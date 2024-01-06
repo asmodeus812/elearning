@@ -2,7 +2,6 @@ package com.cci.examples;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +62,7 @@ public class TechincalQuestions {
          * Count all solutions to the a^3 + b^3 = c^3 + d^3. What we need to realize
          * there is that this is a simple sum problem, meaning that a,b,c,d must be
          *
-         * @param n [TODO:parameter]
+         * @param n - the upper boundary for which a,b,c and d are to be cubed
          */
         public int countAllSolutions(int n) {
             // We try to collect all sums, of the expression m^3 + n^3, this
@@ -99,6 +98,13 @@ public class TechincalQuestions {
 
     public static class PermutationWithinString {
 
+        /**
+         * Find each position in a long string where any permutation of shortString is found
+         *
+         * @param longString - a very long string
+         * @param shortString - a short string
+         * @return - number of valid permutations of short string found in the long string
+         */
         public int describePermutationPositions(String longString, String shortString) {
             // sort the input, to make sure it is normalized the same way the window
             // string below will be, this we will make use in equalsIgnoreCase
@@ -135,6 +141,13 @@ public class TechincalQuestions {
 
     public static class BestConceavableRuntime {
 
+        /**
+         * Find all pairs in an array which sum up to a specific given sum
+         *
+         * @param input wa- the array of elements
+         * @param sum - the sum between two pairs to find
+         * @return - number of pairs which match sum
+         */
         public int uniquePairsSum(List<Integer> input, int sum) {
             // first we sort the array of unique numbers, this would allow us to
             // do a quick binary search over the entire array
@@ -145,12 +158,12 @@ public class TechincalQuestions {
             for (Integer entry : input) {
                 // we know what value we are looking for, since we know the sum,
                 // and the current value, therefore x + current = sum, or x =
-                // sum - current we can lookup the value of x, if it is truly
+                // sum - current, we can lookup the value of x, if it is truly
                 // present in the array
                 Integer lookup = sum - entry;
                 int found = Arrays.binarySearch(entries, lookup);
                 if (found != -1) {
-                    // format and add the pair of values that sum up to the given sum.
+                    // the value of the lookup was present in the array, add it
                     results.add(String.format("%d + %d = %d", entry, lookup, sum));
                 }
             }
@@ -160,6 +173,14 @@ public class TechincalQuestions {
             return results.size();
         }
 
+        /**
+         * Find all common elements between two arrays, which are of the same
+         * size, number of elements, and are already sorted in the same order
+         *
+         * @param first - the first array
+         * @param second - the seond array
+         * @return - number of matching elements between both arrays
+         */
         public int findCommonElements(List<Integer> first, List<Integer> second) {
             // by the task definition this is true
             assert (first.size() == second.size());
@@ -192,10 +213,9 @@ public class TechincalQuestions {
                     firstIterator++;
                     secondInterator++;
                     results.add(String.format("%d", firstElement));
-                }
-                else if (firstElement < secondElement) {
-                // the first element is smaller than the second therefore we move the pointer
-                // of the first array forward, only
+                } else if (firstElement < secondElement) {
+                    // the first element is smaller than the second therefore we move the pointer
+                    // of the first array forward, only
                     firstIterator++;
                 } else {
                     // the second element is smaller than the first therefore we move the pointer
@@ -221,13 +241,13 @@ public class TechincalQuestions {
             // pull the last element from the input, and remember it
             String suffix = input.substring(input.length() - 1);
 
-            // the new input string the original with the tail cut off
+            // the new input string, is the original with the tail cut off
             String prefix = input.substring(0, input.length() - 1);
 
-            // generate permutations for the substring and enrich each
+            // generate list of permutations for the new substring(n - 1)
             List<String> permutations = permutateStringHelper(prefix);
 
-            // hold the actual final result here
+            // we hold the actual final result here
             List<String> result = new ArrayList<>();
 
             // for each permutation of the smaller string, stick last element of
@@ -251,10 +271,73 @@ public class TechincalQuestions {
             return result;
         }
 
+        /**
+         * Find the permutations of the input string. The number of
+         * permutations, is n! (n factorial), where n is the size or length of
+         * the string
+         *
+         * @param input - the input string
+         * @return - number permutations for input string
+         */
         public int permutateGivenString(String input) {
             List<String> result = permutateStringHelper(input);
             System.out.println(result);
             return result.size();
+        }
+    }
+
+    public static final class StringNumberConverter {
+
+        private static final Map<Character, Integer> hexNumberMapping;
+
+        static {
+            hexNumberMapping = new HashMap<>();
+            hexNumberMapping.put('A', 10);
+            hexNumberMapping.put('B', 11);
+            hexNumberMapping.put('C', 12);
+            hexNumberMapping.put('D', 13);
+            hexNumberMapping.put('E', 14);
+            hexNumberMapping.put('F', 15);
+        }
+
+        /**
+         * Convert any string of valid numbers / digits and given base into a number in base 10
+         *
+         * @param number - the number, string of valid digits
+         * @param base - the base of the number (up to base 16)
+         * @return - the number in base 10
+         */
+        public long convertStringTo(String number, int base) {
+            if (number.length() == 0 || base > 16) {
+                return -1;
+            }
+
+            long value = 0;
+            int size = number.length();
+
+            // loop the string backwardds, since numbers in bases, are usually
+            // defined from left to right, direction being most significant to
+            // least significant digit.
+            for (int i = size - 1; i >= 0; i--) {
+                char num = number.charAt(i);
+                int n = 0;
+                if (base == 16 && hexNumberMapping.containsKey(num)) {
+                    // try to convert the hex letter values to numbers usually
+                    // from A to F which map to values 10 to 15
+                    n = hexNumberMapping.get(num);
+                } else {
+                    // this might fail but it is okay, we do not care anything
+                    // invalid should fail
+                    n = Integer.parseInt(String.valueOf(num));
+                }
+                // the exponent is the position in the string, since the
+                // iteration is backwards, invert the value of i
+                value += n * Math.pow(base, size - (i + 1));
+            }
+
+            // print the result value
+            System.out.println(value);
+            return value;
         }
     }
 
@@ -271,10 +354,18 @@ public class TechincalQuestions {
         // PermutateInputString input = new PermutateInputString();
         // input.permutateGivenString("abcd");
 
-        BestConceavableRuntime bcr = new BestConceavableRuntime();
-        bcr.uniquePairsSum(Arrays.asList(0, 1, 2, 3, 4, 7, 10, 11, 12, 13, 15), 13);
+        // BestConceavableRuntime bcr = new BestConceavableRuntime();
+        // bcr.uniquePairsSum(Arrays.asList(0, 1, 2, 3, 4, 7, 10, 11, 12, 13, 15), 13);
+        // bcr.findCommonElements(Arrays.asList(13, 27, 35, 40, 49, 55, 59),
+        // Arrays.asList(17, 35, 39, 40, 55, 58, 60));
 
-        bcr.findCommonElements(Arrays.asList(13, 27, 35, 40, 49, 55, 59), Arrays.asList(17, 35, 39, 40, 55, 58, 60));
+        // StringNumberConverter converter = new StringNumberConverter();
+        // converter.convertStringTo("110110", 2);
+        // converter.convertStringTo("FA10", 16);
+        // converter.convertStringTo("FF", 16);
+        // converter.convertStringTo("150", 10);
+        // converter.convertStringTo("73", 8);
+
         return;
     }
 }
