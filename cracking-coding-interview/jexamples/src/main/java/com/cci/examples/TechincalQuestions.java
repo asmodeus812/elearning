@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public class TechincalQuestions {
 
     public static class CountArrayPairs {
+
         /**
          * For a list with unique numbers, find all pairs of that list which have a
          * difference of diff
@@ -356,8 +357,7 @@ public class TechincalQuestions {
 
         // BestConceavableRuntime bcr = new BestConceavableRuntime();
         // bcr.uniquePairsSum(Arrays.asList(0, 1, 2, 3, 4, 7, 10, 11, 12, 13, 15), 13);
-        // bcr.findCommonElements(Arrays.asList(13, 27, 35, 40, 49, 55, 59),
-        // Arrays.asList(17, 35, 39, 40, 55, 58, 60));
+        // bcr.findCommonElements(Arrays.asList(13, 27, 35, 40, 49, 55, 59), Arrays.asList(17, 35, 39, 40, 55, 58, 60));
 
         // StringNumberConverter converter = new StringNumberConverter();
         // converter.convertStringTo("110110", 2);

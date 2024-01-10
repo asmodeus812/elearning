@@ -47,7 +47,6 @@ public class ArraysAndStrings {
         }
     }
 
-
     public static class StringCheckPermutation {
 
         /**
@@ -257,6 +256,13 @@ public class ArraysAndStrings {
             return count;
         }
 
+        /**
+         * Check if the operation on one string is one edit away, where an edit is either a replace, insert or remove of a character
+         *
+         * @param left - the first string
+         * @param right - the second string
+         * @return - true if one edit away, false otherwise
+         */
         public boolean oneEditAway(String left, String right) {
             int insertOrRemove = checkInsertRemove(left, right);
             int replaceOnly = checkReplaceOnly(left, right);
