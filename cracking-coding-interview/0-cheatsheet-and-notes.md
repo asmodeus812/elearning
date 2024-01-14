@@ -171,13 +171,13 @@
 
 # Arrays and Strings
 
-1. Static linear arrays are of fixed size, where inserting and element is
-   constant time, until the array is full, after it is full insertion is not
-   possible, unless array is re-sized, see amortized complexity.
+1.  Static linear arrays are of fixed size, where inserting and element is
+    constant time, until the array is full, after it is full insertion is not
+    possible, unless array is re-sized, see amortized complexity.
 
-2. When constructing strings, keep in mind that most languages offer immutable
-   string objects, therefore use an alternative which would allow you to append,
-   cut and prepend such as `StringBuilder`
+2.  When constructing strings, keep in mind that most languages offer immutable
+    string objects, therefore use an alternative which would allow you to append,
+    cut and prepend such as `StringBuilder`
 
     ```java
         // { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" }
@@ -192,9 +192,9 @@
         return result;
     ```
 
-    3. Permutations of a string, very often required algorithm question, how to
-       generate all Permutations of a string or how to check if a longer string
-       contains a permutation of another shorter string within it.
+3.  Permutations of a string, very often required algorithm question, how to
+    generate all Permutations of a string or how to check if a longer string
+    contains a permutation of another shorter string within it.
 
     ```java
         // take the input shown below, and find all permutations of it
@@ -237,28 +237,28 @@
 
     ```
 
-    4. Removing and inserting elements to an array. Could be done in the following
-       ways
+4.  Removing and inserting elements to an array. Could be done in the following
+    ways
 
-        - removing by shifting elements to the left - this is done by traversing
-          the array from the position of removal, to the right, assigning the
-          next element to the current element and moving until the end of the
-          array, once at the end, the final two elements would be duplicated,
-          therefore we can reduce the size of the array by 1
+    -   removing by shifting elements to the left - this is done by traversing
+        the array from the position of removal, to the right, assigning the
+        next element to the current element and moving until the end of the
+        array, once at the end, the final two elements would be duplicated,
+        therefore we can reduce the size of the array by 1
 
-            ```java
-                // start from the end of the array, move backwards,
-                for (int i = n - 1; i > k; i--) {
-                    a[i] = a[i - 1];
-                }
-                a[k] = 0
-            ```
+        ```java
+            // start from the end of the array, move backwards,
+            for (int i = n - 1; i > k; i--) {
+                a[i] = a[i - 1];
+            }
+            a[k] = 0
+        ```
 
-        - inserting an empty space - by shifting elements to the right, similar
-          to the approach above, however we start from the end of the array,
-          moving elements to the right, making space for new elements instead,
-          this assumes the array already has sufficient size to hold the new
-          element or elements.
+    -   inserting an empty space - by shifting elements to the right, similar
+        to the approach above, however we start from the end of the array,
+        moving elements to the right, making space for new elements instead,
+        this assumes the array already has sufficient size to hold the new
+        element or elements.
 
 # Linked lists
 
