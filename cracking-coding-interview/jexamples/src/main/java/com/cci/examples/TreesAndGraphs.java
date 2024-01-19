@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Stack;
 
 public class TreesAndGraphs {
 
@@ -112,7 +113,8 @@ public class TreesAndGraphs {
                 // new element and returned back
                 root.left = insert(root.left, value);
             }
-            // return the node always, we only recurse inside the if/else, this case here also handlers equals, but in all 3 cases we want to return
+            // return the node always, we only recurse inside the if/else, this case here also handlers equals, but in all 3 cases we want
+            // to return
             // the original node anyway
             return root;
         }
@@ -537,25 +539,373 @@ public class TreesAndGraphs {
                 }
             }
 
-            // try to check if rebalance is required, all the way, to the root, this is outside the else, because we have to post recurse, to
+            // try to check if rebalance is required, all the way, to the root, this is outside the else, because we have to post recurse,
+            // to
             // the root, to at the very least update the heights of each parent along the way, if a deletion has occurred, and also check if
             // the balance is okay.
             return rebalance(root, value);
         }
     }
 
-    public static final class HeapBinarySearchTree<T extends Comparable<T>> {
+    public static final class HeapBinaryTree<T extends Comparable<T>> {
 
         public enum HeapType {
             MIN, MAX
         }
 
-        private HeapType type;
-        private List<BinaryNode<T>> nodes = new ArrayList<>();
+        private final HeapType type;
+        private final List<T> heap = new ArrayList<>();
 
-        // public
+        public HeapBinaryTree(HeapType type) {
+            this.type = type;
+        }
 
+        private int parent(int child) {
+            // parent index of a heap element can be computed from either the left or the right child, we know that left child indices are
+            // always not even, and right ones are always even, therefore, first check mod 2, and subtract 2, for right child, or 1 for a
+            // left child
+            child = child % 2 == 0 ? child - 2 : child - 1;
 
+            // finally to get the parent divide by 2, this basically reverses the equation for finding a child from a parent index, see the
+            // methods below
+            return child / 2;
+        }
+
+        private int left(int parent) {
+            // to get the left child, multiply the parent index by two, and add one, each number multiplied by two becomes an even, adding
+            // one would make it odd, all right children are on odd indices
+            return (2 * parent) + 1;
+        }
+
+        private int right(int parent) {
+            // to get the right child, multiply the parent index by two, and add two, each number multiplied by two becomes an even, adding
+            // two would keep it even, all left children are on even indices
+            return (2 * parent) + 2;
+        }
+
+        private void swap(List<T> heap, int l, int r) {
+            // simple method to swap elements located on two indices, not particularly important to the heap implementation, but a utility
+            // method to help us have cleaner implementation
+            T c = heap.get(r);
+            T p = heap.get(l);
+
+            // exchange the elements at the two index locations in the heap array
+            heap.set(r, p);
+            heap.set(l, c);
+        }
+
+        public T peek(List<T> heap) {
+            if (heap.isEmpty()) {
+                // an empty heap has nothing to peek at
+                return null;
+            }
+            // the element of a heap that can be looked at is always at the top, either the smallest, or the biggest in a heap
+            return heap.get(0);
+        }
+
+        public T insert(List<T> heap, T value) {
+            // first off we start by putting the new item at the end of the array or heap, and getting that new index location of the last
+            // element we have just inserted
+            heap.add(value);
+            int curr = heap.size() - 1;
+
+            // what is going on here, is looping until the current element is not pointing at the root, or in other words at index 0,
+            // current starts off from the insertion position, i.e the end of the heap, the very last element and bubbles up the new element
+            // until the correct spot is found
+            while (curr > 0) {
+                // calculate the parent of the current index, and extract the value of the parent
+                int prev = parent(curr);
+                T parent = heap.get(prev);
+
+                // find if the new element is bigger, smaller or equal to the parent
+                int diff = value.compareTo(parent);
+
+                // when equal to the parent, we can abort, duplicates are not allowed, for simplicity
+                if (diff == 0) {
+                    break;
+                }
+
+                if (type == HeapType.MIN && diff < 0) {
+                    // when we are in a min heap, the swap is happening only if the new element is smaller than it's parent, this is because
+                    // the new element being smaller, has to be bubbled up, until it is no longer smaller than it's parent
+                    swap(heap, curr, prev);
+                }
+
+                if (type == HeapType.MAX && diff > 0) {
+                    // when we are in a max heap, the swap is happening only if the new element is bigger than it's parent, this is because
+                    // the new element being bigger, has to be bubbled up, until it is no longer bigger than it's parent
+                    swap(heap, curr, prev);
+                }
+
+                // move up to the parent of the current element, eventually prev here would become 0, index 0, and the while loop will
+                // finish, meaning that the element was bubbled to the top, for extra peformance one might just break after we find the
+                // first element where diff does not perform a swap, meaning the element is already at the correct spot.
+                curr = prev;
+            }
+            return value;
+        }
+
+        public T delete(List<T> heap) {
+            // there is nothing to delete from an emtpy heap in the first place
+            if (heap.isEmpty()) {
+                return null;
+            }
+
+            // first get the last element from the heap and swap with with the root, the last element will then be bubbled down, and the
+            // root returned from this function as result
+            int last = heap.size() - 1;
+            swap(heap, last, 0);
+
+            // the head or root of the heap is now the last one, after the swap, just remember it, and remove it from the heap
+            T head = heap.get(last);
+            heap.remove(last);
+
+            // we start off from the top or head of the heap, going down locating the left and right indices of the current element and
+            // check if the root needs to stay in it's place, or go left or right
+            int next = 0;
+            while (next < heap.size()) {
+                // get the indices of the left and right children of the current element
+                int left = left(next);
+                int right = right(next);
+
+                // start off by assuming the smallest / biggest (whichever heap type we have) element between the root and it's children is
+                // the root, set the 'base' index to point at the root initially, this base index will either change, or remain the same,
+                // based on this we would know to continue or not to swap elements
+                int base = next;
+
+                if (type == HeapType.MIN) {
+                    // we first compare the value of the 'base' index with it's left child, if the left child is smaller than the root, we
+                    // update the 'base' index to point to the left child index
+                    if (left < heap.size() && heap.get(left).compareTo(heap.get(base)) < 0) {
+                        // left becomes the smaller between base and left
+                        base = left;
+                    }
+
+                    // we first compare the value of the 'base' index with it's right child, if the right child is smaller than the 'base',
+                    // we update the 'base' index to point to the right child index
+                    if (right < heap.size() && heap.get(right).compareTo(heap.get(base)) < 0) {
+                        // right becomes the smaller between base and right
+                        base = right;
+                    }
+                } else if (type == HeapType.MAX) {
+                    // we first compare the value of the 'base' index with it's left child, if the left child is bigger than the root, we
+                    // update the 'base' index to point to the left child index
+                    if (left < heap.size() && heap.get(left).compareTo(heap.get(base)) > 0) {
+                        // left becomes the bigger between base and left
+                        base = left;
+                    }
+
+                    // we first compare the value of the 'base' index with it's right child, if the right child is bigger than the 'base',
+                    // we update the 'base' index to point to the right child index
+                    if (right < heap.size() && heap.get(right).compareTo(heap.get(base)) > 0) {
+                        // right becomes the bigger between base and right
+                        base = right;
+                    }
+                }
+
+                if (base != next) {
+                    // if the base index actually changed, then we can swap the base with next, meaning that either the left or right
+                    // children of the root were smaller / bigger (based on the heap type we have)
+                    swap(heap, base, next);
+                    // now we move to the next index with which we swapped, either the left or right, to continue to drop down
+                    // the element until it finds its place
+                    next = base;
+                } else {
+                    // at this point the base did not change, meaning the root was the smallest / biggest of the 3 (root,left,right),
+                    // therefore the element is at the correct position, there is nowhere for it to go further, it conforms to the rules
+                    // of a heap
+                    break;
+                }
+            }
+            return head;
+        }
+    }
+
+    public static final class RetrievalPrefixTree<T> {
+
+        private static final int CHAR_COUNT = 26;
+        private static final int BASE_CHAR = 'a';
+
+        public static class TriePrefixNode<T> extends ValueNode<T> {
+            protected TriePrefixNode<T>[] children;
+            protected boolean terminating = false;
+        }
+
+        private void cleanup(TriePrefixNode<T> root) {
+            if (root == null || root.children == null) {
+                return;
+            }
+            root.value = null;
+            root.terminating = true;
+            for (int i = 0; i < root.children.length; i++) {
+                TriePrefixNode<T> child = root.children[i];
+                if (child != null && child.terminating && child.value == null) {
+                    root.children[i] = null;
+                }
+            }
+        }
+
+        private int children(TriePrefixNode<T> root) {
+            if (root == null || root.children == null) {
+                return 0;
+            }
+
+            int count = 0;
+            for (int i = 0; i < root.children.length; i++) {
+                if (root.children[i] != null) {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        public TriePrefixNode<T> insert(TriePrefixNode<T> root, String string, T value) {
+            // check if the input values first make any sense at all, the string can not be nil, and the value can not be nil either
+            if (string == null || value == null) {
+                return null;
+            }
+            // for simplicity reasons normalize all strings to lower case, this is not really a part of an usual trie implementation but it
+            // makes things easier to understand
+            string = string.toLowerCase();
+
+            // either start off from the provided root, or make on if the insert was called without a valid root
+            TriePrefixNode<T> base = root;
+            if (root == null) {
+                root = new TriePrefixNode<>();
+                base = root;
+            }
+
+            // go over each character in the input string.
+            for (int i = 0; i < string.length(); i++) {
+                // fetch the character and convert it to a number, in the ascii table the english alphabet lower case letters start at 97,
+                // up until 97 + 26. This is used to index the character in node in the children list of a trie node
+                Character c = string.charAt(i);
+                int cval = c.charValue();
+
+                if (root.children == null) {
+                    // the current root has no children, therefore we have to create an array of CHAR_COUNT children first, this is needed,
+                    // to make an empty array of null pointers, which are going to be filled in with node instances
+                    root.children = new TriePrefixNode[CHAR_COUNT];
+                }
+
+                // find which child index the current character correspons to, it can either already exist, or not, if it exists we just
+                // take that path, and continue down
+                TriePrefixNode<T> node = root.children[cval - BASE_CHAR];
+                if (node == null) {
+                    // the node at that char position does not exist, create a new node instance, and assign it to that position in the
+                    // root's children
+                    node = new TriePrefixNode<>();
+                    root.children[cval - BASE_CHAR] = node;
+                }
+
+                // the next root would now be the last character node we inserted, continue until the string is completely looped over
+                root = node;
+            }
+
+            // after the string has been looped over the root node here would point at the last character 'node', we mark it as terminating,
+            // meaning that it represents an end of the path, or in other words one complete word, and we set a value mapping to it. The
+            // value here is not a usual part of trie implementation, it is done to demonstrate how a value can be mapped to a word/string
+            // in a trie, similarly to a hash-map
+            root.terminating = true;
+            root.value = value;
+
+            // return the base root node, which represents the passed in or created root
+            return base;
+        }
+
+        public boolean delete(TriePrefixNode<T> root, String string) {
+            // check if the input values first make any sense at all, the string can not be nil, and the value can not be nil either
+            if (string == null || root == null) {
+                return false;
+            }
+            // for simplicity reasons normalize all strings to lower case, this is not really a part of an usual trie implementation but it
+            // makes things easier to understand
+            string = string.toLowerCase();
+
+            // go over each character in the input string, keep a stack of element which will represent all nodes thorugh which we have
+            // traversed. Note that deletion as with every tree involves the same algorithm, first search for the node, therefore this block
+            // below is pretty much search with the added change that we add the path that we go through to a stack
+            Stack<TriePrefixNode<T>> path = new Stack<>();
+            for (int i = 0; i < string.length(); i++) {
+                // fetch the character and convert it to a number, in the ascii table the english alphabet lower case letters start at 97,
+                // up until 97 + 26. This is used to index the character in node in the children list of a trie node
+                Character c = string.charAt(i);
+                int cval = c.charValue();
+
+                // if the current root is invalid or has no children array initialized, there is nowhere to go really, therefore the passed
+                // in string 'word' is not part of the trie. there is no path in the tree which would describe this word
+                if (root == null || root.children == null) {
+                    return false;
+                }
+                // set the next root to the child which corresponds to the char index, from the root.children nodes, that node can either be
+                // null, or be initialized, when we re-enter the next iteration, it will either terminate on root == null / or root.children
+                // == null or keep going
+                root = root.children[cval - BASE_CHAR];
+
+                // this is the important part, add the current root path to the stack, this is done after the root assignment, note why ?
+                // the very first root of the tree is not representing a character, it is just the common point from which we start, after
+                // root has been assigned below, it would actually point to the node which represents the first character from the input
+                // string 'word', could be null, or a valid one, but in either case has to happen after root is re-assigned
+                path.push(root);
+            }
+
+            // the root element would point at the last character of the input string, if it is terminating, then we know we have hit a
+            // valid word which can be removed, otherwise, there is nothing to delete
+            if (root.terminating) {
+                // empty the stack, and clean up the children, remember we start off from the very last trie node / character representing
+                // the word, going up to the begining of the word. At each level that node can have
+                // - 1 or less children, meaning that
+                while (!path.isEmpty()) {
+                    TriePrefixNode<T> curr = path.pop();
+                    // if (curr != root && curr.terminating) {
+                    // cleanup(curr);
+                    // break;
+                    // }
+                    // if (curr != null && children(curr) <= 1) {
+                    // curr.terminating = true;
+                    // curr.children = null;
+                    // curr.value = null;
+                    // cleanup(curr);
+                    // }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public boolean search(TriePrefixNode<T> root, String string) {
+            // make some validation on the input, nil strings are not valid, neither are non existent roots
+            if (string == null || root == null) {
+                return false;
+            }
+
+            // for simplicity reasons normalize all strings to lower case, this is not really a part of an usual trie implementation but it
+            // makes things easier to understand
+            string = string.toLowerCase();
+
+            // go over each character in the input string.
+            for (int i = 0; i < string.length(); i++) {
+                // fetch the character and convert it to a number, in the ascii table the english alphabet lower case letters start at 97,
+                // up until 97 + 26. This is used to index the character in node in the children list of a trie node
+                Character c = string.charAt(i);
+                int cval = c.charValue();
+
+                // if the current root is invalid or has no children array initialized, there is nowhere to go really, therefore the passed
+                // in string 'word' is not part of the trie. there is no path in the tree which would describe this word
+                if (root == null || root.children == null) {
+                    // nothing was found, return false
+                    return false;
+                }
+                // set the next root to the child which corresponds to the char index, from the root.children nodes, that node can either be
+                // null, or be initialized, when we re-enter the next iteration, it will either terminate on root == null / or root.children
+                // == null or keep going
+                root = root.children[cval - BASE_CHAR];
+            }
+            // reaching this point does not mean we have found the string 'word' still, the path might exist, as a subpath of another longer
+            // word, we have to see if the node at the end of the path for the current string 'word' was marked as terminating, meaning it
+            // represent a word in the trie.
+            return root.terminating;
+        }
     }
 
     public static void main(String[] args) {
@@ -572,18 +922,47 @@ public class TreesAndGraphs {
         // tree.insert(root, 5);
         // tree.delete(root, 8);
 
-        AvlBinarySearchTree<Integer> tree = new AvlBinarySearchTree<>();
-        BinaryHeightNode<Integer> root = tree.insert(null, 10);
-        tree.insert(root, 8);
-        tree.insert(root, 25);
-        tree.insert(root, 3);
-        tree.insert(root, 9);
-        tree.insert(root, 19);
-        tree.insert(root, 35);
-        tree.insert(root, 1);
-        tree.insert(root, 4);
-        tree.insert(root, 5);
-        tree.delete(root, 8);
+        // AvlBinarySearchTree<Integer> tree = new AvlBinarySearchTree<>();
+        // BinaryHeightNode<Integer> root = tree.insert(null, 10);
+        // tree.insert(root, 8);
+        // tree.insert(root, 25);
+        // tree.insert(root, 3);
+        // tree.insert(root, 9);
+        // tree.insert(root, 19);
+        // tree.insert(root, 35);
+        // tree.insert(root, 1);
+        // tree.insert(root, 4);
+        // tree.insert(root, 5);
+        // tree.delete(root, 8);
+
+        // HeapBinaryTree<Integer> heap = new HeapBinaryTree<>(HeapBinaryTree.HeapType.MIN);
+        // heap.insert(heap.heap, 5);
+        // heap.insert(heap.heap, 4);
+        // heap.insert(heap.heap, 3);
+        // heap.insert(heap.heap, 2);
+        // heap.insert(heap.heap, 9);
+        // heap.insert(heap.heap, 8);
+        // heap.insert(heap.heap, 10);
+        // heap.insert(heap.heap, 1);
+        // heap.peek(heap.heap);
+        // heap.delete(heap.heap);
+        // heap.peek(heap.heap);
+
+        RetrievalPrefixTree<Integer> trie = new RetrievalPrefixTree<>();
+        RetrievalPrefixTree.TriePrefixNode<Integer> root = trie.insert(null, "word", 0);
+        trie.insert(root, "wordle", 1);
+        trie.insert(root, "static", 2);
+        trie.insert(root, "ant", 3);
+        trie.insert(root, "tan", 4);
+        trie.insert(root, "antlers", 5);
+        trie.insert(root, "tank", 6);
+        trie.insert(root, "statistics", 7);
+        trie.insert(root, "an", 8);
+        trie.insert(root, "antimeasure", 9);
+        trie.delete(root, "antlers");
+        trie.search(root, "an");
+        trie.search(root, "antlers");
+        trie.search(root, "antimeasure");
 
         return;
     }
