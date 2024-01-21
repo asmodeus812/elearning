@@ -3,6 +3,7 @@ package com.cci.examples;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,11 +13,10 @@ public class TechincalQuestions {
     public static class CountArrayPairs {
 
         /**
-         * For a list with unique numbers, find all pairs of that list which have a
-         * difference of diff
+         * For a list with unique numbers, find all pairs of that list which have a difference of diff
          *
          * @param pairs - the list of pairs
-         * @param diff  - the diff to find
+         * @param diff - the diff to find
          * @return - the number of pairs
          */
         public int countDiffPairs(List<Integer> pairs, int diff) {
@@ -60,8 +60,8 @@ public class TechincalQuestions {
     public static class CubicSumExpression {
 
         /**
-         * Count all solutions to the a^3 + b^3 = c^3 + d^3. What we need to realize
-         * there is that this is a simple sum problem, meaning that a,b,c,d must be
+         * Count all solutions to the a^3 + b^3 = c^3 + d^3. What we need to realize there is that this is a simple sum problem, meaning
+         * that a,b,c,d must be
          *
          * @param n - the upper boundary for which a,b,c and d are to be cubed
          */
@@ -109,9 +109,10 @@ public class TechincalQuestions {
         public int describePermutationPositions(String longString, String shortString) {
             // sort the input, to make sure it is normalized the same way the window
             // string below will be, this we will make use in equalsIgnoreCase
-            shortString = shortString.chars().sorted().collect(StringBuilder::new,
-                    StringBuilder::appendCodePoint,
-                    StringBuilder::append).toString();
+            shortString = shortString.chars()
+                            .sorted()
+                            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                            .toString();
 
             List<String> listOfMatches = new ArrayList<>();
             for (int i = 0; i < longString.length(); i++) {
@@ -124,9 +125,10 @@ public class TechincalQuestions {
                 // sure that whatever the permutation in windowString is, it
                 // will be normalized, by sorting it, to be ready for comparison
                 // with shortString
-                String sortedString = windowString.chars().sorted().collect(StringBuilder::new,
-                        StringBuilder::appendCodePoint,
-                        StringBuilder::append).toString();
+                String sortedString = windowString.chars()
+                                .sorted()
+                                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                                .toString();
 
                 // compare against the short string, which is also sorted
                 if (shortString.equalsIgnoreCase(sortedString)) {
@@ -175,8 +177,8 @@ public class TechincalQuestions {
         }
 
         /**
-         * Find all common elements between two arrays, which are of the same
-         * size, number of elements, and are already sorted in the same order
+         * Find all common elements between two arrays, which are of the same size, number of elements, and are already sorted in the same
+         * order
          *
          * @param first - the first array
          * @param second - the seond array
@@ -232,6 +234,12 @@ public class TechincalQuestions {
         }
     }
 
+    /**
+     * Find the permutations of the input string. The number of permutations, is n! (n factorial), where n is the size or length of the
+     * string. This is achieved by cutting the last character of the source string, the generating recursive permutations for the cut part,
+     * until the cut part becomes of length 1.
+     *
+     */
     public static final class PermutateInputString {
 
         private List<String> permutateStringHelper(String input) {
@@ -272,18 +280,70 @@ public class TechincalQuestions {
             return result;
         }
 
-        /**
-         * Find the permutations of the input string. The number of
-         * permutations, is n! (n factorial), where n is the size or length of
-         * the string
-         *
-         * @param input - the input string
-         * @return - number permutations for input string
-         */
         public int permutateGivenString(String input) {
             List<String> result = permutateStringHelper(input);
             System.out.println(result);
             return result.size();
+        }
+    }
+
+    /**
+     * Weave the elements of two lists, this process very similar to permutation of a string, weaves two lists into each other, while
+     * keeping the relative element order of the elements from each list, meaning that the elements of each list are still in the same order
+     * in the weaved permutations as they were in the original array they came from i.e. for {1,2} & {3,4} - {1,3,4,2} {3,4,1,2}, {1,3,2,4}
+     * etc. This is achieved by moving the contents of each list into a special prefix list, until the list is empty, generating the weave
+     *
+     */
+    public static final class WeaveTwoLists {
+
+        private void listWeaverHelper(LinkedList<Integer> first, LinkedList<Integer> second, LinkedList<Integer> prefix,
+                        List<LinkedList<Integer>> result) {
+
+            if (first.isEmpty() || second.isEmpty()) {
+                // in the case where one of the source lists are emtpy, meaning elements were moved to the prefix list, clone the prefix and
+                // add to that the first and second lists, the prefix at any given time would contain elements from one, or both arrays, in
+                // different order, i.e first elements from first array, then second, or vice-versa, but not mess the order of the elements
+                // that come from the same array.
+                LinkedList<Integer> cloned = (LinkedList<Integer>) prefix.clone();
+                cloned.addAll(first);
+                cloned.addAll(second);
+                result.add(cloned);
+                return;
+            }
+
+            // The way this flow works, is by first exhausting the first list, down to the very last element, put everything into the prefix
+            // list, and append in the base case, now the recursive stack starts to unwind, elements are returned to the first list, one by
+            // one, and for each, we go depth first into the recurisive calls for the second list. Let us take the example {1,2} & {3,4}
+
+            // remove the front element from the first list
+            Integer element = first.removeFirst();
+            // add that element to the tail of the prefix list
+            prefix.addLast(element);
+            // drill down, depth first, into the first list first
+            listWeaverHelper(first, second, prefix, result);
+            // remove the last inserted element to the prefix
+            prefix.removeLast();
+            // restore the element back into the source list
+            first.addFirst(element);
+
+            // remove the front element from the second list
+            element = second.removeFirst();
+            // add that element to the tail of the prefix list
+            prefix.addLast(element);
+            // drill down, depth first, into the second list second
+            listWeaverHelper(first, second, prefix, result);
+            // remove the last inserted element to the prefix
+            prefix.removeLast();
+            // restore the element back into the source list
+            second.addFirst(element);
+        }
+
+        public List<LinkedList<Integer>> performListWeave(List<Integer> first, List<Integer> second) {
+            List<LinkedList<Integer>> result = new LinkedList<>();
+            LinkedList<Integer> one = new LinkedList<>(first);
+            LinkedList<Integer> two = new LinkedList<>(second);
+            listWeaverHelper(one, two, new LinkedList<>(), result);
+            return result;
         }
     }
 
@@ -365,6 +425,9 @@ public class TechincalQuestions {
         // converter.convertStringTo("FF", 16);
         // converter.convertStringTo("150", 10);
         // converter.convertStringTo("73", 8);
+
+        // WeaveTwoLists weaver = new WeaveTwoLists();
+        // weaver.performListWeave(Arrays.asList(1, 2), Arrays.asList(3, 4));
 
         return;
     }

@@ -394,9 +394,9 @@ public class ArraysAndStrings {
             int loops = 0;
             int count = 0;
 
-            // loop over the rotate string, and and check how many consequtive characters from the original match with the
+            // loop over the original string, and and check how many consequtive characters from the original match with the
             // rotated string, the caveat here is to just loop around the original, using mod, to make sure all characters
-            // are inspected in the correct order.
+            // are inspected in the correct order. (we do simple wrap around)
             while (i < orig.length()) {
                 // check if j is at the end of it's pass, if so, then mark that one loop is completed
                 if((j + 1) >= orig.length()) {

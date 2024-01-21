@@ -21,7 +21,7 @@ and is not required. Important to note:
 A sample representation of a tree node might look like this, note that a tree
 class is rarely needed, it does not really add any significant value, since
 passing the root Node around, to represent the tree is simply enough, a Tree
-class might be useful to attach an interface to the tree, actions which might be
+class might be useful to attach an interface to the tree, actions, which might be
 done on a tree, but that is usually just it.
 
 An N-ary tree node could look like this
@@ -152,6 +152,37 @@ properties
        3      7 15    23
     ```
 
+## Creating
+
+A fast way to create a binary tree from a list of items, is to just use the heap
+approach. What we do is simply start off from the first index, and calculate
+which elements are children of that index, get that from the array and create a
+node child subtree, and keep recursing. Keep a base case check for the index,
+must not exceed the list size.
+
+-   left child is (index \* 2) + 1
+-   right child is (index \* 2) + 2
+
+```java
+    Node create(Node root, int index, List elements) {
+        if (index >= elements.size()) {
+            return null;
+        }
+
+        root.value = elements.get(index);
+        if (root.value == null) {
+            return null;
+        }
+        root.left = create(new Node(), (index * 2) + 1, elements);
+        root.right = create(new Node(), (index * 2) + 2, elements);
+        return root;
+    }
+
+    Node create(List elements) {
+        return create(new Node(), 0, elements);
+    }
+```
+
 ## Traversal
 
 There are a few ways to traverse a binary tree, or n-ary tree, usually that
@@ -210,6 +241,281 @@ tree, we have post, pre and in order traversal
         }
     ```
 
+### Height
+
+```java
+    int height(Node root) {
+        if (root == null) {
+            // when the node is invalid there is no meaningful height value to return for it, but zero
+            return 0;
+        }
+        if (root.left == null && root.right == null) {
+            // when the node is a leaf, the height could be only one, the height is the node node itself
+            return 1;
+        }
+        // when the node has children, the height is the current height, one, plus the max height between the left or right subtrees of
+        // the current node
+        return 1 + Math.max(height(root.left), height(root.right));
+    }
+```
+
+### Containment
+
+To check if a given node reference, not by value, is contained in a tree, we
+have to go through all nodes and compare each to the target reference we have.
+The premise is simple compare by reference, either the left or the right
+subtrees could contain that node. If we reach a nil node, we can return false,
+if both paths `check(left) and check(right)` return false, therefore we have not
+found the node, at least one should return true.
+
+```java
+    boolean contains(Node root, Node node) {
+        if (root == null) {
+            // the root does not contain the given node
+            return false;
+        }
+
+        // the root and the node are the same, yes the initial root contained the node
+        if (root == node) {
+            return true;
+        }
+
+        // try go to the left and right of the current root looking for the target node
+        return contains(root.left, node) || contains(root.right, node);
+    }
+```
+
+### Ancestor
+
+This is a tricky, but very useful problem to solve, find the first common
+ancestor of two nodes. Given two nodes at any depth in a tree. To do this we
+have to realize we have two conditions / states only. The nodes could be in
+
+-   both nodes are on the left or right subtree of a given node
+-   one node is on the right the other on the left or vice versa
+
+We know that if one node is on the right the other on the left, of a given
+parent node, or vice versa, that this parent node is the common ancestor,
+otherwise if they are on the same side, we have to go down that side, until they
+split, and are no longer on the same side
+
+```txt
+       10
+      /  \
+     3   15
+   /  \
+  1    4
+ /
+0
+```
+
+If we take a look at the example above, the nodes 0 and 4 have an immediate
+common ancestor, the node 3. We can see how this is the first node where both 0
+and 4 are on both sides of 3, while if we take a look at node 10, 0 an 4 are on
+the same side of 10 (the left subtree)
+
+What we need to do is simply verify that the given nodes do not lie in the same
+subtree at the same time of a given node, then we know that node is the common
+ancestor, note that this works for example if we had the nodes 3 and 0, where
+the common ancestor would be 10, (not 3)
+
+```java
+    Node ancestor(Node root, Node first, Node second) {
+        if (root == null) {
+            // invalid root no common ancestors
+            return null;
+        }
+
+        // check if the first node is on the left of the root
+        boolean firstOnLeft = contains(root.left, first);
+
+        // check if the second node is on the right of the root
+        boolean secondOnRight = contains(root.right, second);
+
+        // we know that if both of those variables are equal, then the current root is the common ancestor, why ? if we take any two
+        // nodes in a binary tree, there exists only one single node, for which the two nodes are located on the left and the right,
+        // at the same time, and that node is the common ancestor. Note that it does not matter if we flip the first and second, so the
+        // checks above would return false for both instead, if the check above both return false, that simply means the nodes are on
+        // the opposite site of what we were checking, but they are on the left and right of root still, as long as firstOnLeft ==
+        // secondOnRight, the nodes are on the left and right of current root, which (of the nodes first/second) is on which does not
+        // matter
+        if (firstOnLeft == secondOnRight) {
+            return root;
+        }
+
+        if (firstOnLeft) {
+            // in the case where the first node was on the left, and the condition above did not meet, that means first node is on the
+            // left but the second one is also on the left, not on the right (secondOnRight would be false), so we go to the left
+            return ancestor(root.left, first, second);
+        } else {
+            // the same as above but inversed, if firstOnLeft was false, that would automatically mean that secondOnRight was true,
+            // therefore the first node is on the right so is the second, go to the right subtree
+            return ancestor(root.right, first, second);
+        }
+    }
+```
+
+### Comparison
+
+There is another problem that comes very often, namely comparing two
+subtrees, to check if they are equal / the same. To do that we have to
+traverse both trees at the same time going from the root to the subtrees
+depth-first or breath-first, does not matter, in either case we have to go
+through both at the same rate, and keep comparing the nodes, if all nodes
+are exactly matching and at the same spot in both trees, we can deduce they
+are equal
+
+```java
+    boolean compare(Node first, Node second) {
+        if (first == null && second == null) {
+            // when the two subtrees are null, they are considered equal, this base case will also be fulfilled when we reach the bottom
+            // of the two trees we compare at the same rate / time / steps, knowing we have finished both trees at the same time
+            return true;
+        }
+
+        if (first == null && second != null) {
+            // we have reached the bottom of the first tree, but the second did not, meaning that moving at the same pace, the first
+            // tree was shorter / smaller than the second one
+            return false;
+        }
+
+        if (second == null && first != null) {
+            // we have reached the bottom of the second tree, but the first did not, meaning that moving at the same pace, the second
+            // tree was shorter / smaller than the first one
+            return false;
+        }
+
+        // compare the values of the roots
+        if (first.value.equals(second.value)) {
+            // compare the roots, only if the roots have the same value, can we then continue down, with the same rate/steps into both
+            // subtrees, what we do here is just drill down equally deep and on the same side for both input trees, if all roots match
+            // up on each side then we can assume they are equal, imagine it as if we had compared two strings, we compare current char,
+            // then move right one character, until the string ends
+            return compare(first.left, second.left) && compare(first.right, second.right);
+        }
+        // the root value did not match, meaning we can terminate, they are not equal here, even though there still might be more
+        // children to look at
+        return false;
+    }
+```
+
+### Subtrees
+
+Another common problem is to find if a subtree exists in a given tree, usually
+the subtree is much smaller than the main tree itself. This is done by
+leveraging `compare`, the check function first drills down to the bottom of the
+main tree, and then starts to run `compare` while unwinding the recursion. Going
+to the bottom first approach or top first does not matter, all that matters is
+that we traverse the entire tree, and we find the subtree in either the left or
+right sub branches. Note the condition which is `check(left) || check(right) ||
+compare(main, sub)`.
+
+```java
+    boolean check(Node main, Node subtree) {
+        if (subtree == null) {
+            // a null subtree, means that it is always a part of the main subtree, the main subtree contains many null subtrees, think
+            // of the leaves which have 'null' subtrees or in other words the children of the leaves
+            return true;
+        }
+        if (main == null) {
+            // the main subtree must not be null, otherwise there is nothing to check against, and the comparison is invalid
+            return false;
+        }
+
+        // we first drill down the left and right branches, then the post recursive call will compare from the bottom - up approach,
+        // either bottom-up or down will work, we have selected to use bottom-up in this example solution
+        return check(main.left, subtree) || check(main.right, subtree) || compare(main, subtree);
+    }
+```
+
+### Random
+
+A common problem, is selecting a random node from a binary tree, where the each
+node in the tree has an equal chance to be selected. What we have to consider is
+how to proportionally select a random element, from a tree, which might be
+imbalanced.
+
+What we need to know is how many nodes, each of our subtrees for the current
+root has. Let us take the example below, the tree has a total of 7 elements,
+however the left sub tree is quite a bit heavier in comparison to the right one.
+To be able to select a random node with equal probability, we have to take this
+into account
+
+```txt
+       10
+      /  \
+     3   15
+   /  \
+  1    4
+ / \
+0   2
+```
+
+We start off with a random number (say 1, that is index 1, elements run from 0
+to 6, for total of 7 elements). We can check the size (num of nodes in that
+subtree) of our left subtree, starting from 10, our left subtree size is 5, the
+right subtree is 1, the index we have picked is less than the size of the left
+subtree size, therefore we go to the left, for root 10 element indices span from
+left[0-4] root[5] right[6-6]
+
+Next is the root 3, its left size is 4, its right size is 1, the index is still
+less, indices for root 3 span from left[0-2] root[3] right[4-4].
+
+We will keep going down, to the left, to 1, where the size of the left is 1, the
+right is 1, the indices of the elements for root 1 span from left[0-0] root[1]
+right[2,2], now here our input random index is equal to the 'index' of our root.
+
+Eventually if the random index is not greater than the total number of elements
+in the tree - 1 (which is a must) then the function will fall down into this
+sole base case i.e. where `index == root_index`
+
+```java
+    Node random(Node root, int index) {
+        // this is not a valid case we can simply return nil
+        if (root == null) {
+            return null;
+        }
+        // this must always be true, for each invocation otherwise the index is not within the correct boundaries, this is a sanity
+        // check, but is actually deduceable, if we know we are given a valid index always, the index will always be less than the total
+        // number of elements / size of the current subtree and always greater or equal to 0
+        assert (index >= 0 && index < root.size);
+
+        // find how many elements there are in the left subtree, if we know how many elements we have on the left, and we know that the
+        // input index will never exceed the total number of elements for the current index (which we guarantee below by clamping the
+        // index when going to the right) we can know with certainty in which direction we have to go, when the index value is within
+        // these 3 ranges below
+        // - [0 - (leftSize - 1)] - go to the left
+        // - [leftSize - leftSize] - exactly at the root
+        // - [(leftSize + 1) - (total subtree size)] - go to the right
+        int leftSize = root.left.size;
+
+        if (index < leftSize) {
+            // if the index is within the number of elements in the left subtree go down the left subtree path, the index does not need
+            // to be touched for the current left subtree, since the range of the index falls exactly in elements within the current
+            // left sub tree, we adjust the index only when we have to go to the right, and we go to the right only when the index is
+            // outside the boundaries of left and root i.e between [(leftSize + 1) and (total subtree size)]
+            return random(root.left, index);
+        } else if (index == leftSize) {
+            // if the index is exactly the left size, that means this is the root item exactly, left indexed items are only from [0 and
+            // leftSize - 1], index equaling leftSize means we have to pick the root, at some point at some level this is the base case
+            // which we will hit for sure, while going down, the index will become equal to the root 'index' and we stop and return
+            return root;
+        } else {
+            // if the index falls in the right subtree, before going down the right subtree, we have to normalize the index, while the
+            // current index is valid for the current tree, when we go down the right one, we have to clamp the index to the size of
+            // that right subtree, which is basically (leftSize + 1) gives us the size of the left subtree + the root, if we subtract
+            // that from index, we will be in the range of the right subtree. For example if the tree at this moment has 10 elements,
+            // and the target index was 9, the left size was 6, another 1 element for the current root, then we can deduce that the
+            // right subtree has 3 elements, therefore the new index must be in range [0-2], and it will be, inded : 9 - (6 + 1) = 2
+            index = index - (leftSize + 1);
+            return random(root.right, index);
+        }
+    }
+
+    // initial invocation, note index is between [0, size - 1]
+    random(create(elements), random(0, elements.size() - 1))
+```
+
 ### Binary search trees
 
 The most simple implementation of a binary search tree, is one that simply
@@ -235,11 +541,106 @@ the O(n) which is what it is going to be if the tree looks like a list.
    3
 ```
 
+#### Creating
+
+One way to quickly create a binary search tree given a sorted array of elements,
+is to simply binary partition the array. What we do is partition the tree in
+half. What is important to note here is how we control start and end. They are
+based off of the root index.
+
+-   the left subtree is created from the left half of the array, i.e all elements
+    from start to just before the current root's index in the array
+-   the right subtree is create from the right half of the array, i.e all
+    elements from the current root's index + 1, to the end of the array
+
+```java
+    Node create(List elements, int start, int end) {
+        // calculate the diff between start and end, note that start is index, and end is a size, therefore the only valid difference
+        // between them can be at most 1, for example when start = 0 and end = 1, that means the sub-array we have to look at has
+        // only one element, the one at index 0, end tells us the number of items in the sub-array, the start is the starting index
+        int diff = end - start;
+
+        if (diff <= 0) {
+            // if the diff is invalid just return here and stop recursion, this would imply that the start (index) overlaps with end
+            // (size), which is not a valid state, meaning we can stop, nothing more to subdivide
+            return null;
+        }
+
+        // the current midpoint index is the diff divided by two, offset with the start index. The diff / 2 would give us the relative
+        // mid point element, for the current subdivided sub-array, but to make it absolute in the context of the source input array we
+        // have to add the current start index to that.
+        int index = start + (diff / 2);
+
+        // create the new root node, the value for that new root node would be the one at 'index', or in other words the midpoint
+        // element in the array, for the current range of start and end
+        Node node = new Node();
+        node.value = array[index];
+
+        // the left subtree for the root node start from start up until, but not including the current node i.e start -> index, remember
+        // the end argument to this function is not an index, it is a size, so the range of elements for the left subtree would be
+        // the inclusive range [start:index-1]
+        node.left = create(array, start, index);
+
+        // the right subtree for the root node start from start up until, but not including the current node i.e index + 1 -> end,
+        // remember the end argument to this function is not an index, it is a size, so the range of elements for the right subtree
+        // would be the inclusive range [index+1:end-1]
+        node.right = create(array, index + 1, end);
+
+        // return the node
+        return node;
+    }
+
+    create(elements, 0, elements.size());
+```
+
+#### Validating
+
+To validate a tree is a binary search tree, to do this we use an approach where
+with each path we take to the left or the right we narrow down the starting min
+and max rnages. Initially they start off as nil, at the very root of the tree.
+
+When we go to the left, we know that all elements to the left must be smaller
+than our root, therefore we set the max to be the current root, when we go to
+the right we set the min to be the current root, as elements to the right cannot
+be smaller than the current root.
+
+Going down left and right the min and max represent the path we came from, the
+values of the roots we came from, and if all of those child nodes in the left
+AND right subtrees up until the very leaves do match the condition `root.value >
+min && root.value < max`, we know that the BST property is met.
+
+```java
+    boolean check(BinaryNode<Integer> root, Integer min, Integer max) {
+        if (root == null) {
+            // this is a weird base case, but if we reach this point it means we have traversed the entire tree and it has kept the bst
+            // property up until the very bottom
+            return true;
+        }
+
+        // we know that the current root value must not be smaller than min and not bigger than max range, if it is either, then the
+        // tree does not meet the bst rules, we return false
+        if ((min != null && root.value < min) || (max != null && root.value > max)) {
+            // the current root value was not within the max or min ranges, therefore it does not meet the rules of a bst, return false,
+            // the and (&&) condition below would guarantee that for this tree as a whole the check for bst would return false
+            return false;
+        }
+
+        // the trick here is to see how we gradually restrict the max/min values while we go down. When we start going left/right down
+        // the tree, the min/max ranges would keep narrowing down, note that both subtrees must evalute to true, i.e must conform to the
+        // rules of bst, therefore note the and (&&) sign below
+        // - the left sub-tree we know that values there can not be bigger than root.value, therefore we set max to be root.value
+        // - the right sub-tree we know that values there can not be smaller than root.value, therefore we set min to be root.value
+        return check(root.left, min, root.value) && check(root.right, root.value, max);
+    }
+
+    check(root, null, null);
+```
+
 #### Max
 
 Finding the max element in a BST is simply following all right subtrees from the
-root of the tree, the max element would be contained in the right most
-child/leaf node starting from the root
+root of the tree, the max element would be contained in the right most child /
+leaf node starting from the root
 
 ```java
     Node max(Node root) {
@@ -248,24 +649,6 @@ child/leaf node starting from the root
             root = root.right;
         }
         return root;
-    }
-```
-
-#### Height
-
-```java
-    int height(Node root) {
-        if (root == null) {
-            // when the node is invalid there is no meaningful height value to return for it, but zero
-            return 0;
-        }
-        if (root.left == null && root.right == null) {
-            // when the node is a leaf, the height could be only one, the height is the node node itself
-            return 1;
-        }
-        // when the node has children, the height is the current height, one, plus the max height between the left or right subtrees of
-        // the current node
-        return 1 + Math.max(height(root.left), height(root.right));
     }
 ```
 
@@ -516,7 +899,7 @@ in this case we only drill down one single path, without doing any tree
 modifications or complex operations.
 
 ```java
-Node serach(Node root, Integer value) {
+Node search(Node root, Integer value) {
     // drill down until either a node with a value equaling value is found, or
     // there is no more nodes to look at, while conforming to the BST rules
     while(root != null) {
@@ -866,7 +1249,7 @@ A Max heap might look like this.
 
     // sample heap representation as a dynamic array, due to fast insert and
     // look up operations at desired indices, i.e. for child / parent elements
-    List<Integer> heap = new ArrayList<>();
+    List heap = new ArrayList<>();
 ```
 
 #### Indexing
@@ -885,7 +1268,7 @@ left or the right child of a given node.
     find the max/min element to be the first element of the heap
 
 ```java
-    Integer peek(List<Integer> heap) {
+    Integer peek(List heap) {
         if (heap.isEmpty()) {
             // an empty heap has nothing to peek at
             return null;
@@ -949,7 +1332,7 @@ element with its parent, and swap if the conditions below are met
 -   for min heaps = it bigger than the parent we swap them
 
 ```java
-    Integer insert(List<Integer> heap, Integer value) {
+    Integer insert(List heap, Integer value) {
         // first off we start by putting the new item at the end of the array or heap, and getting that new index location of the last
         // element we have just inserted
         heap.add(value);
@@ -1018,7 +1401,7 @@ follow these rules for the two types of trees
     which we swapped
 
 ```jav
-    Integer delete(List<Integer> heap) {
+    Integer delete(List heap) {
         // there is nothing to delete from an emtpy heap in the first place
         if (heap.isEmpty()) {
             return null;
@@ -1185,26 +1568,26 @@ a word that is part of the trie, it has been inserted
             int cval = c.charValue();
 
             if (root.children == null) {
-                // the current root has no children, therefore we have to create an array of CHAR_COUNT children first, this is needed,
+                // the current root has no children, therefore we have to create an array of 26 children first, this is needed,
                 // to make an empty array of null pointers, which are going to be filled in with node instances
-                root.children = new TriePrefixNode[CHAR_COUNT];
+                root.children = new TriePrefixNode[26];
             }
 
-            // find which child index the current character correspons to, it can either already exist, or not, if it exists we just
-            // take that path, and continue down
-            TriePrefixNode node = root.children[cval - BASE_CHAR];
+            // find which child index the current character corresponds to, it can either already exist, or not, if it exists we just
+            // take that path, and continue down, setting the next root to the found node
+            TriePrefixNode node = root.children[cval - 'a'];
             if (node == null) {
                 // the node at that char position does not exist, create a new node instance, and assign it to that position in the
                 // root's children
                 node = new TriePrefixNode();
-                root.children[cval - BASE_CHAR] = node;
+                root.children[cval - 'a'] = node;
             }
 
             // the next root would now be the last character node we inserted, continue until the string is completely looped over
             root = node;
         }
 
-        // after the string has been looped over the root node here would point at the last character 'node', we mark it as terminating,
+        // after the string has been looped over the root node here would point at the last character node, we mark it as terminating,
         // meaning that it represents an end of the path, or in other words one complete word, and we set a value mapping to it. The
         // value here is not a usual part of trie implementation, it is done to demonstrate how a value can be mapped to a word/string
         // in a trie, similarly to a hash-map
@@ -1251,7 +1634,7 @@ another bigger / longer word)
             // set the next root to the child which corresponds to the char index, from the root.children nodes, that node can either be
             // null, or be initialized, when we re-enter the next iteration, it will either terminate on root == null / or root.children
             // == null or keep going
-            root = root.children[cval - BASE_CHAR];
+            root = root.children[cval - 'a'];
         }
         // reaching this point does not mean we have found the string 'word' still, the path might exist, as a subpath of another longer
         // word, we have to see if the node at the end of the path for the current string 'word' was marked as terminating, meaning it
@@ -1259,10 +1642,450 @@ another bigger / longer word)
         return root.terminating;
     }
 ```
+
 #### Deleting
 
 todo: this is not yet finalized, finish it
 
 ### B-Trees
 
+## Worker&Iterator approach
+
+Solving tree problems very often involves a very common approach technique, which
+as to be taken extra note of. Very often the problems for trees involve
+developing two recursive solutions. One might be called the main worker
+solution, and the other is the iterating function. This approach comes very
+often in tree problems. Two functions with dedicated roles / actions.
+
+```java
+    void worker(Node root, Params... params) {
+        // is a recursive function that does the actual work on a node basis
+        // it is meant to do the actual work, produce result and use that result
+        // in the iterating function, to accumulate it, to store it, to return it
+    }
+
+    void iterator(Node root) {
+        // iterator solution which basically goes through the nodes, collects
+        // information for the worker function to do it's job, the worker
+        // execution might happen as pre, post recursive call or we might call it
+        // multiple times in the iterator function , but it is the main solver
+        worker(root)
+        iterator(root.left)
+        iterator(root.right)
+    }
+```
+
+We can notice how many times the worker & iterator approach was observed above,
+there are multitude of solutions, which make use of it like
+
+-   [Ancestor](###Ancestor) - makes use of the contains, which is the main
+    function providing the result based on which the iterator function decides how
+    to proceed further down the tree, or stop
+
+-   [Subtrees](###Subtrees) - makes use of the compare, which is the main function
+    providing the result to validate subtree equality, the iterator function simply
+    goes in both left and right direction
+
 # Graphs
+
+Graphs are a collection of nodes with edges between some of them. It is a known
+fact that all trees are graphs, but not all graphs are trees. A graph, which has
+cycles cannot be called a tree. Trees can only be valid when there are no
+cycles between nodes.
+
+A graph could contain multiple other sub-graphs, such that there are no
+connections between different sub-graphs, if there are connections between all
+nodes in a graph, we call this graph a connected one
+
+Below we have an example of a graph, which contains two sub-graphs, there are no
+connections between the two sub-graphs
+
+```txt
+          k   o     m -- j -- w
+         /    /     \    |
+   a -- c -- f       y --
+    \       /
+    b --- d
+```
+
+In practice, the most used graph we would encounter is a directed graph, where
+the edges / connections have a direction, meaning connection from `a -> b` does
+not mean that `b -> a` exists automatically
+
+## Representations
+
+Depending on the task at hand there might be better or worse representations to
+use, what is important is that as much information is contained in the
+representation as possible (i.e. incoming edges, parent nodes etc.)
+
+### Basic class & node
+
+There are multiple ways to represent a graph, the most common one is with a
+graph node, and a graph class, which is just enough to implement most all graph
+features we would ever need. We need the class on top of a node since in a graph
+it is possible to not have path from one single root node to all others, that is
+actually usually the case, a graph might have many root nodes (ones with not
+incoming edges), or it might have none (no nodes with 0 incoming edges), in that
+case if all nodes have incoming edges this graph has cycles, there is no obvious
+graph root to speak of
+
+```java
+    class Node {
+        int incoming;
+        Integer value;
+        Node[] children;
+    }
+
+    class Graph {
+        Node[] nodes;
+    }
+```
+
+In the structure above take note of the `incoming` property, which is important,
+and tells us how many incoming edges link to the current node, while `children`
+tell us how many outbound connections we have coming out of the current node
+
+### Adjacency Matrices
+
+One popular way to represent a graph is by simply using a hash map where the
+keys are the values of the nodes, and the nodes themselves, and each value /
+node has a connection to a list of the nodes it connects to. Instead of a normal
+hash map we could also use a multi map, which is a more convenient way to add
+new node connections
+
+```java
+    HashMap<Integer, List<Integer>> matrix;
+    matrix.put(1, Arrays.asList(5, 3, 1));
+    matrix.put(2, Arrays.asList(3, 1));
+    matrix.put(3, Arrays.asList(2, 5, 1));
+    matrix.put(4, Arrays.asList(3));
+    matrix.put(5, Arrays.asList(3, 4));
+```
+
+In the example above each key represents a unique node value, while the arrays
+represent the links that node has to other nodes. This is for directed graphs
+
+Another variant of the Adjacency matrix is a simple 2d array where each position
+where an edge / connection exists in the 2d array is marked with 1, and where no
+connection exists is marked with 0
+
+```txt
+      | 1 2 3 4 5
+    -------------
+    1 | 1 0 1 0 1
+    2 | 1 0 1 0 0
+    3 | 1 1 0 0 1
+    4 | 0 0 1 0 0
+    5 | 0 0 1 1 0
+```
+
+The same example from above with the has map could be represented as a 2d array,
+where each row is mapped to a node, and each row represents the status of the
+connection / edge to the rest of each of the nodes. Take node `1` which in the
+matrix above, the first row has connections to nodes `1` and `3` and `5`, take a
+note that 1 has a connection to itself, which is completely valid
+
+## Creation
+
+A very simple example which creates a graph from a list of edges, where the
+edges represent a simple `from - to` relation between nodes
+
+```java
+    class Node {
+        Integer value;
+        int incoming = 0;
+        List<Node> children;
+    }
+
+    class Edge {
+        Integer from;
+        Integer to;
+    }
+
+    List<Edge> edges(List<T> elements) {
+        // list has to be an even number since connections are from - to, note
+        // that to could be a null element but still has to be present
+        if (elements.size() % 2 != 0) {
+            return Collections.emptyList();
+        }
+
+        // hold the list of edges, representing the graph connections
+        List<Edge> edges = new ArrayList<>();
+
+        // elements is a plain array which contains pairs of links, connections
+        // between the nodes, we use that to construct the connections or edges
+        for (int i = 0; i < elements.size(); i += 2) {
+            edges.add(edge(elements.get(i), elements.get(i + 1)));
+        }
+
+        // return the list of edges constructed from the elements array
+        return edges;
+    }
+
+    List<Node> create(List<Edge> edges) {
+        // the cache holds each unique node based on it's primary value, and a
+        // link to the node instance / reference itself
+        Map<T, Node> cache = new HashMap<>();
+
+        // simple constructor producer which initializes a graph node with
+        // correct value, like incoming edges, and the children
+        Function<T, Node> constructor = (T value) -> {
+            Node node = new GraphNode<>();
+            node.children = new ArrayList<>();
+            node.value = value;
+            node.incoming = 0;
+            return node;
+        };
+
+        // go through all the edges, and create and link the node instances
+        for (Edge edge : edges) {
+            if (edge.from != null && !cache.containsKey(edge.from)) {
+                // construct the node instance for the from edge
+                cache.put(edge.from, constructor.apply(edge.from));
+            }
+
+            if (edge.to != null && !cache.containsKey(edge.to)) {
+                // construct the node instance for the to edge
+                cache.put(edge.to, constructor.apply(edge.to));
+            }
+
+            // extract the node from, from the cache
+            Node current = cache.get(edge.from);
+
+            if (edge.to != null) {
+                // when the edge connection to is valid, we link it to the
+                // instance / reference of the node which represents the edge.to
+                Node child = cache.get(edge.to);
+                // add the child node to the current edge.from children list,
+                // this represents the forward, outbound connections of edge.from
+                current.children.add(child);
+                // make sure to increment the incoming edges for the child, as
+                // we have added a new incoming edge
+                child.incoming++;
+            }
+        }
+
+        // get the values from the cache map, which are all the nodes in the
+        // graph, return this as the final result of the constructed graph
+        return cache.values().stream().collect(Collectors.toList());
+    }
+```
+
+## Traversing
+
+Graphs have two major traversal approaches, similarly to trees, we can either use:
+
+-   Breadth first - where each level of the graph is visited, before the
+    next one is, then drill to the next immediate level and repeat
+-   Depth first - where each level is visited in depth, down to the very
+    last link, before neighbor levels are considered
+
+In the examples below the input list of graph nodes `List<Node>` represent a set
+of input nodes from which to start the traversal, that list could simply be the
+entire list of nodes, which belong to the graph, or simply a small set of
+pre-selected ones, for example, select only the ones without incoming edges, and
+traverse from them in depth or breadth
+
+### BFS
+
+Similarly to trees, however not as widely used with tree traversal, while, very
+much a cornerstone traversal approach for graphs, this approach inspects each
+immediate graph neighbors before going down to each of their children,
+inspecting a level of depth at a time
+
+```java
+    void breadth(Queue<Node> queue, List<Integer> path, Set<Node> visited) {
+        // remove the current element from the queue
+        Node node = queue.remove();
+
+        if (node == null) {
+            // reaching this point should not really be possible, since the
+            // queue would normally not get any nil elements pushed into it
+            return;
+        }
+
+        // add the value of the current node to the path, before adding the
+        // children to the queue
+        path.add(node.value);
+
+        // for each child of the current node
+        for (Node child : node.children) {
+            // before trying to go down, make sure the child is not visited already
+            // could be, in case other nodes have links to this child, and have
+            // been processed before
+            if (!visited.contains(child)) {
+                // mark the current node as visited, we want to make sure that if the
+                // graph has cycles, we never pass through this again, otherwise it
+                // would be added to the queue repeatedly
+                visited.add(child);
+
+                // append child to the end of the queue
+                queue.add(child);
+            }
+        }
+    }
+
+    List<Integer> breadth(List<Node> graph) {
+        // the input list graph, would contain a list of starting nodes, from
+        // which we would like to start traversing the graph in breadth
+
+        // construct the queue firstly initialized with the input graph nodes
+        Queue<Node> queue = new LinkedList<>(graph);
+
+        // hold state for visited nodes, already having been traversed over
+        Set<Node> visited = new HashSet<>();
+
+        // hold the nodes, in order of the way they were visited
+        List<Integer> result = new LinkedList<>();
+
+        while (!queue.isEmpty()) {
+            // pull from the queue the current element, add its children and
+            // keep doing that until the queue is emtpy, meaning all nodes that
+            // were reachable from the starting ones were visited at least once
+            breadth(queue, result, visited);
+        }
+
+        // return the path formed by traversing the nodes starting from the
+        // input list of graph nodes
+        return result;
+    }
+```
+
+### DFS
+
+Works very much like a DFS in trees, with the added caveat that we do not have 2
+children at most, but N children, each node is fully inspected, down to its last
+children, before the next one is picked up.
+
+```java
+    void depth(Node node, List<Integer> path, Set<Node> visited) {
+        if (node == null) {
+            // reaching this point should not really be possible, since children
+            // array should never contain nil nodes, but add this guard case
+            return;
+        }
+
+        // add the value of the current node to the path, before adding the
+        // children to the queue
+        path.add(node.value);
+
+        // for each child of the current node
+        for (Node child : node.children) {
+            // before trying to go down, make sure the child is not visited already
+            // could be, in case other nodes have links to this child, and have
+            // been processed before
+            if (!visited.contains(child)) {
+                // mark the current node as visited, we want to make sure that if the
+                // node has cycles, we never pass through this again, otherwise infinite
+                // recursion would occur
+                visited.add(child);
+
+                // dive in depth for the current child
+                depth(child, path, visited);
+            }
+        }
+    }
+
+    List<Integer> depth(List<Node> graph) {
+        // the input list graph, would contain a list of starting nodes, from
+        // which we would like to start traversing the graph in depth
+
+        // hold state for visited nodes, already having been traversed over
+        Set<Node> visited = new HashSet<>();
+
+        // hold the nodes, in order of the way they were visited
+        List<Integer> result = new LinkedList<>();
+
+        for (Node node : graph) {
+            // go through all nodes of the graph, dive depth first for each node
+            depth(node, result, visited);
+        }
+        return result;
+    }
+```
+
+## Searching
+
+### Dijkstra
+
+A way to find the shortest path between two points in a weighted directed graph
+(which might have cycles). Where all edges must have positive values.
+
+```java
+
+```
+
+### A-star
+
+Similarly to Dijkstra, a way to find the shortest path between two nodes in a
+weighted graph, but ...
+
+## Sorting
+
+### Topological sort
+
+This type of sort / ordering of graph nodes works only for directed graphs,
+without cycles. There are many ways to detect cycles in a graph, the
+implementation below assumes valid graph.
+
+Topological sorting is a way to order nodes in a graph in such a way that the
+nodes with the least amount of incoming edges come first. The nodes are
+basically ordered / sorted in increasing order of the number of incoming edges.
+
+A very common use case would be to represent a build system, where each module
+is a node, each dependency between the modules is an edge. We would like to see,
+which modules need to be built first, second, third and so on. We would like to
+print the modules in the correct build order. This is where Topological sort
+comes in handy.
+
+What we do is select the modules with no incoming edges, meaning they have no
+dependencies, then we breadth traverse their immediate children, decrease the
+children's incoming edge count, if a child's incoming edge count becomes 0, add
+that to the path, and to the processing queue, repeat until processing queue is
+empty
+
+```java
+    List<String> sort(List<Node> graph) {
+        // the queue here will receive the next node in the graph which has no more incoming edges
+        Queue<Node> queue = new LinkedList<>();
+
+        // the result holds the list of nodes in topological order, ordered front to back, at the front the nodes with the least number
+        // of incoming edges - zero, and increasing
+        List<String> result = new LinkedList<>();
+
+        // put in the queue all the nodes with no incoming edges, these would be the ones with which we would have to start, if there
+        // are none, then there is no topological order, meaning the graph probably has cycles
+        for (Node node : graph) {
+            if (node.incoming == 0) {
+                // add node with no incoming edges
+                queue.add(node);
+            }
+        }
+
+        // while the queue is not empty, meaning we have nodes to go through,
+        while (!queue.isEmpty()) {
+            // pop the current node, remember, they are only added to the queue if they have no incoming edges
+            Node node = queue.remove();
+
+            // add the node to the result
+            result.add(node.value);
+
+            // for each child of the current node, go and decrement the incoming edge, child is linked to the current node,
+            // therefore we have to 'remove' this incoming edge from the current node to the parent.
+            for (Node child : node.children) {
+                // 'remove' the current connection from node - child
+                child.incoming--;
+
+                // when incoming becomes zero or less, add the child node to the queue, the child might have more than one incoming
+                // edges, it will be added only when the last incoming edge for it was removed
+                if (child.incoming <= 0) {
+                    // add to the processing queue
+                    queue.add(child);
+                }
+            }
+        }
+
+        // the topological order of the graph's nodes are contained in the list result
+        return result;
+    }
+```
