@@ -3,8 +3,6 @@
 To crack the coding interview you need to prepare with real interview questions. You must practice on real problems and learn their
 patterns. It is about developing a fresh algorithm, not memorizing existing problems
 
-# The Approach
-
 # The interview
 
 The interview is short, you might not be able to get through more than a couple of questions / tasks in the span of an hour or 45 mins.
@@ -32,11 +30,12 @@ with enterprise systems and frameworks, but are not applying for such a role, yo
 that. When answering questions, focus on yourself, not the team, tell them what you have accomplished, not the team.
 
 ## When talking about yourself, try to answer the following questions
-1. What is your current role in the company you are/were at - be brief
-2. College / university background - what did you study, how did it go
-3. Post education - brief history of your career, taken from the resume
-4. Outside of work - what do you do, do you do projects in your spare time
-5. Hobbies (something unique) - best if the hobby is technical
+
+    - What is your current role in the company you are/were at - be brief
+    - College / university background - what did you study, how did it go
+    - Post education - brief history of your career, taken from the resume
+    - Outside of work - what do you do, do you do projects in your spare time
+    - Hobbies (something unique) - best if the hobby is technical
 
 # The process
 
@@ -76,4 +75,3 @@ the company
    to use it because of D.
 5. Ask them what opportunities are there in the company to learn about a technology or a stack you are passionate about.
 6. Ask about technology you are not familiar with, ask them how they use it, in their projects
-

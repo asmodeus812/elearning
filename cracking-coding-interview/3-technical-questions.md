@@ -61,6 +61,3 @@ issue incorrectly, or not completely.
 7. Test - go through your code and test it, if you have to do any changes to
    adjust the logic go back to step 3
 
-Important to note that, one might be better off trying to approximate or try to
-solve the issue as a real world example, instead of 
-

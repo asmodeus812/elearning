@@ -2009,18 +2009,314 @@ children, before the next one is picked up.
 ### Dijkstra
 
 A way to find the shortest path between two points in a weighted directed graph
-(which might have cycles). Where all edges must have positive values.
+(which might have cycles). Where all edges must have positive values. Note that
+a side effect of Dijkstra is that it finds the shortest paths from the `start`
+node to any other node that can be reached by start, and one of them being `end`
+(if start and end have path between each other of course).
+
+The way the Dijkstra works to find the shortest path, is by maintaining 4
+separate structures
+
+-   priority queue / min heap - this is the core of the Dijkstra algorithm, we
+    push nodes, and their absolute cost / path in that min heap, by the nature of
+    the min heap, the nodes with the least cost / weight will be at the very top of
+    the heap, pulling from it means we always pull the best cost node
+
+-   distances - maps a node, actually a unique `node.value,` and a min path to that
+    node, in the end of the algorithm we would have the shortest paths to all nodes
+    in the graph from the starting position, in the distances map
+
+-   previous - mirrored structure of distance, where for each min distance for a
+    given node the previous node from where this min distance was achieved is stored
+    in, we use previous to backtrack from where we came to achieve the shortest
+    path, and thus can generate all the pahts from all nodes to the starting node
+    (if the starting node had a path to them of course)
+
+-   visited - nodes, which are pulled from the priority queue are marked as
+    visited, to avoid re-visiting them, the first time a node is visited, is also
+    the first time we extract it from the min heap, meaning it is going to be the
+    one with the min weight
+
+What is crucial to note is that the min heap can contain the same node i.e
+`node.value` more than once, but with different weights, since we can reach that
+node from many places, each time we do find a better cost weight (compared to
+the current `distance[node.value]` weight) we push to the heap.
+
+Naturally because it is a min heap, the best cost WeightNode would be found near
+the top of the heap, when we pull a node that is not visited for the first time,
+we always pull the best WeightNode for that node (even if there are duplicates,
+the others would have worse cost, and will be deeper in the heap), we then mark
+the node by `node.value` as visited.
+
+Note that unlike DFS and BFS, we do not mark the nodes when we first encounter
+them as children, but we mark them as visited only when we pull them from the
+queue, this guarantees that by the time we pull the node, all paths to that node
+would have been investigated, best cost weight would have been found. And
+naturally we would pull the best cost from the min heap for that node /
+`node.value`. After we pull a node we have to check if it has been visited,
+having been visited already means that the best cost for that node was pulled,
+and processed, we can simply `continue` (this handles the duplicates with worse
+costs / weights, by simply removing them from the queue without taking any
+action)
+
+The two main loop ending conditions for the Dijkstra are 2, these do not tell us
+if we have reached the end node target, however they are used to know when to
+stop traversing the graph
+
+-   all nodes - either the visited structure contains the same number of nodes as
+    the entire graph, meaning we have visited all possible nodes, this might not
+    obtain if we have sub-graphs with no connections, and the start node is in one
+    sub-graph, the end-node in another, we would never reach the 2-nd sub-graph
+    nodes, meaning `visitedGraphNodes.size` would never equal `totalGraphNodes.size`
+-   min heap empty - priority queue is empty, this would happen in case we pop
+    every possible node that we could have reached from the starting position node,
+    by that time we still do not know if we have actually reached end, but at least
+    we have gone over all possible paths that could have been traversed starting
+    from the `starting` node
+
+The final stage, we try to reconstruct the path from end to start backwards,
+using the previous structure, we can check if we have mappings following the
+previous, if we reach `start` then we had a link from `end` to `start`,
+otherwise no path between the two targets exists.
 
 ```java
+    // base utility weight node class which extends from the base graph node class,
+    // used to maintain and track the absolute weight of the graph nodes while
+    // executing Dijkstra, in a priority queue
+    class WeightNode extends Node implements Comparable<WeightNode> {
+        int weight = 0;
 
+        // create a weight node from a graph node, by cloning over the
+        // properties of the base node
+        public WeightNode(Node node, int weight) {
+            this.weight = weight;
+            this.value = node.value;
+            this.children = node.children;
+            this.incoming = node.incoming;
+        }
+
+        @Override
+        public int compareTo(WeightNode o) {
+            // required for the priority queue, we care only about comparing the
+            // total weight, of each node.
+            return this.weight - o.weight;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            WeightNode node = (WeightNode) obj;
+            return this.value.equals(node.value);
+        }
+    }
+
+    List<String> computeShortestPath(List<Node> nodes, Node start, Node end) {
+        // this is the cornerstone of this algorithm, this is a min heap, which orders the nodes such that the ones with smallest cost
+        // / weight are at the front of the queue, remember that the same node i.e. node.value can be added in this heap more than once,
+        // but with different costs, since we might reach that node from multiple other nodes, but since we work with a min heap, these
+        // WeightNode would be ordered by cost, so we will always pull the smallest node by cost first.
+        PriorityQueue<WeightNode> heap = new PriorityQueue<>();
+
+        // visited holds nodes by identifier, that is important, since the heap might contain the same 'node' multiple times with
+        // different costs
+        Set<String> visited = new HashSet<>();
+
+        // distances from a given node / node.value so far, these are the total accumulated distances, and always represent the minimum
+        // distance to the specific node, or more precisely the shortest distandce to each node id <-> node.value
+        Map<String, Integer> distances = new HashMap<>();
+
+        // a mirror of the distances map, it tells us from where we came to achieve that min distance for a given node, they are both
+        // updated together always, this way later on we can use previous to backtrack the shortest path
+        Map<String, Node> previous = new HashMap<>();
+
+        // nodes are identified by their value, that is like an id for a node, so update the initial distances, and previous, as well as
+        // the heap, which at the start would contain the 'start' node we want to start from. The cost to the current start node is
+        // obviously zero, add this as a 0 weight node to the heap
+        distances.put(start.value, 0);
+        previous.put(start.value, null);
+        heap.add(new WeightNode(start, 0));
+
+        // loop until we see all nodes in the graph, this is the very basic exit condition, it might not obtain, if we have sub-graphs
+        // that have no connections between each other in the main graph, but the heap -> break would be our backup exit strategy
+        while (visited.size() < nodes.size()) {
+            // it is possible for the queue to become empty, before all nodes in the graph are visited, one way this could happen is if
+            // we have two sub-graphs, part of the main graph, which have no connections between each other
+            if (heap.isEmpty()) {
+                break;
+            }
+            // pull the current shortest path node, from the priority queue / min heap, in this case, the heap is sorted based on the
+            // cost of the weight node
+            WeightNode node = heap.remove();
+
+            // we can check if it has been visited before first, based on the value of the node, if it has it means that it was present
+            // already in the heap with a smaller total cost / weight, so any further presence of the same node would be with higher
+            // cost / weight we do not want to consider it
+            if (visited.contains(node.value)) {
+                continue;
+            }
+            // add / mark the current node as visited, reaching here means the current node was not visited so far, meaning this is the
+            // first time we pull it from the heap, meaning we are pulling the one with the smallest cost, remember the heap might
+            // contain multiple nodes with the same value, but different 'costs', due to the fact that in a graph we might reach the
+            // same 'node' from multiple parent nodes. By saying 'node' we really mean 'node.value' - that is the identifier for a node
+            visited.add(node.value);
+
+            for (Node child : node.children) {
+                // extract the current path to the current child so far, or default to some big value, creaful, we are not using
+                // INT_MAX, due to the fact that it might overflow if we add anything more than 0 to it
+                Integer current = distances.getOrDefault(child.value, 9999);
+
+                // compute the 'would be' distance from the current node to the current child, this is the cost of the current node so
+                // far + the weight cost of the current child, care with overflow, if using INT_MAX
+                Integer possible = distances.getOrDefault(node.value, 9999) + node.getWeightCost(child);
+
+                // in case the possible new distance is actually smaller than the distance stored so far, we update the distance stored
+                // so far, update the previous node we come from, and add the child to the heap
+                if (possible < current) {
+                    // update from which node we came to the current child, since we found better / lower cost path value
+                    previous.put(child.value, node);
+
+                    // update the distances to the current child node as we have found shorter path to it than what we had so far
+                    distances.put(child.value, possible);
+
+                    // every time we find path to a given node which is shorter (so far) we add it to the heap, it would be 'sorted'
+                    // based on it's weight into the heap, note we add the total 'weight' not just the 'child.weight'
+                    heap.add(new WeightNode(child, possible));
+                }
+            }
+        }
+
+        // collect the path from start - end
+        List<String> path = new LinkedList<>();
+        Node target = end;
+
+        do {
+            // starting off from the end node, track back using the previous map, which tells us from where we came to achieve the
+            // current path, remember previous and distances were updated together meaning previous contains the shortest cost / path to
+            // a given node / node.value
+            path.add(target.value);
+
+            // move backwards to previous node
+            target = previous.get(target.value);
+        } while (target != null && target != start);
+
+        // return the path, we might want to validate if the start / end correspond to the
+        return path;
+    }
 ```
 
 ### A-star
 
-Similarly to Dijkstra, a way to find the shortest path between two nodes in a
-weighted graph, but ...
+Similarly to Dijkstra, the implementation is actually the same, a way to find
+the shortest path between two nodes in a weighted graph, the only meaningful
+difference is the way the cost is computed, in Dijkstra we simply compare the
+cost / weight of the shortest path to a given node so far, to the current weight
+or cost of the path to that node at the moment. However A-star takes us a step
+further, it defines an additional function `h`, a heuristic, which modifies the
+calculation such that it tries to guess how much cheaper would the cost be if we
+go through the current `node` to the end goal
 
-## Sorting
+The heuristic function is only computed when we add the node to the priority
+queue, it biases the priority queue order such that nodes with less cost IN
+RELATION TO THE TARGET GOAL ONLY, would be put to the front of the heap, which
+means that unlike Dijkstra in the distances array, we do not have all shortest
+paths from the start to every other node, we only have the shortest distance
+from start to end, since the children we took from the heap were the ones with
+cost biased by the heuristic, and the heuristic function is a function of the
+`current` and `end` node i.e. `h = heuristic(node, end)`.
+
+The value of the heuristic function could be positive, negative or 0, depends on
+how it is defined. Imagine a negative value of the heuristic, would imply that
+the cost to the goal node is actually very low, since we would subtract it from
+the current `min` cost, a very big positive heuristic value would imply a very
+costly path to the goal node if we took that route.
+
+A heuristic is defined very much differently based on the use case, if our graph
+was instead a grid, the heuristic is usually a coordinate computation of the
+`current node`, in relation to the `end` goal. There are several famous ones:
+
+-   Manhattan distance - on a grid where we can move in 4 directions,
+    up/down/right/left `d = abs(x1 - x2) + abs(y1 - y2)`. The simplest one, we
+    can move only in right angles
+
+    ```txt
+        0 1 0
+        1 x 1
+        0 1 0
+    ```
+
+-   Euclidean distance - on a grid where we can move in 8 directions, including the
+    4 cardinal ones, plug, moving in diagonals, it is simply the Pythagorean
+    theorem - `d = sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2))`. Here moving in
+    diagonals is simply the length of hypotenuse of the right triangle formed.
+
+    ```txt
+        5 3 5
+        4 x 4
+        5 3 5
+    ```
+
+-   Chebyshev distance - on a grid where we can still move in the 8
+    directions, as described above, `d = max(y2 - y1, x2 - x1)`. Here moving in
+    diagonals is just as expensive as moving in the costliest direction
+
+    ```txt
+       3 3 3
+       2 x 2
+       3 3 3
+    ```
+
+In the examples above we have to simply substitute the coordinates of the
+current node for `x1 and y1` and then the coordinates for the target goal node
+`x2 and y2`, the resulting value is our heuristic function. Notice that a lower
+value - meaning lower distance, meaning less cost, is better, higher means -
+more distance between the child and goal node, meaning it is worse to take that
+path through that node (to the goal node) overall.
+
+The implementation pretty much follows the base Dijkstra one, with the addition
+of having a special function, which calculates the heuristic cost of each node.
+And take a good look at how it is used, the heuristic is calculated, at the very
+moment the node is added to the queue, by that time we know that this distance
+coming from the parent is smaller than any current distance for that node, we
+further bias that node's cost based on the heuristic, if the heuristic is very
+big the cost would be big, the node would be pushed down the min heap, if the
+heuristic is low (maybe negative) the cost would be low, and the node would be
+pushed to the front of the min heap
+
+A-star with heuristic, which always evaluates to 0, is essentially just the
+Dijkstra algorithm, since no node is biased towards the end goal, in other
+words, there is no one or more special nodes in the graph we can take to make
+our cost extra cheaper, we only consider the cost of the weights, there is
+additional property which could further reduce our costs.
+
+```java
+    ......................................
+
+    while (visited.size() < nodes.size()) {
+        for (Node child : node.children) {
+            // current min cost so far, to reach the child node, or default to some high value if none
+            Integer current = distances.getOrDefault(child.value, 9999);
+
+            // the possible new cost, note that the heuristic is still not calculated here, see below
+            Integer possible = distances.getOrDefault(node.value, 9999) + node.getWeightCost(child);
+
+            // in case the possible new distance is actually smaller than the distance stored so far
+            if (possible < current) {
+                // these remain the same as they do in Dijkstra, we update both previous and
+                // distances for the specific node, they must be kept in sync, to use later
+                previous.put(child.value, node);
+                distances.put(child.value, possible);
+                // take a very good note of how and where the heuristic is calculated, and
+                // that it is based on the child node, and the cost it would take
+                // to get to the goal node, and that is the value we put in the
+                // queue, the lower the heuristic the better, means less cost.
+                heap.add(new WeightNode(child, possible + heuristic(child, end));
+            }
+        }
+    }
+
+    ......................................
+```
+
+# Sorting
 
 ### Topological sort
 
