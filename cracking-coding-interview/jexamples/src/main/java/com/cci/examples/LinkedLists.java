@@ -105,14 +105,12 @@ public class LinkedLists {
         System.out.println();
     }
 
+    /**
+     * Remove all duplicate elements in a list, where the list is a linked list.
+     *
+     */
     public static final class RemoveDuplicateElements {
 
-        /**
-         * Remove all duplicate elements in a list, where the list is a linked list.
-         *
-         * @param elements - the elements from which to create the linked list
-         * @return - the total number of elements that were removed
-         */
         public int removeDuplicateElements(List<Integer> elements) {
             Node list = createLinkedList(elements);
 
@@ -142,14 +140,16 @@ public class LinkedLists {
             }
 
             if (count > 0) {
-                // finally print the total number of duplicate elements that were deleted from the list
-                System.out.println(String.format("Deleted %d duplicate elements in total", count));
             }
             printLinkedList(current);
             return count;
         }
     }
 
+    /**
+     * Return the k-th to last element of a linked list
+     *
+     */
     public static final class ReturnKthElement {
 
         private int totalCount;
@@ -187,17 +187,14 @@ public class LinkedLists {
         }
     }
 
+    /**
+     * Remove a node from the middle of the list, given access only to that node. This problem is not well formulated, it is really bad
+     * because we are not removing a node, we are removing the value of a node, or rather simply overriding it. This problem does not use
+     * terms correctly, leading to great confusion.
+     *
+     */
     public static final class DeleteInnerNode {
 
-        /**
-         * Remove a node from the middle of the list, given access only to that node. This problem is not well formulated, it is really bad
-         * because we are not removing a node, we are removing the value of a node, or rather simply overriding it. This problem does not
-         * use terms correctly, leading to great confusion.
-         *
-         * @param elements - the items of the list
-         * @param node - the position of the mid node to be removed
-         * @return - number of elements shifted left during the removal
-         */
         public int removeInnerNode(List<Integer> elements, int node) {
             Node list = createLinkedList(elements);
             Node middle = list;
@@ -242,17 +239,14 @@ public class LinkedLists {
         }
     }
 
+    /**
+     * Given a list of elements, move all elements that are bigger than a given value to the right, such that the right side of the array
+     * has all elements bigger than or equal to that value, and the left side has all elements be less than that value, the order in each
+     * half does not matter.
+     *
+     */
     public static final class PartitionAroundElement {
 
-        /**
-         * Given a list of elements, move all elements that are bigger than a given value to the right, such that the right side of the
-         * array has all elements bigger than or equal to that value, and the left side has all elements be less than that value, the order
-         * in each half does not matter.
-         *
-         * @param elements - the elements of the list
-         * @param val - the midpoint value to partition the list
-         * @return - the number of elements moved to the right
-         */
         public int partitionLinkedList(List<Integer> elements, int val) {
             Node list = createLinkedList(elements);
             Node tail = list;
@@ -316,18 +310,15 @@ public class LinkedLists {
         }
     }
 
-    public static final class IntersperceListItems {
+    /**
+     * Given an even numbers array, intersperce the elements such that they alternate. For example given the following linked list
+     * a1,a2,a3,b1,b2,b3 -> a1,b1,a2,b2,a3,b3. This is done by having two pointers walking the list, one from the actual head, the other
+     * starting from the midpoint node, the midpoint is found by value for simplicity, once we reach the end of the list we terminate
+     *
+     */
+    public static final class IntersperseListItems {
 
-        /**
-         * Given an even numbers array, intersperce the elements such that they alternate. For example given the following linked list
-         * a1,a2,a3,b1,b2,b3 -> a1,b1,a2,b2,a3,b3. This is done by having two pointers walking the list, one from the actual head, the other
-         * starting from the midpoint node, the midpoint is found by value for simplicity, once we reach the end of the list we terminate
-         *
-         * @param elements - the list of items to re arrange
-         * @param midpoint - the value of the midpoint node
-         * @return - the head of the list
-         */
-        public Node intersperceListElements(List<Integer> elements, int midpoint) {
+        public Node intersperseListElements(List<Integer> elements, int midpoint) {
             // do sanity check on the input values
             assert (elements.size() % 2 == 0);
 
@@ -382,16 +373,13 @@ public class LinkedLists {
         }
     }
 
+    /**
+     * Given two linked lists, which represent different digits of two numbers written backwards, sum the two lists and return the result as
+     * a new list. For example having the two numbers 295 and 1763, represented as (5, 9, 2), (3, 6, 7, 1)
+     *
+     */
     public static final class SumTwoLists {
 
-        /**
-         * Given two linked lists, which represent different digits of two numbers written backwards, sum the two lists and return the
-         * result as a new list. For example having the two numbers 295 and 1763, represented as (5, 9, 2), (3, 6, 7, 1)
-         *
-         * @param first - the first list of digits of the first number
-         * @param second - the second list of digist of the second number
-         * @return - the total sum / result
-         */
         public int sumTwoLists(List<Integer> first, List<Integer> second) {
             Node l1 = createLinkedList(first);
             Node l2 = createLinkedList(second);
@@ -443,17 +431,14 @@ public class LinkedLists {
         }
     }
 
+    /**
+     * Detect if the given list of items has a loop, if yes, which node points at the start of the loop. This is a classical tortoise & hare
+     * problem. Also known as the Floyd's cycle-finding algorithm is a pointer algorithm that uses only two pointers, which move through the
+     * sequence at different speeds.
+     *
+     */
     public static final class LoopDetectionStrategy {
 
-        /**
-         * Detect if the given list of items has a loop, if yes, which node points at the start of the loop. This is a classical tortoise &
-         * hare problem. Also known as the Floyd's cycle-finding algorithm is a pointer algorithm that uses only two pointers, which move
-         * through the sequence at different speeds.
-         *
-         * @param elements - the elements of the list
-         * @param target - the value at which to create the loop
-         * @return - the node where the loop starts or nil if none
-         */
         public static Node detectLoopStart(List<Integer> elements, int target) {
             Node list = createLinkedList(elements);
 
@@ -495,7 +480,6 @@ public class LinkedLists {
             // the tail of the list, which means the list has no loops, and the while above never broke, we can also instead check here if
             // slow and fast are equal, if not, then there is no loop again i.e if (slow != fast) - same as the check below
             if (fast == null || fast.next == null) {
-                System.out.println(String.format("There is no loop around value %d", target));
                 return null;
             }
 
@@ -511,7 +495,6 @@ public class LinkedLists {
 
             // do sanity check on the resulting values
             assert (fast == slow && fast != null && slow != null && fast.value == target);
-            System.out.println(String.format("Loop starts at element %d", fast.value));
             return fast;
         }
     }

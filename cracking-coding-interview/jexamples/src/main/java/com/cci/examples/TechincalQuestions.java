@@ -10,27 +10,20 @@ import java.util.stream.Collectors;
 
 public class TechincalQuestions {
 
+    /**
+     * For a list with unique numbers, find all pairs of that list which have a difference of diff
+     */
     public static class CountArrayPairs {
 
-        /**
-         * For a list with unique numbers, find all pairs of that list which have a difference of diff
-         *
-         * @param pairs - the list of pairs
-         * @param diff - the diff to find
-         * @return - the number of pairs
-         */
         public int countDiffPairs(List<Integer> pairs, int diff) {
-            // One approach mgiht be to sort the array, and then do a lookup with binary
-            // search
+            // One approach mgiht be to sort the array, and then do a lookup with binary search
             // which is log(n) time, basically a constant lookup time
             // pairs.sort((Integer o1, Integer o2) -> {
             // return o1 - o2;
             // });
 
-            // Another approach might be to just put these numbers in a lookup table, and
-            // simply
-            // have a look at the table, we use this approach below, it is basically the
-            // same
+            // Another approach might be to just put these numbers in a lookup table, and simply
+            // have a look at the table, we use this approach below, it is basically the same
             // as far as big O complexity is concerned
             Map<Integer, Integer> allNumbersStore = new HashMap<>();
             for (Integer number : pairs) {
@@ -51,20 +44,20 @@ public class TechincalQuestions {
                     count++;
                 }
             }
-            // return the count back for validation, print the information to the user
-            System.out.println(String.format("Number of pairs: %d ", count));
             return count;
         }
     }
 
+    /**
+     * Count all solutions to the a^3 + b^3 = c^3 + d^3.
+     *
+     * The solution to this problem involves findin the sums of the cubes of all numbers from 0 to n, and what we are looking for is the
+     * unique pairs or a,b and c,d where the cubes sum to the given number. We can simply map the sums into a table, and then count up the
+     * unique ones
+     *
+     */
     public static class CubicSumExpression {
 
-        /**
-         * Count all solutions to the a^3 + b^3 = c^3 + d^3. What we need to realize there is that this is a simple sum problem, meaning
-         * that a,b,c,d must be
-         *
-         * @param n - the upper boundary for which a,b,c and d are to be cubed
-         */
         public int countAllSolutions(int n) {
             // We try to collect all sums, of the expression m^3 + n^3, this
             // will give us the sums. In addition to that we map each unique sum
@@ -74,11 +67,13 @@ public class TechincalQuestions {
             for (int i = 1; i < n + 1; i++) {
                 for (int j = 1; j < n + 1; j++) {
                     Integer totalSum = (int) (Math.pow(i, 3) + Math.pow(j, 3));
+
                     // if the sum already is not present add a new empty list
                     // the sum is integer so it will be unique.
                     if (!allSumStore.containsKey(totalSum)) {
                         allSumStore.put(totalSum, new ArrayList<>());
                     }
+
                     // append to the list of the mapping for totalSum. The pair
                     // below is the pair of m and n both raised to the 3rd power
                     // summed together
@@ -89,23 +84,20 @@ public class TechincalQuestions {
             // the final result will contain a list of pairs, for each sum which give us
             // the sum in question, most numbers (up to 1000) have pretty much at most
             // one pair which sums up to e.g. - 737: [[2,9], [9,2]]
-            for (Map.Entry<Integer, List<String>> entry : allSumStore.entrySet()) {
-                System.out.println(String.format("%d: %s", entry.getKey(), entry.getValue()));
-                System.out.println("-----------------------------------------------------");
-            }
-            return n;
+            return allSumStore.entrySet().stream().map(Map.Entry::getValue).map(List::size).mapToInt(Integer::intValue).sum();
         }
     }
 
+    /**
+     * Find each position in a long string where any permutation of a shorter string is found
+     *
+     * The solution to this problem is to simply sort the the input short string, after that traverse the long string and take a sub string
+     * as long as the input short string, sort it, and compare against the short string, if they match then that substring is a permutation
+     * of the short string, repeat until the end of the string
+     *
+     */
     public static class PermutationWithinString {
 
-        /**
-         * Find each position in a long string where any permutation of shortString is found
-         *
-         * @param longString - a very long string
-         * @param shortString - a short string
-         * @return - number of valid permutations of short string found in the long string
-         */
         public int describePermutationPositions(String longString, String shortString) {
             // sort the input, to make sure it is normalized the same way the window
             // string below will be, this we will make use in equalsIgnoreCase
@@ -120,7 +112,7 @@ public class TechincalQuestions {
                 // part of the long string
                 String windowString = longString.substring(i, Math.min(longString.length(), i + shortString.length()));
 
-                // unscrable the word window, of shortString.length chars, into
+                // unscamble the word window, of shortString.length chars, into
                 // a predictable ordered sequence of chars this way we can be
                 // sure that whatever the permutation in windowString is, it
                 // will be normalized, by sorting it, to be ready for comparison

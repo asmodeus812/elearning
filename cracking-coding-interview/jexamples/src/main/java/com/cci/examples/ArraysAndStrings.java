@@ -10,14 +10,57 @@ import javax.swing.text.StyledEditorKit.ForegroundAction;
 
 public class ArraysAndStrings {
 
+    /**
+     * Find each position in a long string where any permutation of a shorter string is found
+     *
+     * The solution to this problem is to simply sort the the input short string, after that traverse the long string and take a sub string
+     * as long as the input short string, sort it, and compare against the short string, if they match then that substring is a permutation
+     * of the short string, repeat until the end of the string
+     *
+     */
+    public static class PermutationWithinString {
+
+        public int describePermutationPositions(String longString, String shortString) {
+            // sort the input, to make sure it is normalized the same way the window
+            // string below will be, this we will make use in equalsIgnoreCase
+            shortString = shortString.chars()
+                            .sorted()
+                            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                            .toString();
+
+            List<String> listOfMatches = new ArrayList<>();
+            for (int i = 0; i < longString.length(); i++) {
+                // take a window of word of at most shortString.length chars, to check if it is
+                // part of the long string
+                String windowString = longString.substring(i, Math.min(longString.length(), i + shortString.length()));
+
+                // unscamble the word window, of shortString.length chars, into
+                // a predictable ordered sequence of chars this way we can be
+                // sure that whatever the permutation in windowString is, it
+                // will be normalized, by sorting it, to be ready for comparison
+                // with shortString
+                String sortedString = windowString.chars()
+                                .sorted()
+                                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                                .toString();
+
+                // compare against the short string, which is also sorted
+                if (shortString.equalsIgnoreCase(sortedString)) {
+                    listOfMatches.add(windowString);
+                }
+            }
+
+            // print the results and return
+            return listOfMatches.size();
+        }
+    }
+
+    /**
+     * Check if a sequence of characters or a string contains only unique characters.
+     *
+     */
     public static final class UniqueSequenceChecker {
 
-        /**
-         * Check if a sequence of characters or a string contains only unique characters.
-         *
-         * @param input - the char sequence input
-         * @return - true if unique, false otherwise
-         */
         public boolean isUniqueSequence(String input) {
             // another approach using intermediary structure is to get the distinct chars, in a map or a distinct stream like the example
             // below
@@ -37,12 +80,9 @@ public class ArraysAndStrings {
                 if (sorted.charAt(i) == sorted.charAt(i + 1)) {
                     // at this point we know that there are duplicate characters in the string
                     // therefore the string does not contain unique characters only
-                    System.out.println(String.format("Is %s not unique sequence", input));
                     return false;
                 }
             }
-
-            System.out.println(String.format("Is %s unique sequence", input));
             return true;
         }
     }
@@ -51,14 +91,10 @@ public class ArraysAndStrings {
 
         /**
          * Check if a given string is a permutation of another string
-         *
-         * @param first - a possible permutation of the source
-         * @param second - a source string against to check
-         * @return - true if permutatio, false otherwise
          */
         private boolean checkStringPermuatation(String first, String second) {
+            // early exit, we know that this can not be true if both have different lengths to begin with
             if (first.length() != second.length()) {
-                System.out.println(String.format("%s not a permutation of %s ", first, second));
                 return false;
             }
 
@@ -82,42 +118,30 @@ public class ArraysAndStrings {
                     // decrement the count of each unique character, in the end we have to end up with all counts being 0, meaning that not
                     // only the same chars were present in the second string but also the same number of them as well
                     Integer count = countMap.get(second.charAt(i));
-                    countMap.put(second.charAt(i), count - 1);
+                    if (count == 1) {
+                        countMap.remove(second.charAt(i));
+                    } else {
+                        countMap.put(second.charAt(i), count - 1);
+                    }
                 } else {
-                    // early exit, we have hit a completely new character which was not in the first string, there is nothing more to do
-                    System.out.println(String.format("%s not a permutation of %s ", first, second));
                     return false;
                 }
             }
 
-            // in the end we have to end up with all counts being 0, that would signal that the first is a permutation of the second one,
-            // otherwise just return false and break out of the function
-            for (var entry : countMap.entrySet()) {
-                if (entry.getValue() != 0) {
-                    System.out.println(String.format("%s not a permutation of %s ", first, second));
-                    return false;
-                }
-
-            }
-
-            // reaching this point means we have a valid permutation between the two inputs
-            System.out.println(String.format("%s is a permutation of %s ", first, second));
-            return true;
+            // check if the count map is empty, if yes, then that means we have removed all characters exactly count times, therefore both
+            // strings are permutations of one another
+            return countMap.isEmpty();
         }
     }
 
+    /**
+     * Convert all spaces in a url string wtih %20
+     *
+     */
     public static final class ConvertUrlSpace {
 
-        /**
-         * Convert all spaces in a url string wtih %20
-         *
-         * @param url - the input string, for which all spaces must be converted
-         * @param spaces - the initial number of spaces present in the input string
-         * @return - the resulting string
-         */
         public String convertUrlSpaces(String url, int spaces) {
             if (spaces == 0 || url.length() == 0) {
-                System.out.println(String.format("Nothing to convert url: %s", url));
                 return url;
             }
             char[] chars = url.toCharArray();
@@ -151,9 +175,7 @@ public class ArraysAndStrings {
                 }
             }
 
-            String result = new String(chars);
-            System.out.println(String.format("Converted url: %s", result));
-            return result;
+            return new String(chars);
         }
     }
 
@@ -207,11 +229,14 @@ public class ArraysAndStrings {
                 palindrome = counter == 1;
             }
 
-            System.out.println(String.format("String %s %s palindrome", input, palindrome ? "is" : "is not"));
             return palindrome;
         }
     }
 
+    /**
+     * Check if the operation on one string is one edit away, where an edit is either a replace, insert or remove of a character
+     *
+     */
     public static final class ComputeEditAction {
 
         public int checkInsertRemove(String left, String right) {
@@ -256,31 +281,20 @@ public class ArraysAndStrings {
             return count;
         }
 
-        /**
-         * Check if the operation on one string is one edit away, where an edit is either a replace, insert or remove of a character
-         *
-         * @param left - the first string
-         * @param right - the second string
-         * @return - true if one edit away, false otherwise
-         */
         public boolean oneEditAway(String left, String right) {
             int insertOrRemove = checkInsertRemove(left, right);
             int replaceOnly = checkReplaceOnly(left, right);
-            boolean distance = insertOrRemove + replaceOnly <= 1;
-
-            System.out.println(String.format("String %s is %d edits away from %s", left, insertOrRemove + replaceOnly, right));
-            return distance;
+            return insertOrRemove + replaceOnly <= 1;
         }
     }
 
+    /**
+     * Given a string of characters, write a compression algorithm that converts any sequential characters in the count they represent, i.e
+     * aaabbcc would become a3b2c2
+     *
+     */
     public static final class StringCompressionConvert {
 
-        /**
-         * Given a string of characters, write a compression algorithm that converts any sequential characters in the count they represent,
-         * i.e aaabbcc would become a3b2c2
-         *
-         * @param input - the string to compress
-         */
         public String compressInputString(String input) {
             int count = 1;
             char curr = input.charAt(0);
@@ -310,24 +324,19 @@ public class ArraysAndStrings {
             // according to the task, the compressed string has to be smaller, i.e contain less characters than the input to be considered a
             // valid compression, if that is not the case return the originl, else return the compressed string
             if (result.length() >= input.length()) {
-                System.out.println(String.format("%s string would not become smaller", input));
                 return input;
             } else {
-                String compressed = result.toString();
-                System.out.println(String.format("Compressed string is %s", compressed));
-                return compressed;
+                return result.toString();
             }
         }
     }
 
+    /**
+     * Given a matrix of size m x n, set each row and col to 0, where an element was found to be 0 at [i][j].
+     *
+     */
     public static final class ZeroMatrixData {
 
-        /**
-         * Given a matrix of size m x n, set each row and col to 0, where an element was found to be 0 at [i][j].
-         *
-         * @param matrix - the input matrix
-         * @return - the total num of 0 elements
-         */
         public int zeroRowCols(int matrix[][]) {
             int size = matrix[0].length;
             List<Integer> rows = new ArrayList<>();
@@ -373,21 +382,14 @@ public class ArraysAndStrings {
         }
     }
 
+    /**
+     * Check if a given string is a rotation of another string, a rotated string is such that the first characteres of it are moved to the
+     * end of the string.
+     *
+     */
     public static final class FindRotatedString {
 
-        /**
-         * Check if a given string is a rotation of another string, a rotated string is such that the first characteres of it are moved to the end of the string.
-         *
-         * @param orig - the original string, to use as a template
-         * @param rotated - the rotated to check against
-         * @return - true if rotated, false otherwise
-         */
         public boolean isRotatedString(String orig, String rotated) {
-            if(orig.length() != rotated.length()) {
-                System.out.println(String.format("The %s string is NOT a rotated string of %s", rotated, orig));
-                return false;
-            }
-
             int i = 0;
             int j = 0;
 
@@ -398,37 +400,38 @@ public class ArraysAndStrings {
             // rotated string, the caveat here is to just loop around the original, using mod, to make sure all characters
             // are inspected in the correct order. (we do simple wrap around)
             while (i < orig.length()) {
-                // check if j is at the end of it's pass, if so, then mark that one loop is completed
-                if((j + 1) >= orig.length()) {
-                    loops++;
-                }
-                // if j somehow loops around the original string two times, and nothing was found, then there is no chance the
-                // string is a rotation
-                if(loops >= 2) {
-                    count = 0;
+                // if two loops over the rotated string were made, and we still have not found the original string, then we can bail out,
+                // there is no match
+                if (loops > 2) {
                     break;
                 }
+
+                // each time a full loop is made, account for it, a loop is made when the next j would become greater than the original
+                // length, and a wrap around would occur
+                loops += (j + 1) / orig.length();
+
                 // check against the current pos in original and rotated, if not equal move the orig string pointer j
                 // forward, accounting for index loop around, using mod
-                if(orig.charAt(j) != rotated.charAt(i)) {
+                if (orig.charAt(i) != rotated.charAt(j)) {
+                    // when count is already bigger than 1
+                    if (count > 1) {
+                        // this case is mandatory to handle, since we have already started 'counting' and we encounter a non-matching
+                        // character, that means that the string partially matched, but not the entire sub-string, we bail here
+                        break;
+                    }
                     j = (j + 1) % orig.length();
                     continue;
                 }
+
                 // both chars at the given position match, increment the count, and move both pointers forward, at some
                 // point if count == orig.length == rotated.length we know that the rotation is valid
-                j = (j + 1) % orig.length();
+                j = (j + 1) % rotated.length();
                 i++;
                 count++;
             }
 
-            // counts are the same, since we found count number of sequential matches, therefore the rotated string is
-            // indeed a rotated representation of the original, otherwise, count is not the same, therefore it is not
-            // rotated representation of the orignal
-            if(count == orig.length()) {
-                System.out.println(String.format("The %s string is a rotated string of %s", rotated, orig));
-            } else {
-                System.out.println(String.format("The %s string is NOT a rotated string of %s", rotated, orig));
-            }
+            // reaching this point here if the count is exactly the length of the original sub-string, that means the rotated string
+            // contained the orig as a sub-string, somewhere in its representation
             return count == orig.length();
         }
     }
@@ -469,10 +472,10 @@ public class ArraysAndStrings {
         // int mat[][] = {{0,2,3}, {1,2,0}, {1,2,3}};
         // matrix.zeroRowCols(mat);
 
-        // FindRotatedString rotate = new FindRotatedString();
+        FindRotatedString rotate = new FindRotatedString();
         // rotate.isRotatedString("waterbottle", "erbottlewat");
         // rotate.isRotatedString("waterbottle", "erbottlevat");
-        // rotate.isRotatedString("waterbottle", "erbottllewat");
+        rotate.isRotatedString("waterbottle", "erbottllewat");
         return;
     }
 }
