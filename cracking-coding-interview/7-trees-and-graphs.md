@@ -428,6 +428,24 @@ compare(main, sub)`.
     }
 ```
 
+### Size
+
+To dynamically calculate the size, or in other words the number of nodes a given
+tree, and to avoid storing that into the node itself as additional information
+we have to care about and update we can leverage the following approach
+
+```java
+int size(BinaryNode<Integer> root) {
+    // a null node has no size really, so we return 0 by default
+    if (root == null) {
+        return 0;
+    }
+    // each valid node, has at least a size of 1 + the size of the left or right
+    // subchildren, whichever it has, if it has any at all
+    return 1 + size(root.left) + size(root.right);
+}
+```
+
 ### Random
 
 A common problem, is selecting a random node from a binary tree, where the each
@@ -478,7 +496,7 @@ sole base case i.e. where `index == root_index`
         // this must always be true, for each invocation otherwise the index is not within the correct boundaries, this is a sanity
         // check, but is actually deduceable, if we know we are given a valid index always, the index will always be less than the total
         // number of elements / size of the current subtree and always greater or equal to 0
-        assert (index >= 0 && index < root.size);
+        assert (index >= 0 && index < size(root));
 
         // find how many elements there are in the left subtree, if we know how many elements we have on the left, and we know that the
         // input index will never exceed the total number of elements for the current index (which we guarantee below by clamping the
@@ -487,7 +505,7 @@ sole base case i.e. where `index == root_index`
         // - [0 - (leftSize - 1)] - go to the left
         // - [leftSize - leftSize] - exactly at the root
         // - [(leftSize + 1) - (total subtree size)] - go to the right
-        int leftSize = root.left.size;
+        int leftSize = size(root.left);
 
         if (index < leftSize) {
             // if the index is within the number of elements in the left subtree go down the left subtree path, the index does not need
@@ -502,11 +520,15 @@ sole base case i.e. where `index == root_index`
             return root;
         } else {
             // if the index falls in the right subtree, before going down the right subtree, we have to normalize the index, while the
-            // current index is valid for the current tree, when we go down the right one, we have to clamp the index to the size of
-            // that right subtree, which is basically (leftSize + 1) gives us the size of the left subtree + the root, if we subtract
-            // that from index, we will be in the range of the right subtree. For example if the tree at this moment has 10 elements,
-            // and the target index was 9, the left size was 6, another 1 element for the current root, then we can deduce that the
-            // right subtree has 3 elements, therefore the new index must be in range [0-2], and it will be, inded : 9 - (6 + 1) = 2
+            // current index is valid for the current tree, when we go down the right one, we have to clamp the index to be valid for the
+            // right sub tree, to do that we have to calculate what the current index corresponds to in terms of the right sub tree, this
+            // we can deduce by knowning that (lefSize + 1) is the lower bound index for the right sub-tree, therefore we can subtract that
+            // from the current index. This will give us an index which is in the index space of the right subtree for the current root, then
+            // we can call the function with the new index and the rigth subtree as the new root.
+
+            // For example if the tree at this moment has 10 elements, and the target index was 9, the left size was 6, and we account
+            // for the 1 element being the current root, then we can deduce that the right subtree has 3 elements, therefore the new
+            // index must be in range [0-2], and it will be, indeed : 9 - (6 + 1) = 2
             index = index - (leftSize + 1);
             return random(root.right, index);
         }
@@ -728,13 +750,16 @@ only if it exists can we proceed to try to delete it.
 
     -   drill down the left subtree and find the max element of root.left
     -   drill down the right subtree and find the min element of root.right
+
     -   found element will either be the root.left (max case) or root.right (min
         case), when they have no right (max case) or left (min case) child nodes, or
         the most right leaf node (max case), or the most left leaf node (min case).
+
     -   the found element's value we swap with the root, the links of the found
         element have to be maintained, and not lost, we have one of two cases
         -   in the max case the found element would not have any right subtrees, only left ones,
         -   in the min case the found element would not have any left subtrees only right ones
+
     -   attach the left/right of the found to the parent of the found element
 
 Deleting the node with value 5, we have to first find the node we want to
@@ -1018,6 +1043,10 @@ separate steps,
     11                       20
 ```
 
+Below is represented the general interface used to balance a tree, we have the
+rotations, and the height method, along with the balance calculation and the
+re-balance action itself.
+
 ```java
     int height(Node root) {
         // height is 0 if the node does not exist
@@ -1078,7 +1107,20 @@ separate steps,
 ```
 
 ```java
+int balance(Node right, Node left) {
+    // the balance calculated as signed integer from left to right, when a tree is imbalanced, it would tend to malform into a
+    // structure very similar to a linked list, it is quite obvious when either the left or right subtrees have a chain of links,
+    // - node->left->left->left....etc, with no right links, along the path, left heavy, positive balance value
+    // - node->right->right->right..etc, with no left links, along the path, right heavy, negative balance value
+    return height(left) - height(right);
+}
+```
+
+```java
     Node rebalance(Node root, T value) {
+        if (root == null) {
+            return root;
+        }
         // first make sure the current height is up to date, if re-balance was called, caller must expect that the height of the root
         // might have changed, during a tree action, insert or delete
         root.height = 1 + Math.max(height(root.right), height(root.left));
@@ -1099,7 +1141,7 @@ separate steps,
             // which of the 4 rotations have to be applied around the current root
 
             // left heavy && value < root.left.value - left-left
-            if (balance > 1 && value < root.left.value) < 0) {
+            if (balance > 1 && value < root.left.value) {
                 // first start off from the balance value, if it is positive, then the imbalance is in root.left, then we check if the
                 // inserted value is smaller than the left node's value, if yes, then the new node was inserted to the left of the left
                 // subtree. meaning the tree is left-left heavy, therefore we do the (opposite rotation) right rotation
@@ -1144,7 +1186,7 @@ and update their heights at the very least, also check for imbalance
 
 ```java
     Node insert(Node root, int value) {
-        // generic insert and lookup logic for bst
+        // generic insert logic for bst
         if (root == null) {
             Node node = new Node();
             node.value = value;
@@ -1155,8 +1197,6 @@ and update their heights at the very least, also check for imbalance
             root.right = insert(root.right, value);
         } else if (value < root.value) {
             root.left = insert(root.left, value);
-        } else {
-            return root;
         }
 
         // reaching at this point, we have very likely inserted an element, therefore we need to re-balance the tree, the return of
@@ -1168,6 +1208,7 @@ and update their heights at the very least, also check for imbalance
 
 ```java
     Node delete(Node root, T value) {
+        // generic delete and logic for bst
         if (root == null) {
             return null;
         }
@@ -1178,11 +1219,11 @@ and update their heights at the very least, also check for imbalance
             root.left = delete(root.left, value);
         } else {
             if (root.left == null && root.right == null) {
-                return null;
+                root = null;
             } else if (root.left != null && root.right == null) {
-                return root.left;
+                root = root.left;
             } else if (root.right != null && root.left == null) {
-                return root.right;
+                root = root.right;
             } else {
                 Node curr = root.left;
                 Node prev = root;
@@ -1349,7 +1390,7 @@ element with its parent, and swap if the conditions below are met
             // find if the new element is bigger, smaller or equal to the parent
             int diff = value - parent;
 
-            // when equal to the parent, we can abort, duplicates are not allowed, for simplicity
+            // when equal to the parent, we can abort, duplicates are not swapped, for simplicity
             if (diff == 0) {
                 break;
             }

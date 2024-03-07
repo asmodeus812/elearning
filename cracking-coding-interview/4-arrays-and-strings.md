@@ -320,7 +320,7 @@ case scenario is we loop through it at most 2 times, which is O(2\*N) which is
 O(N), we can drop the constants.
 
 ```java
-public boolean substrting(String orig, String rotated) {
+boolean substrting(String orig, String rotated) {
     int i = 0;
     int j = 0;
 
@@ -369,6 +369,6 @@ public boolean substrting(String orig, String rotated) {
 
 Since we are looking for a sequential sub-string, the moment we start
 incrementing the count, and we notice a non-matching character, we can early
-bail out, the sub-string sequence is broken, i.e. not contained.
+bail out, the sub-string sequence is broken, meaning it is not contained.
 
 # Arrays

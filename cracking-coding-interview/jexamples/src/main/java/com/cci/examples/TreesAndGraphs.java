@@ -416,6 +416,9 @@ public class TreesAndGraphs {
         }
 
         private BinaryHeightNode<T> rebalance(BinaryHeightNode<T> root, T value) {
+            if (root == null) {
+                return root;
+            }
             // first make sure the current height is up to date, if re-balance was called, caller must expect that the height of the root
             // might have changed, during a tree action, insert or delete
             root.height = 1 + Math.max(height(root.right), height(root.left));
@@ -485,7 +488,7 @@ public class TreesAndGraphs {
 
         public int balance(BinaryHeightNode<T> right, BinaryHeightNode<T> left) {
             // the balance calculated as signed integer from left to right, when a tree is imbalanced, it would tend to malform into a
-            // structure very simlar to a linked list, it is quite obvious when either the left or right subtrees have a chain of links,
+            // structure very similar to a linked list, it is quite obvious when either the left or right subtrees have a chain of links,
             // - node->left->left->left....etc, with no right links, along the path, left heavy, positive balance value
             // - node->right->right->right..etc, with no left links, along the path, right heavy, negative balance value
             return height(left) - height(right);
@@ -514,11 +517,6 @@ public class TreesAndGraphs {
                 // not have duplicate elements in a bst to root.left, or will drill down until there is not root.left anymore, at which
                 // point the node will be created with the new element and new element node returned back
                 root.left = insert(root.left, value);
-            } else {
-                // we have found the root value to be equal here, there is nothing to do, we can not insert a duplicate element into the
-                // tree, therefore we can simply return the root, and unwind the stack back to it's starting position, nothing to balance,
-                // nothing to modfiy, the element would never be inserted and modfiy the tree in any way
-                return root;
             }
 
             // reaching at this point, we have very likely inserted an element, therefore we need to re-balance the tree, the return of
@@ -557,19 +555,19 @@ public class TreesAndGraphs {
                     // the previous recursive call where the root will reference the parent of the current root node, therefore without
                     // using any parent pointers in the tree, we will correctly assign to the left or right of the parent of this root,
                     // null, detaching the current node that was found to equal the value
-                    return null;
+                    root = null;
                 } else if (root.left != null && root.right == null) {
                     // the same as above, but instead, we know that we have only left subtree, therefore we link the left subtree of the
                     // current root, which equals the target value, to the parent of the current root, this will essentially attach the
                     // current root's left subtree to the left or right subtree, based on off of where we came, to the parent of the current
                     // root / node
-                    return root.left;
+                    root = root.left;
                 } else if (root.right != null && root.left == null) {
                     // the same as above, but instead, we know that we have only right subtree, therefore we link the right subtree of the
                     // current root, which equals the target value, to the parent of the current root, this will essentially attach the
                     // current root's right subtree to the right or right subtree, based on off of where we came, to the parent of the
                     // current root / node
-                    return root.right;
+                    root = root.right;
                 } else {
                     // we have both left and right subtrees for the current root for which the value is found to be equal, what we do here,
                     // two options are available, in that scenario, both equal, and either one is fine
@@ -614,8 +612,7 @@ public class TreesAndGraphs {
                 }
             }
 
-            // try to check if rebalance is required, all the way, to the root, this is outside the else, because we have to post recurse,
-            // to
+            // try to check if rebalance is required, all the way, to the root, this is outside the else, because we have to post recurse, to
             // the root, to at the very least update the heights of each parent along the way, if a deletion has occurred, and also check if
             // the balance is okay.
             return rebalance(root, value);
@@ -1619,11 +1616,15 @@ public class TreesAndGraphs {
                 return root;
             } else {
                 // if the index falls in the right subtree, before going down the right subtree, we have to normalize the index, while the
-                // current index is valid for the current tree, when we go down the right one, we have to clamp the index to the size of
-                // that right subtree, which is basically (leftSize + 1) gives us the size of the left subtree + the root, if we subtract
-                // that from index, we will be in the range of the right subtree. For example if the tree at this moment has 10 elements,
-                // and the target index was 9, the left size was 6, another 1 element for the current root, then we can deduce that the
-                // right subtree has 3 elements, therefore the new index must be in range [0-2], and it will be, inded : 9 - (6 + 1) = 2
+                // current index is valid for the current tree, when we go down the right one, we have to clamp the index to be valid for the
+                // right sub tree, to do that we have to calculate what the current index corresponds to in terms of the right sub tree, this
+                // we can deduce by knowning that (lefSize + 1) is the lower bound index for the right sub-tree, therefore we can subtract that
+                // from the current index. This will give us an index which is in the index space of the right subtree for the current root, then
+                // we can call the function with the new index and the rigth subtree as the new root.
+
+                // For example if the tree at this moment has 10 elements, and the target index was 9, the left size was 6, and we account
+                // for the 1 element being the current root, then we can deduce that the right subtree has 3 elements, therefore the new
+                // index must be in range [0-2], and it will be, indeed : 9 - (6 + 1) = 2
                 index = index - (leftSize + 1);
                 return randomNodePick(root.right, index);
             }
