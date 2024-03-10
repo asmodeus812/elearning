@@ -757,6 +757,7 @@ only if it exists can we proceed to try to delete it.
 
     -   the found element's value we swap with the root, the links of the found
         element have to be maintained, and not lost, we have one of two cases
+
         -   in the max case the found element would not have any right subtrees, only left ones,
         -   in the min case the found element would not have any left subtrees only right ones
 
@@ -1757,16 +1758,16 @@ not mean that `b -> a` exists automatically
 
 Depending on the task at hand there might be better or worse representations to
 use, what is important is that as much information is contained in the
-representation as possible (i.e. incoming edges, parent nodes etc.)
+representation as possible (incoming edges, parent nodes etc.)
 
-### Basic class & node
+### Class & Nodes
 
 There are multiple ways to represent a graph, the most common one is with a
 graph node, and a graph class, which is just enough to implement most all graph
 features we would ever need. We need the class on top of a node since in a graph
 it is possible to not have path from one single root node to all others, that is
-actually usually the case, a graph might have many root nodes (ones with not
-incoming edges), or it might have none (no nodes with 0 incoming edges), in that
+actually usually the case, a graph might have many root nodes (ones with no
+incoming edges), or it might have no roots (nodes with 0 incoming edges), in that
 case if all nodes have incoming edges this graph has cycles, there is no obvious
 graph root to speak of
 
@@ -1806,6 +1807,8 @@ new node connections
 In the example above each key represents a unique node value, while the arrays
 represent the links that node has to other nodes. This is for directed graphs
 
+### 2D Flags Array
+
 Another variant of the Adjacency matrix is a simple 2d array where each position
 where an edge / connection exists in the 2d array is marked with 1, and where no
 connection exists is marked with 0
@@ -1828,8 +1831,22 @@ note that 1 has a connection to itself, which is completely valid
 
 ## Creation
 
-A very simple example which creates a graph from a list of edges, where the
-edges represent a simple `from - to` relation between nodes
+A very simple example, which creates a graph from a list of edges, where the
+edges represent a simple `from - to` relation between nodes. In the example
+below there are two main functions
+
+-   edges - creates an array / list of edges, the input here is a simple list of
+    values, which represents the `unique` graph node values, and the links they form
+    to other nodes. e.g. `a, b, a, c, a, d, c, b, c,d`. In simple terms node `a` has
+    outgoing / child connections to nodes `b, c and d`, then node `c` has outgoing /
+    child connections to nodes `b and d` and so on.
+
+-   create - creates the graph node representation, in this case a list of nodes,
+    representing the graph, from a list of edges or connections. While the edge
+    `from` property must be present, the `to` might be null, signaling that this
+    node has no connection to another node for example, or in other words it has no
+    outgoing connection, the input array / list of edges might look something like
+    that - `a, nil, a, c, a, d`.
 
 ```java
     class Node {
@@ -1881,25 +1898,30 @@ edges represent a simple `from - to` relation between nodes
         // go through all the edges, and create and link the node instances
         for (Edge edge : edges) {
             if (edge.from != null && !cache.containsKey(edge.from)) {
-                // construct the node instance for the from edge
+                // construct the node instance for the `from` edge
                 cache.put(edge.from, constructor.apply(edge.from));
             }
 
             if (edge.to != null && !cache.containsKey(edge.to)) {
-                // construct the node instance for the to edge
+                // construct the node instance for the `to` edge
                 cache.put(edge.to, constructor.apply(edge.to));
             }
 
-            // extract the node from, from the cache
+            // extract the node `from`, from the cache, `from` link is mandatory
+            // and will always be present, since it represents the source node,
+            // while `to` is optional since an outgoing connection might or
+            // might not be present.
             Node current = cache.get(edge.from);
 
             if (edge.to != null) {
                 // when the edge connection to is valid, we link it to the
                 // instance / reference of the node which represents the edge.to
                 Node child = cache.get(edge.to);
+
                 // add the child node to the current edge.from children list,
                 // this represents the forward, outbound connections of edge.from
                 current.children.add(child);
+
                 // make sure to increment the incoming edges for the child, as
                 // we have added a new incoming edge
                 child.incoming++;
@@ -1918,6 +1940,7 @@ Graphs have two major traversal approaches, similarly to trees, we can either us
 
 -   Breadth first - where each level of the graph is visited, before the
     next one is, then drill to the next immediate level and repeat
+
 -   Depth first - where each level is visited in depth, down to the very
     last link, before neighbor levels are considered
 
@@ -1929,10 +1952,21 @@ traverse from them in depth or breadth
 
 ### BFS
 
-Similarly to trees, however not as widely used with tree traversal, while, very
+Similarly to trees, however not as widely used with tree traversal, BFS is very
 much a cornerstone traversal approach for graphs, this approach inspects each
 immediate graph neighbors before going down to each of their children,
 inspecting a level of depth at a time
+
+Note that is quite important when a node is marked as visited in either BFS or
+DFS traversals, this is due to how the traversal works, while in the recursive
+approach we have more freedom, in the iterative BFS approach the visited mark
+must be done when the child node is added to the queue.
+
+This detail, of when the node is marked as visited comes in again when we
+discuss the Dijkstra algorithm, where the visited mark is done in a different
+position in the iterative process, and it is very important to take a note of
+that. The early or late marking of a node as visited, could drastically change
+the algorithm, the problem and the solution.
 
 ```java
     void breadth(Queue<Node> queue, List<Integer> path, Set<Node> visited) {
@@ -1996,7 +2030,7 @@ inspecting a level of depth at a time
 
 Works very much like a DFS in trees, with the added caveat that we do not have 2
 children at most, but N children, each node is fully inspected, down to its last
-children, before the next one is picked up.
+leaf children, before the next one is picked up.
 
 ```java
     void depth(Node node, List<Integer> path, Set<Node> visited) {
@@ -2045,15 +2079,13 @@ children, before the next one is picked up.
     }
 ```
 
-## Searching
-
 ### Dijkstra
 
 A way to find the shortest path between two points in a weighted directed graph
 (which might have cycles). Where all edges must have positive values. Note that
 a side effect of Dijkstra is that it finds the shortest paths from the `start`
 node to any other node that can be reached by start, and one of them being `end`
-(if start and end have path between each other of course).
+(if start and end have path or link between each other of course).
 
 The way the Dijkstra works to find the shortest path, is by maintaining 4
 separate structures
@@ -2081,11 +2113,11 @@ separate structures
 What is crucial to note is that the min heap can contain the same node i.e
 `node.value` more than once, but with different weights, since we can reach that
 node from many places, each time we do find a better cost weight (compared to
-the current `distance[node.value]` weight) we push to the heap.
+the current `distance[node.value]` weight) we then push to the heap.
 
-Naturally because it is a min heap, the best cost WeightNode would be found near
+Naturally because it is a min heap, the best cost `WeightNode` would be found near
 the top of the heap, when we pull a node that is not visited for the first time,
-we always pull the best WeightNode for that node (even if there are duplicates,
+we always pull the best `WeightNode` for that node (even if there are duplicates,
 the others would have worse cost, and will be deeper in the heap), we then mark
 the node by `node.value` as visited.
 
@@ -2098,7 +2130,7 @@ naturally we would pull the best cost from the min heap for that node /
 having been visited already means that the best cost for that node was pulled,
 and processed, we can simply `continue` (this handles the duplicates with worse
 costs / weights, by simply removing them from the queue without taking any
-action)
+action, and just skips to the next iteration in the algorithm)
 
 The two main loop ending conditions for the Dijkstra are 2, these do not tell us
 if we have reached the end node target, however they are used to know when to
@@ -2139,7 +2171,7 @@ otherwise no path between the two targets exists.
         @Override
         public int compareTo(WeightNode o) {
             // required for the priority queue, we care only about comparing the
-            // total weight, of each node.
+            // total weight, or cost of each node.
             return this.weight - o.weight;
         }
 
@@ -2154,7 +2186,7 @@ otherwise no path between the two targets exists.
         // this is the cornerstone of this algorithm, this is a min heap, which orders the nodes such that the ones with smallest cost
         // / weight are at the front of the queue, remember that the same node i.e. node.value can be added in this heap more than once,
         // but with different costs, since we might reach that node from multiple other nodes, but since we work with a min heap, these
-        // WeightNode would be ordered by cost, so we will always pull the smallest node by cost first.
+        // WeightNodes would be ordered by cost, so we will always pull the smallest node by cost first.
         PriorityQueue<WeightNode> heap = new PriorityQueue<>();
 
         // visited holds nodes by identifier, that is important, since the heap might contain the same 'node' multiple times with
@@ -2162,7 +2194,7 @@ otherwise no path between the two targets exists.
         Set<String> visited = new HashSet<>();
 
         // distances from a given node / node.value so far, these are the total accumulated distances, and always represent the minimum
-        // distance to the specific node, or more precisely the shortest distandce to each node id <-> node.value
+        // distance to the specific node, or more precisely the shortest distance to each node id <-> node.value
         Map<String, Integer> distances = new HashMap<>();
 
         // a mirror of the distances map, it tells us from where we came to achieve that min distance for a given node, they are both
@@ -2201,12 +2233,13 @@ otherwise no path between the two targets exists.
             visited.add(node.value);
 
             for (Node child : node.children) {
-                // extract the current path to the current child so far, or default to some big value, creaful, we are not using
+                // extract the current path to the current child so far, or default to some big value, careful, we are not using
                 // INT_MAX, due to the fact that it might overflow if we add anything more than 0 to it
                 Integer current = distances.getOrDefault(child.value, 9999);
 
                 // compute the 'would be' distance from the current node to the current child, this is the cost of the current node so
-                // far + the weight cost of the current child, care with overflow, if using INT_MAX
+                // far + the weight cost of the current child, care with overflow, if using INT_MAX. The method `getWeightCost`, simply
+                // returns the cost / edge value from the current `node` to the `child`
                 Integer possible = distances.getOrDefault(node.value, 9999) + node.getWeightCost(child);
 
                 // in case the possible new distance is actually smaller than the distance stored so far, we update the distance stored
@@ -2256,18 +2289,18 @@ calculation such that it tries to guess how much cheaper would the cost be if we
 go through the current `node` to the end goal
 
 The heuristic function is only computed when we add the node to the priority
-queue, it biases the priority queue order such that nodes with less cost IN
-RELATION TO THE TARGET GOAL ONLY, would be put to the front of the heap, which
+queue, it biases the priority queue order such that nodes with less cost `IN
+RELATION TO THE TARGET GOAL ONLY`, would be put to the front of the heap, which
 means that unlike Dijkstra in the distances array, we do not have all shortest
 paths from the start to every other node, we only have the shortest distance
 from start to end, since the children we took from the heap were the ones with
 cost biased by the heuristic, and the heuristic function is a function of the
-`current` and `end` node i.e. `h = heuristic(node, end)`.
+`current` and `end` node strictly, i.e. `h = heuristic(node, end)`.
 
 The value of the heuristic function could be positive, negative or 0, depends on
 how it is defined. Imagine a negative value of the heuristic, would imply that
 the cost to the goal node is actually very low, since we would subtract it from
-the current `min` cost, a very big positive heuristic value would imply a very
+the current `weight` cost, a very big positive heuristic value would imply a very
 costly path to the goal node if we took that route.
 
 A heuristic is defined very much differently based on the use case, if our graph
@@ -2326,7 +2359,7 @@ A-star with heuristic, which always evaluates to 0, is essentially just the
 Dijkstra algorithm, since no node is biased towards the end goal, in other
 words, there is no one or more special nodes in the graph we can take to make
 our cost extra cheaper, we only consider the cost of the weights, there is
-additional property which could further reduce our costs.
+no additional feature / property, which could further reduce our costs.
 
 ```java
     ......................................
@@ -2345,6 +2378,7 @@ additional property which could further reduce our costs.
                 // distances for the specific node, they must be kept in sync, to use later
                 previous.put(child.value, node);
                 distances.put(child.value, possible);
+
                 // take a very good note of how and where the heuristic is calculated, and
                 // that it is based on the child node, and the cost it would take
                 // to get to the goal node, and that is the value we put in the
@@ -2359,7 +2393,7 @@ additional property which could further reduce our costs.
 
 # Sorting
 
-### Topological sort
+## Topological sort
 
 This type of sort / ordering of graph nodes works only for directed graphs,
 without cycles. There are many ways to detect cycles in a graph, the
