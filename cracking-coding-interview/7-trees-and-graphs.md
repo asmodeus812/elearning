@@ -1811,7 +1811,19 @@ represent the links that node has to other nodes. This is for directed graphs
 
 Another variant of the Adjacency matrix is a simple 2d array where each position
 where an edge / connection exists in the 2d array is marked with 1, and where no
-connection exists is marked with 0
+connection exists is marked with 0. In this representation either the rows or
+the cols will represent from and to. They are not interchangeable.
+
+Below the `to` is presented by the columns, and the `from` is presented by the rows.
+Meaning we can read this matrix like that - `col to row` tells us the outgoing
+edges for the node and `row to col` tells us the incoming edges for the node.
+
+- Take col-node `2` which in the matrix has 1 incoming edge  - `3`
+- Take row-node `2` which in the matrix has 2 outgoing edges - `1, 3`
+
+That information tells us that node `2 and 3` are bidirectionally connected in
+the graph example given below. While node `2 and 1` are only connected from node
+`2 to 1` but not the other way, in other words this is a singly directed edge.
 
 ```txt
       | 1 2 3 4 5
@@ -1822,12 +1834,6 @@ connection exists is marked with 0
     4 | 0 0 1 0 0
     5 | 0 0 1 1 0
 ```
-
-The same example from above with the has map could be represented as a 2d array,
-where each row is mapped to a node, and each row represents the status of the
-connection / edge to the rest of each of the nodes. Take node `1` which in the
-matrix above, the first row has connections to nodes `1` and `3` and `5`, take a
-note that 1 has a connection to itself, which is completely valid
 
 ## Creation
 
@@ -1939,10 +1945,12 @@ below there are two main functions
 Graphs have two major traversal approaches, similarly to trees, we can either use:
 
 -   Breadth first - where each level of the graph is visited, before the
-    next one is, then drill to the next immediate level and repeat
+    next one is, then drill to the next immediate level and repeat, algorithm is
+    based off of storing the nodes in a queue
 
 -   Depth first - where each level is visited in depth, down to the very
-    last link, before neighbor levels are considered
+    last link, before neighbor levels are considered, algorithm is based off of
+    storing the nodes in a stack
 
 In the examples below the input list of graph nodes `List<Node>` represent a set
 of input nodes from which to start the traversal, that list could simply be the
@@ -2312,13 +2320,13 @@ was instead a grid, the heuristic is usually a coordinate computation of the
     can move only in right angles
 
     ```txt
-        0 1 0
+        - 1 -
         1 x 1
-        0 1 0
+        - 1 -
     ```
 
 -   Euclidean distance - on a grid where we can move in 8 directions, including the
-    4 cardinal ones, plug, moving in diagonals, it is simply the Pythagorean
+    4 cardinal ones, plus, moving in diagonals, it is simply the Pythagorean
     theorem - `d = sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2))`. Here moving in
     diagonals is simply the length of hypotenuse of the right triangle formed.
 
@@ -2365,6 +2373,9 @@ no additional feature / property, which could further reduce our costs.
     ......................................
 
     while (visited.size() < nodes.size()) {
+
+        ......................................
+
         for (Node child : node.children) {
             // current min cost so far, to reach the child node, or default to some high value if none
             Integer current = distances.getOrDefault(child.value, 9999);

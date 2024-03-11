@@ -16,7 +16,9 @@ allow for representing negative numbers or even decimal / real ones as well
 Binary number are represented as a chain or a string of of 1s and 0s. This
 string is enumerated (usually) from right to left, the right most bit being the
 least significant and the leftmost being the most significant. The numbering
-starts from 0 up to number of bits - 1. Some common types and their sizes
+starts from 0 up to number of bits - 1. Some common types and their sizes, note
+that the size is platform dependent but the types and the sizes listed below
+are the ones most commonly seen
 
 -   byte = 8 bits = 1 byte
 -   short = 16 bits = 2 bytes
@@ -25,11 +27,11 @@ starts from 0 up to number of bits - 1. Some common types and their sizes
 -   double = 64 = 8 bytes
 -   long double 80 bits = 10 bytes
 
-Some of the sizes defined above vary from platform to platform, and they are
+As some of the sizes defined above vary from platform to platform, and they are
 implementation dependent, for example on some platform long and int might have
-the same size (4 bytes), on other platforms integer could be defined as 16 bits.
-Older 32 bit systems usually define long as 32 bits, while long long is 64, on
-newer 64 bit systems these are usually both 64 bits wide. There are many
+the same size (4 bytes - x86), on other platforms integer could be defined as 16
+bits. Older x86 systems usually define long as 32 bits, while long long is 64,
+on newer x64-86 systems these are usually both 64 bits wide. There are many
 variations but what is important, to remember is the general stride / size of
 each of those primitives.
 
@@ -76,10 +78,10 @@ number `7` which is `0b111`, with the difference being only the sign bit
 therefore `-1 = 1b111`. Note that above we take `2^(4-1) == 2^3`, since the top
 most bit is reserved for sign, effectively halving the range we can represent.
 
-Note how 0 and 8 are actually also mirrored, just as every other number in the
+Note how 0 and -8 are actually also mirrored, just as every other number in the
 range form `[7 to -7]` is, the only difference being the sign bit, and in total
-we still have 16 numbers we can represent. (from -1 to -7, from 1 to 7 = 14,
-then 0 and 8 = 2, totaling 16 unique numbers)
+we still have 16 numbers we can represent. (from `-1 to -7, plus 1 to 7 = 14`,
+then `0 and 8 = 2`, totaling 16 unique numbers)
 
 This allows us to exploit negative numbers, which are very often used in bit
 wise operations to create masks such as:
@@ -104,13 +106,24 @@ of the floating number, e.g.
 The endianess of a memory defines how at the machine level the memory is represented
 
 -   little endian - stores the least significant byte of information at the lowest
-    smallest / address
+    smallest / address - `0x00FF = 255`
 -   big endian - stores the most significant byte of the information at the
-    lowest / smallest address
+    lowest / smallest address - `0xFF00 = 255`
+
+Historically, Intel processors have always been little endian, while processors
+like the 6502, Motorolla, have always been employing big endian byte order. This
+is mostly relevant information when the same software has to be deployed on
+platforms with differing endianess. For example something developed on an Intel
+platform must be carefully ported over to another platform if it is using big
+endian byte order
 
 # Operations
 
-## Logical
+There are just a few generally applicable operations on per bits basis. They are
+often used in conjunction to build composite operations to mutate and transform
+a bit set or a number of bits into some other state.
+
+## General Operations
 
 | Operation   | Description                               | Example     |            |            |
 | ----------- | ----------------------------------------- | ----------- | ---------- | ---------- |
@@ -121,11 +134,32 @@ The endianess of a memory defines how at the machine level the memory is represe
 | LEFT SHIFT  | shifts a bit into a position to the left  | 1 << 5 = 32 | ---------- | ---------- |
 | RIGHT SHIFT | shifts a bit into a position to the right | 32 >> 5 = 1 | ---------- | ---------- |
 
-## Arithmetic
+## Logical Shifts
+
+During the left and right bit shifts, `essentially move the bits that many
+positions in each direction`, taking the example from above, shifting left the
+number `1` means the bit which sits at position 0, will be moved 5 positions to
+the left, going into position 5 (where position of the bit is actually an index,
+starting from 0). Therefore to shift by 5 positions, we can start `counting from
+0, 5 positions forward`, start counting `from current position of the 1st set
+bit` in the number (in our example the number is 1, the 1st set bit is at index
+0)
+
+To summarize this in a formula, `take the index / position of the first set bit,
+and simply add the number by which the target is being shifted`. The inverse is
+applicable for shifting in the other direction, but instead of addition we
+`subtract from the bit's index / position`
+
+```txt
+    0b0000001 - 1st set bit at index 0, therefore 0 + 5 = 5
+    0b0100000 - the result is the bit is now moved at index 5
+```
+
+## Arithmetic Shifts
 
 There are the arithmetic left and right shifts, which work a bit differently
 than the logical ones, while in logical right and left shifts, we simply move
-all bits to the let or right by a specified offset, in arithmetic shifts in
+all bits to the left or right by a specified offset, in arithmetic shifts in
 addition to what happens during logical shift, the most significant bits that
 are freed up are filled with the sign bit of. This has the effect of `dividing`
 a number by two, rounding down, for odd numbers
@@ -137,16 +171,15 @@ a number by two, rounding down, for odd numbers
  11011010 = -38
 ```
 
-## Comparison
-
 Note in the example above shifting to the right is accompanied by filling up the
 most significant bits which are freed up (and in a logical shift would otherwise
 be a 0), by the sign or to be more precise by value of the most significant bit
 of the number, in this case 1.
 
 Both the logical shift operation and arithmetic ones are used to divide or
-multiply a number by the number shifted bits. Shifts can be useful as efficient
-ways to perform multiplication or division of signed integers by powers of two.
+multiply a number by the `number shifted bits * 2.` Shifts can be useful as
+efficient ways to perform multiplication or division of signed or unsigned
+integers by powers of two.
 
 Arithmetic shifting left by n bits on a signed or unsigned binary number has the
 effect of multiplying it by 2n. While logical shifting has the same effect as
@@ -154,9 +187,9 @@ arithmetic, however only valid when applied on unsigned integers
 
 ## Get bit
 
-The approach here, knowing the index of the bit, is to move that specific bit at
-the least position, after that simply check if that bit is a 0 or a 1 by bit
-wise AND against 0b01. Note that the bit argument is and index, meaning it
+The approach here, knowing the index of the target bit, is to move that specific
+bit at the least position, after that simply check if that bit is a 0 or a 1 by
+bit wise AND against 0b01. Note that the bit argument is and index, meaning it
 ranges for normal 4 byte integers, from 0 to 31 inclusive, for a total of 32
 bits
 
