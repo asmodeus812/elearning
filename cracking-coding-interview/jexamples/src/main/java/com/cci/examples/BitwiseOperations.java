@@ -148,7 +148,6 @@ public class BitwiseOperations {
 
     public static final class ComputeNextNumber {
 
-        // public int getNextNumber(int n) {}
     }
 
     /**
@@ -275,7 +274,7 @@ public class BitwiseOperations {
             }
 
             if (head != 0) {
-                // the mod result, is going to be a number between 0 and 7, 
+                // the mod result, is going to be a number between 0 and 7,
                 int mask = ((1 << (8 - (head - 1))) - 1);
                 screen[yoff + start] &= mask;
             }
