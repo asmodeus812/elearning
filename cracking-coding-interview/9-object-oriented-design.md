@@ -118,46 +118,46 @@ non-technical stakeholders, leading to better software solutions.
 
 # Design patterns
 
-1. [Singleton Pattern] Ensures that a class has only one instance and provides a
+1. **Singleton Pattern** Ensures that a class has only one instance and provides a
    global point of access to that instance.
-2. [Factory Method Pattern] Defines an interface for creating an object, but
+2. **Factory Method Pattern** Defines an interface for creating an object, but
    lets subclasses decide which class to instantiate.
-3. [Observer Pattern] Defines a one-to-many dependency between objects so that
+3. **Observer Pattern** Defines a one-to-many dependency between objects so that
    when one object changes state, all its dependents are notified and updated
    automatically.
-4. [Builder Pattern] Separates the construction of a complex object from its
+4. **Builder Pattern** Separates the construction of a complex object from its
    representation, allowing the same construction process to create various
    representations.
-5. [Strategy Pattern] Defines a family of algorithms, encapsulates each one, and
+5. **Strategy Pattern** Defines a family of algorithms, encapsulates each one, and
    makes them interchangeable.
-6. [Decorator Pattern] Allows behavior to be added to an individual object,
+6. **Decorator Pattern** Allows behavior to be added to an individual object,
    either statically or dynamically, without affecting the behavior of other
    objects from the same class.
-7. [Adapter Pattern] Allows incompatible interfaces to work together by
+7. **Adapter Pattern** Allows incompatible interfaces to work together by
    converting the interface of a class into another interface.
-8. [Command Pattern] Encapsulates a request as an object, thereby allowing for
+8. **Command Pattern** Encapsulates a request as an object, thereby allowing for
    parameterization of clients with queues, requests, and operations.
-9. [Template Method Pattern] Defines the skeleton of an algorithm in the
+9. **Template Method Pattern** Defines the skeleton of an algorithm in the
    superclass but lets subclasses override specific steps of the algorithm
    without changing its structure.
-10. [State Pattern] Allows an object to alter its behavior when its internal
+10. **State Pattern** Allows an object to alter its behavior when its internal
     state changes, appearing to change its class.
-11. [Proxy Pattern] Provides a surrogate or placeholder for another object to
+11. **Proxy Pattern** Provides a surrogate or placeholder for another object to
     control access to it.
-12. [Composite Pattern] Composes objects into tree structures to represent
+12. **Composite Pattern** Composes objects into tree structures to represent
     part-whole hierarchies, treating individual objects and compositions of
     objects uniformly.
-13. [Iterator Pattern] Provides a way to access the elements of an aggregate
+13. **Iterator Pattern** Provides a way to access the elements of an aggregate
     object sequentially without exposing its underlying representation.
-14. [Mediator Pattern] Defines an object that encapsulates how a set of objects
+14. **Mediator Pattern** Defines an object that encapsulates how a set of objects
     interact, promoting loose coupling.
-15. [Memento Pattern] Captures and externalizes an object's internal state so
+15. **Memento Pattern** Captures and externalizes an object's internal state so
     that it can be restored to this state later.
-16. [Flyweight Pattern] Uses sharing to support a large number of fine-grained
+16. **Flyweight Pattern** Uses sharing to support a large number of fine-grained
     objects efficiently.
-17. [Chain of Responsibility Pattern] Allows an object to send a command without
+17. **Chain of Responsibility Pattern** Allows an object to send a command without
     knowing which object will handle it, chaining the receiving objects.
-18. [Visitor Pattern] Represents an operation to be performed on the elements of
+18. **Visitor Pattern** Represents an operation to be performed on the elements of
     an object structure, letting you define new operations without changing the
     classes of the elements.
 
@@ -184,97 +184,6 @@ application:
         }
 
         // Other methods and properties
-    }
-```
-
-## Factory Pattern
-
-**Description:** Defines an interface for creating an object, but lets
-subclasses decide which class to instantiate. It allows a class to defer
-instantiation to its subclasses.
-
-**Example:** Consider a factory for creating different types of shapes:
-
-```java
-    public interface Shape {
-            void draw();
-    }
-
-    public class Circle implements Shape {
-            @Override
-        public void draw() {
-                    System.out.println("Drawing Circle");
-                }
-    }
-
-    public class Square implements Shape {
-            @Override
-        public void draw() {
-                    System.out.println("Drawing Square");
-                }
-    }
-
-    public interface ShapeFactory {
-            Shape createShape();
-    }
-
-    public class CircleFactory implements ShapeFactory {
-            @Override
-        public Shape createShape() {
-                    return new Circle();
-                }
-    }
-
-    public class SquareFactory implements ShapeFactory {
-            @Override
-        public Shape createShape() {
-                    return new Square();
-                }
-    }
-```
-
-## Observer Pattern
-
-**Description:** Defines a one-to-many dependency between objects so that when
-one object changes state, all its dependents are notified and updated
-automatically.
-
-**Example:** In a chat application, when a new message is received, all the
-users who are observing the chat room are notified:
-
-```java
-    import java.util.ArrayList;
-    import java.util.List;
-
-    public interface Observer {
-            void update(String message);
-    }
-
-    public class ChatRoom {
-            private List<Observer> observers = new ArrayList<>();
-
-            public void addObserver(Observer observer) {
-                    observers.add(observer);
-                }
-
-        public void notifyObservers(String message) {
-                    for (Observer observer : observers) {
-                            observer.update(message);
-                        }
-        }
-    }
-
-    public class User implements Observer {
-            private String name;
-
-            public User(String name) {
-                    this.name = name;
-                        }
-
-        @Override
-        public void update(String message) {
-                    System.out.println(name + " received message: " + message);
-                }
     }
 ```
 
@@ -689,6 +598,117 @@ structure.
     coffee.prepareRecipe();
 ```
 
+## State Pattern
+
+**Description:** Allows an object to alter its behavior when its internal state
+changes. The object will appear to change its class.
+
+**Example:** Consider a simple vending machine that dispenses different items
+based on its current state:
+
+```java
+    interface State {
+        void handleRequest();
+    }
+
+    class TrafficLight {
+        private State state;
+
+        public TrafficLight() {
+            state = new RedState();
+        }
+
+        public void changeState(State newState) {
+            state = newState;
+        }
+
+        public void request() {
+            state.handleRequest();
+        }
+    }
+
+    class RedState implements State {
+        @Override
+        public void handleRequest() {
+            System.out.println("Stop");
+        }
+    }
+
+    // Similarly, implement YellowState and GreenState classes
+
+    // Usage
+    TrafficLight trafficLight = new TrafficLight();
+    trafficLight.request(); // Outputs: Stop
+```
+
+## Proxy Pattern
+
+**Description:** Provides a surrogate or placeholder for another object to
+control access to it.
+
+**Example:** Consider a proxy controlling access to a sensitive bank account:
+
+```java
+    interface BankAccount {
+        void deposit(double amount);
+
+        void withdraw(double amount);
+    }
+
+    class RealBankAccount implements BankAccount {
+        private double balance;
+
+        @Override
+        public void deposit(double amount) {
+            balance += amount;
+            System.out.println("Deposited: $" + amount);
+        }
+
+        @Override
+        public void withdraw(double amount) {
+            if (balance >= amount) {
+                balance -= amount;
+                System.out.println("Withdrawn: $" + amount);
+            } else {
+                System.out.println("Insufficient balance");
+            }
+        }
+    }
+
+    class BankAccountProxy implements BankAccount {
+        private RealBankAccount realAccount;
+        private String password;
+
+        public BankAccountProxy(String password) {
+            this.password = password;
+            realAccount = new RealBankAccount();
+        }
+
+        @Override
+        public void deposit(double amount) {
+            authenticate();
+            realAccount.deposit(amount);
+        }
+
+        @Override
+        public void withdraw(double amount) {
+            authenticate();
+            realAccount.withdraw(amount);
+        }
+
+        private void authenticate() {
+            if (!password.equals("secret")) {
+                throw new SecurityException("Access denied!");
+            }
+        }
+    }
+
+    // Usage
+    BankAccount account = new BankAccountProxy("secret");
+    account.deposit(1000); // Output: Deposited: $1000
+    account.withdraw(500); // Output: Withdrawn: $500
+```
+
 ## Composite Pattern
 
 **Description:** Composes objects into tree structures to represent part-whole
@@ -755,6 +775,70 @@ pattern:
     root.addComponent(music);
 
     root.print();
+```
+
+## Iterator Pattern
+
+**Description:** Provides a way to access the elements of an aggregate object
+sequentially without exposing its underlying representation.
+
+**Example:** Consider a simple implementation of an iterator for a list:
+
+```java
+    interface Iterator<T> {
+        boolean hasNext();
+        T next();
+    }
+
+    interface Aggregate<T> {
+        Iterator<T> iterator();
+    }
+
+    class ListAggregate<T> implements Aggregate<T> {
+        private List<T> items;
+
+        public ListAggregate(List<T> items) {
+            this.items = items;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return new ListIterator<>(this);
+        }
+
+        // Other methods to manipulate the list
+    }
+
+    class ListIterator<T> implements Iterator<T> {
+        private ListAggregate<T> aggregate;
+        private int index;
+
+        public ListIterator(ListAggregate<T> aggregate) {
+            this.aggregate = aggregate;
+            this.index = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return index < aggregate.size();
+        }
+
+        @Override
+        public T next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return aggregate.get(index++);
+        }
+    }
+
+    // Usage
+    List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+    Aggregate<Integer> aggregate = new ListAggregate<>(numbers);
+    Iterator<Integer> iterator = aggregate.iterator();
+    while (iterator.hasNext()) {
+        System.out.println(iterator.next());
+    }
 ```
 
 ## Mediator Pattern
@@ -927,6 +1011,67 @@ flyweights:
     System.out.println("a == b: " + (a == b));   // Output: false (different instances
 ```
 
+## Chain of Responsibility Pattern
+
+**Description:** Allows an object to send a command without knowing which object
+will handle it. It chains the receiving objects and passes the request along the
+chain until an object handles it.
+
+**Example:** Consider a simple ATM withdrawal process with multiple handlers:
+
+```java
+    abstract class WithdrawalHandler {
+        protected WithdrawalHandler nextHandler;
+
+        public void setNextHandler(WithdrawalHandler nextHandler) {
+            this.nextHandler = nextHandler;
+        }
+
+        public abstract void handleRequest(int amount);
+    }
+
+    class FiftyDollarHandler extends WithdrawalHandler {
+        @Override
+        public void handleRequest(int amount) {
+            if (amount >= 50) {
+                int numNotes = amount / 50;
+                int remainingAmount = amount % 50;
+                System.out.println("Dispensing " + numNotes + " $50 notes");
+                if (remainingAmount > 0 && nextHandler != null) {
+                    nextHandler.handleRequest(remainingAmount);
+                }
+            } else if (nextHandler != null) {
+                nextHandler.handleRequest(amount);
+            }
+        }
+    }
+
+    class TwentyDollarHandler extends WithdrawalHandler {
+        @Override
+        public void handleRequest(int amount) {
+            if (amount >= 20) {
+                int numNotes = amount / 20;
+                int remainingAmount = amount % 20;
+                System.out.println("Dispensing " + numNotes + " $20 notes");
+                if (remainingAmount > 0 && nextHandler != null) {
+                    nextHandler.handleRequest(remainingAmount);
+                }
+            } else if (nextHandler != null) {
+                nextHandler.handleRequest(amount);
+            }
+        }
+    }
+
+    // Usage
+    WithdrawalHandler fiftyHandler = new FiftyDollarHandler();
+    WithdrawalHandler twentyHandler = new TwentyDollarHandler();
+
+    fiftyHandler.setNextHandler(twentyHandler);
+
+    // Request handling
+    fiftyHandler.handleRequest(80);
+```
+
 ## Visitor Pattern
 
 **Description:** Represents an operation to be performed on the elements of an
@@ -1082,7 +1227,7 @@ implementations:
 
 # Exception handling
 
-## Types of Exceptions
+## Exception Types
 
 ### Checked Exceptions
 
@@ -1102,8 +1247,18 @@ implementations:
 
 -   **Errors** are exceptional situations that are typically beyond the control of
     the programmer. They are not meant to be caught or handled by applications.
--   Examples include `OutOfMemoryError`, `StackOverflowError`, and
-    `AssertionError`.
+-   Examples include `OutOfMemoryError`, `StackOverflowError`, and `AssertionError`.
+
+Checked exceptions must be either caught using a try-catch block or declared in
+the throws clause of the method signature, while unchecked exceptions are not
+required to be handled explicitly. Checked exceptions are checked at compile
+time, meaning that the compiler ensures that they are either handled or
+declared, whereas unchecked exceptions are not checked at compile time.
+
+-   Checked Exceptions: Typically used for recoverable conditions where the
+    caller is expected to handle the exception.
+-   Unchecked Exceptions: Often used for programming errors or conditions that
+    cannot be reasonably handled, such as null pointer or array index out of bounds.
 
 ## Exception Handling
 
