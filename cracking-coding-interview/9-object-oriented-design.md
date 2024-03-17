@@ -11,36 +11,81 @@ systems.
 
 # Design principles
 
-## SOLID principles
+## SOLID principles & The Theory
 
 ### Single Responsibility Principle (SRP)
 
-A class should have only one reason to change, meaning that a class should have
-only one job or responsibility.
+-   **Description:** A class should have only one reason to change.
+-   **Example:** Separating data access logic from business logic.
 
 ### Open/Closed Principle (OCP)
 
-Objects or entities should be open for extension but closed for modification,
-meaning that you should be able to extend a class's behavior without modifying
-it.
+-   **Description:** Objects should be open for extension but closed for
+    modification.
+-   **Example:** Using interfaces and abstract classes to allow for extension
+    without modifying existing code.
 
 ### Liskov Substitution Principle (LSP)
 
-Subtypes must be substitutable for their base types, meaning that objects of a
-superclass should be replaceable with objects of its subclasses without
-affecting the correctness of the program.
+-   **Description:** Subtypes must be substitutable for their base types.
+-   **Example:** Ensuring that derived classes can be used interchangeably with
+    their base class without affecting the program's behavior.
 
 ### Interface Segregation Principle (ISP)
 
-Clients should not be forced to depend on interfaces they do not use. This
-principle states that no client should be forced to depend on methods it does
-not use.
+-   **Description:** Clients should not be forced to depend on interfaces they
+    do not use.
+-   **Example:** Breaking down large interfaces into smaller, more specific
+    interfaces to avoid imposing unnecessary dependencies.
 
 ### Dependency Inversion Principle (DIP)
 
-High-level modules should not depend on low-level modules. Both should depend on
-abstractions. Abstractions should not depend on details; details should depend
-on abstractions.
+-   **Description:** High-level modules should not depend on low-level modules.
+    Both should depend on abstractions.
+-   **Example:** Using dependency injection to decouple components and promote
+    loose coupling.
+
+## SOLID Principles & The Real-World
+
+### Single Responsibility Principle (SRP)
+
+-   **Problem:** An application has a class responsible for both logging user
+    activities and processing user data.
+-   **Solution:** Separate the logging functionality into its own class,
+    creating two classes: one for processing user data and another for logging user
+    activities.
+
+### Open/Closed Principle (OCP)
+
+-   **Problem:** An application has a class responsible for calculating various
+    types of discounts, but new types of discounts keep getting added, requiring
+    modification of the existing class.
+-   **Solution:** Create an abstract class or interface for discounts and
+    implement specific discount types as subclasses. This allows adding new discount
+    types without modifying the existing class.
+
+### Liskov Substitution Principle (LSP)
+
+-   **Problem:** An application expects all shapes to have an area method, but
+    the behavior of the area method for some shapes (e.g., circles) cannot be
+    accurately represented by a generic area method.
+-   **Solution:** Ensure that derived classes (e.g., Circle, Square) can be
+    substituted for their base class (e.g., Shape) without altering the correctness
+    of the program's behavior.
+
+### Interface Segregation Principle (ISP)
+
+-   **Problem:** An interface for a reporting service includes methods for
+    generating multiple types of reports, but not all clients need all types of
+    reports, leading to unnecessary dependencies.
+-   **Solution:** Split the large interface into smaller, more specific
+    interfaces (e.g., IExcelReportGenerator, IPDFReportGenerator) to avoid forcing
+    clients to depend on methods they don't use.
+
+### Dependency Inversion Principle (DIP)
+
+-   **Problem:** An application has tightly coupled components, making it difficult to replace or extend one component without affecting others.
+-   **Solution:** Use dependency injection to invert the dependencies, allowing high-level modules to depend on abstractions (e.g., interfaces) rather than concrete implementations, promoting loose coupling and easier maintenance.
 
 ## Other principles
 
@@ -73,7 +118,7 @@ composed of other classes or modules rather than inheriting from them.
 
 ## More principles
 
-### Clean Code Principles
+### Clean Code Principles (CCp)
 
 These principles include concepts such as meaningful names, small functions,
 single responsibility, minimal comments, and others that contribute to writing
@@ -89,14 +134,12 @@ Coupling refers to the degree of interdependence between modules or classes.
 Loose coupling means that modules are relatively independent of each other,
 which promotes modularity and easier maintenance.
 
-### Inversion of Control (IoC) and Dependency Injection (DI)
+### Inversion of Control (IoC)
 
 Inversion of Control (IoC) is a design principle where the control of object
 creation and flow is inverted from the application code to a framework or
 container. This promotes loose coupling and allows for better testability and
-scalability. Dependency Injection (DI) is a technique used to implement IoC,
-where the dependencies of a class are injected into it rather than being created
-internally. This makes classes more reusable and easier to test.
+scalability.
 
 ### Test-Driven Development (TDD)
 
@@ -133,31 +176,33 @@ non-technical stakeholders, leading to better software solutions.
 6. **Decorator Pattern** Allows behavior to be added to an individual object,
    either statically or dynamically, without affecting the behavior of other
    objects from the same class.
-7. **Adapter Pattern** Allows incompatible interfaces to work together by
+7. **Bridge Pattern** Allows and is used to separate the abstraction from its
+   implementation, allowing them to vary independently.
+8. **Adapter Pattern** Allows incompatible interfaces to work together by
    converting the interface of a class into another interface.
-8. **Command Pattern** Encapsulates a request as an object, thereby allowing for
+9. **Command Pattern** Encapsulates a request as an object, thereby allowing for
    parameterization of clients with queues, requests, and operations.
-9. **Template Method Pattern** Defines the skeleton of an algorithm in the
-   superclass but lets subclasses override specific steps of the algorithm
-   without changing its structure.
-10. **State Pattern** Allows an object to alter its behavior when its internal
+10. **Template Method Pattern** Defines the skeleton of an algorithm in the
+    superclass but lets subclasses override specific steps of the algorithm
+    without changing its structure.
+11. **State Pattern** Allows an object to alter its behavior when its internal
     state changes, appearing to change its class.
-11. **Proxy Pattern** Provides a surrogate or placeholder for another object to
+12. **Proxy Pattern** Provides a surrogate or placeholder for another object to
     control access to it.
-12. **Composite Pattern** Composes objects into tree structures to represent
+13. **Composite Pattern** Composes objects into tree structures to represent
     part-whole hierarchies, treating individual objects and compositions of
     objects uniformly.
-13. **Iterator Pattern** Provides a way to access the elements of an aggregate
+14. **Iterator Pattern** Provides a way to access the elements of an aggregate
     object sequentially without exposing its underlying representation.
-14. **Mediator Pattern** Defines an object that encapsulates how a set of objects
+15. **Mediator Pattern** Defines an object that encapsulates how a set of objects
     interact, promoting loose coupling.
-15. **Memento Pattern** Captures and externalizes an object's internal state so
+16. **Memento Pattern** Captures and externalizes an object's internal state so
     that it can be restored to this state later.
-16. **Flyweight Pattern** Uses sharing to support a large number of fine-grained
+17. **Flyweight Pattern** Uses sharing to support a large number of fine-grained
     objects efficiently.
-17. **Chain of Responsibility Pattern** Allows an object to send a command without
+18. **Chain of Responsibility Pattern** Allows an object to send a command without
     knowing which object will handle it, chaining the receiving objects.
-18. **Visitor Pattern** Represents an operation to be performed on the elements of
+19. **Visitor Pattern** Represents an operation to be performed on the elements of
     an object structure, letting you define new operations without changing the
     classes of the elements.
 
@@ -423,6 +468,67 @@ adding condiments:
     System.out.println("Cost: $" + coffee.cost());
 ```
 
+## Bridge Pattern
+
+**Description:** The Bridge pattern decouples an abstraction from its
+implementation, allowing them to vary independently.
+
+**Example:** Consider a drawing application where shapes can be drawn using
+different drawing tools. We'll use the Bridge pattern to separate the
+abstraction (Shape) from its implementation (DrawingAPI).
+
+```java
+    // Abstraction
+    interface Shape {
+        void draw();
+    }
+
+    // Concrete Abstraction
+    class Circle implements Shape {
+        private final DrawingAPI drawingAPI;
+
+        public Circle(DrawingAPI drawingAPI) {
+            this.drawingAPI = drawingAPI;
+        }
+
+        @Override
+        public void draw() {
+            drawingAPI.drawCircle();
+        }
+    }
+
+    // Implementation
+    interface DrawingAPI {
+        void drawCircle();
+    }
+
+    // Concrete Implementation
+    class DrawingAPI1 implements DrawingAPI {
+        @Override
+        public void drawCircle() {
+            System.out.println("Drawing circle using API1");
+        }
+    }
+
+    class DrawingAPI2 implements DrawingAPI {
+        @Override
+        public void drawCircle() {
+            System.out.println("Drawing circle using API2");
+        }
+    }
+
+    // Usage
+    public class Main {
+        public static void main(String[] args) {
+            Shape circle1 = new Circle(new DrawingAPI1());
+            Shape circle2 = new Circle(new DrawingAPI2());
+
+            circle1.draw(); // Output: Drawing circle using API1
+            circle2.draw(); // Output: Drawing circle using API2
+        }
+    }
+```
+
 ## Adapter Pattern
 
 **Description:** Allows incompatible interfaces to work together. It converts
@@ -437,30 +543,31 @@ Celsius:
     }
 
     class FahrenheitTemperature {
-            private double fahrenheit;
+        private double fahrenheit;
 
-            public FahrenheitTemperature(double fahrenheit) {
-                    this.fahrenheit = fahrenheit;
-                        }
+        public FahrenheitTemperature(double fahrenheit) {
+            this.fahrenheit = fahrenheit;
+        }
 
         public double getFahrenheit() {
-                    return fahrenheit;
-                }
+            return fahrenheit;
+        }
     }
 
     class TemperatureAdapter implements CelsiusTemperature {
-            private FahrenheitTemperature temperature;
+        private FahrenheitTemperature temperature;
 
-            public TemperatureAdapter(FahrenheitTemperature temperature) {
-                    this.temperature = temperature;
-                        }
+        public TemperatureAdapter(FahrenheitTemperature temperature) {
+            this.temperature = temperature;
+        }
 
         @Override
         public double getCelsius() {
-                    return (temperature.getFahrenheit() - 32) * 5 / 9;
-                }
+            return (temperature.getFahrenheit() - 32) * 5 / 9;
+        }
     }
 
+    // Usage
     FahrenheitTemperature fahrenheitTemp = new FahrenheitTemperature(98.6);
     CelsiusTemperature celsiusTemp = new TemperatureAdapter(fahrenheitTemp);
     System.out.println("Celsius temperature: " + celsiusTemp.getCelsius());
@@ -855,46 +962,46 @@ mediator:
     import java.util.List;
 
     interface ChatMediator {
-            void sendMessage(User user, String message);
+        void sendMessage(User user, String message);
     }
 
     class ConcreteChatMediator implements ChatMediator {
-            private List<User> users;
+        private List<User> users;
 
-            public ConcreteChatMediator() {
-                    users = new ArrayList<>();
-                        }
+        public ConcreteChatMediator() {
+            users = new ArrayList<>();
+        }
 
         public void addUser(User user) {
-                    users.add(user);
-                }
+            users.add(user);
+        }
 
         @Override
         public void sendMessage(User user, String message) {
-                    for (User u : users) {
-                            if (u != user) {
-                                    u.receiveMessage(message);
-                                }
+            for (User u : users) {
+                if (u != user) {
+                    u.receiveMessage(message);
+                }
             }
         }
     }
 
     class User {
-            private String name;
-            private ChatMediator mediator;
+        private String name;
+        private ChatMediator mediator;
 
-            public User(String name, ChatMediator mediator) {
-                    this.name = name;
-                            this.mediator = mediator;
-                                }
+        public User(String name, ChatMediator mediator) {
+            this.name = name;
+            this.mediator = mediator;
+        }
 
         public void sendMessage(String message) {
-                    mediator.sendMessage(this, message);
-                }
+            mediator.sendMessage(this, message);
+        }
 
         public void receiveMessage(String message) {
-                    System.out.println(name + " received message: " + message);
-                }
+            System.out.println(name + " received message: " + message);
+        }
     }
 
     // Usage
@@ -920,39 +1027,39 @@ memento pattern:
 
 ```java
     class Editor {
-            private String content;
+        private String content;
 
-            public Editor(String content) {
-                    this.content = content;
-                        }
+        public Editor(String content) {
+            this.content = content;
+        }
 
         public void setContent(String content) {
-                    this.content = content;
-                }
+            this.content = content;
+        }
 
         public String getContent() {
-                    return content;
-                }
+            return content;
+        }
 
         public EditorMemento save() {
-                    return new EditorMemento(content);
-                }
+            return new EditorMemento(content);
+        }
 
         public void restore(EditorMemento memento) {
-                    this.content = memento.getContent();
-                }
+            this.content = memento.getContent();
+        }
     }
 
     class EditorMemento {
-            private String content;
+        private String content;
 
-            public EditorMemento(String content) {
-                    this.content = content;
-                        }
+        public EditorMemento(String content) {
+            this.content = content;
+        }
 
         public String getContent() {
-                    return content;
-                }
+            return content;
+        }
     }
 
     // Usage
@@ -968,47 +1075,60 @@ memento pattern:
 
 ## Flyweight Pattern
 
-**Description:** Uses sharing to support a large number of fine-grained objects
-efficiently.
+**Description:** The Flyweight pattern is used to minimize memory usage and
+improve performance by sharing common state among multiple objects.
 
-**Example:** Consider a text editor where characters are represented as
-flyweights:
+**Example:** Consider a GUI application that displays a large number of icons on
+the screen. Each icon may have different properties such as size, color, and
+position. Instead of creating a separate object for each icon, we can use the
+Flyweight pattern to share common properties among icons of the same type.
 
 ```java
+    import java.awt.Color;
+    import java.awt.Graphics;
     import java.util.HashMap;
     import java.util.Map;
 
-    class Character {
-        private char symbol;
+    // Flyweight interface
+    interface Icon {
+        void draw(int x, int y);
+    }
 
-        public Character(char symbol) {
-            this.symbol = symbol;
+    // Concrete flyweight class
+    class ImageIcon implements Icon {
+        private final String filename;
+
+        public ImageIcon(String filename) {
+            this.filename = filename;
         }
 
-        public char getSymbol() {
-            return symbol;
+        @Override
+        public void draw(int x, int y) {
+            // Load and draw image at (x, y)
+            System.out.println("Drawing image '" + filename + "' at (" + x + ", " + y + ")");
         }
     }
 
-    class CharacterFactory {
-        private Map<Character, Character> characters = new HashMap<>();
+    // Flyweight factory
+    class IconFactory {
+        private final Map<String, Icon> icons = new HashMap<>();
 
-        public Character getCharacter(char symbol) {
-            if (!characters.containsKey(symbol)) {
-                characters.put(symbol, new Character(symbol));
+        public Icon getIcon(String filename) {
+            if (!icons.containsKey(filename)) {
+                icons.put(filename, new ImageIcon(filename));
             }
-            return characters.get(symbol);
+            return icons.get(filename);
         }
     }
 
     // Usage
-    CharacterFactory characterFactory = new CharacterFactory();
-    Character a = characterFactory.getCharacter('a');
-    Character b = characterFactory.getCharacter('b');
-    Character a2 = characterFactory.getCharacter('a');
-
-    System.out.println("a == a2: " + (a == a2)); // Output: true (same instance)
-    System.out.println("a == b: " + (a == b));   // Output: false (different instances
+    IconFactory factory = new IconFactory();
+    // Make icon, first time
+    Icon icon1 = factory.getIcon("icon.png");
+    icon1.draw(100, 100);
+    // Reuse existing icon
+    Icon icon2 = factory.getIcon("icon.png");
+    icon2.draw(200, 200);
 ```
 
 ## Chain of Responsibility Pattern
