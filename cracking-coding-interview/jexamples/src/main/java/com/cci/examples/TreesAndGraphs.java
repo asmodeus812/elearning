@@ -626,7 +626,6 @@ public class TreesAndGraphs {
         }
 
         private final HeapType type;
-        private final List<T> heap = new ArrayList<>();
 
         public HeapBinaryTree(HeapType type) {
             this.type = type;

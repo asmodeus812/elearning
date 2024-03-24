@@ -92,6 +92,7 @@ issue incorrectly, or not completely.
 ## Key & Core Differences
 
 * Compilation vs. Interpretation:
+
   * Compiler: Translates entire source code into machine code before execution.
   * Interpreter: Executes source code line by line at runtime without prior translation.
 
@@ -208,8 +209,7 @@ Key features and processes performed by the JVM, include:
     $ javap -c Calculator
 ``
 
-```asm
-
+```txt
     public class Calculator {
         public static int sum(int, int);
             Code:
