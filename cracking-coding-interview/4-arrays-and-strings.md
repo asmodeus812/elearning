@@ -308,8 +308,8 @@ beginning.
 Another example where the input string is the same length as the sub-string,
 which is really just the same as the general case.
 
-- `waterbottle` <-> `erbottlewat` - is contained completely, but wraps around
-- `waterbottle` <-> `orbottlewat` - is not contained, a mismatching character
+-   `waterbottle` <-> `erbottlewat` - is contained completely, but wraps around
+-   `waterbottle` <-> `orbottlewat` - is not contained, a mismatching character
 
 To solve this issue we have to simply modify the sub-string algorithm, instead
 of looping through the string from start to finish, we loop through it with wrap

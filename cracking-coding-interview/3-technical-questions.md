@@ -65,48 +65,50 @@ issue incorrectly, or not completely.
 
 # Compilation & Interpretation
 
-* Compiled Languages: In strictly compiled languages, such as C and C++, source
-  code is translated directly into machine code by a compiler before execution.
-  The resulting machine code is specific to the target hardware architecture.
+-   Compiled Languages: In strictly compiled languages, such as C and C++, source
+    code is translated directly into machine code by a compiler before execution.
+    The resulting machine code is specific to the target hardware architecture.
 
-  1. Compilation Process: The compilation process involves translating the entire
-     source code into machine code in one pass. This generates an executable file
-     containing native machine code that can be directly executed by the CPU.
-  2. Execution: Strictly compiled languages produce standalone executables that are
-     independent of the original source code. The compiled code is executed directly
-     by the CPU without the need for an intermediate runtime environment.
+    1. Compilation Process: The compilation process involves translating the entire
+       source code into machine code in one pass. This generates an executable file
+       containing native machine code that can be directly executed by the CPU.
+    2. Execution: Strictly compiled languages produce standalone executables that are
+       independent of the original source code. The compiled code is executed directly
+       by the CPU without the need for an intermediate runtime environment.
 
-* Interpreted Languages: In interpreted languages, such as Python and
-  JavaScript, source code is executed line by line by an interpreter at runtime.
-  The interpreter reads and executes each statement of the source code
-  sequentially.
+-   Interpreted Languages: In interpreted languages, such as Python and
+    JavaScript, source code is executed line by line by an interpreter at runtime.
+    The interpreter reads and executes each statement of the source code
+    sequentially.
 
-  1. Interpretation Process: The interpreter reads the source code, parses it into
-     intermediate representations (such as bytecode or AST), and executes it
-     immediately. There is no separate compilation step to generate machine code.
-  2. Execution: Interpreted languages typically require an interpreter to be
-     installed on the target system to execute the source code. The interpreter
-     translates and executes the source code on-the-fly, without producing
-     standalone executables.
+    1. Interpretation Process: The interpreter reads the source code, parses it into
+       intermediate representations (such as bytecode or AST), and executes it
+       immediately. There is no separate compilation step to generate machine code.
+    2. Execution: Interpreted languages typically require an interpreter to be
+       installed on the target system to execute the source code. The interpreter
+       translates and executes the source code on-the-fly, without producing
+       standalone executables.
 
 ## Key & Core Differences
 
-* Compilation vs. Interpretation:
+-   Compilation vs. Interpretation:
 
-  * Compiler: Translates entire source code into machine code before execution.
-  * Interpreter: Executes source code line by line at runtime without prior translation.
+    -   Compiler: Translates entire source code into machine code before execution.
+    -   Interpreter: Executes source code line by line at runtime without prior translation.
 
-* Output:
-  * Compiler: Produces standalone executable files containing native machine code.
-  * Interpreter: Executes source code directly without generating standalone executables.
+-   Output:
 
-* Execution Speed:
-  * Compiler: Generally produces faster-executing code as it is optimized for the target hardware architecture.
-  * Interpreter: May have slower execution speed compared to compiled languages due to the overhead of interpretation at runtime.
+    -   Compiler: Produces standalone executable files containing native machine code.
+    -   Interpreter: Executes source code directly without generating standalone executables.
 
-* Portability:
-  * Compiler: Generates machine code specific to the target hardware architecture, potentially limiting portability.
-  * Interpreter: Source code is platform-independent, and the interpreter translates and executes code on-the-fly, allowing for greater portability.
+-   Execution Speed:
+
+    -   Compiler: Generally produces faster-executing code as it is optimized for the target hardware architecture.
+    -   Interpreter: May have slower execution speed compared to compiled languages due to the overhead of interpretation at runtime.
+
+-   Portability:
+    -   Compiler: Generates machine code specific to the target hardware architecture, potentially limiting portability.
+    -   Interpreter: Source code is platform-independent, and the interpreter translates and executes code on-the-fly, allowing for greater portability.
 
 In summary, strictly compiled languages translate source code into machine code
 before execution, resulting in standalone executables, while interpreted
@@ -118,37 +120,37 @@ Several interpreted languages utilize Just-In-Time (JIT) compilation techniques
 to improve performance. Some examples of interpreted languages with JIT
 compilation include:
 
-* JavaScript (V8 Engine): JavaScript is commonly used in web development, and
-  modern JavaScript engines such as Google's V8 engine (used in Chrome and
-  Node.js) employ JIT compilation to dynamically compile frequently executed
-  JavaScript code into native machine code for improved performance.
+-   JavaScript (V8 Engine): JavaScript is commonly used in web development, and
+    modern JavaScript engines such as Google's V8 engine (used in Chrome and
+    Node.js) employ JIT compilation to dynamically compile frequently executed
+    JavaScript code into native machine code for improved performance.
 
-* Python (PyPy): While Python is traditionally interpreted, projects like PyPy
-  implement a JIT compiler for Python code. PyPy's JIT compiler (Just-In-Time
-  Compiler for Python) dynamically compiles Python bytecode into native machine
-  code at runtime, resulting in significant performance improvements over
-  traditional interpreters.
+-   Python (PyPy): While Python is traditionally interpreted, projects like PyPy
+    implement a JIT compiler for Python code. PyPy's JIT compiler (Just-In-Time
+    Compiler for Python) dynamically compiles Python bytecode into native machine
+    code at runtime, resulting in significant performance improvements over
+    traditional interpreters.
 
-* Ruby (YARV): The YARV (Yet Another Ruby VM) interpreter for Ruby includes a
-  JIT compiler called MJIT (Method JIT). MJIT dynamically compiles Ruby methods
-  into native machine code, providing performance enhancements for Ruby
-  applications.
+-   Ruby (YARV): The YARV (Yet Another Ruby VM) interpreter for Ruby includes a
+    JIT compiler called MJIT (Method JIT). MJIT dynamically compiles Ruby methods
+    into native machine code, providing performance enhancements for Ruby
+    applications.
 
-* PHP (HHVM): The HipHop Virtual Machine (HHVM), developed by Facebook, includes
-  a JIT compiler for PHP code. HHVM's JIT compiler dynamically compiles PHP
-  bytecode into native machine code, offering performance improvements over
-  traditional PHP interpreters.
+-   PHP (HHVM): The HipHop Virtual Machine (HHVM), developed by Facebook, includes
+    a JIT compiler for PHP code. HHVM's JIT compiler dynamically compiles PHP
+    bytecode into native machine code, offering performance improvements over
+    traditional PHP interpreters.
 
-* Lua (LuaJIT): LuaJIT is a Just-In-Time (JIT) compiler for the Lua programming
-  language. It dynamically compiles Lua bytecode into highly optimized native
-  machine code at runtime, resulting in significant performance gains for Lua
-  applications.
+-   Lua (LuaJIT): LuaJIT is a Just-In-Time (JIT) compiler for the Lua programming
+    language. It dynamically compiles Lua bytecode into highly optimized native
+    machine code at runtime, resulting in significant performance gains for Lua
+    applications.
 
-* Java (JVM): like HotSpot, incorporate Just-In-Time (JIT) compilation. The JVM
-  dynamically compiles frequently executed bytecode sequences into optimized
-  native machine code during runtime. This compilation process aims to improve the
-  performance of Java applications by translating bytecode into efficient machine
-  code
+-   Java (JVM): like HotSpot, incorporate Just-In-Time (JIT) compilation. The JVM
+    dynamically compiles frequently executed bytecode sequences into optimized
+    native machine code during runtime. This compilation process aims to improve the
+    performance of Java applications by translating bytecode into efficient machine
+    code
 
 ## Java virtual machine
 
@@ -196,43 +198,47 @@ Key features and processes performed by the JVM, include:
    memory that is no longer in use, preventing memory leaks and ensuring efficient
    memory usage.
 
-```java
-    public class Calculator {
-        public static int sum(int a, int b) {
-            return a + b;
+Here is a very simple example of the different steps the java virtual machine
+might go through to generate byte or machine code from an input java source
+
+1. Java source code
+
+    ```java
+        public class Calculator {
+            public static int sum(int a, int b) {
+                return a + b;
+            }
         }
-    }
-```
+    ```
 
-````sh
-    $ javac Calculator.java
-    $ javap -c Calculator
-``
+2. Bytecode generation
 
-```txt
-    public class Calculator {
-        public static int sum(int, int);
-            Code:
-            0: iload_0
-            1: iload_1
-            2: iadd
-            3: ireturn
-    }
-````
+    ```sh
+        $ javac Calculator.java
+        $ javap -c Calculator
+    ```
 
-The bytecode for the sum method consists of the following instructions:
+3. Java byte code
 
-* iload\_0: Load the value of the first argument (a) onto the stack.
-* iload\_1: Load the value of the second argument (b) onto the stack.
-* iadd: Add the top two integers on the stack and push the result back onto the stack.
-* ireturn: Return the integer result from the method.
+    ```txt
+        public class Calculator {
+            public static int sum(int, int);
+                Code:
+                0: iload_0
+                1: iload_1
+                2: iadd
+                3: ireturn
+        }
+    ```
 
-```asm
-    sum:
-        mov eax, DWORD PTR [rsp+0x8]    ; Load the value of the first argument (a)
-        add eax, DWORD PTR [rsp+0xc]    ; Add the value of the second argument (b)
-        ret                             ; Return the result
-```
+4. Native machine code
+
+    ```asm
+        sum:
+            mov eax, DWORD PTR [rsp+0x8]    ; Load the value of the first argument (a)
+            add eax, DWORD PTR [rsp+0xc]    ; Add the value of the second argument (b)
+            ret                             ; Return the result
+    ```
 
 After JIT compilation, the bytecode instructions are translated into native
 machine code. The native machine code for the sum method is represented using

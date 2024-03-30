@@ -15,77 +15,77 @@ systems.
 
 ### Single Responsibility Principle (SRP)
 
-- **Description:** A class should have only one reason to change.
-- **Example:** Separating data access logic from business logic.
+-   **Description:** A class should have only one reason to change.
+-   **Example:** Separating data access logic from business logic.
 
 ### Open/Closed Principle (OCP)
 
-- **Description:** Objects should be open for extension but closed for
+-   **Description:** Objects should be open for extension but closed for
     modification.
-- **Example:** Using interfaces and abstract classes to allow for extension
+-   **Example:** Using interfaces and abstract classes to allow for extension
     without modifying existing code.
 
 ### Liskov Substitution Principle (LSP)
 
-- **Description:** Subtypes must be substitutable for their base types.
-- **Example:** Ensuring that derived classes can be used interchangeably with
+-   **Description:** Subtypes must be substitutable for their base types.
+-   **Example:** Ensuring that derived classes can be used interchangeably with
     their base class without affecting the program's behavior.
 
 ### Interface Segregation Principle (ISP)
 
-- **Description:** Clients should not be forced to depend on interfaces they
+-   **Description:** Clients should not be forced to depend on interfaces they
     do not use.
-- **Example:** Breaking down large interfaces into smaller, more specific
+-   **Example:** Breaking down large interfaces into smaller, more specific
     interfaces to avoid imposing unnecessary dependencies.
 
 ### Dependency Inversion Principle (DIP)
 
-- **Description:** the strategy of depending upon interfaces or abstract
+-   **Description:** the strategy of depending upon interfaces or abstract
     functions and classes rather than upon concrete functions and classes.
-- **Example:** Using dependency injection to decouple components and promote
+-   **Example:** Using dependency injection to decouple components and promote
     loose coupling.
 
 ## SOLID Principles & The Real-World
 
 ### Single Responsibility Principle (SRP)
 
-- **Problem:** An application has a class responsible for both logging user
+-   **Problem:** An application has a class responsible for both logging user
     activities and processing user data.
-- **Solution:** Separate the logging functionality into its own class,
+-   **Solution:** Separate the logging functionality into its own class,
     creating two classes: one for processing user data and another for logging user
     activities.
 
 ### Open/Closed Principle (OCP)
 
-- **Problem:** An application has a class responsible for calculating various
+-   **Problem:** An application has a class responsible for calculating various
     types of discounts, but new types of discounts keep getting added, requiring
     modification of the existing class.
-- **Solution:** Create an abstract class or interface for discounts and
+-   **Solution:** Create an abstract class or interface for discounts and
     implement specific discount types as subclasses. This allows adding new discount
     types without modifying the existing class.
 
 ### Liskov Substitution Principle (LSP)
 
-- **Problem:** An application expects all shapes to have an area method, but
+-   **Problem:** An application expects all shapes to have an area method, but
     the behavior of the area method for some shapes (e.g., circles) cannot be
     accurately represented by a generic area method.
-- **Solution:** Ensure that derived classes (e.g., Circle, Square) can be
+-   **Solution:** Ensure that derived classes (e.g., Circle, Square) can be
     substituted for their base class (e.g., Shape) without altering the correctness
     of the program's behavior.
 
 ### Interface Segregation Principle (ISP)
 
-- **Problem:** An interface for a reporting service includes methods for
+-   **Problem:** An interface for a reporting service includes methods for
     generating multiple types of reports, but not all clients need all types of
     reports, leading to unnecessary dependencies.
-- **Solution:** Split the large interface into smaller, more specific
+-   **Solution:** Split the large interface into smaller, more specific
     interfaces (e.g., IExcelReportGenerator, IPDFReportGenerator) to avoid forcing
     clients to depend on methods they don't use.
 
 ### Dependency Inversion Principle (DIP)
 
-- **Problem:** An application has tightly coupled components, making it difficult to replace or extend one component without affecting others.
-- **Solution:** Use dependency injection to invert the dependencies, allowing high-level modules to depend on abstractions (e.g., interfaces) rather than concrete implementations, promoting loose coupling and easier maintenance.
+-   **Problem:** An application has tightly coupled components, making it difficult to replace or extend one component without affecting others.
+-   **Solution:** Use dependency injection to invert the dependencies, allowing high-level modules to depend on abstractions (e.g., interfaces) rather than concrete implementations, promoting loose coupling and easier maintenance.
 
 ## Other principles
 
@@ -1259,23 +1259,23 @@ shapes:
 
 ### Checked Exceptions
 
-- **Checked exceptions** are exceptions that the compiler forces you to handle.
+-   **Checked exceptions** are exceptions that the compiler forces you to handle.
     These exceptions are subclasses of `Exception` but not subclasses of
     `RuntimeException`.
-- Examples include `IOException`, `SQLException`, and `ClassNotFoundException`.
+-   Examples include `IOException`, `SQLException`, and `ClassNotFoundException`.
 
 ### Unchecked Exceptions
 
-- **Unchecked exceptions** are exceptions that don't need to be declared in a
+-   **Unchecked exceptions** are exceptions that don't need to be declared in a
     method's throws clause. These exceptions are subclasses of `RuntimeException`.
-- Examples include `NullPointerException`, `ArrayIndexOutOfBoundsException`, and
+-   Examples include `NullPointerException`, `ArrayIndexOutOfBoundsException`, and
     `ArithmeticException`.
 
 ### Errors
 
-- **Errors** are exceptional situations that are typically beyond the control of
+-   **Errors** are exceptional situations that are typically beyond the control of
     the programmer. They are not meant to be caught or handled by applications.
-- Examples include `OutOfMemoryError`, `StackOverflowError`, and `AssertionError`.
+-   Examples include `OutOfMemoryError`, `StackOverflowError`, and `AssertionError`.
 
 Checked exceptions must be either caught using a try-catch block or declared in
 the throws clause of the method signature, while unchecked exceptions are not
@@ -1283,25 +1283,25 @@ required to be handled explicitly. Checked exceptions are checked at compile
 time, meaning that the compiler ensures that they are either handled or
 declared, whereas unchecked exceptions are not checked at compile time.
 
-- Checked Exceptions: Typically used for recoverable conditions where the
+-   Checked Exceptions: Typically used for recoverable conditions where the
     caller is expected to handle the exception.
-- Unchecked Exceptions: Often used for programming errors or conditions that
+-   Unchecked Exceptions: Often used for programming errors or conditions that
     cannot be reasonably handled, such as null pointer or array index out of bounds.
 
 ## Exception Handling
 
 ### Try-Catch & Finally
 
-- Java provides the `try-catch` block for handling exceptions. Code that may
+-   Java provides the `try-catch` block for handling exceptions. Code that may
     throw an exception is enclosed within a `try` block, and any exceptions thrown
     are caught and handled in the `catch` block.
 
-- Multiple `catch` blocks can be used to handle different types of exceptions.
+-   Multiple `catch` blocks can be used to handle different types of exceptions.
     Remember that the catch blocks are executed sequentially, the way they
     appear in code, meaning that it is advised to catch exceptions from more fine
     grained to more generic ones.
 
-- `Finally` Block The finally block is used to execute code that should always
+-   `Finally` Block The finally block is used to execute code that should always
     run, regardless of whether an exception occurred or not. It's often used for
     cleanup tasks like closing resources.
 
@@ -1319,10 +1319,10 @@ declared, whereas unchecked exceptions are not checked at compile time.
 
 ### Try-With-Resources
 
-- Introduced in Java 7, the try-with-resources statement ensures that a resource
+-   Introduced in Java 7, the try-with-resources statement ensures that a resource
     is closed at the end of the statement, regardless of whether an exception is
     thrown or not.
-- Resources that implement the AutoCloseable interface can be used within the
+-   Resources that implement the AutoCloseable interface can be used within the
     try-with-resources statement.
 
 ```java
@@ -1335,19 +1335,19 @@ declared, whereas unchecked exceptions are not checked at compile time.
 
 ### Best practices
 
-- Use specific exceptions: Catch specific exceptions rather than catching
+-   Use specific exceptions: Catch specific exceptions rather than catching
     generic Exception whenever possible.
 
-- Handle exceptions appropriately: Handle exceptions at an appropriate level of
+-   Handle exceptions appropriately: Handle exceptions at an appropriate level of
     abstraction and provide meaningful error messages.
 
-- Avoid swallowing exceptions: Avoid catching exceptions without taking any
+-   Avoid swallowing exceptions: Avoid catching exceptions without taking any
     action or logging them.
 
-- Clean up resources: Ensure that resources are properly closed in a finally
+-   Clean up resources: Ensure that resources are properly closed in a finally
     block or using try-with-resources.
 
-- Don't catch Throwable: Avoid catching Throwable, which includes both Exception
+-   Don't catch Throwable: Avoid catching Throwable, which includes both Exception
     and Error subclasses, unless absolutely necessary.
 
 # Streams & Transforms
@@ -1406,6 +1406,7 @@ declared, whereas unchecked exceptions are not checked at compile time.
     ```
 
 6. **Flattening**
+
     - Flattening is used to flatten nested collections produced by mapping operations.
 
     ```java
@@ -1414,4 +1415,3 @@ declared, whereas unchecked exceptions are not checked at compile time.
                                             .flatMap(List::stream)
                                             .collect(Collectors.toList());
     ```
-

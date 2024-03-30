@@ -15,7 +15,7 @@ surpass the constant progression.
 -   O(n) - non-constant complexity, meaning that the complexity of the run time is
     directly correlated to the input arguments or parameters
 
-There are many types of complexity such as log(n) or n^2, or 2^n. Each of which
+There are many types of complexity such as `log(n)` or `n^2`, or `2^n`. Each of which
 describes non-constant run time complexity. There is a non-fixed list of possible
 non-constant complexity run times.
 
@@ -24,26 +24,43 @@ n, which represents one of the input parameters, we could have n\*m, where m is
 another input parameter, which is in play. The dependent arguments might also be
 indirectly connected to the input, and be a function of the input instead.
 
+`Big O allows us to describe how the run or space complexity scales, and not to
+measure absolute units of time or space. This is crucial to understand and
+grasp.`
+
 # Big theta and omega
 
-In academia, there is big O, big theta, and big omega. Three different
+In academia, there is - big O, big theta, and big omega. Three different
 complexities describing different ranges of run times
 
--   big O - in academia that describes an upper bound on the run time. Something
+-   `big O` - in academia that describes an upper bound on the run time. Something
     prints values of an array of N items, can be described as O(N), but it could also
     be described as O(N^2), O(N^3), O(N^4). The printing is at least as fast as each
     of these run times, it will however never be less than, the lowest complexity
     run time, in the example above that is O(N).
 
--   big theta - is the same concept but for a lower bound. Where the inverse is
-    true, meaning that an algorithm would not be slower/more than than O(N)
+-   `big theta` - is the same concept but for a lower bound. Where the inverse is
+    true, meaning that an algorithm would not be slower than than O(N)
 
--   big omega - is when big O and big theta, give a tight bound on the run time,
+-   `big omega` - is when big O and big theta, give a tight bound on the run time,
     meaning when they converge to the same run time complexity. This is what the
     industry means by big O, and not the academic, big O, which only describes an
     upper boundary, as mentioned above.
 
-# Best and worst run time
+# Common complexities
+
+In practice we have the following 7 most commonly occurring complexities, each
+worse than the other, they are listed in order of the fastest to the slowest
+
+1. Constant - `O(1)` - array access
+2. Logarithmic - `O(log(n))` - binary search
+3. Linear - `O(N)` - array print
+4. N\*Logarithmic - `O(N \* log(n))` - quick sort
+5. Quadratic - `O(N^2)` - bubble sort
+6. Exponential - `O(2^N)` - Fibonacci sequence
+7. Factorial = `O(n!)` - string permutations
+
+# Best & worst
 
 Generally when talking best, worst and expected run times, in the industry we
 focus on the expected and worst, where usually the expected is the worst, or in
@@ -64,7 +81,7 @@ that each algorithm, requires a specific amount of memory or space to execute
 in, based on the type of algorithm, that could be constant, or non-constant
 space, for example take a regular loop and a recursive print of an array of N
 elements, the loop variant will take constant space for the entire execution,
-however it would take O(N) space if we use recursion since the call stack, and
+however it would take `O(N)` space if we use recursion since the call stack, and
 stack frame function will constantly grow on each call for the next element.
 
 # Drop the constants
@@ -76,15 +93,11 @@ are equivalent - `O(1*N) == O(2*N) == O(3*N) == O(4*N) == etc`. That is because
 the constant time no matter how big in absolute units of time or space, will/is
 always constant, and is not correlated to the input parameters.
 
-Big O allows us to describe how the run or space complexity scales, and not to
-measure absolute units of time or space. This is crucial to understand and
-grasp.
-
 Take for example, an algorithm, that finds the max and min element in an array,
 you could go about this two different ways
 
-1. Two for loops, one for the max and one for the min element
-2. One loop to find both the max and min element
+1. Two for loops, one for the max and one for the min element - `O(2N)`
+2. One loop to find both the max and min element - `O(N)`
 
 Well in either case the complexity here is O(N) for time and O(1) for space,
 both of these algorithms, scale the same way with N. Having one combined for
@@ -105,19 +118,19 @@ removed, since it will not affect the complexity scaling in any significant way
 
 Now this is only relevant when we talk about the same input parameter
 correlation, we cannot reduce a complexity of two different terms, for example
-the following O(A + B), cannot be reduced without having some information about
-the parameters beforehand, if we know that A is significantly more dominant
-than B, then yes, but that requires additional data or information about our
-input.
+the following `O(A + B)`, cannot be reduced without having some information
+about the parameters beforehand, if we know that A is significantly more
+dominant than B, then yes, but that requires additional data or information
+about our input.
 
 # Add vs Multiply of complexities
 
-When would one add two complexities or multiply them. The rule is as follows,
+When would one add two complexities or multiply them. The rules are as follows
 
--   if for each of A chunks of work, we do B chunks of work, then we multiply,
+-   if for each `A chunks of work, we do B chunks of work`, then we multiply,
     this is mostly expressed as nested loops or similar loop like actions.
 
--   if however the work done for each chunk of A and each chunk of B, then we add
+-   if however the work done for `each chunk of A and each chunk of B,` then we add
     the run times, this is similar to have loops executed one after the other for
     example.
 
@@ -156,15 +169,17 @@ into 2, until we have only 1 element, or have found the element being search
 4. 1 -> found target
 
 When we see a problem space where the solution space divides the data by two, it
-is more often than not a log (of base 2) of n.
+is more often than not a base two log of the input n - `log(n)`
 
 If the problem space was divided by 4 or 8 or 16 times instead on each step,
-then our log base would be either 4, 8 or 16. For example log4(16) will be 2,
+then our log base would be either 4, 8 or 16. For example `log4(16)` will be 2,
 meaning that we can find solution in 2 steps instead of 4 (see example above)
 
 Note that the base of the log, does not matter, the complexity will still be log
-of some base of the number of input arguments, could be log10(n) or log4(10)
-etc.
+of some base of the number of input arguments, could be `log10(n) or log4(10)`
+etc. The reason it does not matter, is because the curve described by log, is
+still the same, no matter the base of the logarithm, remember that big O does
+not evaluate absolute run time & space complexity, rather it describes scaling
 
 What the log describes is the type of scaling in relation to the input, we are
 not looking for which log base produces a smaller / better absolute value of
