@@ -91,24 +91,21 @@ issue incorrectly, or not completely.
 
 ## Key & Core Differences
 
--   Compilation vs. Interpretation:
+1.  Compilation vs. Interpretation:
+    -   Compiler: Translates entire source code into machine code before execution.
+    -   Interpreter: Executes source code line by line at runtime without prior translation.
 
--   Compiler: Translates entire source code into machine code before execution.
--   Interpreter: Executes source code line by line at runtime without prior translation.
+2.  Output:
+    -   Compiler: Produces standalone executable files containing native machine code.
+    -   Interpreter: Executes source code directly without generating standalone executables.
 
--   Output:
+3.  Execution Speed:
+    -   Compiler: Generally produces faster-executing code as it is optimized for the target hardware architecture.
+    -   Interpreter: May have slower execution speed compared to compiled languages due to the overhead of interpretation at runtime.
 
--   Compiler: Produces standalone executable files containing native machine code.
--   Interpreter: Executes source code directly without generating standalone executables.
-
--   Execution Speed:
-
--   Compiler: Generally produces faster-executing code as it is optimized for the target hardware architecture.
--   Interpreter: May have slower execution speed compared to compiled languages due to the overhead of interpretation at runtime.
-
--   Portability:
--   Compiler: Generates machine code specific to the target hardware architecture, potentially limiting portability.
--   Interpreter: Source code is platform-independent, and the interpreter translates and executes code on-the-fly, allowing for greater portability.
+4.  Portability:
+    -   Compiler: Generates machine code specific to the target hardware architecture, potentially limiting portability.
+    -   Interpreter: Source code is platform-independent, and the interpreter translates and executes code on-the-fly, allowing for greater portability.
 
 In summary, strictly compiled languages translate source code into machine code
 before execution, resulting in standalone executables, while interpreted
@@ -360,9 +357,9 @@ other languages using similar approaches
         particularly useful in scenarios like caching and managing native resources.
     -   `SoftReference` objects are garbage collected only when memory is low.
 
-#### Garbage collection algorithms
+### Garbage collection algorithms
 
-**Mark and Sweep**
+#### Mark and Sweep
 
 -   Mark Phase: The first phase, known as the "mark" phase,
     involves traversing all reachable objects starting from the roots (e.g., global
@@ -387,7 +384,7 @@ other languages using similar approaches
     It typically involves stop-the-world pauses during the mark and sweep phases, which can lead to application pauses and reduced responsiveness in interactive applications.
     It doesn't perform memory compaction, which means it may not efficiently utilize available memory space, especially in long-running applications.
 
-#### Garbage collection strategies
+### Garbage collection strategies
 
 1.  **Serial Garbage Collector:** The Serial Garbage Collector (also known as
     the Serial Collector) is the simplest garbage collector. It is best suited
@@ -430,7 +427,8 @@ other languages using similar approaches
         int j = i; // What happens here?
     ```
 
-    This code will throw a NullPointerException because autoboxing attempts to unbox a null reference to an int.
+    This code will throw a NullPointerException because autoboxing attempts to
+    unbox a null reference to an int.
 
 2.  ConcurrentModificationException with Iterators:
 
@@ -443,7 +441,9 @@ other languages using similar approaches
         }
     ```
 
-    This code will throw a ConcurrentModificationException because you're trying to modify the list while iterating over it without using an iterator's remove() method.
+    This code will throw a ConcurrentModificationException because you're trying
+    to modify the list while iterating over it without using an iterator's
+    remove() method.
 
 3.  ArithmeticException with Division:
 
@@ -451,7 +451,8 @@ other languages using similar approaches
         int result = 5 / 0; // What happens here?
     ```
 
-    This code will throw an ArithmeticException because dividing by zero is undefined in Java.
+    This code will throw an ArithmeticException because dividing by zero is
+    undefined in Java.
 
 4.  IndexOutOfBoundsException with Arrays:
 
@@ -460,7 +461,9 @@ other languages using similar approaches
         int value = array[5]; // What happens here?
     ```
 
-    This code will throw an IndexOutOfBoundsException because array indices in Java are zero-based, and trying to access index 5 in an array of length 5 is out of bounds.
+    This code will throw an IndexOutOfBoundsException because array indices in
+    Java are zero-based, and trying to access index 5 in an array of length 5 is
+    out of bounds.
 
 5.  ClassCastException with Generics:
 
@@ -469,7 +472,9 @@ other languages using similar approaches
         List<Object> objects = (List<Object>) strings; // What happens here?
     ```
 
-    This code will compile without error, but it will throw a ClassCastException at runtime because you cannot cast a generic type to another generic type with different type arguments due to type erasure.
+    This code will compile without error, but it will throw a ClassCastException
+    at runtime because you cannot cast a generic type to another generic type
+    with different type arguments due to type erasure.
 
 6.  NullPointerException with String Comparison:
 
@@ -480,7 +485,8 @@ other languages using similar approaches
         }
     ```
 
-    This code will throw a NullPointerException because you're trying to call the equals() method on a null reference.
+    This code will throw a NullPointerException because you're trying to call
+    the equals() method on a null reference.
 
 7.  NumberFormatException with String to Integer Conversion:
 
@@ -489,7 +495,8 @@ other languages using similar approaches
         int num = Integer.parseInt(str); // What happens here?
     ```
 
-    This code will throw a NumberFormatException because "abc" cannot be parsed into an integer.
+    This code will throw a NumberFormatException because "abc" cannot be parsed
+    into an integer.
 
 8.  UnsupportedOperationException with Unmodifiable Collections:
 
@@ -498,7 +505,8 @@ other languages using similar approaches
         list.add("item"); // What happens here?
     ```
 
-    This code will throw an UnsupportedOperationException because Collections.emptyList() returns an immutable (unmodifiable) list.
+    This code will throw an UnsupportedOperationException because
+    Collections.emptyList() returns an immutable (unmodifiable) list.
 
 9.  StackOverflowError with Recursion:
 
@@ -508,14 +516,91 @@ other languages using similar approaches
         }
     ```
 
-    This code will cause a StackOverflowError because it creates an infinite recursion without an exit condition.
+    This code will cause a StackOverflowError because it creates an infinite
+    recursion without an exit condition.
 
-10.  IllegalArgumentException with Enum.valueOf():
+10. IllegalArgumentException with Enum.valueOf():
 
     ```java
         public enum Color { RED, GREEN, BLUE }
         Color color = Enum.valueOf(Color.class, "YELLOW"); // What happens here?
     ```
 
-    This code will throw an IllegalArgumentException because there is no enum constant named "YELLOW" in the Color enum.
+    This code will throw an IllegalArgumentException because there is no enum
+    constant named "YELLOW" in the Color enum.
 
+11. EmptyStackException from stack.pop()
+
+    ```java
+    Stack<Integer> stack = new Stack<>();
+    int element = stack.pop(); // What happens here?
+    ```
+
+    Trying to pop an element from an empty stack (pop() on an empty stack) will
+    throw an EmptyStackException.
+
+12. Integer Overflow:
+
+    ```java
+        int value = Integer.MAX_VALUE;
+        value++; // What happens here?
+    ```
+
+    Incrementing Integer.MAX_VALUE will wrap around to Integer.MIN_VALUE,
+    causing overflow.
+
+13. String Pool Behavior:
+
+    ```java
+        String s1 = "hello";
+        String s2 = "hello";
+        System.out.println(s1 == s2); // What is the output?
+    ```
+
+    Strings created using string literals are pooled, so s1 and s2 will refer to
+    the same object, resulting in true when comparing them with ==.
+
+14. Floating-Point Precision:
+
+    ```java
+        double result = 0.1 + 0.2; // What is the value of result?
+    ```
+
+    Due to floating-point precision, the result of 0.1 + 0.2 is not exactly 0.3
+    but a close approximation due to binary representation limitations.
+
+15. Equals Method with String and StringBuilder:
+
+    ```java
+        String str1 = "hello";
+        StringBuilder str2 = new StringBuilder("hello");
+        System.out.println(str1.equals(str2)); // What is the output?
+    ```
+
+    The equals() method in Java compares the content of objects. Since str1 is a
+    String and str2 is a StringBuilder, they will not be equal even if they
+    contain the same characters.
+
+16. Casting and Arithmetic Operations:
+
+    ```java
+        byte a = 127;
+        byte b = 127;
+        byte c = a + b; // What happens here?
+    ```
+
+    The result of adding two bytes (a and b) will be promoted to an int, so
+    assigning it to a byte (c) without explicit casting will cause a compilation
+    error.
+
+17. Object Comparison:
+
+    ```java
+        Integer x = new Integer(100);
+        Integer y = new Integer(100);
+        System.out.println(x == y); // What is the output?
+    ```
+
+    Comparing x and y with == checks for reference equality. Since x and y are
+    different objects (even though they contain the same value), the result will
+    be false.
