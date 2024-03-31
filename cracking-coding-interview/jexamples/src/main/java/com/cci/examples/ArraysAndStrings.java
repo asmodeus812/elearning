@@ -1,12 +1,12 @@
 package com.cci.examples;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import javax.swing.text.StyledEditorKit.ForegroundAction;
+import java.util.Stack;
 
 public class ArraysAndStrings {
 
@@ -436,6 +436,230 @@ public class ArraysAndStrings {
         }
     }
 
+    /**
+     * Generate a new array where each element is the product of all other elements in the source array, but the current one
+     *
+     */
+    public static final class ProductOfAllElements {
+
+        public int[] createProductsArray(int[] input) {
+            int[] products = new int[input.length];
+
+            int total = 1;
+            // compute the product of all array elements first, we assume the array has no 0 elements, we are going to use
+            // this product to later on divide it by each element in the array to effectively 'remove' that specific element
+            // from the final product
+            for (int i = 0; i < input.length; i++) {
+                total *= input[i];
+            }
+
+            // for each element simply divide the product by the current element, assume array has no dups
+            for (int i = 0; i < products.length; i++) {
+                products[i] = total / input[i];
+            }
+
+            // return the final array which has the products such that each element is only the product of all other
+            // elements but the current one from the original array
+            return products;
+        }
+    }
+
+    /**
+     * Find out the Nth max element in an array of integers
+     *
+     */
+    public static final class NthMaximumElement {
+
+        public int findNthMaximum(int[] input, int n) {
+            // holds the n number of max elements in the array
+            Stack<Integer> stack = new Stack<>();
+            stack.push(Integer.MIN_VALUE);
+
+            // to simplify the task we simply push into a stack of integers, where the top of the stack always contains the biggest element so far
+            for (int i = 1; i < input.length; i++) {
+                // it might be good idea to stop after n max elements were already found, there is no reason to continue
+                if (stack.size() > n) {
+                    break;
+                }
+                int top = stack.peek();
+                // when the top of the stack is smaller than the current element, push the current element onto the
+                // stack
+                if (top < input[i]) {
+                    stack.push(input[i]);
+                }
+            }
+
+            // at this point we will know if we have enough 'max' elements pushed into the stack, if we do then we can
+            // simply pop that many elements from the stack to get the n-th max one. Note comparison against size > n, since
+            // the stack always has at least one element - Integer.MIN_VALUE
+            if (stack.size() > n) {
+                // pop that many elements such that the n-th one ends up at the top of the stack, so we can get it
+                for (int i = 0; i < n - 1; i++) {
+                    stack.pop();
+                }
+                // the top of the stack will contain the n-th max element at this point, after the n - 1 pops
+                return stack.pop();
+            } else {
+                // we have not found at least n max elements, we can return 0, or some fallback value here
+                return 0;
+            }
+        }
+    }
+
+    /**
+     * Find the minimal length of a subarray which sums to a given target sum, from an array of positive integers
+     *
+     */
+    public static final class MinimumSubArraySum {
+
+        public int findSubArraySum(int[] input, int sum) {
+            // start with placeholder value for the max length
+            int result = Integer.MAX_VALUE;
+
+            // we have to inspect all possible lengths for each element of the array, for the first, second up to the n-th element.
+            for (int j = 0; j < input.length; j++) {
+                // start off from the current element, including the current length of the sub-array sum and accumulator
+                int len = 1;
+                int acc = input[j];
+                int min = Integer.MAX_VALUE;
+
+                // we calculate the minimum length of the sub-array starting from j + 1, which is going to give us
+                // number bigger or equal to the target sum
+                for (int i = j + 1; i < input.length; i++) {
+                    if (acc >= sum) {
+                        // at this point we have found the min length, going further will not help, this array
+                        // holds only positive integers, the length will only grow
+                        min = Math.min(min, len);
+                        break;
+                    }
+                    // accumulate the total sum currently found
+                    acc += input[i];
+                    len++;
+                }
+
+                // after each sub-array min length sum, compare to the one currently considered the minimum one.
+                result = Math.min(result, min);
+            }
+
+            // at this point the result will hold the minimum length of whichever sub-array sumed to target with the least
+            // amount of elements
+            return result;
+        }
+    }
+
+    /**
+     * Remove all duplicate elements from a sorted array of integer elements
+     *
+     */
+    public static final class RemoveDuplicateElements {
+
+        public int[] removeDuplicateElements(int[] input) {
+            int s = 0; // pointer into next non duplicate idx
+            for (int i = 0; i < input.length - 1; i++) {
+                if (input[i] == input[i + 1]) {
+                    // go forward when visiting duplicate elements
+                    continue;
+                } else {
+                    // when the next element is different, put it
+                    // at the last known non-duplicate pointer pos
+                    // and increment the pointer forward
+                    input[s + 1] = input[i + 1];
+                    s = s + 1;
+                }
+            }
+            // at this point s will point at the last index which
+            // was inserted, meaning we can simply add one to it
+            // to get the length of the array with unique elements
+            return Arrays.copyOf(input, s + 1);
+        }
+    }
+
+    /**
+     * Find which elements, sum up to a given target integer, store out their indices.
+     *
+     */
+    public static final class TwoElementsSums {
+
+        public int[] sumElementsToTarget(int[] input, int target) {
+            List<Integer> pairs = new LinkedList<>();
+            for (int i = 0; i < input.length; i++) {
+                // since we have the target sum, and the current element
+                // we can find the second element we need, by subtracting
+                // the current element from the target sum
+                int result = target - input[i];
+
+                // the result is the element we are going to look for in
+                // the sub-array from i - length. We also assume that
+                // a pair should exist if the target == input[i], we should
+                // look for an element with a value of 0 in the array
+                for (int j = i + 1; j < input.length; j++) {
+                    if (result == input[j]) {
+                        // add the pairs of elements which sum up to target
+                        // note that we assume the array does not contain
+                        // duplicates, for simplicty, break
+                        pairs.add(i);
+                        pairs.add(j);
+                        break;
+                    }
+                }
+            }
+
+            // return the array of pairs where each two indices are pairs
+            return pairs.stream().mapToInt(Integer::intValue).toArray();
+        }
+    }
+
+    /**
+     * Move all zero elements of the array at the end of the array
+     *
+     */
+    public static final class MoveZeroElements {
+
+        public int[] moveZeroElements(int[] input) {
+            int s = 0; // pointer into last non zero element in the array
+            for (int i = 0; i < input.length - 1; i++) {
+                if (input[i] == 0 && input[i + 1] != 0) {
+                    // when the current elemnet is a 0 and the next one is not,
+                    // swap with the 0th element, and move the current non-zero
+                    // element's pointer 's' forward
+                    input[s] = input[i + 1];
+                    input[i + 1] = 0;
+                    s += 1;
+                } else if (input[i] != 0) {
+                    // when the current element is not a 0, simply move the pointer
+                    // forward, since it must not be moved from it's current position
+                    s += 1;
+                }
+            }
+            return input;
+        }
+    }
+
+    /**
+     * Rotate an array such that elements at index i go to index i + k.
+     *
+     */
+    public static final class RotateArrayInPlace {
+
+        private int[] reverseArrayElements(int[] input, int start, int end) {
+            while (start <= end) {
+                int tmp = input[start];
+                input[start] = input[end];
+                input[end] = tmp;
+                start++;
+                end--;
+            }
+            return input;
+        }
+
+        public int[] rotateArrayInPlace(int[] input, int k) {
+            input = reverseArrayElements(input, 0, input.length - 1);
+            input = reverseArrayElements(input, 0, k - 1);
+            input = reverseArrayElements(input, k, input.length - 1);
+            return input;
+        }
+    }
+
     public static void main(String[] args) {
         // UniqueSequenceChecker checker = new UniqueSequenceChecker();
         // checker.isUniqueSequence("ackwabcw");
@@ -472,10 +696,39 @@ public class ArraysAndStrings {
         // int mat[][] = {{0,2,3}, {1,2,0}, {1,2,3}};
         // matrix.zeroRowCols(mat);
 
-        FindRotatedString rotate = new FindRotatedString();
+        // FindRotatedString rotate = new FindRotatedString();
         // rotate.isRotatedString("waterbottle", "erbottlewat");
         // rotate.isRotatedString("waterbottle", "erbottlevat");
-        rotate.isRotatedString("waterbottle", "erbottllewat");
+        // rotate.isRotatedString("waterbottle", "erbottllewat");
+
+        // ProductOfAllElements product = new ProductOfAllElements();
+        // product.createProductsArray(new int[]{ 3, 1, 5 });
+        // product.createProductsArray(new int[]{ 3, 6, 5 });
+        // product.createProductsArray(new int[]{ 8, 2, 7 });
+
+        // NthMaximumElement nth = new NthMaximumElement();
+        // nth.findNthMaximum(new int[]{ 1, 5, 8, 3, 2, 9, 10 }, 3);
+        // nth.findNthMaximum(new int[]{ 8, 9, 1, 2, 5 }, 1);
+        // nth.findNthMaximum(new int[]{ 1, 5 }, 3);
+
+        // MinimumSubArraySum max = new MinimumSubArraySum();
+        // max.findSubArraySum(new int[] {3, 1, 5, 2, 2, 1, 1 }, 6);
+        // max.findSubArraySum(new int[] {3, 1, 5, 2, 8, 10, 1 }, 11);
+        // max.findSubArraySum(new int[] {3, 1, 5, 2, 8, 5, 1 }, 15);
+
+        // RotateArrayInPlace rotate = new RotateArrayInPlace();
+        // rotate.rotateArrayInPlace(new int[]{ 1, 2, 3, 4, 5, 6, 7, 8 }, 3);
+
+        // RemoveDuplicateElements dups = new RemoveDuplicateElements();
+        // dups.removeDuplicateElements(new int[]{ 0, 1, 1, 1, 2, 2, 3, 3, 4 });
+        // dups.removeDuplicateElements(new int[]{ 0, 0, 1, 1, 1, 2, 2, 3, 3, 4, 5, 5 });
+
+        // TwoElementsSums sums = new TwoElementsSums();
+        // sums.sumElementsToTarget(new int[]{ 2, 7, 11, -6, 15, 9, 0 }, 9);
+
+        // MoveZeroElements zeroes = new MoveZeroElements();
+        // zeroes.moveZeroElements(new int[] { 0, 0, 1, 0, 3, 4, 0, 0, 5 });
+        // zeroes.moveZeroElements(new int[] { 7, 9, 0, 1, 0, 0, 3, 4, 0, 0, 5 });
         return;
     }
 }

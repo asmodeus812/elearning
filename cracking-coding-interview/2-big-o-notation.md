@@ -25,8 +25,7 @@ another input parameter, which is in play. The dependent arguments might also be
 indirectly connected to the input, and be a function of the input instead.
 
 `Big O allows us to describe how the run or space complexity scales, and not to
-measure absolute units of time or space. This is crucial to understand and
-grasp.`
+measure absolute units of time or space.`
 
 # Big theta and omega
 
@@ -55,7 +54,7 @@ worse than the other, they are listed in order of the fastest to the slowest
 1. Constant - `O(1)` - array access
 2. Logarithmic - `O(log(n))` - binary search
 3. Linear - `O(N)` - array print
-4. N\*Logarithmic - `O(N \* log(n))` - quick sort
+4. N\*Logarithmic - `O(N*log(n))` - quick sort
 5. Quadratic - `O(N^2)` - bubble sort
 6. Exponential - `O(2^N)` - Fibonacci sequence
 7. Factorial = `O(n!)` - string permutations
@@ -127,7 +126,7 @@ about our input.
 
 When would one add two complexities or multiply them. The rules are as follows
 
--   if for each `A chunks of work, we do B chunks of work`, then we multiply,
+-   if for `each A chunks of work, we do B chunks of work`, then we multiply,
     this is mostly expressed as nested loops or similar loop like actions.
 
 -   if however the work done for `each chunk of A and each chunk of B,` then we add
@@ -210,7 +209,7 @@ tree formed by the call stack). In our case, the depth D is 4, the bottom most
 level is 3, the level above it is 2, the one above it is 1, and the final one
 with the root node, where we start f(4) is 0. Therefore at most `2^4 - 1 = 15`
 function calls. Note that each level (in this specific example, which is a
-perfectly balanced binary tree, each level has exactly 2^depth number of nodes)
+perfectly balanced binary tree) has exactly `2^(current-depth)` number of nodes
 
 ```txt
                   f(4)                         2^0 = 1
@@ -231,8 +230,12 @@ increase in N, the number of calls doubles. The branching factor of our
 algorithm is 2 (we have 2 function calls per invocation of f)
 
 Note that, by coincidence, the depth (D) of the tree (formed by the call stack)
-and the input here match, so N == D, levels, but do not confuse the depth of the
+and the input here match, so `N == D`, levels, but do not confuse the depth of the
 tree, and the input N. The depth does not express the run-time complexity, or in
-other words the run-time complexity is not governed by the depth. The generated
-call stack tree, and its depth is a bi product of the simple example / algorithm
-we have provided. The algorithm scales with the input `number N` and `N` alone
+other words the `run-time complexity is not governed by the depth`. The generated
+call stack tree, and its depth is a bi product of the input and algorithm itself
+The algorithm scales with the input `number N` and `N` alone.
+
+Changes in `N` and the algorithm will produce different depth, different scaling
+and different run- time and space complexities (e.g, we had 3 recursive calls to
+N-1 to calculate N)
