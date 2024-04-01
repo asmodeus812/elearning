@@ -372,3 +372,329 @@ incrementing the count, and we notice a non-matching character, we can early
 bail out, the sub-string sequence is broken, meaning it is not contained.
 
 # Arrays
+
+## Reversing array
+
+One of the most common algorithms, that is not that complex but comes up often
+and is something that should be understood. The approach basically walks the
+array from both ends, and swaps elements at both ends of the array, while the
+two pointers, end and start meet. The moment start overlaps with end we can stop
+with the swapping. Key thing to note here is that start has to become strictly
+bigger or equal than end
+
+```java
+int[] reverse(int[] input, int start, int end) {
+    while (start < end) {
+        // general swap method, nothing special, swap the elements at both ends
+        int tmp = input[start];
+        input[start] = input[end];
+        input[end] = tmp;
+
+        // move start forward and end backward, do this until they basically meet
+        start++;
+        end--;
+    }
+    return input;
+}
+```
+
+```txt
+   [1, 2, 3, 4, 5, 6] s = 0, e = 5
+
+   [6, 2, 3, 4, 5, 1] s = 1, e = 4
+
+   [6, 5, 4, 5, 2, 1] s = 2, e = 3
+
+                      s = 3, e = 2
+```
+
+## Rotating array
+
+This problem extends off of the base problem of rotating an array, what rotating an array means
+is rotating it such that the elements are pushed forward, from some position `k` and they loop
+around the end of the array and are `pushed` at the beginning of the array
+
+```txt
+   [1, 2, 3, 4, 5, 6]
+
+   [5, 6, 1, 2, 3, 4]
+```
+
+In the example above the rotation factor `k` is 2, note that if the rotation
+factor is 0, that would imply we simply have to only reverse the array, and that
+is that. That is simply a special case of the rotation problem, but the rotation
+problem itself is solved by reversing the array around the rotation factor `k`
+
+```java
+int[] rotate(int[] input, int k) {
+    // first reverse the entire array, this is the base case
+    input = reverse(input, 0, input.length - 1);
+
+    // then reverse from the start to the `k`-th element
+    input = reverse(input, 0, k - 1);
+
+    // finally reverse the elements from `k` to the end of the array
+    input = reverse(input, k, input.length - 1);
+    return input;
+}
+```
+
+```txt
+   [1, 2, 3, 4, 5, 6] - input starting array
+
+   [6, 5, 4, 3, 2, 1] - reverse entire array
+
+   [5, 6, 4, 3, 2, 1] - reverse from 0 - (k - 1)
+
+   [5, 6, 1, 2, 3, 4] - reverse from k - (l - 1)
+```
+
+## Move zeroes
+
+Another interesting problem, is moving all zero (or any other value) elements in
+an array at the end, in-place. The way this is achieved is by keeping a pointer
+where non-zero elements are placed, starting from the beginning of the array.
+When the current element is a zero and the next one is not, we put the non-zero
+element at the current pointer position `s`, then we move the pointer `s`
+forward, and zero out the next element i.e. `[i - 1]`. A side case that we need
+to handle is when the current element is non zero, we also need to move the
+pointer `s` forward, this will make sure that we skip over non-zero elements and
+both `i` and `s` are incrementing in sync, so we do not override the actual
+non-zero element later on.
+
+```java
+int[] movez(int[] input) {
+    int s = 0; // pointer into last non zero element in the array
+    for (int i = 0; i < input.length - 1; i++) {
+        if (input[i] == 0 && input[i + 1] != 0) {
+            // when the current element is a 0 and the next one is not,
+            // swap with the 0th element, and move the current non-zero
+            // element's pointer 's' forward
+            input[s] = input[i + 1];
+            input[i + 1] = 0;
+            s += 1;
+        } else if (input[i] != 0) {
+            // when the current element is not a 0, simply move the pointer
+            // forward, since it must not be moved from it's current position
+            s += 1;
+        }
+    }
+    return input;
+}
+```
+
+## Sum target
+
+Another problem which pops up real often is to find two elements in an array
+which sum to a given target sum. This is quite an interesting one, the way to
+solve it is to realize that we already have at least two of the variables, the
+target sum and one of the values, `s = x + y`. In this equation, the value of
+`x` is the current element from the array (while traversing), the value of `y`
+we can calculate by re-arranging it such that `y = s - x`. Meaning that we
+simply search in the array for the value of `y`. If there is such we simply
+remember the index of that value or print it out, whatever the solution
+requires. In these tasks it is often assumed that a pair will exist, meaning
+that if the current value of `x` is the same as the sum we have to find a `0` in
+the array, that would be the second part of the pair
+
+Note that in the inner loop where we look for the value, we already start from
+`i + 1`, why is that the case ? Well since `i` starts from the beginning of the
+array, we are always going to find the second value in the `i + 1` subarray. If
+such a value exists, of course. The break below is not needed, but we assume the
+elements are unique, in any case if they are not, the array can be made unique
+or the break can be removed
+
+```java
+int[] sum(int[] input, int target) {
+    List<Integer> pairs = new LinkedList<>();
+    for (int i = 0; i < input.length; i++) {
+        // since we have the target sum, and the current element
+        // we can find the second element we need, by subtracting
+        // the current element from the target sum
+        int result = target - input[i];
+
+        // the result is the element we are going to look for in
+        // the sub-array from i - length. We also assume that
+        // a pair should exist if the target == input[i], we should
+        // look for an element with a value of 0 in the array
+        for (int j = i + 1; j < input.length; j++) {
+            if (result == input[j]) {
+                // add the pairs of elements which sum up to target
+                // note that we assume the array does not contain
+                // duplicates, for simplicty, break
+                pairs.add(i);
+                pairs.add(j);
+                break;
+            }
+        }
+    }
+
+    // return the array of pairs where each two indices are pairs
+    return pairs.stream().mapToInt(Integer::intValue).toArray();
+}
+```
+
+## Sub array
+
+Another very often asked problem is to find of sub-array which produces the
+biggest sum. While the array can have negative numbers. The way this solution
+works, is by tracking the current max sum, and resetting the sum every time
+a better sum is reached
+
+The most important part here is the current sum tracking. What happens is we
+compare the local sum accumulated so far with the current element, if the
+current element is greater than the local sum + current element, the sequence
+'resets', at the current index `i`, otherwise the sequence continues. By resets,
+what we really mean is that the current element is greater than the local sum
+accumulated so far meaning that that accumulation can be discarded, we have
+found a better local sum sequence
+
+```txt
+    [-2, 1, -3, 4, -1, 2, 1, -5, 4]
+```
+
+Take the example above, starting off the local sum is `-2`, then the local sum
+will be summed with `1`, producing `-2 + 1 = -1`, however, the element itself is
+`1`, greater than the local sum, meaning that between the sequence of elements
+`-2, 1` and simply sequence starting at element `1`, the second one is producing
+a greater total sum = 1. Then in the next step we go to `-3`, where the current
+local sum will be `1 + (-3) = -2`, which is better than the element itself `-3`,
+meaning the sequence will be extended to elements `1, -3` not reset. Third step
+the element is `4`, the sum so far is `-2`, between `-2 + 4 = 2` and the element
+`4` itself, we can see the local sum will be greater if we reset the sequence to
+start at the current element `4`. This process of either extending the sequence
+or resetting it at the current element keeps going on until we finish with all
+elements, at the end the `max` value will hold the biggest local sum ever
+encountered
+
+```java
+int subarray(int[] nums) {
+    if (nums == null || nums.length == 0) {
+        return 0;
+    }
+
+    int max = nums[0];
+    int current = nums[0];
+
+    for (int i = 1; i < nums.length; i++) {
+        // either extend the current subarray or start a new subarray from nums[i]
+        current = Math.max(nums[i], current + nums[i]);
+        // update the maximum sum found so far
+        max = Math.max(max, current);
+    }
+
+    return max;
+}
+```
+
+A brief follow up of the steps above, could look like this
+
+```txt
+   inut-array: n[-2, 1, -3, 4, -1, 2, 1, -5, 4]
+   curr-sum:   c = -2
+   max-sum:    m = -2
+
+   looping i = 1 -> l
+        c = max(1, -2 + 1) -> 1 - seq reset, starts at i = 1
+        m = max(-2, 1) -> 1 - new total max is found, set it
+
+   looping i = 2 -> l
+        c = max(-3, 1 + (-3)) -> -2 - seq continues, starts at i = 1, ends in j = 2
+        m = max(1,  1) -> 1 -> total max is retained so far no bigger sum is found
+
+   looping i = 3 -> l
+        c = max(4, -2 + 4) -> 4 - seq resets, starts at i = 3
+        m = max(1, 4) -> 4 -> new total max is found, set it
+
+   looping i = 4 -> l
+        c = max(-1, 4 + (-1)) -> 3 - seq continues, starts at i = 3, ends in j = 4
+        m = max(4, 3) -> 4 -> total max is retained so far no bigger sum is found
+
+   looping i = 5 -> l
+        c = max(2, 3 + 2) -> 5 - seq continues, starts at i = 3, ends in j = 5
+        m = max(4, 5) -> 5 -> new total max is found, set it
+
+   the steps keep repeating, until the entire array is exhaused, and finally we find
+   in the end the max sum is actually 5, produced by these 4 elements - [4, -1, 2, 1]
+```
+
+## Array removal
+
+There are basically two general ways to do array removal, for a given index
+element that has to be removed, assume that the implementations account for
+re-sizing the capacity of the array to reduce the capacity if needed
+
+-   swap the element to be removed with the last element, when order is not
+    important
+-   shift down all elements right - left, starting from the index of the element
+    to be removed
+
+### Swap solution
+
+This is usually included in gotcha questins, where the order of array elements
+often does not matter, meaning that we can simply place the last element over
+the element to be removed, which is often enough to consider this implementation
+as 'removal'
+
+```java
+void remove(int[] n, int i) {
+    n[i] = n[n.size - 1];
+    n.size--;
+}
+```
+
+### Shift solution
+
+Following elements are `pulled` down overriding elements starting at index `k`,
+which is the index to be removed, the element at that index is assigned the next
+element, and so on, until the end of the array, this has the effect of pulling
+down all elements by one, shifting them to the left.
+
+```java
+void remove(int[] n, int k) {
+    for (int i = k; i < n.size - 1; i++) {
+        n[k] = n[k + 1];
+    }
+    n.size--;
+}
+```
+
+## Array insert
+
+Similarly we have two options here, assume that the implementations account for
+re-sizing the capacity of the array to fit the new elements, if needed
+
+-   inserted at the end of the array, set element at [len - 1] = value, when array
+    is big enough
+-   inserted at some given index position, where elements are shifted left -
+    right, starting from the index to be inserted at
+
+### Append solution
+
+Simply append the element at the last possible, free position, which in this
+case is index `size`, that is the new last free space in the array.
+
+```java
+void insert(int[] n, int v) {
+    n[n.size] = v
+    n.size++;
+}
+```
+
+### Shift solution
+
+In this solution the elements are pulled towards the end of the array, note that
+`size` below refers to the actual number of elements present in the array, we
+start off from index `size` due to the fact we are inserting one element,
+meaning that index `size` will be the new last index after the insertion is
+done.
+
+```java
+void insert(int[] n, int v, int k) {
+    for (int i = n.size; i > k; --i) {
+        n[i] = n[i - 1];
+    }
+    n[k] = v;
+    n.size++;
+}
+```
