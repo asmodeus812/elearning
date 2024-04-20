@@ -22,16 +22,19 @@ The major principles here are as follows
     down approach, where the recursion calls will drill down from top to the bottom,
     base cases first, and then ascend the recursive call stack.
 
--   iterative - when we have some idea of how to build off of the base cases, or
-    if it makes more sense to use the base cases to accumulate them to compute
-    further
+-   iterative - very similar to the recursive approach, however it often uses a
+    table to store results, and build future results off of this table, usually the
+    table is initialized with one positive case, the base case, and everything else
+    is initialized with the negative case, the size of the array is usually based on
+    the argument which will be mutated, and that same argument is used to `key` into
+    the table/array
 
 ## Types
 
 -   bottom up - this is when we start the problem solving from the base case,
     for example to solve the Fibonacci sequence we will start from the two base
-    cases, in this case the first two numbers of the Fibonacci sequence are `1 and
-1`, from this we built the solution from `the bottom to the top`
+    cases, in this case the first two numbers of the Fibonacci sequence are 1 and 1,
+    from this we built the solution from `the bottom to the top`
 -   top down - this is the inverse of the bottom up approach where we build the
     solution by starting with some final `end paramter`, and is mostly used with
     recursive approach, where the recursive calls drill down to the base cases
@@ -53,7 +56,7 @@ The major principles here are as follows
 
 # Steps
 
-There is a common pattern, or sequence to be followed when we try to solve these problems. Below each item of the list to follow is accompanied by a simple example following the `canSumSequence` dynamic programming problem / task
+## Recursive approach
 
 -   identify the input arguments
 
@@ -141,6 +144,42 @@ There is a common pattern, or sequence to be followed when we try to solve these
     ```
 
 -   go through the problem and execution flow by drawing a stack call tree
+
+## Iterative approach
+
+-   identify the input arguments
+
+    ```java
+        // the primary input arguments to the function
+        int target, int[] sequence
+    ```
+
+-   identify which input arguments will mutate, and which will not, remain constant
+
+    ```java
+        // will be mutated on each call to the function, target is reduced on each call
+        // the main sequence of numbers remains `unchanged`, across all function calls
+        target
+    ```
+
+-   create the iterative table, make sure the size is correct
+
+```java
+```
+
+-   use a simple example to find the base cases, the negative and positive ones
+
+    ```java
+        // negative base case, when target reaches negative value
+        if (target < 0) {
+            return false;
+        }
+
+        // positive, affirmation base case when target is equal/reaches to 0
+        if (target == 0) {
+            return true;
+        }
+    ```
 
 # Recursive problems
 
@@ -254,100 +293,6 @@ To see why the space complexity is O(d) - we can see that once we reach the
 bottom of the recursion in the following call path - `5 -> 4 -> 3 -> ( 2 + 1)`,
 stack has at this point consists of 5 calls to the fib function. Then the
 recursion stack unwinds, and it will never be deeper than N.
-
-## Grid counter
-
-Another common task is, given a grid of NxM cells. Where N is the number of
-rows, and M is the number of cols, find all possible ways to get from the top
-left corner (start) to the bot right one (end).
-
-This one, similarly to Fibonacci, is also leveraging recursion and memoization,
-in this task we are required to basically compute all possible ways to go from
-one start position to another, while we can move only in two directions, which
-are right and down, to reach the bottom right (end) coordinates.
-
-In the example below the grid coordinates start from 1,1 and the end coordinates
-and size of the grid is defined by the input arguments to the `count` function
-R,C
-
-```java
-static final class GridPathCounter {
-
-    // hold a string key which represents the count for the specific coordinates of the current row and col, [r,c]. The reason we can
-    // use memo here is that once a given coordinate position of row,col is visited, we do not have to visit it again, all paths
-    private final Map<String, Integer> MEMO = new HashMap<>();
-
-    public int count(int r, int c) {
-        // when either of the coordinates points at an invalid position, then there are no valid paths to reach the end goal, there is
-        // no grid where the row or columns can be 0, remember the rows and cols here are defined positions, therefore they must be
-        // greater or equal to 1
-        if (r == 0 || c == 0) {
-            return 0;
-        }
-
-        // in a grid of 1x1, there is only 1 path between the start, top left, and the end, bot right, and both are exactly the same
-        // grid cell
-        if (r == 1 && c == 1) {
-            return 1;
-        }
-
-        // build a unique key, from the current pair of coordinates, this will ensure we can key the map, correctly and have a unique
-        // key - value relation between the coordinates and the count of paths to these specific coordinates
-        String key = String.format("%d,%d", r, c);
-        if (MEMO.containsKey(key)) {
-            return MEMO.get(key);
-        }
-
-        // calculate the count paths, from the current position to the previous, possible positions, from the current position of
-        // [row,col] we can either go up a row, or to the left in the col coordinates.
-        int count = count(r - 1, c) + count(r, c - 1);
-
-        // remember the count for this specific combination of rows and cols using the unique key, note the key is delimiting the
-        // coordinates with a coma, which is a good idea, to ensure uniqueness of pairs. Why does remembering the key work, well since
-        // we go in both directions, in this case first in the row the col, it is possible for one branch of these two, to each a
-        // specific path first, meaning that when the second branch goes through, and sees the same path i.e coordinates they have been
-        // already visisted and computed, this ONLY works, because we are doing a top down approach, where the recursive calls drill
-        // down to the bottom, to the base cases and then ascends up, accumulating the count for specific paths.
-        MEMO.put(key, count);
-        return count;
-    }
-}
-```
-
-The memo approach in this task is rather important, first the key has to be
-unique, to make sure we can correctly distinguish between the combination of row
-x col pairs, secondly we can not swap those since those coordinates represent
-specific unique position pairs.
-
-```java
-    // call the path grid counter with a grid of 2 rows and 3 columns
-    gridCounter.count(2, 3)
-```
-
-```txt
-          (2, 3)
-        /        \
-    (1, 3)       (2, 2)
-   /     \       /     \
-(0, 3)  (1, 2) (1, 2) (2, 1)
-        /    \        /     \
-     (0, 2) (1, 1)  (1, 1) (2, 0)
-```
-
-If we have a look at an example of 2x3 grid below, we can notice a few nice
-properties and make several observations by just looking at the tree
-representing the call stack
-
--   the `count` function is called with the max coordinates (NxM), the recursive
-    approach is top down
--   going to the left in the tree means we go up a row (row - 1)
--   going to the right in the tree means we go left a col (col - 1)
--   the pair branch root pair of `(1, 2)`, is contained twice, this is where
-    memo will store the first time (coming from the row sub-path) it was visisted
-    and simply reference it from the memo table the second time (coming from the col
-    sub-path)
--   nodes that contain `0` in one of their pairs are invalid, and indeed grids
-    with 0 dimensions are not valid according to our task
 
 ## Can sum
 
@@ -810,6 +755,100 @@ the already well established pattern, of
 -   returning the result of the computation
 -   memoization of the results
 
+## Grid counter
+
+Another common task is, given a grid of NxM cells. Where N is the number of
+rows, and M is the number of cols, find all possible ways to get from the top
+left corner (start) to the bot right one (end).
+
+This one, similarly to Fibonacci, is also leveraging recursion and memoization,
+in this task we are required to basically compute all possible ways to go from
+one start position to another, while we can move only in two directions, which
+are right and down, to reach the bottom right (end) coordinates.
+
+In the example below the grid coordinates start from 1,1 and the end coordinates
+and size of the grid is defined by the input arguments to the `count` function
+R,C
+
+```java
+static final class GridPathCounter {
+
+    // hold a string key which represents the count for the specific coordinates of the current row and col, [r,c]. The reason we can
+    // use memo here is that once a given coordinate position of row,col is visited, we do not have to visit it again, all paths
+    private final Map<String, Integer> MEMO = new HashMap<>();
+
+    public int count(int r, int c) {
+        // when either of the coordinates points at an invalid position, then there are no valid paths to reach the end goal, there is
+        // no grid where the row or columns can be 0, remember the rows and cols here are defined positions, therefore they must be
+        // greater or equal to 1
+        if (r == 0 || c == 0) {
+            return 0;
+        }
+
+        // in a grid of 1x1, there is only 1 path between the start, top left, and the end, bot right, and both are exactly the same
+        // grid cell
+        if (r == 1 && c == 1) {
+            return 1;
+        }
+
+        // build a unique key, from the current pair of coordinates, this will ensure we can key the map, correctly and have a unique
+        // key - value relation between the coordinates and the count of paths to these specific coordinates
+        String key = String.format("%d,%d", r, c);
+        if (MEMO.containsKey(key)) {
+            return MEMO.get(key);
+        }
+
+        // calculate the count paths, from the current position to the previous, possible positions, from the current position of
+        // [row,col] we can either go up a row, or to the left in the col coordinates.
+        int count = count(r - 1, c) + count(r, c - 1);
+
+        // remember the count for this specific combination of rows and cols using the unique key, note the key is delimiting the
+        // coordinates with a coma, which is a good idea, to ensure uniqueness of pairs. Why does remembering the key work, well since
+        // we go in both directions, in this case first in the row the col, it is possible for one branch of these two, to each a
+        // specific path first, meaning that when the second branch goes through, and sees the same path i.e coordinates they have been
+        // already visisted and computed, this ONLY works, because we are doing a top down approach, where the recursive calls drill
+        // down to the bottom, to the base cases and then ascends up, accumulating the count for specific paths.
+        MEMO.put(key, count);
+        return count;
+    }
+}
+```
+
+The memo approach in this task is rather important, first the key has to be
+unique, to make sure we can correctly distinguish between the combination of row
+x col pairs, secondly we can not swap those since those coordinates represent
+specific unique position pairs.
+
+```java
+    // call the path grid counter with a grid of 2 rows and 3 columns
+    gridCounter.count(2, 3)
+```
+
+```txt
+          (2, 3)
+        /        \
+    (1, 3)       (2, 2)
+   /     \       /     \
+(0, 3)  (1, 2) (1, 2) (2, 1)
+        /    \        /     \
+     (0, 2) (1, 1)  (1, 1) (2, 0)
+```
+
+If we have a look at an example of 2x3 grid below, we can notice a few nice
+properties and make several observations by just looking at the tree
+representing the call stack
+
+-   the `count` function is called with the max coordinates (NxM), the recursive
+    approach is top down
+-   going to the left in the tree means we go up a row (row - 1)
+-   going to the right in the tree means we go left a col (col - 1)
+-   the pair branch root pair of `(1, 2)`, is contained twice, this is where
+    memo will store the first time (coming from the row sub-path) it was visisted
+    and simply reference it from the memo table the second time (coming from the col
+    sub-path)
+-   nodes that contain `0` in one of their pairs are invalid, and indeed grids
+    with 0 dimensions are not valid according to our task
+
 # Iterative problems
 
 In this chapter we are going to solve the same issue as above, however taking
@@ -861,15 +900,13 @@ int fibonacci(int n) {
 }
 ```
 
-## Grid counter
-
 ## Can sum
 
- Given a target array of numbers, allowing number reuse from the array, find if
- there is at least one combination of the given numbers that sums up to the
- given target sum, note that the same number from the array can be repeated
- multiple times. To solve this task we have to come up with the basic base
- cases, where
+Given a target array of numbers, allowing number reuse from the array, find if
+there is at least one combination of the given numbers that sums up to the
+given target sum, note that the same number from the array can be repeated
+multiple times. To solve this task we have to come up with the basic base
+cases, where
 
 ```java
 boolean summable(int target, int[] sequence) {
@@ -972,3 +1009,239 @@ List<Integer> best(int target, int[] sequence) {
 ```
 
 ## Can construct
+
+A variation of the `cansum` problem where we have to now find if a `target word`
+can be constructed by taking `words from a dictionary` passed in as input
+arguments.
+
+The way this is solved by using iteration approach is a bit different, the key
+thing to note here is how to "encode" the characters of the target word, into
+the `boolean` table array we use. What we do here is first to make the boolean
+array of size `target.length + 1`
+
+```java
+boolean constructible(String target, String[] dictionary) {
+    // this is a generally good idea, overall, we can add this basic fallback case since we know that if the target word is empty,
+    // we can simply return true, we can build the empty string by not taking anything from the dictionary in the first place
+    if (target.isEmpty()) {
+        return true;
+    }
+
+    // we create the table here, which has to be of at least length + 1 size, this is explained below, on how the indices are mapped
+    // to represent substrings from the main target word
+    boolean[] table = new boolean[target.length() + 1];
+
+    // fill the array by default with false, we assume that we can not build the target word from the words in the dictionary first
+    Arrays.fill(table, false);
+
+    table[0] = true;
+    for (int i = 0; i < target.length(); i++) {
+        // we loop over the main target word, and update the table of boolean values, whenever we find a prefix taken from the
+        // current position `i` up until `i + word.length` from the string, that matches up with any of the words in the dictionary.
+        for (String word : dictionary) {
+            // for each word from the dictionary we check first if we can pull a prefix from the target word.
+            if (i + word.length() > word.length()) {
+                continue;
+            }
+            // we pull a prefix, based on the current position we are at `i` and the length of the current word from the dictionary.
+            String prefix = target.substring(i, i + word.length());
+            // if the prefix we pulled from the target word matches with the word from the dictionary, we can mark this position in
+            // the boolean table array as true
+            if (prefix.equalsIgnoreCase(word)) {
+                // now note what is going on here, the index we mark is actually not an index, it is a length or position, this is
+                // why we create the array to be target.length + 1, take the following example here, which follows the table updates
+                // target word - abcdef, dictionary - ["abc", "ab", "ef", "def"], table - [(a)t, (b)f, (c)f, (d)f, (e)f, (f)f, (-)f]
+
+                // i = 0 prefix is "abc", word "abc" from the dictionary table of booleans will become - [(a)t, (b)f, (c)f, (d)t, (e)f, (f)f, (-)f]
+                // i = 0 prefix is "ab", word "ab", from the dictionary table of booleans will become - [(a)t, (b)f, (c)t, (d)t, (e)f, (f)f, (-)f]
+                // i = 0 prefix is "ef", word "ef" from the dictionary table of booleans unchanged, there is no "ef" prefix starting from i = 0
+                // i = 1 prefix is "bcd" word is "abc" from the dictionary table of booleans unchanged, there is no "abc" prefix starting from i = 1
+                // i - keeps increasing table will change when i becomes equal to 3, where we find another prefix match, against word in the dictionary
+                // i = 3 prefix is "def" word is "abc" from the dictionary table of booleans unchanged, there is no "abc" prefix starting from i = 3
+                // i = 3 prefix is "def" word is "ab" from the dictionary table of booleans unchanged, there is no "ab" prefix starting from i = 3
+                // i = 3 prefix is "def" word is "ef" from the dictionary table of booleans unchanged, there is no "ef" prefix starting from i = 3
+                // i = 3 prefix is "def" word is "def" from the dictionary table of booleans will become - [(a)t, (b)f, (c)f, (d)t, (e)f, (f)f, (-)t]
+
+                // we can see that for the first prefix match of "abc", we marked at index / position i = 0, "abc".length = 3, target[3] = true
+                // we can see that for the second prefix match of "def", we marked at index / position i = 3, "def".length = 6, target[6] = true
+                table[i + word.length()] = true;
+            }
+        }
+    }
+
+    // return whatever value is stored at the last position available, remember that the table array is of target.length + 1,
+    // meaning that at index target.length we will hold the actual answer, if we can build the target word from the dictionary of
+    // words.
+    return table[target.length()];
+}
+```
+
+If we go through the implementation above, we can track how the `boolean` table
+will change, remember we go through the length of the target word, and for each
+`char` from the target word, we go through each word of the dictionary. We then
+take a prefix starting from the current character we are at `i` and the prefix
+is from `i` to `i + word.length`. If the prefix from the target word matches
+the current word from the dictionary we can set that position in the `boolean`
+table to true, `table[i + word.length] = true`
+
+Take a good note at the index that is being set above, it is actually taken from
+the current index `i` position we are at in the target word plus the length of
+the current word from the dictionary, this means that if we find that there are
+words that can build up the target word, the final position in the `boolean` table
+that will be set to true and that we need to check is actually
+`table[target.length]`, if we have a `true` value at that position in the
+`boolean` table we can conclude that there were words from the dictionary which
+make up the target word
+
+Taking the following example for the given words, we can see which ones can up
+the target word immediately, there are a few options
+
+```txt
+target - abcdef
+dictionary - ["ab", "abc", "cd", "ef", "def", "abcd"]
+combinations - ["abc", "def"], ["ab", "cd", "ef"], ["abcd", "ef"].
+```
+
+```txt
+i = 0 prefix is "ab", word "ab" from the dictionary table of booleans - [2] = true <> [(a)t, (b)f, (c)t, (d)f, (e)f, (f)f, (-)f]
+i = 0 prefix is "abc", word "abc" from the dictionary table of booleans - [3] = true <> [(a)t, (b)f, (c)t, (d)t, (e)f, (f)f, (-)f]
+i = 0 prefix is "ab", word "cd" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+i = 0 prefix is "ab", word "ef" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+i = 0 prefix is "abcd", word "abcd" from the dictionary table of booleans - [4] = true <> [(a)t, (b)f, (c)t, (d)t, (e)t, (f)f, (-)f]
+
+i = 1 prefix is "bc", word "ab" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+i = 1 prefix is "bcd", word "abc" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+i = 1 prefix is "bc", word "cd" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+i = 1 prefix is "bc", word "ef" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+i = 1 prefix is "bcde", word "abcd" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+
+i = 2 prefix is "cd", word "ab" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+i = 2 prefix is "cde", word "abc" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+i = 2 prefix is "cd", word "cd" from the dictionary table of booleans - [4] = true <> [(a)t, (b)f, (c)t, (d)t, (e)t, (f)f, (-)f]
+i = 2 prefix is "cd", word "ef" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+i = 2 prefix is "cdef", word "abcd" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+
+i = 3 prefix is "de", word "ab" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+i = 3 prefix is "def", word "abc" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+i = 3 prefix is "de", word "cd" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+i = 3 prefix is "de", word "ef" from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)
+i = 3 prefix is "def", word "def" from the dictionary table of booleans - [6] = true <> [(a)t, (b)f, (c)t, (d)t, (e)t, (f)f, (-)t]
+```
+
+We can already see that by the time we go through `i = 3`, the position `tbl[6]` in
+the `boolean` table, has already become true, which means that there are certainly
+words in the dictionary which build up to the target word, we can keep going
+here, but we can also early bail from the iterations, since we have found what
+we need to know.
+
+## Count construct
+
+A variation of the task above which aims at counting the total number of times
+the target string can be constructed from a set of words in a dictionary, needs
+a few small changes, but follows the same recipe.
+
+```java
+int count(String target, String[] dictionary) {
+    // this is a generally good idea, overall, we can add this basic fallback case since we know that if the target word is empty,
+    // we can simply return 1, we can build the empty string by not taking anything from the dictionary in the first place
+    if (target.isEmpty()) {
+        return 1;
+    }
+
+    // we create the table here, which has to be of at least length + 1 size, this is explained below, on how the indices are mapped
+    // to represent substrings from the main target word
+    int[] table = new int[target.length() + 1];
+
+    // fill the array by default with 0, we assume that we can not build the target word from the words in the dictionary first
+    Arrays.fill(table, 0);
+
+    // default value, which will be used to start the accumulation of the total count
+    table[0] = 1;
+    for (int i = 0; i < target.length(); i++) {
+        // we loop over the main target word, and update the table of boolean values, whenever we find a prefix taken from the
+        // current position `i` up until `i + word.length` from the string, that matches up with any of the words in the dictionary.
+        for (String word : dictionary) {
+            // for each word from the dictionary we check first if we can pull a prefix from the target word.
+            if (i + word.length() > target.length()) {
+                continue;
+            }
+            // we pull a prefix, based on the current position we are at `i` and the length of the current word from the dictionary.
+            String prefix = target.substring(i, i + word.length());
+            if (prefix.equalsIgnoreCase(word)) {
+                // each time we reach this index, e will increment the count here, this position can be reached multiple times from
+                // multiple dictionary words, in the end we will have the table containing all possible combinations, remember that
+                // we have a default value of 1 for i = 0, each time we hit this branch we will accumulate the current count at [i]
+                // at the [i + w.len].
+                table[i + word.length()] += table[i];
+            }
+        }
+    }
+
+    // return whatever value is stored at the last position available, remember that the table array is of target.length + 1,
+    // meaning that at index target.length we will hold the actual answer, if we can build the target count
+    return table[target.length()];
+}
+```
+
+You will note that the general algorithm follows the same idea, however here we are accumulating the current count to the next, each time we find a new prefix match at `table[i + w.len]` we accumulate to that value the current count at `table[i]`. Why is that ? Well if we can construct at [i + w.len] that means that we have already constructed at [i], therefore we take the current count at [i] and accumulate it. The idea is very much the same as the example above, each time we reach a certain string state, for example
+
+```txt
+target - abcdef
+dictionary - ["ab", "abc", "cd", "ef", "def", "abcd"]
+combinations - ["abc", "def"], ["ab", "cd", "ef"], ["abcd", "ef"].
+```
+
+Here is a very brief flow of how the accumulation happens when we go through the
+string and the words, below we are only looking for the positive `true` branch
+cases where the `prefix` matches the current word from the dictionary, the most
+important things to note is the current value if `i` as well as the current
+value stored at `table[i]`, which will be used to accumulate at `table[i +
+w.len`]. We accumulate only when the current prefix taken from the main target
+word matches the current word from the dictionary, and we also loop through each
+character in the target word
+
+We reach the word from dictionary `ab` only once, so the count in the table at
+`ab` position (which is table[2] += table[0]) will be one, `i = 0`
+
+We reach the word from dictionary `abc` only once, so the count in the table at
+`abc` position (which is table[3] += table[0]) will be one, `i = 0`
+
+We reach the word from dictionary `abcd` only once, so the count in the table at
+`abcd` position (which is table[4] += table[0]) will be one, `i = 0`
+
+Eventually here is where the interesting part comes in, when `i > 0` and we find
+a sub-prefix, like the ones presented below, is how the accumulation works
+
+We reach the word from dictionary `cd` twice, so at this point after we have
+processed over `cd` the count at that index will be 2, (which is `table[2 + 2]`,
+since `cd` starts at index 2, and is of length 2, therefore it ends at position
+`4`, due to the formula of `table[i + word.length]`. The first time we go
+through it is actually when `[i] = 0`, and the word is `abcd`, then we will set
+`table[0 + 4] += table[0]` (table[0] is actually the default, base value 1,
+always). The second time is when we are at `[i] = 2`, and the current words is
+`cd`, then we will set `table[2 + 2] += table[2]` (table[2] is actually the
+count for `ab`). At the end we therefore have a value of `2` at the `table[4]`
+position, and that is indeed true, we can reach `abcd` from two routes.
+
+We reach the word from dictionary `def` only once, `i = 3`. This is because to
+reach `def` the current `i = 3`, with the length of `def = 3`, therefore the
+value at `table[3 + 3] += table[3]`, remember that at `table[3]` we have a count
+of 1 already, that is `abc`
+
+We reach the word from dictionary `ef` only once, `i = 4`. This is because to
+reach `ef` the current `i = 4`, with the length of `ef = 2`, therefore the value
+at `table[4 + 2] += table[4]`, remember that at `table[4]` we have a count of 2
+already, that is `abcd` and `ab cd`. Now since at table[6] we already had `1`
+from the step above, when we reached `def`, we add to that the value at
+`table[4]` which is 2 at this point, meaning at now at `table[6] = 3`. And that
+is indeed the actual total number of ways to build `abcdef` from the given
+dictionary of words.
+
+## Grid counter
+
+Another common task is, given a grid of NxM cells. Where N is the number of
+rows, and M is the number of cols, find all possible ways to get from the top
+left corner (start) to the bot right one (end).
+
+To solve this problem iteratively we have to change the way we inspect the
+

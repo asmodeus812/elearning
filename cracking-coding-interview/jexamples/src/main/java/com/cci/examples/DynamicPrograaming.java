@@ -567,6 +567,72 @@ public class DynamicPrograaming {
             MEMO.put(target, false);
             return false;
         }
+
+        public boolean canConstructWordIterative(String target, String[] dictionary) {
+            // this is a generally good idea, overall, we can add this basic fallback case since we know that if the target word is empty,
+            // we can simply return true, we can build the empty string by not taking anything from the dictionary in the first place
+            if (target.isEmpty()) {
+                return true;
+            }
+
+            // we create the table here, which has to be of at least length + 1 size, this is explained below, on how the indices are mapped
+            // to represent substrings from the main target word
+            boolean[] table = new boolean[target.length() + 1];
+
+            // fill the array by default with false, we assume that we can not build the target word from the words in the dictionary first
+            Arrays.fill(table, false);
+
+            table[0] = true;
+            for (int i = 0; i < target.length(); i++) {
+                // we loop over the main target word, and update the table of boolean values, whenever we find a prefix taken from the
+                // current position `i` up until `i + word.length` from the string, that matches up with any of the words in the dictionary.
+                for (String word : dictionary) {
+                    // for each word from the dictionary we check first if we can pull a prefix from the target word.
+                    if (i + word.length() > target.length()) {
+                        continue;
+                    }
+                    // we pull a prefix, based on the current position we are at `i` and the length of the current word from the dictionary.
+                    String prefix = target.substring(i, i + word.length());
+                    // if the prefix we pulled from the target word matches with the word from the dictionary, we can mark this position in
+                    // the boolean table array as true
+                    if (prefix.equalsIgnoreCase(word)) {
+                        // now note what is going on here, the index we mark is actually not an index, it is a length or position, this is
+                        // why we create the array to be target.length + 1, take the following example here, which follows the table updates
+                        // target word - abcdef, dictionary - ["abc", "ab", "ef", "def"], table - [(a)t, (b)f, (c)f, (d)f, (e)f, (f)f, (-)f]
+
+                        // i = 0 prefix is "abc", word "abc" from the dictionary table of booleans will become - [(a)t, (b)f, (c)f, (d)t,
+                        // (e)f, (f)f, (-)f]
+                        // i = 0 prefix is "ab", word "ab", from the dictionary table of booleans will become - [(a)t, (b)f, (c)t, (d)t,
+                        // (e)f, (f)f, (-)f]
+                        // i = 0 prefix is "ef", word "ef" from the dictionary table of booleans unchanged, there is no "ef" prefix starting
+                        // from i = 0
+                        // i = 1 prefix is "bcd" word is "abc" from the dictionary table of booleans unchanged, there is no "abc" prefix
+                        // starting from i = 1
+                        // i - keeps increasing table will change when i becomes equal to 3, where we find another prefix match, against
+                        // word in the dictionary
+                        // i = 3 prefix is "def" word is "abc" from the dictionary table of booleans unchanged, there is no "abc" prefix
+                        // starting from i = 3
+                        // i = 3 prefix is "def" word is "ab" from the dictionary table of booleans unchanged, there is no "ab" prefix
+                        // starting from i = 3
+                        // i = 3 prefix is "def" word is "ef" from the dictionary table of booleans unchanged, there is no "ef" prefix
+                        // starting from i = 3
+                        // i = 3 prefix is "def" word is "def" from the dictionary table of booleans will become - [(a)t, (b)f, (c)f, (d)t,
+                        // (e)f, (f)f, (-)t]
+
+                        // we can see that for the first prefix match of "abc", we marked at index / position i = 0, "abc".length = 3,
+                        // target[3] = true
+                        // we can see that for the second prefix match of "def", we marked at index / position i = 3, "def".length = 6,
+                        // target[6] = true
+                        table[i + word.length()] = true;
+                    }
+                }
+            }
+
+            // return whatever value is stored at the last position available, remember that the table array is of target.length + 1,
+            // meaning that at index target.length we will hold the actual answer, if we can build the target word from the dictionary of
+            // words.
+            return table[target.length()];
+        }
     }
 
     /**
@@ -613,6 +679,47 @@ public class DynamicPrograaming {
             // dictionary words exist that make up the target word.
             MEMO.put(target, counter);
             return counter;
+        }
+
+        public int countConstructWordIterative(String target, String[] dictionary) {
+            // this is a generally good idea, overall, we can add this basic fallback case since we know that if the target word is empty,
+            // we can simply return 1, we can build the empty string by not taking anything from the dictionary in the first place
+            if (target.isEmpty()) {
+                return 1;
+            }
+
+            // we create the table here, which has to be of at least length + 1 size, this is explained below, on how the indices are mapped
+            // to represent substrings from the main target word
+            int[] table = new int[target.length() + 1];
+
+            // fill the array by default with 0, we assume that we can not build the target word from the words in the dictionary first
+            Arrays.fill(table, 0);
+
+            // default value, which will be used to start the accumulation of the total count
+            table[0] = 1;
+            for (int i = 0; i < target.length(); i++) {
+                // we loop over the main target word, and update the table of boolean values, whenever we find a prefix taken from the
+                // current position `i` up until `i + word.length` from the string, that matches up with any of the words in the dictionary.
+                for (String word : dictionary) {
+                    // for each word from the dictionary we check first if we can pull a prefix from the target word.
+                    if (i + word.length() > target.length()) {
+                        continue;
+                    }
+                    // we pull a prefix, based on the current position we are at `i` and the length of the current word from the dictionary.
+                    String prefix = target.substring(i, i + word.length());
+                    if (prefix.equalsIgnoreCase(word)) {
+                        // each time we reach this index, e will increment the count here, this position can be reached multiple times from
+                        // multiple dictionary words, in the end we will have the table containing all possible combinations, remember that
+                        // we have a default value of 1 for i = 0, each time we hit this branch we will accumulate the current count at [i]
+                        // at the [i + w.len].
+                        table[i + word.length()] += table[i];
+                    }
+                }
+            }
+
+            // return whatever value is stored at the last position available, remember that the table array is of target.length + 1,
+            // meaning that at index target.length we will hold the actual answer, if we can build the target count
+            return table[target.length()];
         }
     }
 
@@ -723,18 +830,15 @@ public class DynamicPrograaming {
 
         // BestSumSequence best = new BestSumSequence();
         // best.bestSumSequence(5, new int[] {1, 2, 3, 4, 6});
+        // best.bestSumSequenceIterative(5, new int[] {1, 2, 3, 4, 6});
 
         // CanConstructWord constructor = new CanConstructWord();
-        // constructor.canConstructWord("abcdef", new String[] {"ab", "abc", "cd", "def", "abcd"});
-
-        // constructor = new CanConstructWord();
         // constructor.canConstructWord("abcdef", new String[] {"ab", "abc", "ef", "abcd"});
+        // constructor.canConstructWordIterative("abcdef", new String[] {"ab", "abc", "ef", "abcd"});
 
-        // constructor = new CanConstructWord();
-        // constructor.canConstructWord("abef", new String[] {"ab", "abc", "bef", "def", "abcd"});
-
-        // CountConstructWord counter = new CountConstructWord();
-        // counter.countConstructWord("abcdef", new String[] {"ab", "abc", "cd", "def", "ef", "abcd"});
+        CountConstructWord counter = new CountConstructWord();
+        counter.countConstructWord("abcdef", new String[] {"ab", "abc", "cd", "def", "ef", "abcd"});
+        counter.countConstructWordIterative("abcdef", new String[] {"ab", "abc", "cd", "def", "ef", "abcd"});
 
         // AllConstructWord all = new AllConstructWord();
         // all.allConstructWord("abcdef", new String[] {"ab", "abc", "cd", "def", "ef", "abcd"});
