@@ -62,7 +62,7 @@ The major principles here are as follows
 
     ```java
         // the primary input arguments to the function
-        int target, int[] sequence
+        int target; int[] sequence
     ```
 
 -   identify which input arguments will mutate, and which will not, remain constant
@@ -151,35 +151,54 @@ The major principles here are as follows
 
     ```java
         // the primary input arguments to the function
-        int target, int[] sequence
+        int target; int[] sequence
     ```
 
--   identify which input arguments will mutate, and which will not, remain constant
+-   identify which are the main input arguments that are going to 'mutate'
 
     ```java
-        // will be mutated on each call to the function, target is reduced on each call
-        // the main sequence of numbers remains `unchanged`, across all function calls
+        // the main input argument which will be used to develop the main algorithm body
+        // based on this input argument, we will key into the tabulation table
         target
     ```
 
--   create the iterative table, make sure the size is correct
-
-```java
-```
-
--   use a simple example to find the base cases, the negative and positive ones
+-   create the tabulation table, size is usually based on the mutating argument + 1
 
     ```java
-        // negative base case, when target reaches negative value
-        if (target < 0) {
-            return false;
-        }
+        int[] table = new int[target + 1];
+    ```
 
-        // positive, affirmation base case when target is equal/reaches to 0
-        if (target == 0) {
-            return true;
+-   initialize the table with correct positive and negative cases
+
+    ```java
+        // init the base positive case which we use to build off off
+        table[0] = 1;
+
+        // all other cases default to the negative value, to start with
+        Arrays.fill(table, -1);
+    ```
+
+-   implementation of the main algorithm body accumulating data into the tabulation table
+
+    ```java
+        // loop through all states in the tabulation table
+        for (int i = 0; i < table.length; i++) {
+            // when we meet a positive case, we can build off of it
+            if (table[i] == true) {
+                // we are in a positive case, meaning the sum to target[i] can be generated
+                for (int num : sequence) {
+                    // sums `i + num` can be generated if the array has enough space to fit the number, remember that the tabulation table
+                    // is created with at most target + 1 elements, meaning that we have to check our bounds first
+                    if (i + num < table.length) {
+                        // i + num is in range and we mark this sum target as possible
+                        table[i + num] = true;
+                    }
+                }
+            }
         }
     ```
+
+-   go through the problem and execution flow by drawing out the states of the tabulation table
 
 # Recursive problems
 
@@ -268,17 +287,17 @@ The complexity of this algorithm is defined for both time and space. For the non
    2   1
 ```
 
-    -   _time complexity_ - O(d) - with memoization each number of the sequence
-        is calculated exactly once, since we have a top down approach, the recursive
-        calls will dril down to N = 1 and N = 2, and calculate upwards, to the target N,
-        meaning that older, smaller numbers will be cached in the memo table, and this
-        is how we get O(n) complexity in run time
+-   _time complexity_ - O(d) - with memoization each number of the sequence
+    is calculated exactly once, since we have a top down approach, the recursive
+    calls will drill down to N = 1 and N = 2, and calculate upwards, to the target N,
+    meaning that older, smaller numbers will be cached in the memo table, and this
+    is how we get O(n) complexity in run time
 
-    -   _space complexity_ - O(d) - the space complexity is based on the number
-        of call stack frames occupied during execution, this will not improve even with
-        the memo table, since the recursive calls will still reach the very bottom, base
-        case and then ascend, unwind the call stack, the depth of the stack will be N
-        here too. We can be pendantic and say that the comp
+-   _space complexity_ - O(d) - the space complexity is based on the number
+    of call stack frames occupied during execution, this will not improve even with
+    the memo table, since the recursive calls will still reach the very bottom, base
+    case and then ascend, unwind the call stack, the depth of the stack will be N
+    here too. We can be pedantic and say that the comp
 
 We can clearly see from the call stack representation that a lot of the numbers
 from the sequence are getting re-computed constantly, we it is easy to see that
@@ -428,7 +447,7 @@ boolean summable(int target, int[] sequence) {
 
     // we have gone through all numbers in the sequence for the current target sum, and none of them returned true, this is the
     // final base case where we can say that there is no number in the sequence that sums up to the target number, on top of that
-    // we also mark that target sum as 'unreacheable' for this given input of sequence numbers
+    // we also mark that target sum as 'unreachable' for this given input of sequence numbers
     MEMO.put(target, false);
     return false;
 }
@@ -491,7 +510,7 @@ List<Integer> best(int target, int[] sequence) {
 
     List<Integer> bestSequence = null;
 
-    // go thorugh each number in the sequence, and find the new target sum
+    // go through each number in the sequence, and find the new target sum
     for (int i : sequence) {
         // the new target sum is the original minus the current number, meaning that with each call our target sum will reduce by
         // each
@@ -875,7 +894,7 @@ int fibonacci(int n) {
     if (n <= 0) {
         return 0;
     }
-    // we first create our tabultaion table, which is going to store all values of the Fibonacci sequence, this is a common approach
+    // we first create our tabulation table, which is going to store all values of the Fibonacci sequence, this is a common approach
     // when solving these issues, with iterative dynamic programming
     int[] table = new int[n + 1];
 
@@ -888,7 +907,7 @@ int fibonacci(int n) {
     table[0] = 0;
     table[1] = 1;
 
-    // start form the 2-nd fib number and calcualte up until we reach n, note that the size of the array here is actually n + 1,
+    // start form the 2-nd fib number and calculate up until we reach n, note that the size of the array here is actually n + 1,
     // this is because the base case of n[0]
     for (int i = 2; i < table.length; i++) {
         table[i] = table[i - 1] + table[i - 2];
@@ -943,7 +962,7 @@ boolean summable(int target, int[] sequence) {
     }
 
     // return the state at the target sum position, remember that we will have one of three cases for this position
-    // - nothing ever summed up to target - meaning it will remain `false` from the initializetion above
+    // - nothing ever summed up to target - meaning it will remain `false` from the initialization above
     // - there was no pair of `i + num` that summed up to target, we either overshot or undershot
     // - there was a pair of `i + num` that exactly summed up to target and the cell was marked true
     return table[target];
@@ -969,7 +988,7 @@ List<Integer> best(int target, int[] sequence) {
     List[] table = new List[target + 1];
     Arrays.fill(table, null);
 
-    // set the base postive case as we know, for a target sum of 0, we can say that there can be a sequence of numbers, by simply
+    // set the base positive case as we know, for a target sum of 0, we can say that there can be a sequence of numbers, by simply
     // taking no numbers, we start off from this initial value and build from it
     table[0] = new ArrayList<>();
 
@@ -992,7 +1011,7 @@ List<Integer> best(int target, int[] sequence) {
                     // sequence, but that is implementation detail
                     List<Integer> current = (List<Integer>) table[i + num];
 
-                    // before we can replace the sequence with the new one, we have to check if there is alrady something there, or
+                    // before we can replace the sequence with the new one, we have to check if there is already something there, or
                     // if the new sequence is 'better', or in other words have less elements than the one currently being there
                     if (Objects.isNull(current) || current.size() > seq.size()) {
                         table[i + num] = seq;

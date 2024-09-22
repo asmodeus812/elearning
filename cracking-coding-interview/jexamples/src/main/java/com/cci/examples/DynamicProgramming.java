@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class DynamicPrograaming {
+public class DynamicProgramming {
 
     /**
      * Compute the N-th number of the Fibonacci sequence
@@ -836,9 +836,9 @@ public class DynamicPrograaming {
         // constructor.canConstructWord("abcdef", new String[] {"ab", "abc", "ef", "abcd"});
         // constructor.canConstructWordIterative("abcdef", new String[] {"ab", "abc", "ef", "abcd"});
 
-        CountConstructWord counter = new CountConstructWord();
-        counter.countConstructWord("abcdef", new String[] {"ab", "abc", "cd", "def", "ef", "abcd"});
-        counter.countConstructWordIterative("abcdef", new String[] {"ab", "abc", "cd", "def", "ef", "abcd"});
+        // CountConstructWord counter = new CountConstructWord();
+        // counter.countConstructWord("abcdef", new String[] {"ab", "abc", "cd", "def", "ef", "abcd"});
+        // counter.countConstructWordIterative("abcdef", new String[] {"ab", "abc", "cd", "def", "ef", "abcd"});
 
         // AllConstructWord all = new AllConstructWord();
         // all.allConstructWord("abcdef", new String[] {"ab", "abc", "cd", "def", "ef", "abcd"});
