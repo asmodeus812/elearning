@@ -221,6 +221,40 @@ classes to override, in java all methods are usually by default eligible for ove
 however we can mark a protected or public method as final in the super class to avoid the inheriting classes from
 overriding it. Trying to override a final method will result in compile time error.
 
+```java
+class A {
+    final void method() {
+        System.out.println("This is a final method.");
+    }
+}
+class B extends A {
+    void method() { // compile time error, this is invalid, method is declared final
+        System.out.println("Illegal!");
+    }
+}
+```
+
+Methods declared as final can sometimes provide a performance enhancement: The compiler is free to inline calls to them
+because it "knows" they will not be overridden by a subclass. When a small final method is called, often the Java
+compiler can copy the bytecode for the subroutine directly inline with the compiled code of the calling method, thus
+eliminating the costly overhead associated with a method call. This is only possible for final methods.
+
+`Normally, Java resolves calls to methods dynamically, at run time. This is called late binding. However, since final
+methods cannot be overridden, a call to one can be resolved at compile time. This is called early binding.`
+
+Applying final to a class declaration itself means that we would like to disallow inheriting this class, this has no
+special benefits in general for compile or runtime optimization but it can ensure that a certain class is well enclosed
+and protected. Also it is not possible to define a class both `abstract` and `final` at the same time !
+
+```java
+final class A {
+    //...
+}
+class B extends A { // compile time error will occur here
+    //...
+}
+```
+
 ### Nesting
 
 A very powerful feature of the java language is to allow us to declare nested classes within each other. Each nested
@@ -352,3 +386,273 @@ public class FirstLevel {
     }
 ```
 
+Note that there is an interesting caveat when we have nesting of non-static classes combined with static members. There
+is a special meaning in `static` members and `non-static` nested classes, which make them incompatible.
+
+```java
+public class FirstLevel {
+
+    public class SecondLevel {
+
+        public static int VARIABLE = 1; // this is not valid we can not define a static member in nested non-static non-top level class
+    }
+```
+### Inheritance
+
+The inheritance implementation in java is something that was inherited from languages like C++, however while in C++ we
+can have more than one super classes or base classes from which our class can inherit, that is not true for java, where
+one class can inherit only from one non-interface base class. This is done to avoid the diamond issue in inheritance.
+
+```java
+class Box {
+    double width;
+    double height;
+    double depth;
+
+    Box(double w, double h, double d) {
+        this.width = w;
+        this.height = h;
+        this.depth = d;
+    }
+}
+
+class BoxWeight extends Box {
+    double weight;
+
+    BoxWeight(double w, double h, double, double v) {
+        super(w, h, w); // use super to construct the base class from it's provided constructor
+        this.weight = v;
+    }
+}
+```
+
+Assigning super-class variable with a sub-class - this means that a variable of a given super-class can be assigned
+with an implementation of the child class. There is also a related principle in programming which extends this idea,
+known as the Liskov's substitution principle, which states that objects of super-classes should be replaceable with
+objects of it's sub-classes without affecting the correctness of the program. In the example below we can see that
+assigning to the `box` variable the object of the created `boxWeight` sub-class which extends the Box class does not
+indeed change the behavior of the program,
+
+```java
+    Box box = new Box(1,2,3);
+    BoxWeight boxWeight = new BoxWeight(1,2,3,10);
+    box = boxWeight; // this is valid we assign the super-class variable the sub-class instance
+    boxWeight = box; // this is not valid the sub-class can not be assigned an object of the super-class
+```
+
+Shadowing super class members can be avoided by using the `super` keyword, similarly to the `this` keyword, we can use `super` to tell the compiler to explicitly target the super or base class instance member variable instead of the one defined for the current class. This can remove any ambiguity which may occur while we define sub-classes with similar-same member names or identifiers
+
+```java
+class BaseClass {
+
+    protected int member;
+
+    BaseClass() {
+        this.member = 0;
+    }
+}
+
+class ChildClass extends BaseClass {
+
+    protected int member;
+
+    ChildClass() {
+        super.member = 1;
+        this.member = 2;
+    }
+}
+```
+
+Note something important the super class constructor, explicitly called or not, will be called first when constructing a
+child-class, meaning that in the example above, `member` from the super-class will be first set to 0, which is what the
+`BaseClass` constructor does, after which the `ChildClass` constructor will set it to 1
+
+`Note in a class hierarchy, constructors complete their execution in order of derivation, from superclass to subclass.
+Further, since super( ) must be the first statement executed in a subclass' constructor, this order is the same whether
+or not super( ) is used. If super( ) is not used, then the default or parameterless constructor of each superclass will
+be executed.`
+
+### Overriding
+
+Method overriding forms the basis for one of Java's most powerful concepts: dynamic method dispatch. Dynamic method
+dispatch is the mechanism by which a call to an overridden method is resolved at run time, rather than compile time.
+Dynamic method dispatch is important because this is how Java implements run-time polymorphism
+
+In a class hierarchy, when a method in a subclass has the same name and type signature as a method in its superclass,
+then the method in the subclass is said to override the method in the superclass. When the method is called from the
+child class, it will always invoke the `overriden` version of the method.
+
+`Method overriding occurs only when the names and the type signatures of the two methods are identical. If they are not,
+then the two methods are simply overloaded.`
+
+```java
+class A {
+    int i, j;
+    A(int a, int b) {
+        i = a;
+        j = b;
+    }
+    void show() {
+        System.out.print("i and j: " + i + " " + j);
+    }
+}
+class B extends A {
+    int k;
+    B(int a, int b, int c) {
+        super(a, b);
+        k = c;
+    }
+    void show() {
+        super.show();
+        System.out.print(" and k: " + k);
+    }
+    void show(int f) {
+        show();
+        System.out.print(" and f: " + k);
+    }
+}
+```
+
+```java
+    A base = new A();
+    A child = new B();
+
+    base.show();
+    child.show();
+    child.show(5);
+```
+
+In this example above we have two instances, once which is only of the base class one of the child class, we can see
+that in the child class we can also reference the original implementation of the method we have overridden from the base
+class, in this case the first `show` call on the base object instance will print `i and j` and the second show call on
+the child object instance will print `i and j and k`. The third call shows that the show method can be overloaded
+instead, this will call/print the overridden version from the child instance of show first showing us `i and j and k and
+f`
+
+`Note, do not forget to call the super class method member with super, when calling the same method from an overridden
+method, otherwise if we omit the super keyword, and we call the same method we will end up calling the child overridden
+member method, effectively entering infinite recursion.`
+
+### Polymorphism
+
+Also known as dynamic, run-time call method dispatch is one of the most powerful mechanisms that object oriented design
+brings to bear on code reuse and robustness.
+
+A superclass reference variable can refer to a subclass object. Java uses this fact to resolve calls to overridden
+methods at run time. Here is how. When an overridden method is called through a superclass reference, Java determines
+which version of that method to execute based upon the type of the object being referred to at the time the call occurs.
+Thus, this determination is made at run time.
+
+When different types of objects are referred to, different versions of an overridden method will be called. In other
+words, it is the type of the object being referred to (not the type of the reference variable) that determines which
+version of an overridden method will be executed. Therefore, if a superclass contains a method that is overridden by a
+subclass, then when different types of objects are referred to through a superclass reference variable, different
+versions of the method are executed.
+
+```java
+class Figure {
+    double dim1;
+    double dim2;
+    Figure(double a, double b) {
+        dim1 = a;
+        dim2 = b;
+    }
+    double area() {
+        System.out.println("Area for Figure is undefined.");
+        return 0;
+    }
+}
+
+class Rectangle extends Figure {
+    Rectangle(double a, double b) {
+        super(a, b);
+    }
+    // override area for rectangle
+    double area() {
+        System.out.println("Inside Area for Rectangle.");
+        return dim1 * dim2;
+    }
+}
+class Triangle extends Figure {
+    Triangle(double a, double b) {
+        super(a, b);
+    }
+    // override area for right triangle
+    double area() {
+        System.out.println("Inside Area for Triangle.");
+        return dim1 * dim2 / 2;
+    }
+}
+```
+
+One of the most ubiquitous examples to really demonstrate how dynamic dispatch really works, in the real world, and how it
+can be a very powerful tool, when applied correctly
+
+```java
+    Figure[] figures = new Figure[2];
+    figures[0] = new Triangle(5, 3);
+    figures[1] = new Rectangle(1, 2);
+
+    for(Figure fig : figures) {
+        System.out.println(fig.area());
+    }
+```
+
+### Abstract
+
+There are situations in which we would like to define a class that must not be initialized or instantiated on it's own
+but it would still need to share some sort of common member methods and variables from which the sub-class hierarchy is
+to be build. Instead of using interfaces, which allow us to only specify method members, we can use abstract classes.
+These are classes which have at least one abstract method in them, this is a method without an implementation,
+effectively making the class unable to be instantiated on it's own. It can however have as many concrete member method
+implementations.
+
+```java
+abstract class A {
+    protected int shared;
+
+    abstract void callme();
+
+    void callmetoo() {
+        System.out.println("This is a concrete method.");
+    }
+}
+class B extends A {
+    void callme() {
+        callmetoo(); // optionally we can also call any of the base member methods which are implemented
+        // super.callme() - not allowed, this will produce a compile time error, callme is not implemented
+        System.out.println("B's implementation of callme.");
+    }
+}
+```
+
+To see how we can use them correctly, it is prudent to note again that we can not create an instance of `A` however we
+can certainly have a variable of type `A` which holds a reference to a child class implementing and inheriting `A`
+
+```java
+    B child = new B(); // this is also allowed, the child class B implements all methods, not defined as abstract
+    A base = new B(); // this is allowed we can certainly hold an object of type B in a variable referencing the base class A
+    A base2 = new A(); // this however is not allowed, since the A class is abstract, has 1 unimplemented method in its declaration
+```
+
+### Object-class
+
+There is one special class, Object, defined by Java. All other classes are subclasses of Object. That is, Object is a
+superclass of all other classes. This means that a reference variable of type Object can refer to an object of any other
+class.
+
+| Method                                        | Purpose                                                           |
+| --------------------------------------------- | ----------------------------------------------------------------- |
+| Object clone( )                               | Creates a new object that is the same as the object being cloned. |
+| boolean equals(Object object)                 | Determines whether one object is equal to another.                |
+| void finalize( )                              | Called before an unused object is recycled.                       |
+| Class<?> getClass( )                          | Obtains the class of an object at run time.                       |
+| int hashCode( )                               | Returns the hash code associated with the invoking object.        |
+| void notify( )                                | Resumes execution of a thread waiting on the invoking object.     |
+| void notifyAll( )                             | Resumes execution of all threads waiting on the invoking object.  |
+| String toString( )                            | Returns a string that describes the object.                       |
+| void wait( )                                  | Waits on another thread of execution.                             |
+| void wait(long milliseconds)                  | Waits on another thread of execution.                             |
+| void wait(long milliseconds, int nanoseconds) | Waits on another thread of execution.                             |
+
+`The methods getClass( ), notify( ), notifyAll( ), and wait( ) are declared as final. You may override the others.`
