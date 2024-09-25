@@ -237,3 +237,31 @@ public static void main(String args[]) {
     }
 }
 ```
+
+### Autoclose
+
+After java 8, it is also now possible to automatically close resources without having to worry about handling the
+case in a finally block, these have to implement the AutoCloseable interface
+
+`The try-with-resources statement can be used only with those resources that implement the AutoCloseable interface
+defined by java.lang. This interface defines the close( ) method. AutoCloseable is inherited by the Closeable
+interface in java.io.`
+
+It is important to understand that the resource declared in the try statement is implicitly final. This means that
+you can't assign to the resource after it has been created. Also, the scope of the resource is limited to the
+try-with-resources statement.
+
+```java
+// `fout` is not accessible outside of the try block and is also declared as final
+try(FileOutputStream fout = new FileOutputStream("file.txt");
+    FileOutputStream foutTwo = new FileOutputStream("file2.txt")) {
+    // do something with the two file streams
+} catch(IOException e) {
+    // capture potential issues with opening
+}
+// after exiting the try block, `fout` stream will be closed automatically
+```
+
+
+
+

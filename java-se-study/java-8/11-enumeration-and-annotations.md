@@ -488,4 +488,3 @@ Annotation anno = m.getAnnotation(MyRepeatedAnnos.class);
 // this is also possible if we know the type of the repeated annotation as well.
 Annotation[] annos = m.getAnnotationsByType(MyAnno.class);
 ```
-

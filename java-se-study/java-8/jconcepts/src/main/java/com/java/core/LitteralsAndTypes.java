@@ -3,6 +3,7 @@ package com.java.core;
 public class LitteralsAndTypes {
 
     public static void main(String[] args) {
+
         // int nums, nums2[], nums3;
         // int integer = 0x7fffffffff;
         // long longer = 0x7fffffffffL;

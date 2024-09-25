@@ -4,7 +4,7 @@ These are core internal component of the java language, unlike other languages w
 the class is the cornerstone structure around which the entire language is evolving. Classes have two main components -
 class methods and class variables.
 
-```
+```java
 class classname {
     type instance-variable1;
     type instance-variable2;
@@ -54,6 +54,36 @@ class Box {
 The example above provides an explicit constructor, meaning that the default one would not be provided by the runtime,
 the object of type Box can be created by only providing the 3 parameters needed - in this case the dimensions of the
 box.
+
+It is possible to invoke a constructor using the `this` keyword, however there are some restrictions. Also it is
+important to note that there is some `significant` performance impact in using `this()` call in a constructor due to
+some restrictions and design implementation details in the JVM, meaning that the use of `this()` call in constructors
+has to be taken with caution
+
+-   `this` call has to be the very first call in a `constructor`
+-   it is not possible to use any instance variable belonging to the class in the call of `this`
+-   `this({args})` call to a constructor has to be the very first call in a constructor
+-   it is not possible to have both `this` and `super` call since both have to be the same call in a constructor
+
+```java
+class TestThis {
+    // class member variables are defined here
+
+    TestThis() {
+    }
+
+    TestThis(int k) {
+        this(); // invoke the default constructor
+        // do something else with this implementation
+    }
+
+    TestThis(double f) {
+        this(); // invoke the default constructor
+        // do something else with this implementation
+    }
+}
+
+```
 
 ### Methods
 
@@ -397,6 +427,7 @@ public class FirstLevel {
         public static int VARIABLE = 1; // this is not valid we can not define a static member in nested non-static non-top level class
     }
 ```
+
 ### Inheritance
 
 The inheritance implementation in java is something that was inherited from languages like C++, however while in C++ we
@@ -655,4 +686,4 @@ class.
 | void wait(long milliseconds)                  | Waits on another thread of execution.                             |
 | void wait(long milliseconds, int nanoseconds) | Waits on another thread of execution.                             |
 
-`The methods getClass( ), notify( ), notifyAll( ), and wait( ) are declared as final. You may override the others.`
+`The methods getClass(), notify(), notifyAll(), and wait() are declared as final. You may override the others.`

@@ -374,3 +374,29 @@ blocked ---------------- runnable ---------------- waiting
                         terminated
 
 ```
+
+### Volatile
+
+A very interesting modifier keyword, that can be placed on member variables, the idea behind it is that in a threaded
+environment, when an object is shared between multiple threads, each thread might create a thread local copy of each
+variable of an object which it accesses, this is usually done on a per `cpu-core` `level`, in the L-level caches,
+however, this can be error prone. Reason being is that if only one thread modifies a variable and every other thread
+reads it, when the thread that modifies it, changes the variable, it might not become immediately visible to the
+`reader` threads, `volatile` ensures that all threads see the same value, in other words the value is not cached,
+meaning it is likely written out to main memory and read from memory on each access, that can be somewhat slow, so use
+the volatile keyword with caution.
+
+It is important to note that when a `synchronize` block is exited, the member variables are updated, the cache is
+flushed, and data written out to main memory, but that can often be way too much for simple reader threads, which do not
+wish to lock the entire object and synchronize on it simply to guarantee they see the most up-to date value. This is
+where volatile comes in handy, also it is on `per` member, instead of `per` entire object, it does not force the entire
+object to be flushed out to memory and out of the cpu cache
+
+```java
+class MyClass {
+    int b; // this is not marked as volatile, meaning that writes to this value, might not be immedately visible to other reading threads
+    volatile byte k; // ensure that k is not cached in L-level cache in the cpu, and threads see the most recent value
+}
+```
+
+`Writes to a volatile variable happen-before subsequent reads of that volatile variable by any thread.`
