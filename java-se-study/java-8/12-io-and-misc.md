@@ -16,20 +16,20 @@ which are - `InputStream` and `OutputStream`, these are the two base classes fro
 | InputStream           | Abstract class that describes stream input                                                                          |
 | OutputStream          | Abstract class that describes stream output                                                                         |
 | \***\*\*\*\*\*\*\***  | \*\*\*\*                                                                                                            |
-| BufferedInputStream   | Buffered input stream                                                                                               |
-| BufferedOutputStream  | Buffered output stream                                                                                              |
+| BufferedInputStream   | Buffered input stream, wraps around other stream objects and buffers their content                                  |
+| BufferedOutputStream  | Buffered output stream, wraps around other stream objects and buffers their content                                 |
 | \***\*\*\*\*\*\*\***  | \*\*\*\*                                                                                                            |
 | ByteArrayInputStream  | Input stream that reads from a byte array                                                                           |
 | ByteArrayOutputStream | Output stream that writes to a byte array                                                                           |
 | \***\*\*\*\*\*\*\***  | \*\*\*\*                                                                                                            |
-| DataInputStream       | An input stream that contains methods for reading the Java standard data types                                      |
-| DataOutputStream      | An output stream that contains methods for writing the Java standard data types                                     |
+| DataInputStream       | An input stream that contains methods for reading the Java standard data primitive types                            |
+| DataOutputStream      | An output stream that contains methods for writing the Java standard data primitive types                           |
 | \***\*\*\*\*\*\*\***  | \*\*\*\*                                                                                                            |
 | FileInputStream       | Input stream that reads from a file                                                                                 |
 | FileOutputStream      | Output stream that writes to a file                                                                                 |
 | \***\*\*\*\*\*\*\***  | \*\*\*\*                                                                                                            |
-| FilterInputStream     | Implements InputStream                                                                                              |
-| FilterOutputStream    | Implements OutputStream                                                                                             |
+| FilterInputStream     | Used to wrap other stream objects and proxy all calls to the wrapped stream                                         |
+| FilterOutputStream    | Used to wrap other stream objects and proxy all calls to the wrapped stream                                         |
 | \***\*\*\*\*\*\*\***  | \*\*\*\*                                                                                                            |
 | ObjectInputStream     | Input stream for objects                                                                                            |
 | ObjectOutputStream    | Output stream for objects                                                                                           |
@@ -45,36 +45,36 @@ which are - `InputStream` and `OutputStream`, these are the two base classes fro
 At the very top of this class hierarchy stay the two major classes representing the input and output streams which are -
 `Reader` and `Writer`, these are the two base classes from which all char streams extend off of.
 
-| Class                | Applicaton                                                             |
-| -------------------- | ---------------------------------------------------------------------- |
-| Reader               | Abstract class that describes character stream input                   |
-| Writer               | Abstract class that describes character stream output                  |
-| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                               |
-| BufferedReader       | Buffered input character stream                                        |
-| BufferedWriter       | Buffered output character stream                                       |
-| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                               |
-| CharArrayReader      | Input stream that reads from a character array                         |
-| CharArrayWriter      | Output stream that writes to a character array                         |
-| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                               |
-| FileReader           | Input stream that reads from a file                                    |
-| FileWriter           | Output stream that writes to a file                                    |
-| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                               |
-| FilterReader         | Filtered reader                                                        |
-| FilterWriter         | Filtered writer                                                        |
-| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                               |
-| InputStreamReader    | Input stream that translates bytes to characters                       |
-| OutputStreamWriter   | Output stream that translates characters to bytes                      |
-| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                               |
-| PipedReader          | Input pipe                                                             |
-| PipedWriter          | Output pipe                                                            |
-| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                               |
-| StringReader         | Input stream that reads from a string                                  |
-| StringWriter         | Output stream that writes to a string                                  |
-| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                               |
-| PrintWriter          | Output stream that contains print( ) and println( )                    |
-| PushbackReader       | Input stream that allows characters to be returned to the input stream |
-| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                               |
-| LineNumberReader     | Input stream that counts lines                                         |
+| Class                | Applicaton                                                                   |
+| -------------------- | ---------------------------------------------------------------------------- |
+| Reader               | Abstract class that describes character stream input                         |
+| Writer               | Abstract class that describes character stream output                        |
+| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                                     |
+| BufferedReader       | Buffered input, wraps around other stream objects and buffers their content  |
+| BufferedWriter       | Buffered output, wraps around other stream objects and buffers their content |
+| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                                     |
+| CharArrayReader      | Input stream that reads from a character array                               |
+| CharArrayWriter      | Output stream that writes to a character array                               |
+| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                                     |
+| FileReader           | Input stream that reads from a file                                          |
+| FileWriter           | Output stream that writes to a file                                          |
+| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                                     |
+| FilterReader         | Used to wrap other stream objects and proxy all calls to the wrapped stream  |
+| FilterWriter         | Used to wrap other stream objects and proxy all calls to the wrapped stream  |
+| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                                     |
+| InputStreamReader    | Input stream that translates bytes to characters                             |
+| OutputStreamWriter   | Output stream that translates characters to bytes                            |
+| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                                     |
+| PipedReader          | Input pipe                                                                   |
+| PipedWriter          | Output pipe                                                                  |
+| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                                     |
+| StringReader         | Input stream that reads from a string                                        |
+| StringWriter         | Output stream that writes to a string                                        |
+| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                                     |
+| PrintWriter          | Output stream that contains print( ) and println( )                          |
+| PushbackReader       | Input stream that allows characters to be returned to the input stream       |
+| \***\*\*\*\*\*\*\*** | \*\*\*\*                                                                     |
+| LineNumberReader     | Input stream that counts lines                                               |
 
 ### Predefined
 
