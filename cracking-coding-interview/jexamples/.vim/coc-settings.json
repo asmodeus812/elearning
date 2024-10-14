@@ -1,0 +1,9 @@
+{
+    "java.configuration.runtimes": [
+        {
+            "default": true,
+            "name": "JavaSE-11",
+            "path": "${env:JAVA_HOME_11}"
+        }
+    ]
+}

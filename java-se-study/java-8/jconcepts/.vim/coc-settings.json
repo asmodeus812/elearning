@@ -4,8 +4,7 @@
         {
             "default": true,
             "name": "JavaSE-11",
-            "path": "/home/linuxbrew/.linuxbrew/opt/openjdk@11/libexec"
+            "path": "${env:JAVA_HOME_11}"
         }
-    ],
-    "java.configuration.updateBuildConfiguration": "automatic"
+    ]
 }

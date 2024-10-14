@@ -251,3 +251,19 @@ Functional creator = Integer::new; // reference the constructor of Integer
 Integer one = creator.create(1); // create an instance of the integer class
 Integer two = creator.create(2); // create an instance of the integer class
 ```
+
+### Predefined
+
+In the core library in Java, there are several functional interfaces which are already defined, that for the most part
+handle pretty much all the cases and patterns one might expect to use in a lambda context. The list below shows the
+different combinations of lambda function references that can be built with the default functional interfaces provided
+by the java core
+
+| Interface           | Purpose                                                                                                                                    |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| UnaryOperator\<T\>  | Apply a unary operation to an object of type T and return the result, which is also of type T. Its method is called apply().               |
+| BinaryOperator\<T\> | Apply an operation to two objects of type T and return the result, which is also of type T. Its method is called apply().                  |
+| Consumer\<T\>       | Apply an operation on an object of type T. Its method is called accept().                                                                  |
+| Supplier\<T\>       | Return an object of type T. Its method is called get().                                                                                    |
+| Function\<T, R\>    | Apply an operation to an object of type T and return the result as an object of type R. Its method is called apply().                      |
+| Predicate\<T\>      | Determine if an object of type T fulfills some constraint. Return a boolean value that indicates the outcome. Its method is called test(). |
