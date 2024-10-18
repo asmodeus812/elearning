@@ -1,16 +1,30 @@
 package com.java.core;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+
 public class LitteralsAndTypes {
 
-    public static void main(String[] args) {
-        try {
-            Thread.sleep(2500);
-            System.out.println("test");
-            for (int i = 0; i < 1000; i++) {
-                System.out.println("test");
-                Thread.sleep(1000);
-            }
-        } catch (InterruptedException e) {
+    public static void main(String[] args) throws IOException {
+        int c;
+        // Create a socket connected to internic.net, port 43.
+        Socket s = new Socket("whois.internic.net", 43);
+        // Obtain input and output streams.
+        InputStream in = s.getInputStream();
+        OutputStream out = s.getOutputStream();
+        // Construct a request string.
+        String str = (args.length == 0 ? "MHProfessional.com" : args[0]) + "\n";
+        // Convert to bytes.
+        byte buf[] = str.getBytes();
+        // Send request.
+        out.write(buf);
+        // Read and display response.
+        while ((c = in.read()) != -1) {
+            System.out.print((char) c);
         }
+        // the output of this might look something like that
+        s.close();
     }
 }
