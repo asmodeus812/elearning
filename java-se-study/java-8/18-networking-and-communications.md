@@ -211,13 +211,13 @@ The java networking package provides means of constructing URL objects and insta
 base class is called URL, the class has overloaded constructors to create an url from a variety of sources, mostly
 strings.
 
-| Constructor                                              | Description                                                                                       |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| URL(String spec)                                         | Creates a `URL` object from a string representing the full URL (e.g., "https://www.example.com"). |
-| URL(String protocol, String host, String path)           | Creates a `URL` from a protocol, host, and path (the path includes the path and query string).    |
-| URL(String protocol, String host, int port, String path) | Creates a `URL` by specifying the protocol, host, port, and path.                                 |
-| URL(URL context, String spec)                            | Creates a `URL` by resolving a relative URL spec within a base URL context.                       |
-| URL(URL context, String spec, URLStreamHandler handler)  | Creates a `URL` object with a base context and custom stream handler for managing protocols.      |
+| Constructor                                              | Description                                                                                         |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| URL(String spec)                                         | Creates a `URL` object from a string representing the full URL (e.g., "<https://www.example.com>"). |
+| URL(String protocol, String host, String path)           | Creates a `URL` from a protocol, host, and path (the path includes the path and query string).      |
+| URL(String protocol, String host, int port, String path) | Creates a `URL` by specifying the protocol, host, port, and path.                                   |
+| URL(URL context, String spec)                            | Creates a `URL` by resolving a relative URL spec within a base URL context.                         |
+| URL(URL context, String spec, URLStreamHandler handler)  | Creates a `URL` object with a base context and custom stream handler for managing protocols.        |
 
 `Note that all of those constructor calls might throw MalformedURLException, which might occur when an invalid url
 format string was provided to the constructor arguments`
@@ -284,7 +284,6 @@ HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 httpURLConnection.setRequestMethod("POST");
 httpURLConnection.setDoOutput(true);
 httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
 String postData = "username=user&password=pass";
 try (OutputStream os = httpURLConnection.getOutputStream()) {
     byte[] input = postData.getBytes("utf-8");
@@ -303,3 +302,260 @@ communicate and connect to URLs with different schemes and communication protoco
 | FileURLConnection       | for accessing local files via the `file://` protocol, allowing file reading.                                                          |
 | FtpURLConnection        | for accessing resources via the FTP protocol, enabling file transfers over FTP.                                                       |
 | DataSourceURLConnection | designed for reading data from `DataSource` objects, commonly used in JavaMail for reading resources.                                 |
+
+### URI
+
+The URI class or type is actually a super-type, to the URL type. The URI describes a unique resource identifier alone.
+While the URL describes not only the unique resource identifier or locator but also how to access this resource. That
+can also be seen in the name of both types. While the URI - is identifier, the URL - is locator. The difference is quite
+is that URLs provide information such as the schema for example, which tells the clients using an URL how (the locator)
+to access the given resource, not just where (the identifier)
+
+`An URI that contains a scheme locator is by definition classified as an URL, https://www.example.com a URI that
+contains a name identifier is called URN or unique resource name, urn:isbn:12345`
+
+### Cookie
+
+Cookies provide a way to establish a `stateful` connection between a server and a client, a cookie is usually send over on
+each request, and it represents some sort of unique identifier which the server can use to identify a client by. On each
+request/response cycle between the server and the client, the server would send a cookie header along with the response,
+and the client will send back the same cookie with the requests to the server, that way the server can identify
+different clients uniquely
+
+Besides regular cookies, there usually companion cookies such as `CSRF` tokens which are used to secure the cookies making
+sure that a cookie that is sent back to the server is coming from the actual client, instead of malicious actions or
+actors.
+
+The Cookie class is under the java class called `HttpCookie` which contains the implementation for a generic `http`
+cookie that can be used along with the `CookieStore` interface and the `CookieManager` which serves as a bridge between
+`HttpURLConnection` and an `HttpCookie`, the `CookieManager` does use a `CookieStore` implementation internally to store
+and manage the cookies for many `HttpURLConnection` responses and requests. One would typically set a default
+`CookieHandler`, like so `CookieHandler.setDefault(new CookieManager())` this would make sure that all requests and
+responses by default are routed to the target `CookieManger` instance.
+
+The actual link between the `HttpURLConnection` is done in it's actual default platform specific implementation under
+`sun.net.www.protocol.http.HttpURLConnection`, which is internally using the `CookieHandler.getDefault()` to extract the
+default `CookieManager`, this is the bridge / glue that makes sure that each `HttpURLConnection` is correctly being
+populated with cookies
+
+```java
+    HttpCookie HttpCookie(String name, String value, String header, long creationTime)
+    HttpCookie HttpCookie(String name, String value, String header)
+    HttpCookie HttpCookie(String name, String value);
+
+    HttpURLConnection HttpURLConnection(URL u, String host, int port) throws IOException
+    HttpURLConnection HttpURLConnection (URL u)
+```
+
+```java
+ *                  use
+ * CookieHandler <------- HttpURLConnection
+ *       ^
+ *       | impl
+ *       |         use
+ * CookieManager -------> CookiePolicy
+ *             |   use
+ *             |--------> HttpCookie
+ *             |              ^
+ *             |              | use
+ *             |   use        |
+ *             |--------> CookieStore
+ *                            ^
+ *                            | impl
+ *                            |
+ *                  Internal in-memory implementation
+```
+
+```java
+// Set up a CookieManager with a default CookieStore
+CookieManager cookieManager = new CookieManager();
+CookieHandler.setDefault(cookieManager);
+
+// Make an HTTP connection
+URL url = new URL("https://example.com");
+HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+// Send a request (cookies from the store are automatically added if applicable)
+connection.setRequestMethod("GET");
+
+// Receive the response
+int responseCode = connection.getResponseCode();
+
+// Check for any cookies sent by the server (they are automatically added to the store)
+Map<String, List<String>> headers = connection.getHeaderFields();
+for (String header : headers.keySet()) {
+    if ("Set-Cookie".equalsIgnoreCase(header)) {
+        List<String> cookies = headers.get(header);
+        for (String cookie : cookies) {
+            System.out.println("Received cookie: " + cookie);
+        }
+    }
+}
+
+// Retrieve cookies from the store for the same URL
+URI uri = url.toURI();
+CookieStore store = cookieManager.getCookieStore();
+List<HttpCookie> storedCookies = store.get(uri);
+for (HttpCookie storedCookie : storedCookies) {
+    System.out.println("Stored cookie: " + storedCookie);
+}
+```
+
+#### CSRF
+
+Those special types of tokens are an essential security mechanism to protect web applications from unauthorized,
+malicious actions initiated by third-party sites. By embedding a unique, unpredictable token in each state-changing
+request and validating it on the server side, web applications can ensure that only legitimate actions performed by the
+authenticated user are allowed. CSRF tokens work because they are tied to both the user's session and the specific site
+from which the form is sent. Since an attacker's website cannot access the legitimate site's CSRF token, they cannot
+include the correct token in any malicious request they try to initiate.
+
+1.  When the user loads the page, the server sets two cookies: one HTTP-only cookie for the session, and one
+    HTTP-only cookie for the CSRF token.
+
+2.  When the user makes an API call (via fetch() or XHR), the Browser itself reads the HTTP-only CSRF token cookie and
+    includes it in a header (X-CSRF-Token).
+
+3.  The server verifies both the session (via the regular HTTP-only cookie) and the CSRF token (via X-CSRF-Token header) to
+    ensure that the request is legitimate.
+
+#### CORS
+
+Is a security feature built on top of the Same-Origin Policy, and it allows web servers to explicitly permit
+cross-origin requests. When a website needs to make a request to another domain, the browser uses CORS to check whether
+the server hosting the resource allows that request to be made. The browser automatically determines if a request is
+cross-origin based on the origin (protocol, domain, and port) of the requesting page and the requested resource. If the
+server doesn't respond with the proper CORS headers or explicitly denies cross-origin access, the browser blocks the
+response from being made available to JavaScript. The request might still be sent, but the browser will refuse to pass
+the response data back to the page's JavaScript if the CORS policy isn't met.
+
+1.  When a script (like an AJAX call or a fetch() request) on a web page tries to request a resource from a different
+    origin, the browser first checks if the request adheres to the Same-Origin Policy.
+
+2.  If the request is cross-origin, the browser sends a special HTTP request known as a preflight request (for certain
+    methods) to the server, asking if the actual request is allowed.
+
+    ```http
+    OPTIONS /resource HTTP/1.1
+    Host: http://original.com
+    Origin: https://example.com
+    Access-Control-Request-Method: POST
+    Access-Control-Request-Headers: X-PINGOTHER, Content-Type
+    ```
+
+3.  The preflight request asks the server if it allows cross-origin requests by sending headers like
+    Access-Control-Request-Method and Access-Control-Request-Headers.
+
+4.  If the server is configured to allow cross-origin requests, it responds with CORS headers like
+    Access-Control-Allow-Origin, Access-Control-Allow-Methods, and Access-Control-Allow-Headers.
+
+    ```http
+    HTTP/1.1 204 No Content
+    Access-Control-Allow-Origin: https://example.com
+    Access-Control-Allow-Methods: POST, GET, OPTIONS
+    Access-Control-Allow-Headers: X-PINGOTHER, Content-Type
+    ```
+
+5.  The browser checks the CORS headers returned by the server to ensure the request is allowed. If the headers are
+    missing or don't match the request (e.g., the origin isn't allowed), the browser will block the response and not
+    allow the JavaScript on the page to read the response.
+
+### Datagram
+
+Unlike the regular `Socket` which is meant for regular `TCP` packet communication in java, the `Datagram` socket
+implementation is meant to be used with `UDP` style packets, the `Datagram` `api` provides multiple ways to construct a
+`datagram` socket, but the gist is that the constructors are pretty much the same as for the regular `TCP` sockets, which
+either can accept a port or/and host address, the `Datagram` socket can also be created without any constructor arguments
+which would bind to the first available socket on the machine that is not reserved
+
+```java
+DatagramSocket DatagramSocket( ) throws SocketException
+DatagramSocket DatagramSocket(int port) throws SocketException
+DatagramSocket DatagramSocket(int port, InetAddress ipAddress) throws SocketException
+DatagramSocket DatagramSocket(SocketAddress address) throws SocketException
+```
+
+```java
+void send(DatagramPacket packet) throws IOException
+void receive(DatagramPacket packet) throws IOException
+```
+
+The `DatagramPacket` is meant to receive information from a DatagramSocket, from the constructor of the DatagramPacket
+below one can see that the information must be stored in a temporary buffer which is filled when a packet is either sent
+or received.
+
+```java
+DatagramPacket DatagramPacket(byte data [], int size)
+DatagramPacket DatagramPacket(byte data [], int offset, int size)
+DatagramPacket DatagramPacket(byte data [], int size, InetAddress ipAddress, int port)
+DatagramPacket DatagramPacket(byte data [], int offset, int size, InetAddress ipAddress, int port)
+```
+
+`From the constructors above, the first two constructors are used when receiving information from a `DatagramSocket`,
+while the last two are used when sending, since the recipient has to be known host, therefore a correct `InetAddresss`
+has to be provided otherwise there would be no way to know where to send the information to`
+
+```java
+class WriteServer {
+    public static int serverPort = 998;
+    public static int clientPort = 999;
+    public static int bufferSize = 1024;
+
+    public static DatagramSocket ds;
+    public static byte buffer[] = new byte[bufferSize];
+
+    public static void TheServer() throws Exception {
+        int pos=0;
+        while (true) {
+            // collect input from the server on stdin
+            int c = System.in.read();
+            switch (c) {
+                case -1:
+                    System.out.println("Server Quits.");
+                    ds.close();
+                    return;
+                case '\r':
+                    break;
+                case '\n':
+                    // send whatever was accumulated in the buffer to the client
+                    ds.send(new DatagramPacket(buffer,pos,
+                        InetAddress.getLocalHost(),clientPort));
+                    // reset the pointer, back to 0, no data is in the buffer
+                    pos=0;
+                    break;
+                default:
+                    // write each byte to the buffer from stdid, and increment the pointer
+                    buffer[pos++] = (byte) c;
+            }
+        }
+    }
+    public static void TheClient() throws Exception {
+        while(true) {
+            // receive from the server, into the buffer, at most `bufferSize`
+            DatagramPacket p = new DatagramPacket(buffer, buffer.length);
+            ds.receive(p);
+            // print the received information to the screen, that would be whatever was entered on the server side
+            System.out.println(new String(p.getData(), 0, p.getLength()));
+        }
+    }
+    public static void main(String args[]) throws Exception {
+        // based on the passed in number arguments start either a server emitting packets or a client receiving them
+        if(args.length == 1) {
+            // start a server type of application
+            ds = new DatagramSocket(serverPort);
+            TheServer();
+        } else {
+            // start a client type of application
+            ds = new DatagramSocket(clientPort);
+            TheClient();
+        }
+    }
+}
+```
+
+To use the same application as both the server and client, just pass in a dummy argument to the execution
+
+```sh
+java WriteServer   # to start a client
+java WriteServer 1 # to start a server
+```
