@@ -1,4 +1,4 @@
-## Stream
+## Streams
 
 Streams are one of the two most notable features in `JAVA 8`, the second being the lambda function. The lambda functional
 interface however enables the existence of the Streams API. Streams in java are types of objects which are not meant to
@@ -21,14 +21,14 @@ The `BaseStream` is the super interface for all other stream interfaces, includi
 contains the most core methods that each stream must support, one of which is the `close` and `iterator` methods, which
 are most probably the ones that are considered the most important.
 
-| Method            | Description                                                                                                                   |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| iterator()        | obtain an iterator to the stream, using the iterator of the underlying structure                                              |
-| spliterator()     | obtain an split-iterator to the stream, using the split-iterator of the underlying structure                                  |
-| sequential()      | return a sequential stream representation of the source stream, if the stream is already sequential reutrns the same instance |
-| parallel()        | return a parallel stream representation of the source stream, if the stream is already parallel reutrns the same instance     |
-| unordered()       | return an unordered stream representation of the source stream, if the stream is already unordered reutrns the same instance  |
-| close()           | closes the stream, meaning that no termination operations can be called on the stream any more                                |
+| Method        | Description                                                                                                                   |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| iterator()    | obtain an iterator to the stream, using the iterator of the underlying structure                                              |
+| spliterator() | obtain an split-iterator to the stream, using the split-iterator of the underlying structure                                  |
+| sequential()  | return a sequential stream representation of the source stream, if the stream is already sequential reutrns the same instance |
+| parallel()    | return a parallel stream representation of the source stream, if the stream is already parallel reutrns the same instance     |
+| unordered()   | return an unordered stream representation of the source stream, if the stream is already unordered reutrns the same instance  |
+| close()       | closes the stream, meaning that no termination operations can be called on the stream any more                                |
 
 ### Stream
 
@@ -36,7 +36,8 @@ are most probably the ones that are considered the most important.
 interface Stream<T> extends BaseStream<T, Stream<T>> // the signature of the Stream API
 ```
 
-The Stream interface extends the BaseStream, and is meant to provide the most commonly used aggregation and tranformation operations that can be performed on any data structure
+The Stream interface extends the BaseStream, and is meant to provide the most commonly used aggregation and
+transformation operations that can be performed on any data structure
 
 | Method Signature                                                                                 | Description                                                                                                                               |
 | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -179,6 +180,7 @@ List<Integer> result = numbers.parallelStream()
 Another very common operation is to apply a filter on the list of elements, the function reference itself, receives the
 element from the stream, and returns a `boolean` result, `true` implies the element should be retained in the stream,
 while `false`, implies that the element can be filtered out / discarded.
+while
 
 ```java
 List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
@@ -194,6 +196,101 @@ Set or any other type of `collection`, even custom user collections, there are n
 collection is done, as long as the collection provides implementation against the `Collector` interface. There exists a
 companion utility class called `Collectors`, which contains common methods which are used for collecting streams into
 lists, sets, maps etc, with exposed methods such as `toList, toSet, toMap`
+
+#### ToList
+
+One of the most frequently used methods on the Collectors API, it has two major methods which are used to create a list from the unerlying stream.
+
+-   `toList` - which basically uses an `ArrayList` as the underlying implementation, and adds all elements from the
+    stream to the list, remember that the elements themselves are added by reference, the only thing that is getting
+    `discarded` is actually the original data structure, which the stream wrapped around in the first place during its
+    creation
+
+-   `toUnmodifiableList` - that is the same implementation as above, still usihng an `ArrayList` to collect the
+    elements, however, at the end the elements are moved from the mutable `ArrayList` into a unmutable list, using the
+    `List.of` API which collects the elements of the source array into a unmodifiable list - using the internal jdk
+    implemented type `ImmutableCollections`
+
+#### ToSet
+
+This one works similarly to the `toList` interface from the collectors API, it does again provide two methods, one
+to produce a mutable `set` and another one to produce an immutable one. Works by internally storing into a
+`HashSet`, and the immutable version is using `Set.of`
+
+#### ToMap
+
+The toMap method has a lot of overloads, providing different means of collecting elements into a map, mostly the overloaded methods deal with `key` handling, and `collisions`.
+
+The most basic usage of `toMap`, simply takes in the value from the source to be mapped and it is passed to the two
+mapper functions, one is supposed to return the key of the map, the other is supposed to return the value for that
+key,
+
+-   in first the example below, the name is mapped through the identity function, meaning the key is simply the entry
+    from the list (the length of the name), the value for the mapping is the length of the entry from the list (the
+    length of the name).
+
+-   the second example below, the mapping function remains the same, however a merging function is added, which tells the underlying `Collectors` how to reconcile values that map to the same key
+
+-   the third example is the same as the first one, and the second one, with the difference being that the third
+    argument for the map, is actually the supplier, or map constructor, this allows clients to pass in custom map
+    implementations instead
+
+`Note that by default if there are duplicate keys the basic version of toMap which is not passed in a merger
+function will use an internal one, the internal one will throw exception if duplicate key is inserted into the map`
+
+```java
+List<String> names = Arrays.asList("Alice", "Bob", "Charlie", "David", "Jon");
+
+Map<String, Integer> nameLengthMap = names.stream().collect(Collectors.toMap(
+    name -> name, // Key the name itself
+    String::length // Value the length of the naem
+));
+
+Map<String, Long> nameCountMap = names.stream().collect(Collectors.toMap(
+    name -> name,             // Key: the name itself
+    name -> 1L,               // Value: initial count of 1
+    Long::sum                 // Merging function to sum counts for duplicates
+));
+
+Map<String, Long> nameCountMap = names.stream().collect(Collectors.toMap(
+    name -> name,             // Key: the name itself
+    name -> 1L,               // Value: initial count of 1
+    Long::sum                 // Merging function to sum counts for duplicates
+    MyHashMap::new            // Provide a custom map implementation
+));
+```
+
+`The toMap functions have a version called toConcurrentMap which is meant to optimize performance when collecting
+elements, by leveraging parallel streams (see below) however the interface for them is the same as for the basic
+toMap methods`
+
+### Grouping
+
+A special case for mapping function which produces a map where the default is that a merging function is specially
+designed to collect all values with the same keys into a bucket. Usually an array or list. The idea is that a list
+of entries or values can be grouped by some common properties, in this case when they end up mapping to the same
+key.
+
+In the example below, the names are grouped by the length of the name itself, the most simple classifier function
+used for this grouping. In the second and third example a grouping factory methods are provided, one is for the
+actual top level map result which represents the grouping, the second is for the value type, which is where the
+elements are accumulated into.
+
+`Similarly to the toMap methods, the grouping methods also support a concurrent version to optimize the grouping by
+using parallel streaming`
+
+```java
+List<String> names = Arrays.asList("Alice", "Bob", "Charlie", "David", "Eve");
+Map<Integer, List<String>> groupedByLength = names.stream().collect(Collectors.groupingBy(
+    String::length // Key for the grouping is the length of the name
+));
+
+Map<Integer, List<String>> groupedByLength = names.stream().collect(Collectors.groupingBy(
+    String::length, // Key for the grouping is the length of the name
+    MyHashMap::new, // Map factory can be provided as second argument
+    MyArrayList::new, // The factory for the grouped map values
+));
+```
 
 ### Reduction
 
@@ -302,12 +399,13 @@ as follows:
 
 ### Unordered
 
-Another property of streams, generally speaking the ordered/unordered nature of a stream depends on the underlying data
-structure. If the stream is wrapped around a `ArrayList, LinkedList, TreeSet`, generally these are considered `ordered`
-structures, while if the stream is wrapped around a `HashMap` or `HashSet` are considered unordered. The unordered part
-plays a role when the stream is of type `parallel` stream. How does it work ? Well usually if the stream is parallel but
-ordered, the processing is done using a fork / join, each batch of elements is processed in parallel, however then it
-comes time to combine the results, the results are combine in order, if the stream is unordered the combination is done
-in whatever order, possibly as soon as there are at least two chunks completed, instead of when talking about ordered,
-it might be waiting for all to complete, then sort them in order and combine, instead for parallel streams the
-underlying implementation will eagerly combine as soon as there are results/chunks finished and ready to be combined
+Another property of streams which affects the way data is being processed in certain situations, generally speaking the
+ordered/unordered nature of a stream depends on the underlying data structure. If the stream is wrapped around a
+`ArrayList, LinkedList, TreeSet`, generally these are considered `ordered` structures, while if the stream is wrapped
+around a `HashMap` or `HashSet` are considered `unordered`. The `unordered` part plays a role when the stream is of type
+`parallel` stream. How does it work ? Well if the stream is parallel but ordered, the processing is done using a fork /
+join, each batch of elements is processed in parallel, then when time comes to combine the results, the results are
+combined in order, if the stream is unordered the combination is done in whatever order, possibly as soon as there are
+at least two results to combine completed, instead with the ordered type, it might be waiting for all results from the
+parallel processing to complete, then sort them in order and only then run the combine function / lambda. Parallel
+streams will eagerly combine as soon as there are results/chunks finished and ready to be combined.
