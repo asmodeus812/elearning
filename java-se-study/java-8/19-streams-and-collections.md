@@ -19,7 +19,7 @@ interface BaseStream<T, S extends BaseStream<T, S>> extends AutoCloseable // the
 
 The `BaseStream` is the super interface for all other stream interfaces, including the Stream interface itself, it
 contains the most core methods that each stream must support, one of which is the `close` and `iterator` methods, which
-are most probably the ones that are considered the most important.
+vare most probably the ones that are considered the most important.
 
 | Method        | Description                                                                                                                   |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------- |

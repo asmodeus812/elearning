@@ -1,3 +1,18 @@
+# Date & Time
+
+With java 8 the standard introduced several new top level classes for dealing with dates and date transformations. They
+are called `LocalDate`, `Localime`, `LocalDateTime`, from the name it is easy to infer what those classes are meant to
+represent and interface with. Those are located at the top level package `java.time`, there are however more packages
+under the java time umbrella which are used to fine tune and provide fine grained access to modify and transform dates
+and time formats
+
+`None of the new date & time related class types define a public constructor, they are meant to be constructed through
+factory static final methods, provided by the runtime, they follow this concept to be consistent with the rest of the
+new types provided by the run-time`
+
+The diagram below shows the general relationship between the classes and interfaces in the new `java.time` package
+provided by the `JDK 8` specification
+
 ```md
 +-----------------+
 |    Temporal     | <------------------------------------+
@@ -48,25 +63,10 @@
                                                   +---------------------+
 ```
 
-# TemporalUnit
+## TemporalUnit
 
 A unit of date-time, such as Days or Hours. Measurement of time is built on units, such as years, months, days, hours,
-minutes and seconds. Implementations of this interface represent those units.
-
-## Date
-
-With java 8 the standard introduced several new top level classes for dealing with dates and date transformations. They
-are called `LocalDate`, `Localime`, `LocalDateTime`, from the name it is easy to infer what those classes are meant to
-represent and interface with. Those are located at the top level package `java.time`, there are however more packages
-under the java time umbrella which are used to fine tune and provide fine grained access to modify and transform dates
-and time formats
-
-`None of the new Local* class types define a public constructor, they are meant to be constructed through factory static
-final methods, provided by the runtime, they follow this concept to be consistent with the rest of the new types
-provided by the run-time`
-
-The diagram below shows the general relationship between the classes and interfaces in the new `java.time` package
-provided by the JDK 8 specification
+minutes and seconds. Implementations of this interface represent those units. The various implementations are listed below
 
 ### LocalDate
 
@@ -253,53 +253,74 @@ available
 `Note that the default printout for ZonedDateTime is always using nanos unlike the LocalDateTime which is has the format
 of YYYY-MM-DDTHH:MM:SS which does not include any nano seconds information`
 
-# TemporalAmount
+## TemporalAmount
 
 Framework-level interface defining an amount of time, such as "6 hours", "8 days" or "2 years and 3 months". This is
 the base interface type for amounts of time. An amount is distinct from a date or time-of-day in that it is not tied
-to any specific point on the time-line.
+to any specific point on the time-line. The various implementations of this interface are listed below.
 
-## Period
+### Period
 
 A period is defined based on date amount, measured in years, months or days. It is useful for representing a period of
-time based on dates.
+time based on dates. There are several methods which are provide means of inter operating with `LocalDate` or
+`LocalDateTime`, which are the relevant `TemporalUnits` which can support math with Period type, which is based on
+years, months and days. One such example is the method called `between` with the following signature -
+`Period.between(LocalDate start, LocalDate end)` - to calculate the period between two dates, that period instance can
+then be converted to any scale which the period class type supports, such as days, months or years
 
-## Duration
+### Duration
 
-## Instant
+This class models a quantity or amount of time in terms of seconds and nanoseconds. It can be accessed using other
+duration-based units, such as minutes and hours. In addition, the `ChronoUnit.DAYS` unit can be used and is treated as
+exactly equal to 24 hours, thus ignoring daylight savings effects.
 
-| Method                                   | Description                                                                                                     |
-|------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| `LocalDate.atStartOfDay()`        | Converts a `LocalDate` to a `LocalDateTime` at the start of the day.                                   |
-| `LocalDate.minus(Period period)`   | Returns a `LocalDate` that is the result of subtracting a `Period` from this `LocalDate`.               |
-| `LocalDate.plus(Period period)`    | Returns a `LocalDate` that is the result of adding a `Period` to this `LocalDate`.                      |
-| `LocalDateTime.toInstant(ZoneOffset offset)` | Converts a `LocalDateTime` to an `Instant` using a specified `ZoneOffset`.                  |
-|------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| `Duration.between(Instant start, Instant end)` | Calculates the duration between two `Instant` objects.                                   |
-| `Duration.ofDays(long days)`             | Obtains a `Duration` representing a specified number of days.                                                 |
-| `Duration.ofHours(long hours)`           | Obtains a `Duration` representing a specified number of hours.                                                 |
-| `Duration.ofMinutes(long minutes)`       | Obtains a `Duration` representing a specified number of minutes.                                               |
-| `Duration.ofSeconds(long seconds)`       | Obtains a `Duration` representing a specified number of seconds.                                               |
-| `Duration.toHours()`                      | Converts this `Duration` to a number of hours.                                                                 |
-| `Duration.toMillis()`                     | Converts this `Duration` to a number of milliseconds.                                                          |
-|------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| `Instant.isAfter(Instant other)`        | Checks if this `Instant` is after the specified `Instant`.                                                    |
-| `Instant.isBefore(Instant other)`       | Checks if this `Instant` is before the specified `Instant`.                                                   |
-| `Instant.minus(Duration duration)`       | Returns an `Instant` that is the result of subtracting a `Duration` from this `Instant`.                       |
-| `Instant.minus(Duration duration)` | Returns an `Instant` that is the result of subtracting a `Duration` from this `Instant`.                 |
-| `Instant.now()`                          | Obtains the current instant from the system clock.                                                             |
-| `Instant.ofEpochMilli(long epochMilli)` | Obtains an `Instant` from a timestamp in milliseconds since the epoch (1970-01-01T00:00:00Z).     |
-| `Instant.ofEpochSecond(long epochSecond)`| Obtains an `Instant` from a timestamp in seconds since the epoch.                                             |
-| `Instant.plus(Duration duration)`        | Returns an `Instant` that is the result of adding a `Duration` to this `Instant`.                              |
-| `Instant.plus(Duration duration)`  | Returns an `Instant` that is the result of adding a `Duration` to this `Instant`.                        |
-| `Instant.toEpochMilli()`                 | Converts this `Instant` to a number of milliseconds since the epoch.                                           |
-| `Instant.toEpochSecond()`                | Converts this `Instant` to a number of seconds since the epoch.                                               |
-|------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| `Period.between(LocalDate start, LocalDate end)`| Calculates the period between two `LocalDate` objects.                                                |
-| `Period.minus(Period period)`             | Returns a `Period` that is the result of subtracting the specified `Period` from this `Period`.                |
-| `Period.ofDays(int days)`         | Obtains a `Period` representing a specified number of days.                                             |
-| `Period.ofMonths(int months)`     | Obtains a `Period` representing a specified number of months.                                           |
-| `Period.ofYears(int years)`               | Obtains a `Period` representing a specified number of years.                                                  |
-| `Period.plus(Period period)`               | Returns a `Period` that is the result of adding the specified `Period` to this `Period`.                       |
-| `Period.toString()`                        | Returns a string representation of the `Period`.                                                               |
-| `Period.toTotalMonths()`                   | Converts this `Period` to a total number of months.                                                            |
+### Instant
+
+The Instant class represents a moment on the timeline, typically used to capture a timestamp. It is the closest
+equivalent to an absolute point in time in Java and is often measured in milliseconds (or nanoseconds) since the Unix
+epoch (1970-01-01T00:00:00Z). Commonly used when you need an exact, machine-based time representation (e.g., for
+timestamps or logging). Instant is immutable and thread-safe.
+
+### Usage
+
+The table below represents the basic api of the temporal amount implementations such as Period, Duration, Instant -
+these are designed in such a way that they can easily inter operate between the other implementations of `TemporalAmount
+(Period, Duration, Instant)` and `TemporalUnit (LocalTime, LocalDate, LocalDateTime)`
+
+`Note that most TemporalUnit implementation classes implement methods which work and inter operate with the TemporalAmount interface.`
+
+| Method                                         | Description                                                                                                       |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| LocalDate.atStartOfDay()                       | Converts a `LocalDate` to a `LocalDateTime` at the start of the day.                                              |
+| LocalDate.minus(Period period)                 | Returns a `LocalDate` that is the result of subtracting a `Period` from this `LocalDate`.                         |
+| LocalDate.plus(Period period)                  | Returns a `LocalDate` that is the result of adding a `Period` to this `LocalDate`.                                |
+| LocalDateTime.toInstant(ZoneOffset offset)     | Converts a `LocalDateTime` to an `Instant` using a specified `ZoneOffset`.                                        |
+| ------------------------------------------     | ----------------------------------------------------------------------------------------------------------------- |
+| Duration.between(Instant start, Instant end)   | Calculates the duration between two `Instant` objects.                                                            |
+| Duration.ofDays(long days)                     | Obtains a `Duration` representing a specified number of days.                                                     |
+| Duration.ofHours(long hours)                   | Obtains a `Duration` representing a specified number of hours.                                                    |
+| Duration.ofMinutes(long minutes)               | Obtains a `Duration` representing a specified number of minutes.                                                  |
+| Duration.ofSeconds(long seconds)               | Obtains a `Duration` representing a specified number of seconds.                                                  |
+| Duration.toHours()                             | Converts this `Duration` to a number of hours.                                                                    |
+| Duration.toMillis()                            | Converts this `Duration` to a number of milliseconds.                                                             |
+| ------------------------------------------     | ----------------------------------------------------------------------------------------------------------------- |
+| Instant.isAfter(Instant other)                 | Checks if this `Instant` is after the specified `Instant`.                                                        |
+| Instant.isBefore(Instant other)                | Checks if this `Instant` is before the specified `Instant`.                                                       |
+| Instant.minus(Duration duration)               | Returns an `Instant` that is the result of subtracting a `Duration` from this `Instant`.                          |
+| Instant.minus(Duration duration)               | Returns an `Instant` that is the result of subtracting a `Duration` from this `Instant`.                          |
+| Instant.now()                                  | Obtains the current instant from the system clock.                                                                |
+| Instant.ofEpochMilli(long epochMilli)          | Obtains an `Instant` from a timestamp in milliseconds since the epoch (1970-01-01T00:00:00Z).                     |
+| Instant.ofEpochSecond(long epochSecond)        | Obtains an `Instant` from a timestamp in seconds since the epoch.                                                 |
+| Instant.plus(Duration duration)                | Returns an `Instant` that is the result of adding a `Duration` to this `Instant`.                                 |
+| Instant.plus(Duration duration)                | Returns an `Instant` that is the result of adding a `Duration` to this `Instant`.                                 |
+| Instant.toEpochMilli()                         | Converts this `Instant` to a number of milliseconds since the epoch.                                              |
+| Instant.toEpochSecond()                        | Converts this `Instant` to a number of seconds since the epoch.                                                   |
+| ------------------------------------------     | ----------------------------------------------------------------------------------------------------------------- |
+| Period.between(LocalDate start, LocalDate end) | Calculates the period between two `LocalDate` objects.                                                            |
+| Period.minus(Period period)                    | Returns a `Period` that is the result of subtracting the specified `Period` from this `Period`.                   |
+| Period.ofDays(int days)                        | Obtains a `Period` representing a specified number of days.                                                       |
+| Period.ofMonths(int months)                    | Obtains a `Period` representing a specified number of months.                                                     |
+| Period.ofYears(int years)                      | Obtains a `Period` representing a specified number of years.                                                      |
+| Period.plus(Period period)                     | Returns a `Period` that is the result of adding the specified `Period` to this `Period`.                          |
+| Period.toString()                              | Returns a string representation of the `Period`.                                                                  |
+| Period.toTotalMonths()                         | Converts this `Period` to a total number of months.                                                               |
