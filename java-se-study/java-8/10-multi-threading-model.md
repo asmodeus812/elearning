@@ -400,3 +400,299 @@ class MyClass {
 ```
 
 `Writes to a volatile variable happen-before subsequent reads of that volatile variable by any thread.`
+
+### Builtin
+
+The standard concurrency library provides means of wrapping common threading patterns around a well defined interfaces
+and classes. One such is the `Executor` and `ExecutorService`. These interfaces provides means of executing tasks in a
+concurrent manner without having to worry about the underlying implementation. However there are some key
+implementations of this interface which find common use in the wild. The `Executor` interface is the top level interface
+which provides a singular method, to execute a Runnable task, the `ExecutorService` provides more sophisticated means of:
+
+1.  `Task Submission`: You can submit `Runnable` and Callable tasks for execution.
+
+2.  `Life cycle Management`: It provides methods to control the `lifecycle` of the executor, such as starting, stopping,
+    and checking if it is terminated.
+
+3.  `Future Management`: The `ExecutorService` returns Future objects that represent the result of the asynchronous
+    computation, allowing you to retrieve the result or handle exceptions.
+
+4.  `Thread Pool Management`: It can manage a pool of threads, allowing for efficient reuse of threads and reducing
+    the overhead associated with thread creation.
+
+#### ThreadPerTaskExecutor
+
+The most basic executor, it implements the `Executor` interface, not the `ExecutorService` which means that this class
+exposes only one single method `execute` and each is run on a separate thread. Should not really be used in production
+environment
+
+#### ThreadPoolExecutor
+
+The pool executor is a more sophisticated verision of the `ThreadPerTaskExecutor` which uses pooling of threads to
+execute tasks. Used for one short, short lived, non repeatable tasks, the pool executor can be configured, meaning it
+can be created with a specific fixed number of threads in the pool, and various other parameters can be changed.
+
+```java
+ExecutorService executor = new ThreadPoolExecutor(
+    5, // core pool size
+    10, // max pool size
+    60, // keep-alive time for extra threads
+    TimeUnit.SECONDS,
+    new LinkedBlockingQueue<Runnable>() // task queue
+);
+executor.submit(() -> {
+    // Task implementation
+});
+
+executor.shutdown();
+```
+
+#### ScheduledThreadPoolExecutor
+
+The scheduled executor is a sub-class of the `ThreadPoolExecutor` and is meant to be used for execution of tasks after a
+given delay, or to execute tasks periodically after a given interval, one can use the `ScheduledThreadPoolExecutor` to
+schedule tasks to be executed in the future
+
+```java
+ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(5);
+scheduler.schedule(() -> {
+    // Task to execute after a delay
+}, 10, TimeUnit.SECONDS); // Execute after 10 seconds
+scheduler.shutdown();
+```
+
+#### CachedThreadPool
+
+This implementation creates new thread for each task but will reuse previously constructed threads when they are
+available, it is unbounded, meaning it can grow to accommodate as many threads as needed, suitable for many short lived
+tasks, where thread per task creation is justified. The cached thread pool is still using pooling however, the pool is
+unbounded, so unlike the `ThreadPoolExecutor` which has a fixed number of threads that can be used, the
+`CachedThreadPool` can grow its internal pool of threads based on throughput, the more tasks that come in the more
+threads are created, once a task frees up a thread from the cached pool, if within some period of time that thread is
+not-reused by a new task, or a new task does not come in, the thread is removed/destroyed from the pool. This allows the
+`CachedThreadPool` to scale the thread count based on the incoming number of tasks, something that the
+`ThreadPoolExecutor` can not do, since it will always have a fixed number of thread allocated.
+
+```java
+ExecutorService executor = Executors.newCachedThreadPool();
+executor.submit(() -> {
+    // Task implementation
+});
+executor.shutdown();
+```
+
+#### FixedThreadPool
+
+This implementation is very similar to the `ThreadPoolExecutor` since it also provides a fixed number of threads in a
+pool which can execute tasks, however the `FixedThreadPool` provides less flexibility in the way it can be configured
+compared to the `ThreadPoolExecutor`. The configuration of the `FixedThreadPool` allows one to only provide the number
+of threads in the pool, and that is about it, while the `ThreadPerTaskExecutor` provides quite a wide variety of
+configuration options.
+
+```java
+ExecutorService executor = Executors.newFixedThreadPool(10);
+executor.submit(() -> {
+    // Task implementation
+});
+executor.shutdown();
+```
+
+#### SingleThreadExecutor
+
+This executor creates a single thread, which is used to execute tasks sequentially, the tasks are queued, and after one
+finishes the next one is scheduled for execution, useful for scenarios where you need to execute tasks in a particular
+order, or if the output of one is used as the input of the other, and they need to be chain executed.
+
+```java
+ExecutorService executor = Executors.newSingleThreadExecutor();
+executor.submit(() -> {
+    // Task implementation
+});
+executor.shutdown();
+```
+
+#### ForkJoinPool
+
+This executor service implementation is a specialized implementation of the `ExecutorService`, designed with for
+work-stealing algorithms and tasks. The work-stealing is the primary benefit of using a `ForkJoinPool`. The
+`ForkJoinPool` is by default created with a fixed number of threads, just as the `ThreadPoolExecutor`, however, it
+employs work-stealing, the way work-stealing works is that each thread is assigned a `deque/queue` of tasks that will be
+run, usually assigned to each thread in the pool, in a round robin way. Now if a particular thread finishes all tasks it
+was assigned to, it can steal tasks from the queue of other threads, which still have pending tasks, usually the work
+stealing will try to balance pulling tasks from the queue of other threads. The `ForkJoinPool` is very useful for tasks
+which are recursive, since the tasks can be distributed evenly, and the threads from the pool will not be idle, since
+they will pull work from other threads, in case the thread finishes all tasks assigned to it. For example algorithms
+such as merge-sort, quick-sort, and other divide and conquer algorithms which are recursive in nature can greatly
+benefit from using a `ForkJoinPool`, instead of `ThreadPoolExecutor`, this is due to the fact that the
+`ThreadPoolExecutor` does not re-distribute tasks among free threads, the only way to make a free thread work, is by
+issuing a new task, then a free thread from the pool will pick it up, however, in the `ForkJoinPool` there will always
+be a thread with a running task until there are no longer tasks to run. The `ForkJoinPool` is very useful for a particular
+task which can be split into multiple stages, such as many algorithms, mentioned above, unlike the `ThreadPoolExecutor`
+which is tailored more towards completely independent long running tasks.
+
+### Future
+
+This interface is very closely related to the `Executor` and `ExecutorService` interfaces, it provides an API wrapping a
+unit of computation for which the client can obtain the result without blocking the current thread, check if the status
+of the task is completed, had an exception. In general the methods in the `ExecutorService` return some sort of
+implementation or sub-interface of `Future` they return a `promise` of sorts, which can be queried, possible results
+extracted and so on. The `Future` interface and the `Executor` work in tandem to complete the user interaction with
+asynchronous task management
+
+When one submits a task to an `ExecutorService` using the `submit()` method, it returns a `Future` object that
+represents the pending result of the task. This allows you to check the status of the task and retrieve the result once
+it has completed.
+
+#### FutureTask
+
+This implementation of `Future` acts as a wrapper around `Runnable` and `Future`. Basically what it provides is means of
+creating a self-canceling runnable task. Meaning that while `submit` method on `ExecutorService` does return a `Feature`
+which can be used to cancel the running task, the task itself can not be canceled from within the task, however the
+`FutureTask` provides the user with the ability to terminate itself during the execution (e.g. when a given state or
+result is reached or not reached, the task can stop execution of itself).
+
+```java
+Callable<String> callableTask = () -> {
+    // Simulate a long-running task
+    Thread.sleep(2000);
+    return "Task Completed";
+};
+
+FutureTask<String> futureTask = new FutureTask<>(callableTask);
+ExecutorService executor = Executors.newFixedThreadPool(1);
+executor.submit(futureTask);
+
+// Retrieve the result
+try {
+    String result = futureTask.get(); // This will block until the result is available
+    System.out.println(result);
+} catch (InterruptedException | ExecutionException e) {
+    e.printStackTrace();
+} finally {
+    executor.shutdown();
+}
+```
+
+#### CompletableFuture
+
+This particular implementation of the Future interface, allows one to chain and transform computation operations which
+are going to be run in an executor. By default the `CompletableFuture` uses a `ForkJoinPool`, this implementation is
+done in the `CompletableFuture` interface. Similarly to `Stream`s the `CompletableFuture`s have two types of operations
+
+Finalizing and composing. The finalizing operations are such that they will block the current thread until the future
+completes The composing operations, similarly to streams will chain the future, with other futures, it is important
+to note that upon registering an composing operation the operation will be schedule for running on the executor, if
+further chaining is done through composing operations, the are done by chaining on the previous instance, each new
+chaining operation (thenCompose, thenApply, thenCombine etc) will either register a new task in the executor if the
+future from which it is being chained from is not complete or immediately start executing if the future is complete.
+
+`The chaining pattern used in CompletableFuture is very similar to how Stream chaining work, however unlike streams
+processing begins immediately as soon as the previous future in the chain has completed/has result, instead of when
+calling a terminating operation with Streams`
+
+##### Finalizing operations
+
+| **Method**               | **Description**                                                                                            |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| get()                    | Waits for the future to complete and retrieves its result, blocking the calling thread if necessary.       |
+| join()                   | Similar to `get()`, but throws an unchecked `CompletionException` if the computation fails.                |
+| thenAccept(Consumer)     | Consumes the result without returning a new `CompletableFuture`, useful for performing side effects.       |
+| thenRun(Runnable)        | Runs a `Runnable` after the computation is complete, regardless of the result.                             |
+| whenComplete(BiConsumer) | Executes a `BiConsumer` after the completion of the future, providing both the result and exception.       |
+| handle(BiFunction)       | Similar to `whenComplete`, but allows for recovery or transformation of the result if an exception occurs. |
+
+##### Composing operations
+
+| **Method**                                    | **Description**                                                                                                       |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| thenApply(Function)                           | Applies a function to the result of the future, returning a new `CompletableFuture` with the transformed result.      |
+| thenCompose(Function)                         | Chains another `CompletableFuture` that depends on the result of the current one, allowing for dependent async tasks. |
+| thenCombine(CompletableFuture, BiFunction)    | Combines the results of two `CompletableFuture`s when both complete, using a function to produce a final result.      |
+| thenAcceptBoth(CompletableFuture, BiConsumer) | Applies a `BiConsumer` to the results of two futures without returning a result.                                      |
+| applyToEither(CompletableFuture, Function)    | Applies a function to whichever of two futures completes first.                                                       |
+| acceptEither(CompletableFuture, Consumer)     | Similar to `applyToEither`, but applies a `Consumer` to the first result without returning a new future.              |
+| exceptionally(Function)                       | Returns a new `CompletableFuture` that handles exceptions and can provide a fallback value.                           |
+
+##### Factory operations
+
+-   `supplyAsync` - Starts execution of a task that produces a result, has a generic return type of T
+
+-   `runAsync` - Starts execution of a task that does not produce a result i.e. has a void return type
+
+-   `completedFuture` - Returns a future that is already completed with a specified value. This works as if a future was
+    created, task was run, completed and a result was produced.
+
+-   `newIncompleteFuture` - Creates a new complete-able future, without a task, use `composing` and `finalizing`
+    operations to complete it
+
+`Note, the factory operations above provide means of creating a completeable future, in different states, there are
+mostly two - already running a given task, or one that is not initialized with any task and has to be registered into an
+executor service to begin execution.`
+
+In the example below one can see how multiple `CompletableFuture` are created, each of which depends on the previous,
+using compose (`thenCompose`) the result of a previous future is used as an input to the next, however they are executed
+asynchronously but in order. When one calls `supplyAsync` on a future instance, the task is `immediately` scheduled for
+execution, it returns a new instance of `CompletableFuture` which can be further chained with more `supplyAsync` calls,
+the next call to `supplyAsync` will either schedule a task to be run after the first future completes / has result, or
+if the first future is already finished, the second call to `supplyAsync` will be immediately scheduled for execution.
+
+Note that `get` will block the current thread until the task is finished, so it is best to execute some other long
+running task between the calls to `thenAccept` and `get` to make sure there is no idle current thread time
+
+`It is important to remember that chained calls to supplyAsync, will start the task as soon as possible only if the
+result of the previous future is complete, that is not applicable only for the very first future in the chain, it does
+not need to wait for result, it can start immediately`
+
+```java
+public static void main(String[] args) {
+    OrderProcessing orderProcessing = new OrderProcessing();
+    orderProcessing.processOrder(123);
+}
+
+public void processOrder(int orderId) {
+    CompletableFuture<User> userFuture = fetchUserDetails(orderId);
+    CompletableFuture<Payment> paymentFuture = userFuture.thenCompose(user -> processPayment(user));
+    CompletableFuture<Void> confirmationFuture = paymentFuture.thenAccept(payment -> sendConfirmation(payment));
+
+    // after calling `supplyAsync`, the future tasks are already being executed, inside the thread executor pool
+    // therefore the current thread is not blocked and more tasks can be run at this point while the result of the
+    // `confirmationFuture` is being computed
+
+    try {
+        confirmationFuture.get(); // obtain the final result
+        System.out.println("Order processed successfully.");
+    } catch (InterruptedException | ExecutionException e) {
+        e.printStackTrace();
+    }
+}
+
+private CompletableFuture<User> fetchUserDetails(int orderId) {
+    return CompletableFuture.supplyAsync(() -> {
+        sleep(1); // Simulate delay
+        System.out.println("Fetched user details for order " + orderId);
+        return new User("John Doe", "john.doe@example.com");
+    });
+}
+
+private CompletableFuture<Payment> processPayment(User user) {
+    return CompletableFuture.supplyAsync(() -> {
+        sleep(2); // Simulate delay
+        System.out.println("Processed payment for user: " + user.getName());
+        return new Payment("12345", 99.99); // Simulate a successful payment
+    });
+}
+
+private void sendConfirmation(Payment payment) {
+    sleep(1); // Simulate delay
+    System.out.println("Sent confirmation email for payment ID: " + payment.getPaymentId());
+}
+
+private void sleep(int seconds) {
+    try {
+        TimeUnit.SECONDS.sleep(seconds);
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+    }
+}
+```
+

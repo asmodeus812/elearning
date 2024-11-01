@@ -17,7 +17,7 @@ public class LitteralsAndTypes {
         // Construct a request string.
         String str = (args.length == 0 ? "MHProfessional.com" : args[0]) + "\n";
         // Convert to bytes.
-        byte buf[] = str.getBytes();
+        byte[] buf = str.getBytes();
         // Send request.
         out.write(buf);
         // Read and display response.

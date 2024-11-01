@@ -1,0 +1,11 @@
+{
+
+    "java.configuration.runtimes": [
+        {
+            "default": true,
+            "name": "JavaSE-11",
+            "path": "/home/linuxbrew/.linuxbrew/Cellar/openjdk@11/11.0.24/libexec"
+        }
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive"
+}
