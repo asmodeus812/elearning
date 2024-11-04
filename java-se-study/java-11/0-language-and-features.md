@@ -1,6 +1,9 @@
 # Release
 
-Java 9 (Released in September 2017). This language release adds many improvements to the libraries and APIs but does not introduce any new significant changes to the base language itself unlike future iterations which do, like java 10 or 11.
+Java 9 (Released in September 2017). This language release adds many improvements to the libraries and `APIs` but does not
+introduce any new significant changes to the base language itself unlike future iterations which do, like java 10 or 11.
+Java 10 Released in March 2018, and Java 11 Released September 2018, are more incremental changes and improvements to
+the Java 9 release. Below are presented the most notable features from each release between java 9 and 11
 
 ## General
 
@@ -75,11 +78,11 @@ Java 9 (Released in September 2017). This language release adds many improvement
     FileInputStream fileInputStream = new FileInputStream("test.txt");
     // fileInputStream is effectively final (not reassigned anywhere)
     try (fileInputStream) {
-        // use fileInputStream directly
+        // use fileInputStream variable directly, can not be re-assigned
     }
     ```
 
-## Language Features
+## Language
 
 1.  `var keyword for local variables and type inference`: Allows for local variable declarations without explicitly
     specifying the type. Java infers the type based on the right hand side expression. However there are some specific
@@ -99,7 +102,7 @@ Java 9 (Released in September 2017). This language release adds many improvement
     null;`
 
 
-## Library Features
+## Library
 
 1.  `Stream` API Enhancements - new methods `takeWhile`, `dropWhile`, and iterate for more fluent functional-style
     programming. These are very similar to `filter` however there is a key difference, while `filter` goes through all
@@ -136,7 +139,7 @@ Java 9 (Released in September 2017). This language release adds many improvement
     Another one `newIncompleteFuture` is a companion to the new `completeAsync` it basically is a replacement for calling
     `supplyAsync` without running the future, to run it call `thenApply`
 
-## Platform Features
+## Platform
 
 1.  `Multi-Release JARs` - allows for packaging multiple versions of classes optimized for different Java versions within
     the same JAR. The structure of the jar is such that by default for java 8 and below, the compiled class files are
@@ -221,7 +224,7 @@ Java 9 (Released in September 2017). This language release adds many improvement
     implementation itself is not packaged within the application, it is linked dynamically during run-time, hence the
     name, The old approach of bundling resembles the static linking in a way
 
-4.  `Java Linker`: New tool to create custom `runtime` images with only required modules, reducing application size. As a
+3.  `Java Linker`: New tool to create custom `runtime` images with only required modules, reducing application size. As a
     continuation of the `module` approach, the `jlink` now gives one the ability to package a java runtime along with the
     application itself, in a single jar. This is like a fat-jar, but instead of 3-rd party libraries in the jar, the jar
     contains the `JDK` runtime modules, only those used / required by the application, along with the application source
