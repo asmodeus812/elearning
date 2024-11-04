@@ -1,3 +1,12 @@
+# Java
+
+Java is a high-level, class-based, object-oriented programming language that is designed to have as few implementation
+dependencies as possible. It is a general-purpose programming language intended to let programmers write once, run
+anywhere (`WORA`), meaning that compiled Java code can run on all platforms that support Java without the need to
+recompile. Java applications are typically compiled to `bytecode` that can run on any Java virtual machine (`JVM`)
+regardless of the underlying computer architecture. The syntax of Java is similar to C and C++, but has fewer low-level
+facilities than either of them.
+
 ## The History
 
 Java was conceived by James Gosling, Patrick Naughton, Chris Warth, Ed Frank, and Mike Sheridan at Sun Microsystems,
@@ -231,7 +240,10 @@ API in Java, introduced in Java 1.0, is part of the java.io package. This API pr
 
 -   File: Represents file and directory pathnames, enabling file and directory manipulation.
 
-### The Java NIO (New Input/Output) API, introduced in Java 1.4 and found in the java.nio package, includes several key components designed for more efficient and flexible I/O operations
+### The Java NIO
+
+Introduced in Java 1.4 and found in the java.nio package, includes several key components designed for more efficient
+and flexible I/O operations
 
 1.  Buffers: Containers for data that allow for efficient reading and writing. Examples include ByteBuffer, CharBuffer, and IntBuffer.
 2.  Channels: Represent connections to I/O devices and provide a way to read from and write to buffers. Examples include FileChannel, SocketChannel, and DatagramChannel.
@@ -246,7 +258,7 @@ Client Request:
 A client (e.g., a web browser or another application) sends an HTTP request to a server. This request is transmitted over the network using the HTTP protocol.
 Socket Communication:
 
-The HTTP request is sent over a TCP/IP connection. This involves creating a socket connection between the client and the server.
+The HTTP request is sent over a `TCP/IP` connection. This involves creating a socket connection between the client and the server.
 On the server side, a socket is an endpoint for communication. The web server listens on a specific port (e.g., port 80 for HTTP or 443 for HTTPS) for incoming connections.
 Web Server Listening:
 
@@ -261,33 +273,33 @@ Routing the Request:
 The server determines how to handle the request based on the URL and method. This may involve serving static content (like HTML files) or forwarding the request to an application server for dynamic content.
 Forwarding to Application Server (if needed):
 
-For dynamic content or web services, the web server forwards the request to a Java EE application server. This can be done using various methods, including proxying or direct communication.
+For dynamic content or web services, the web server forwards the request to a `Java EE` application server. This can be done using various methods, including proxying or direct communication.
 3. Application Server Processing
 Receiving the Request:
 
-The application server (e.g., Apache Tomcat, JBoss EAP) receives the request from the web server. This server is capable of handling Java EE components.
+The application server (e.g., Apache Tomcat, JBoss EAP) receives the request from the web server. This server is capable of handling `Java EE` components.
 Request Dispatching:
 
-The application server dispatches the request to the appropriate component based on the configuration. For example, it might route the request to a servlet or a web service.
+The application server dispatches the request to the appropriate component based on the configuration. For example, it might route the request to a `servlet` or a web service.
 4. Web Service Invocation
 Service Locator:
 
 If the request is for a web service, the application server locates the appropriate service endpoint based on the request URL and method.
 Processing the Request:
 
-SOAP Web Services (JAX-WS):
-WSDL: The service is described using WSDL (Web Services Description Language). The server uses the WSDL to understand the request structure and determine how to process it.
-Service Endpoint: The application server uses JAX-WS to handle the SOAP request. It invokes the appropriate service method based on the SOAP message.
-RESTful Web Services (JAX-RS):
-Annotations: RESTful services use annotations to map HTTP methods to Java methods. The server uses JAX-RS to find the appropriate resource method.
+SOAP Web Services (`JAX-WS`):
+`WSDL`: The service is described using `WSDL` (Web Services Description Language). The server uses the `WSDL` to understand the request structure and determine how to process it.
+Service Endpoint: The application server uses `JAX-WS` to handle the SOAP request. It invokes the appropriate service method based on the SOAP message.
+`RESTful` Web Services (`JAX-RS`):
+Annotations: `RESTful` services use annotations to map HTTP methods to Java methods. The server uses `JAX-RS` to find the appropriate resource method.
 Processing: The application server processes the request, possibly involving business logic or database interactions, and prepares a response.
 Business Logic Execution:
 
-The web service might interact with other components like EJBs (Enterprise JavaBeans) or data access layers to perform the necessary business logic.
+The web service might interact with other components like `EJBs` (Enterprise `JavaBeans`) or data access layers to perform the necessary business logic.
 5. Generating and Sending the Response
 Response Preparation:
 
-The web service generates a response based on the request. For SOAP services, this involves creating a SOAP message. For RESTful services, it might be JSON or XML.
+The web service generates a response based on the request. For SOAP services, this involves creating a SOAP message. For `RESTful` services, it might be `JSON` or XML.
 Returning the Response:
 
 The response is sent back to the web server, which then forwards it to the client. The response includes the HTTP status code, headers, and body content.
@@ -316,7 +328,7 @@ into their development processes.
 Future of the Six-Month Cycle As for whether this cycle will continue indefinitely, several points are worth noting
 
 -   Sustainability: The six-month cycle has been well-received and has proven sustainable over several years. There is no
-official indication from Oracle or the OpenJDK community that they plan to change this schedule in the near future.
+official indication from Oracle or the `OpenJDK` community that they plan to change this schedule in the near future.
 
 -   Continuous Improvement: The Java community regularly evaluates the release process and adapts as needed. If the
 community or the demands of modern software development change significantly, adjustments to the release cadence might
