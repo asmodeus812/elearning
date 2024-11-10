@@ -1,18 +1,17 @@
 package com.java.core;
 
-import java.io.IOException;
-
 public class LitteralsAndTypes {
 
-    public static void main(String[] args) throws IOException {
-        switch (args) {
-            case String[] a when a.length > 0:
+    int test = 0;
 
-                break;
+    void method(int arg) {
+        Runnable r = () -> {
+            this.test = 1;
+            arg = 23;
+            System.out.println("test");
+        };
+        r.run();
+    }
 
-            default:
-                break;
-        }
-        }
-
+    public static void main(String[] args) {}
 }
