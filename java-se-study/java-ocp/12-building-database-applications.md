@@ -529,9 +529,9 @@ Describe the interfaces that make up the core of the `JDBC`
 
 -   `Statement`: Sends a SQL statement to the database without any parameters
 
--   `PreparedStatement`: Represents a precompiled SQL statement that can be customized using IN parameters
+-   `PreparedStatement`: Represents a pre-compiled SQL statement that can be customized using IN parameters
 
--   `CallableStatement`: Executes stored procedures; can handle IN as well as OUT and INOUT parameters
+-   `CallableStatement`: Executes stored procedures; can handle IN as well as `OUT` and `INOUT` parameters
 
 -   A `resultset` is a table with column heading and associated values requested by the query.
 

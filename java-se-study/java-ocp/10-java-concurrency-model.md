@@ -547,14 +547,14 @@ over the original array, meaning that new elements being added will not be print
 
 Threads can be directly managed by the applications by creating Thread objects, however that is cumbersome to manage. If
 one wishes to abstract away this low level detail of a multi-threading programming, the executor services are a good
-choice. That interface declares only one method,  which is `void execute(Runnable)`. The derived interfaces and classes
+choice. That interface declares only one method, which is `void execute(Runnable)`. The derived interfaces and classes
 such as `ExecutorService`, `ThreadPoolExecutor`, and `ForkJoinPool`, support useful functionality, which extends the base
 interface. The basic premise of the Executor chain/hierarchy of classes is that they are meant to provide re-usable
 containers for Thread objects, which aid the creation, destruction, reuse and running of threads.
 
 ## Callable
 
-Callable is an interface that declares one method `V call()`.  It represents a task that needs to be completed by a
+Callable is an interface that declares one method `V call()`. It represents a task that needs to be completed by a
 thread. Once the task completes it returns a value. For some reason if the call method cannot execute or fails it throws
 an Exception. To execute a task using the Callable object, a thread pool first must be created. A thread pool is a
 collection of threads that can execute tasks.
@@ -628,3 +628,153 @@ framework has a queue with tasks, other threads can steal tasks from that queue.
 
 The `ForkJoinPool` is the most important class in the fork/join framework, it is a thread pool for running fork/join tasks
 and it executes an instance of `ForkJoinTask`. It executes tasks and manages their `lifecycle`.
+
+Briefly the Fork/Join algorithm is designed as follows, below the pseudo code for this algorithm is laid out
+
+```txt
+forkJoin {
+    fork the task;
+    join the task;
+    compose the results;
+}
+```
+
+```txt
+doRecursive {
+    if (task is small enough to be handled by a single thread) {
+        compute the small task
+        if there is a result to return, do so
+    } else {
+        divide or fork the task into two parts
+        call compute on first task and obtain result
+        join on second task, and obtain result
+        combine results from both tasks
+    }
+}
+```
+
+In the `ForkJoin` framework there are a few other classes besides the `ForkJoinPool` which are used to describe the
+algorithm presented above
+
+-   `RecursiveTask<V>` - that is a task that can run in a ForkJoinPool the compute method returns a value of type V. It
+    inherits from ForkJoinTask
+
+-   `RecursiveAction` - is a task that can run in a ForkJoinPool It is similar to RecursiveTask but does not return a value
+
+Let us ascertain how to use the fork join framework in problem solving, here are the steps to use the framework
+
+-   First check whether the problem is suitable for the fork join approach or not. Remember that it is not suitable for
+    all kinds of tasks, the problem at hand must follow some core characteristics
+
+        *   The problem can be designed as a recursive task where the task can be subdivided into smaller units and the
+            results can be combined together.
+        *   The subdivided tasks are independent and can be computed separately without hte need for communication etween the
+            tasks when computation is in process. (Of course after the computation is over, the results have to be joined together
+
+-   If the problem to be solved can be modeled recursively then define a task class that extends either RecursiveTask or
+    RecursiveAction if a task returns a result extend from RecursiveTask otherwise extend from RecursiveAction.
+
+-   Override the compute method in the newly defined task class. The compute method actually performs the task if the
+    task is small enough to be executed; or splits the task into subtasks and invoke them. The subtasks can be invoked
+    either by invokeAll or fork method (use fork when the subtask returns a value). Use the join method to get the computed
+    results.
+
+-   Merge the results, if computed from the subtasks.
+
+-   Instantiate `ForkJoinPool` create an instance of the task class and start the execution of the task using the invoke
+    method on the ForkJoinPool instance.
+
+-   That is is - computation of the algorithm is done
+
+The example below illustrates how one can compute the sum of 1..N numbers using fork join framework the range of numbers
+are divided into half until the range can be handled by a single thread. Once the range summation completes the result
+gets summed up together.
+
+```java
+class SumOfNUsingForkJoin {
+    // one million - we want to compute sum
+    // from 1 .. one million
+    private static long N = 1000_000;
+
+    // number of threads to create for distributing the effort
+    private static final int NUM_THREADS = 10;
+
+    // This is the recursive implementation of the algorithm; inherit from RecursiveTask
+    // instead of RecursiveAction since we're returning values.
+    static class RecursiveSumOfN extends RecursiveTask<Long> {
+        // from and to are range of values to sum-up
+        long from, to;
+
+        public RecursiveSumOfN(long from, long to) {
+            this.from = from;
+            this.to = to;
+        }
+
+        // the method performs fork and join to compute the sum if the range
+        // of values can be summed by a threadremember that we want to divide
+        // the summation task equally among NUM_THREADS) then, sum the range
+        // of numbers from..to using a simple for loop;
+        // otherwise, fork the range and join the results
+        public Long compute() {
+            if( (to - from) <= N/NUM_THREADS) {
+                // the range is something that can be handled
+                // by a thread, so do summation
+                long localSum = 0;
+                // add in range 'from' .. 'to' inclusive of the value 'to'
+                for(long i = from; i <= to; i++) {
+                    localSum += i;
+                }
+                return localSum;
+            }
+            else {
+                // no, the range is too big for a thread to handle,
+                // so fork the computation
+                // we find the mid-point value in the range from..to
+                long mid = (from + to)/2;
+
+                // determine the computation for first half
+                // with the range from..mid
+                RecursiveSumOfN firstHalf = new RecursiveSumOfN(from, mid);
+                // now, fork off that task
+                firstHalf.fork();
+
+                // determine the computation for second half
+                // with the range mid+1..to
+                RecursiveSumOfN secondHalf = new RecursiveSumOfN(mid + 1, to);
+
+                // now, wait for the first half of computing sum to
+                // complete, once done, add it to the remaining part
+                long resultSecond = secondHalf.compute();
+                return firstHalf.join() + resultSecond;
+            }
+        }
+    }
+    public static void main(String []args) {
+        // Create a fork-join pool that consists of NUM_THREADS
+        ForkJoinPool pool = new ForkJoinPool(NUM_THREADS);
+
+        // submit the computation task to the fork-join pool
+        long computedSum = pool.invoke(new RecursiveSumOfN(0, N));
+
+        // this is the formula sum for the range 1..N
+        long formulaSum = (N * (N + 1)) / 2;
+
+        // Compare the computed sum and the formula sum
+        System.out.printf("Sum for range 1..%d; computed sum = %d, " + "formula sum = %d %n", N, computedSum, formulaSum);
+    }
+}
+```
+
+Analyzing how this program works. In this program one wishes to compute the sum of the values in the range of
+1..1,000,000. For the sake of simplicity, the program uses ten threads to execute the tasks. The class RecursiveSumOfN
+extends `RecursiveTask<Long>`. In that class long is used since the sum of numbers in each sub-range is a long value. In
+addition the RecursiveTask is chosen instead of RecursiveAction because each subtask returns value. If the subtask does
+not return a value, the RecursiveAction can be used instead.
+
+In the compute method, the decision to either compute the sum or split the task is made. The condition on which that is
+done is `(to - from) <= N/NUM_THREADS`. This is the threshold value in this computation. In other words, if the range of
+values is within the threshold that can be handled by a task, then the computation is performed, otherwise the task is
+split recursively. Either the sum is computed using a simple for loop from the ranges, or the middle of the range is
+ound, afterwards that is handled in the recursive part of the algorithm.
+
+recursive

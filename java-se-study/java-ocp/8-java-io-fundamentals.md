@@ -1,6 +1,6 @@
 # IO Streams
 
-The input and output in Ava is vast, and it does not only include console or file input output operations, alone. The
+The input and output in Java is vast, and it does not only include console or file input output operations, alone. The
 public static fields in out and err in `java.lang.System` class respectively represent the standard input output and error
 streams. System.in is of type `InputStream` and System.out and System.err are of type `PrintStream`.
 
@@ -537,8 +537,7 @@ Read and write data from the console
 -   Use the `readPassword()` method for reading secure strings such as passwords. It is recommended to use Array's `fill()`
     method to "empty" the password read into the character array (to avoid malicious access to the typed passwords).
 
-BufferedReader, BufferedWriter, File, FileReader, FileWriter, FileInputStream, FileOutputStream, ObjectOutputStream,
-ObjectInputStream, and PrintWriter in the java.io package
+Use the java.io package classes
 
 -   The java.io package has classes supporting both character streams and byte streams.
 

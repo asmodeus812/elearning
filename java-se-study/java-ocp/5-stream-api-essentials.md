@@ -1,7 +1,7 @@
 # Streams
 
 Possibly the most important addition to the Java library in the Java 8 release, the stream API. The stream API is part
-of the java.util.stream package.
+of the `java.util.stream` package.
 
 ## Optional
 

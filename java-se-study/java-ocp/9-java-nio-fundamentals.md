@@ -1,26 +1,28 @@
 # NIO Streams
 
-Java offers a rich set of APIs one can use to manipulate files and directories. Java 7 introduced a set of IO APIs
-called NIO.2 which stands for - New I/O. It offered convenient ways to perform operations related to a file system. In
+Java offers a rich set of `APIs` one can use to manipulate files and directories. Java 7 introduced a set of IO `APIs`
+called `NIO.2` which stands for - New I/O. It offered convenient ways to perform operations related to a file system. In
 Java 8 they can also be sued along the Stream API.
 
 ## Path
 
-All file systems usually form a tree. The file system starts with a root diretory that contains files and directories.
-Each directory in turn may have subdirectories or hold files. To locate a file one just needs to put togehter the
+All file systems usually form a tree. The file system starts with a root directory that contains files and directories.
+Each directory in turn may have sub-directories or hold files. To locate a file one just needs to put together the
 directories from the root directory to the immediate directory containing the file, along with the file name, with a
 correct file separator. This forms the unique resource name or identifier for the file resource on disk - URN. A path
 can be absolute or relative. The Absolute path always starts from the root directory, the relative, is well relative to
 the current working directory or path (that could really mean many things, but in general when a program or a process is
-executing, it has a way of obtaining the current working directory, which itself is always an absolute path from the
-root).
+executing, it is always started or bound to a certain file system directory by the operating system itself, it also has
+a way of obtaining the current working directory, which itself is always an absolute path from the root).
 
 Another important mention, is symbolic links. A symbolic link is like a pointer or reference to an actual file. In
 general symbolic link are transparent to applications, which means operations are performed directly on the files rather
-than on the links (except operations which deal with symbolic links, i.e deleting a symbolic link), they are also
-referred to as `sym links` in practice. The path interface is a programming abstraction for a path. A path objects
-contains the names of directories and files that form the full path of the file/directory represented by the Path
-object; the Path abstraction provides methods to extract path elements, manipulate them and append them .
+than on the links (except certain mutation operations such as deleting or moving), they are also referred to as `sym
+links` in practice.
+
+The path interface is a programming abstraction for a path. A path objects contains the names of directories and files
+that form the full path of the file/directory represented by the Path object; the Path abstraction provides methods to
+extract path elements, manipulate them and append them.
 
 See later that almost all the methods that access files/directories to get information about them or manipulate them use Path
 objects. The new `path` interface, is the corner stone of the NIO library, and is the building block of pretty much the entire API

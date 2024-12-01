@@ -4,8 +4,6 @@ Computers and software have become so prevalent today that they are used everywh
 For any software to be relevant and useful to these users, it needs to be localized. The process in which we adapt the
 software to the local language and customs is known as localization.
 
-computers and software have become so prevelent today that they are used everywher in the world, for human activities. for any software to be relevant and useful to these users it needs to be localize. The process in which we adapt the software to the loca
-
 `Localization` is all about making the software relevant and usable for the users from different cultures - in other
 words, customizing software for people from different countries or languages. How is that achieved ? Two important
 guidelines should be heeded when you localize a software application

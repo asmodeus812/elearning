@@ -12,12 +12,13 @@ comparison
 ## Generics
 
 The general syntax of defining generics and generic types is to wrap around any non primitive type in angle brackets
-such as `<GenericType>`. The `GenericType` name is just a placeholder which the compiler uses during compile time to
-make sure that the correct type defined by the user when the generic is used is correctly matched up against the
-definition of the generic type. This is important, since the entire generic feature in Java works in compile time, once
-the class is compiled by the compiler the actual generic type information is erased away. This is different than how
-some other languages implement generics, however this was done to keep backwards compatibility with older versions of
-the language and avoid introducing breaking changes at such a fundamental level.
+such as `<T>`. The `T` name is just a placeholder which the compiler uses during compile time to replace with the actual
+type declared by the user when a generic type is instantiated, it is matched against the actual definition of the type,
+mostly to make sure that type adheres to the API and generic rules (e.g. T extends K, T super K), since the entire
+generic feature in Java works in compile time, once the class is compiled by the compiler the actual generic type
+information is erased away. This is different than how some other languages implement generics, however this was done to
+keep backwards compatibility with older versions of the language and avoid introducing breaking changes at such a
+fundamental level.
 
 ```java
 // this is how the declaration of a generic type looks like, note that the `T` type is simply a placeholder, which is
@@ -715,4 +716,3 @@ terminating operation on the stream object.
 
 `Once the stream has been finalized with calling a terminating operation, the stream is considered consumed, and any
 attempt to call any other operation on it - terminating or intermediate, will result in IllegalStateException`
-
