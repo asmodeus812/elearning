@@ -29,8 +29,8 @@ To create a Optional object there are several options by default provided by def
 
 The optional class type similarly to the streams has also primitive versions - `OptionalDouble`, `OptionalLong`,
 `OptionalInt`, the interface of these optional types is pretty much the same as the regular Optional type, however with
-some very slight differences, they also do not inherit from the Optional type, just as like the primitive streams doe not
-inherit from Stream, only from `BaseStream`
+some very slight differences, they also do not inherit from the Optional type, just as like the primitive streams does
+not inherit from Stream, only from `BaseStream`
 
 ```java
 DoubleStream temperatures = DoubleStream.of(24.5, 23.6, 27.9, 21.1, 23.5, 25.5, 28.3);
