@@ -6,7 +6,7 @@ Given a version number `MAJOR.MINOR.PATCH` increment the:
 2.  `MINOR` - version when you add functionality in a backward compatible manner
 3.  `PATCH` - version when you make backward compatible bug fixes
 
-Additional labels for pre-release and build `metadata` are available as extensions to the `MAJOR.MINOR.PATCH` format
+Additional labels for `pre-release` and build `metadata` are available as extensions to the `MAJOR.MINOR.PATCH` format
 
 In the world of software management there exists a dreaded place called dependency hell. The bigger your system grows
 and the more packages you integrate into your software, the more likely you are to find yourself one day in this pit of
@@ -29,7 +29,7 @@ bitten by version promiscuity.
     might unexpectedly break when package B updates to `2.0.0`
 
 As a solution to this problem we propose a simple set of rules and requirements that dictate how version numbers are
-assigned and incremented. These rules are based on but not necessarily limited to pre-existing widespread common
+assigned and incremented. These rules are based on but not necessarily limited to `pre-existing` widespread common
 practices in use in both closed and open source software. For this system to work, you need to declare a public API. This
 may consist of documentation or be enforced by the code itself. Regardless, it is important that this API be clear and
 precise. Once you identify your public API, you communicate changes to it with specific increments to your version
@@ -70,35 +70,35 @@ strictly in documentation. However it is done, it should be precise and comprehe
     include minor and patch level changes. Patch and minor version must be reset to 0 when major version is incremented.
     1.0.0
 
--   A pre-release version may be denoted by appending a hyphen and a series of dot separated identifiers immediately
-    following the paths version. Identifiers must comprise only ASCII alphanumeric and hyphens. Identifiers must not be
-    empty. Numeric identifiers must not include leading zeroes. Pre-release versions have a lower precedence than the
-    associated normal version. A pre-release version indicates that the version is unstable and might not satisfy the
+-   A `pre-release` version may be denoted by appending a hyphen and a series of dot separated identifiers immediately
+    following the patch version. Identifiers must comprise only ASCII alphanumeric and hyphens. Identifiers must not be
+    empty. Numeric identifiers must not include leading zeroes. `Pre-release` versions have a lower precedence than the
+    associated normal version. A `pre-release` version indicates that the version is unstable and might not satisfy the
     intended compatibility requirements as denoted by its associated normal version. 1.0.0-alpha, 1.0.0-alpha.1, 1.0.0-0.3.7
     and so on.
 
 -   Build `metadata` may be denoted by appending a plus sign and a series of dot separated identifiers following the patch or
-    pre-release version, Identifiers must comprise only ASCII alphanumeric and hyphens. Identifiers must not be empty build
+    `pre-release` version, Identifiers must comprise only ASCII alphanumeric and hyphens. Identifiers must not be empty build
     `metadata` a must be ignored when determining version precedence. Thus two versions that differ only in the build `metadata`
     have the same precedence. 1.0.0-alpha+001, 1.0.0+201303313144700, and so on.
 
 -   Precedence refers to how versions are compared to each other when ordered. Precedence must be calculated by separating
-    the version into major minor patch and pre-release identifiers in that order (build `metadata` does not figure into
+    the version into major minor patch and `pre-release` identifiers in that order (build `metadata` does not figure into
     precedence)
 
 -   Precedence is determined by the first difference when comparing each of these identifiers from left to right as follows:
     major, minor and patch version are always compared numerically. 1.0.0 < 2.0.0 < 2.1.0 < 2.1.1
 
--   When all the major, minor and patch version are equal a pre-release version has lower precedence than a normal version
+-   When all the major, minor and patch version are equal a `pre-release` version has lower precedence than a normal version
     1.0.0-alpha < 1.0.0
 
--   Precedence for two pre-release versions with the same major, minor and patch version must be determined by comparing each
+-   Precedence for two `pre-release` versions with the same major, minor and patch version must be determined by comparing each
     dot separated identifier from left to right until a difference is found as follows:
 
     1.  Identifiers consisting of only digits are compared numerically.
     2.  Identifiers with letters or hyphens are compared lexically in ASCII sort order.
     3.  Numeric identifiers always have lower precedence than non-numeric identifiers
-    4.  Precedence for two pre-release versions with the same major, minor and patch versions must be determined by
+    4.  Precedence for two `pre-release` versions with the same major, minor and patch versions must be determined by
         comparing each dot separated identifier from left to right until a difference is found
 
 ## Why use semantic versioning
@@ -127,9 +127,7 @@ already be at 1.0.0
 Major version zero is all about rapid development. If you are changing the API every day you should either still be in
 version 0.y.z or on a separate development branch working on the next major version.
 
-### If even the tiniest backward incompatible change to the public API require a major version, won't we end up at version
-
-42.0.0 very quickly
+### If even the tiniest backward incompatible change to the public API require a major version, won't we end up at version 42.0.0 very quickly
 
 This is a question of responsible development and foresight. Incompatible changes should not be introduced lightly to
 software that has a lot of dependent code. The cost that must be incurred to upgrade can be significant. Having to bump
