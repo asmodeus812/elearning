@@ -4,11 +4,11 @@
 services. An orchestrator is a system that deploys and manages apps, it can deploy your app and dynamically respond to
 changes, for example k8s, can:
 
-1. Deploy you app
-2. Scale it up and down dynamically based on demand
-3. Self heal when things break
-4. Perform zero downtime rolling updates and rollbacks
-5. Many, many more things
+1.  Deploy you app
+2.  Scale it up and down dynamically based on demand
+3.  Self heal when things break
+4.  Perform zero downtime rolling updates and rollbacks
+5.  Many, many more things
 
 `What really is containerised app` - it is an app that runs in a container, before we had containers, apps ran on physical
 servers or virtual machines, containers are just the next iteration of how we package and run apps, as such they are
@@ -22,12 +22,12 @@ even your on premise datacenter.
 `What are microservice apps` - is built from lots of independent small specialised parts that work together to form a
 meaningful app. For example you might have an e-commerce app that comprises all of the following small components
 
-1. Web front end
-2. Catalog service
-3. Shopping cart
-4. Authentication service
-5. Logging service
-6. Persistent store
+1.  Web front end
+2.  Catalog service
+3.  Shopping cart
+4.  Authentication service
+5.  Logging service
+6.  Persistent store
 
 Each of these individual services is called a micro service, typically each is coded and owned by a different team, each
 can have its own release cycle and can be scaled independently, for example you can patch and scale the logging micro
@@ -52,8 +52,8 @@ the lessons leaned from these systems, and created a new platform called Kuberne
 `Cloud Native Computing Foundation (CNCF)` in 2014, as an open source project. Kubernetes enables two things Google and the
 rest of the industry needs
 
-1. It abstracts underlying infrastructure such as `AWS`
-2. It makes it easy to move apps on and off clouds
+1.  It abstracts underlying infrastructure such as `AWS`
+2.  It makes it easy to move apps on and off clouds
 
 Since its introduction in 2014, Kubernetes has become the most important cloud native technology on the planet. Like
 many of the modern cloud native projects, it's written in Go, it is built in the open on GitHub it is actively discussed
@@ -83,11 +83,11 @@ which nodes to run containers on, deciding when to scale up or down, and execute
 container runtime that Kubernetes supports, it also does support `gVisor`, `containerd` and `kata`. Kubernetes has
 features which abstract the container runtime and make it interchangeable
 
-1. The container runtime interface (CRI) - is an abstraction layer that standardizes the way 3rd party container
-   runtimes work with Kubernetes
+1.  The container runtime interface (CRI) - is an abstraction layer that standardizes the way 3rd party container
+    runtimes work with Kubernetes
 
-2. Runtime Classes allows you to create different classes of runtimes. For example the `gVisor` or `Kata` Containers
-   runtimes might provide better workload isolation than the Docker and `containerd` runtimes
+2.  Runtime Classes allows you to create different classes of runtimes. For example the `gVisor` or `Kata` Containers
+    runtimes might provide better workload isolation than the Docker and `containerd` runtimes
 
 ## Kubernetes and Docker swarm
 
@@ -160,15 +160,18 @@ As previously mentioned a Kubernetes cluster is made of control plane nodes and 
 can be virtual machines, bare metal servers in your datacenter or basement, instances in a private or public cloud. You
 can even run Kubernetes on ARM and IoT devices
 
-#### The control plane
-
 A Kubernetes control plane node is a server running collection on system services that make up the control plane of the
 cluster. Sometimes we call those Masters, Heads or Head nodes. The simplest setups run a single control plane node.
 However this is only suitable for labs and test environments, for production environments multiple control plane nodes
 configured for high availability is vital. Also considered a good practice not to run user apps on control plane nodes.
-This frees them up to concentrate entirely on managing the cluster.
+This frees them up to concentrate entirely on managing the cluster. These are some of the core components
 
-##### The Kubernetes Server
+1.  **etcd**: A distributed key-value store that stores all cluster data, i.e called the cluster store.
+2.  **kube-apiserver**: The front-end for the Kubernetes control plane, exposing the Kubernetes API.
+3.  **kube-scheduler**: Assigns workloads (Pods) to nodes based on resource availability and constraints.
+4.  **kube-controller-manager**: Runs controllers that regulate the state of the cluster (e.g., Node Controller, Replication Controller).
+
+#### The front-end Server
 
 The API server is the Grand Central of Kubernetes. All communication, between all components must go through the API
 server. It is important to understand that internal system components as well as external user components all
@@ -180,7 +183,7 @@ which ports to expose and how many Pod replicas to run. All requests to API serv
 authorization checks. Once these are done, the configuration in the YAML file is validated, persisted to the cluster
 store, and work is scheduled to the server
 
-##### The cluster store
+#### The cluster store
 
 The cluster store is the only stateful part of the control plane and persistently stores the entire configuration and
 state of the cluster. As such it is vital components of every Kubernetes cluster - no cluster store, no cluster. The
@@ -197,7 +200,7 @@ As with all distributed databases, consistency of writes to the database is vita
 same value originating from different places needs to be handled. `etcd` uses the popular RAFT consensus algorithm to
 accomplish this.
 
-##### The controller manager and controllers
+#### The controller manager and controllers
 
 The controller manager implements all the background controllers that monitor cluster components and respond to events.
 Architecturally, it is a controller of controllers, meaning it spawns all the independent controllers and monitors them.
@@ -208,17 +211,33 @@ watching the API Server for changes.
 `The aim of the game is to ensure the observed state of the cluster matches the desired state. The logic implemented by
 each controller is as follows, and is at the heart of Kubernetes and declarative design patterns`
 
-1. Obtain desired state
-2. Observe current state
-3. Determine differences
-4. Reconcile differences
+1.  Obtain desired state
+2.  Observe current state
+3.  Determine differences
+4.  Reconcile differences
 
 Each controller is also extremely specialized and only interested in its own little corner of the Kubernetes cluster. No
 attempts is made to over complicate design by implementing awareness of other parts of the system each controller takes
 care of its own business and leaves everything else alone. This is key to the distributed design of Kubernetes and
-adheres to the Unix philosophy.
+adheres to the Unix philosophy. Controllers are control loops that watch the state of the cluster and make changes to
+bring the current state closer to the desired state. Some core controller components
 
-##### The scheduler
+-   **Node Controller**: Manages node lifecycle.
+
+-   **Service Controller**: Ensures that traffic is routed to the correct pods on the fly.
+
+-   **Replication Controller**: Ensures the desired number of Pod replicas are running.
+
+-   **Deployment Controller**: Manages updates to Pods and `ReplicaSets`.
+
+-   **Ingress Controller**: Manages Ingress resources and configures external access to services.
+
+-   **Ingress Controller** is a special type of controller that handles Ingress resources. It is not part of the control
+  plane itself but is instead a user-deployed component that runs as a Pod in the cluster. It watches for Ingress
+  resources and configures external load balancers or proxies (e.g., NGINX, Traefik) to route traffic to the appropriate
+  services.
+
+#### The scheduler
 
 At a high level, the scheduler watches the API server for new work tasks and assigns them to appropriate healthy worker
 nodes. Behind the scenes, it implements complex logic that filters out nodes incapable of running tasks and the ranks
@@ -232,6 +251,33 @@ ranked according to things such as does it already have the required image how m
 many tasks is it currently running. Each is worth points and the node with the most points is selected to run the task.
 If the scheduler does not find a suitable node, the task is not schedule and gets marked as pending. The scheduler is
 not responsible for running tasks just picking the nodes to run them. A task is normally a Pod/container.
+
+#### The controller manager
+
+If one is running cluster on a supported public cloud platform such as `AWS, Azure, GCP, or Linode` your control plane
+will be running a cloud controller manager. Its job is to facilitate integrations with cloud services, such as instances
+, load-balancers, and storage. For example if your app asks for an internet facing load-balancer the cloud controller
+manager provisions a load-balancer from your cloud and connects it to your app.
+
+#### Control plane summary
+
+`Kubernetes control plane nodes are servers that run the cluster's control plane services`. These services are the brains
+of the cluster where all the control and scheduling decisions happen. Behind the scenes, these services include the API
+server, the cluster store, scheduler and the specialised controllers.
+
+`The API server is the front end into the control plane and all instructions and communication pass through it. By
+default it exposes a RESTful endpoint on port 443.`
+
+#### Worker nodes
+
+Nodes are servers that are the workers of a Kubernetes cluster, at a high level they do three things
+
+1.  Watch the API server for new work assignments
+2.  Execute the new work assignments
+3.  Report back to the control plane
+
+`containerd is the container supervisor and runtime logic stripped out from docker engine. It was donated to the CNCF by
+Docker Inc, and has a lot of community support. Other CRI container runtimes also exist.`
 
 ##### The Kubelet
 
@@ -248,45 +294,25 @@ plane decides what to do.
 
 ##### The Kubeproxy
 
+The last piece of the node puzzle is the `kube-proxy`. This runs on every node and is responsible for local cluster
+networking. It ensures each node gets its own unique IP address, and it implements local `iptables` or `IPVS` rules to
+handle routing and load balancing of traffic on the Pod network. More on all of this later on in other chapters down
+below.
+
 The kube proxy is another component which runs on each node, it is mostly responsible for routing the traffic between
 pods on the same node, if for example there are multiple pods running under a given service or in other words matching
 the selector of a given service, and that service is called from the outside world, the kube proxy takes care of load
 balancing the traffic between the different number pods, usually in a round robin style, making sure that each pod is
 hit evenly. The details of this are usually dependent on the configuration of the kube proxy.
 
-##### The CRI & CNI
+`The kube-proxy is a crucial component in the node to node internal cluster network communication stack, which allows
+nodes to communicate to other nodes, through the use of iptables and IPVS, rules, providing load balancing traffic
+between Nodes and by proxy, Pods on different Nodes. The kube proxy is not actively participating in the actual traffic,
+rather it monitors for new Services and Endpoints and helps setup the state of the IPVS or iptable rules on the node,
+the active part happens in the actual kernel reading the ipvs rules and doing the IP translation / mapping to the other
+nodes`
 
-Besides the kubelet and proxy, Kubernetes nodes also run other essential management components, one key components if
-the container runtime interface (CRI) which is responsible for running and managing containers. Popular CRI
-implementations include containerd (used in OpenShift). Another component is the container network interface (CNI) which
-handles networking for pods, including IP address allocation and routing, different CNI plugins such as calico, flannel,
-cilium, and weave-net, enable networking capabilities based on the cluster needs
-
-##### The controller manager
-
-If one is running cluster on a supported public cloud platform such as `AWS, Azure, GCP, or Linode` your control plane
-will be running a cloud controller manager. Its job is to facilitate integrations with cloud services, such as instances
-, load-balancers, and storage. For example if your app asks for an internet facing load-balancer the cloud controller
-manager provisions a load-balancer from your cloud and connects it to your app.
-
-##### Control plane summary
-
-Kubernetes control plane nodes are servers that run the cluster's control plane services. These services are the brains
-of the cluster where all the control and scheduling decisions happen. Behind the scenes, these services include the API
-server, the cluster store, scheduler and specialised controller.
-
-The API server is the front end into the control plane and all instructions and communication pass through it. By
-default it exposes a RESTful endpoint on port 443.
-
-#### Worker nodes
-
-Nodes are servers that are the workers of a Kubernetes cluster, at a high level they do three things
-
-1. Watch the API server for new work assignments
-2. Execute the new work assignments
-3. Report back to the control plane
-
-##### Container runtime
+##### The Runtime
 
 The kubelet needs a container runtime to perform a container related task - things like pulling images and starting and
 stopping containers. In the early days, Kubernetes had native support for Docker, More recently it has moved to a plugin
@@ -295,15 +321,11 @@ and exposes a clean documented interface for 3rd party container runtimes to plu
 for Docker as a container runtime, this is because Docker is bloated and does not support the `CRI` (requires a shim
 instead). `containerd` is replacing it as the most common container runtime on Kubernetes
 
-`containerd is the container supervisor and runtime logic stripped out from docker engine. It was donated to the CNCF by
-Docker Inc, and has a lot of community support. Other CRI container runtimes also exist.`
-
-##### Kubernetes proxy
-
-The last piece of the node puzzle is the `kube-proxy`. This runs on every node and is responsible for local cluster
-networking. It ensures each node gets its own unique IP address, and it implements local `iptables` or `IPVS` rules to
-handle routing and load balancing of traffic on the Pod network. More on all of this later on in other chapters down
-below.
+Besides the kubelet and proxy, Kubernetes nodes also run other essential management components, one key components if
+the container runtime interface (CRI) which is responsible for running and managing containers. Popular CRI
+implementations include containerd (used in OpenShift). Another component is the container network interface (CNI) which
+handles networking for pods, including IP address allocation and routing, different CNI plugins such as calico, flannel,
+cilium, and weave-net, enable networking capabilities based on the cluster needs
 
 ### Kubernetes DNS
 
@@ -313,13 +335,13 @@ the cluster. This ensures every container and Pod can locate it and use it for d
 automatic. This means apps do not need to be coded with the intelligence to register with Kubernetes service discovery.
 Cluster `DNS` is based on open source `CoreCNS` project.
 
-### Packaging apps for Kubernetes
+### Packaging apps
 
 An app needs to tick a few boxes to run on a Kubernetes cluster. These include:
 
-1. Packages as a container image
-2. Wrapped the image as a container instance in a pod
-3. Deployed via a declarative config manifest file
+1.  Packages as a container image
+2.  Wrapped the image as a container instance in a pod
+3.  Deployed via a declarative config manifest file
 
 It goes like this. You write an application microservice in a language of your choice. Then you build it into a
 container image and store it in a registry. At this point the app service is containerized. Next you define a Kubernetes
@@ -337,11 +359,11 @@ command line tools to post it to the API server as the desired state of the app,
 The declarative model and the concept of desired state are at the very heart of Kubernetes. So it is vital you
 understand them. In Kubernetes the declarative model works like this.
 
-1. Declare the desired state of an app, microservice in a manifest file
-2. Post the desired state to the API server
-3. Kubernetes stores it in the cluster store as the app's desired state
-4. Kubernetes implements the target desired state in the cluster
-5. Controller makes sure the observed state of the app does not vary from the desired state
+1.  Declare the desired state of an app, microservice in a manifest file
+2.  Post the desired state to the API server
+3.  Kubernetes stores it in the cluster store as the app's desired state
+4.  Kubernetes implements the target desired state in the cluster
+5.  Controller makes sure the observed state of the app does not vary from the desired state
 
 Manifest files are written in simple YAML and tell Kubernetes what an app should look like. This is called desired
 state. It includes things such as which image to use, how many replicas to run, which network ports to listen on, and
@@ -386,7 +408,9 @@ the Kubernetes world it is the Pod. It is true that Kubernetes runs containerize
 every container runs inside a pod.
 
 `Pods are objects in the Kubernetes API, so we capitalize the first letter. This adds clarity and the official
-Kubernetes docs are moving towards this standard.`
+Kubernetes docs are moving towards this standard. You can think of Pods as specs and rules for running containers, they
+define all kind of container specific rules and boundaries, which are used when the containers are managed in their
+lifecycle - started, running, terminated by the container runtime (like containerd)`
 
 #### Pods & Containers
 
@@ -396,9 +420,9 @@ have Pods. The simplest model is to run a single container in every Pod. This is
 container interchangeably. However there are advanced use cases that run multiple containers in a single Pod, Powerful
 examples of multi container Pods include:
 
-- Service meshes
-- Containers with a tightly coupled log scraper
-- Web containers supported by a helper container pulling updated content
+-   Service meshes
+-   Containers with a tightly coupled log scraper
+-   Web containers supported by a helper container pulling updated content
 
 `The point is that a Kubernetes Pod is a construct for running one or more containers. A pod is an object, defined
 declaratively in the k8s state, they are not physical entities that run on the Nodes, they are used by the kubelet
@@ -431,10 +455,10 @@ interact with the so called `pause containers`
 
 Here is an example: imagine a pod with two containers - web server and logging sidecar container
 
-1. The kubelet starts the pause container first
-2. The pause container sets up the shared network and IPC namespaces.
-3. The kubelet starts the web server container and joins it to the pause container namespace
-4. The kubelet starts the logging container and joins it to the same namespace
+1.  The kubelet starts the pause container first
+2.  The pause container sets up the shared network and IPC namespaces.
+3.  The kubelet starts the web server container and joins it to the pause container namespace
+4.  The kubelet starts the logging container and joins it to the same namespace
 
 Now both containers share the same networking namespaces, they communicate over localhost, and the same IPC namespace
 (they can use shared memory)
@@ -479,8 +503,8 @@ configuration. When we have talked about updating Pods, we have really meant del
 new one having the new configuration The immutable nature of Pods is a key aspect of cloud native microservices, design
 and patterns and forces the following:
 
-- When updates are needed replace all old pods with new ones that have the updates
-- When failures occur replace failed Pods with new identical ones
+-   When updates are needed replace all old pods with new ones that have the updates
+-   When failures occur replace failed Pods with new identical ones
 
 To be clear you never update the running pod, you always replace it with a new pod containing the updates, you also
 never log onto failed pods and attempt fixes you build fixes into an updated pod and replace failed ones with the update
@@ -494,35 +518,41 @@ mentioned above, a Pod can in theory run multiple containers of the same image, 
 common) those can share a single state and make integration and integration between these services more robust and
 easier in some situations that is desirable
 
-`Pods are not Nodes, Nodes are the physical devices that run the containers and the containers runtimes, the kubelet and
-any other component of the k8s infrastructure, those could be many things, (virtual machines, physical machines, embedded
-devices and so on) as long as they support running the k8s runtime, the Pods, are a collection of containers that run on
-a Node, you can think of it as an intermediate level of division between a node, and a container, meaning that there is
-a physical separation between the container runtime and the node itself, which is not the case of other orchestrators
-such as Docker, where the containers run directly on the nodes/workers`
+`Pods are not Nodes, Nodes are the computing environments that run the containers,the container runtimes, the
+kubelet and any other component of the k8s infrastructure, those could be many things, (virtual machines, physical
+machines, embedded devices and so on) as long as they support running the k8s runtime, the pods, are a logical
+collection of containers that run on a k8s Node`
 
 #### Pod strategies
 
 The atomic unit of a scheduling on K8s is the pod, this is just a fancy way of saying that apps deployed to the k8s
-always run inside pods.
+are always managed by Pods.
 
 Why need Pods ? Why not just run the container on the k8s node directly, the short answer is that you can not, k8s does
-not allow containers to run directly on a cluster or a node, they always have to be wrapped in a Pod, there are three
-main reasons why Pods exist
+not allow containers to run directly on a cluster or a node, they always have to be wrapped in a Pod object, there are
+three main reasons why Pods exist
 
-1. Pods augment containers
-2. Pods assist in scheduling
-3. Pods enable resource sharing
+1.  Pods augment containers
+2.  Pods assist in scheduling
+3.  Pods enable resource sharing
 
 On the augmentation front, Pods augment container in all of the following ways.
 
-1. Labels and annotations
-2. Restart policies
-3. Probes, startup, readiness, liveness, and more
-4. Affinity and anti affinity rules
-5. Termination control
-6. Security policies
-7. Resource requests and limits
+1.  Labels and annotations
+2.  Restart policies
+3.  Probes, startup, readiness, liveness, and more
+4.  Affinity and anti affinity rules
+5.  Termination control
+6.  Security policies
+7.  Resource requests and limits
+
+`Note that containers still technically run directly on the node, the container runtime to be more precise, which is
+running on the node, but the container runtime and the containers themselves are managed and run by the Pods, Pods are
+not physically running the containers, Pods are not like containers, Pods are k8s objects/manifests and through their
+pod manifest spec they instruct the kubelet, and the kubelet instructs the container runtime (containerd) what to do and
+how to run the set of containers the Pods 'manage', what resources to allocate for them, and all the nitty gritty fine
+grained control a container might require. This is needed because there is NO equivalent 'container' spec which can do
+this, so an intermediate control object like the Pod is needed to do just THAT`
 
 Labels let you group pods and associate them with other obEcts in powerful ways, annotations let you add experimental
 features and integrations with 3rd party tools and services, Probes let you test the health and status of Pods, enabling
@@ -554,16 +584,16 @@ anything, it does only manage the containers providing them with the shared stat
 between multiple containers, as already mentioned one pod object can manage multiple containers, and can provide them
 with shared state which is isolated from other pods and containers
 
-1. Each pod has its own IP address, allowing it to communicate with other Pods, between several Nodes. The container
-   interface plugin is responsible for assigning IP addresses and setting up networking, pods on the same node
-   communicate through a bridge, pods on a different nodes communicate through routing rules set in the CNI plugin
+1.  Each pod has its own IP address, allowing it to communicate with other Pods, between several Nodes. The container
+    interface plugin is responsible for assigning IP addresses and setting up networking, pods on the same node
+    communicate through a bridge, pods on a different nodes communicate through routing rules set in the CNI plugin
 
-2. Storage between containers in a given Pod is shared using volumes, meaning that a given Pod, mounts volumes from the
-   Host/Node to all containers that it is responsible for, these volumes are then used and shared only by the containers
-   that this Pod governs.
+2.  Storage between containers in a given Pod is shared using volumes, meaning that a given Pod, mounts volumes from the
+    Host/Node to all containers that it is responsible for, these volumes are then used and shared only by the containers
+    that this Pod governs.
 
-3. Resources, the governing pod makes sure that each configured container does not exceed the resources allocated for
-   it, and if it does it will restart or kill the container
+3.  Resources, the governing pod makes sure that each configured container does not exceed the resources allocated for
+    it, and if it does it will restart or kill the container
 
 `REMEMBER! Pods are not physical services running on the host, they are merely objects defined in the k8s deployment
 config, these pod objects are picked up by the kubelet, which is the service running on the Node, it is actually the
@@ -576,12 +606,12 @@ abnormal occurences or if the desired state diverges from the actual state`
 The process is simple, the pods are defined in files, as already mentioned pods are mere objects, part of the k8s
 environment,
 
-1. Define it in an YAML manifest file
-2. Post the YAML to the REST API server
-3. The server authenticates the request
-4. The configuration file is validated
-5. The scheduler deploys the pod to a healthy node
-6. The local kubelet monitors it
+1.  Define it in an YAML manifest file
+2.  Post the YAML to the REST API server
+3.  The server authenticates the request
+4.  The configuration file is validated
+5.  The scheduler deploys the pod to a healthy node
+6.  The local kubelet monitors it
 
 The pod is deployed via a controller the configuration will be added to the cluster store as part of overall desired
 state that has to be maintained and a controller will monitor it. The pod deployment process is an atomic one, this
@@ -621,10 +651,10 @@ work both containers need to run in the same Pod, so they share the same volume 
 environment. Co-locating multiple containers in the same pod allows containers to be designed with a single
 responsibility but work closely with others, Kubernetes offers several well defined multi container Pod patterns.
 
-1. Sidecar pattern
-2. Adapter pattern
-3. Ambassador pattern
-4. Init pattern
+1.  Sidecar pattern
+2.  Adapter pattern
+3.  Ambassador pattern
+4.  Init pattern
 
 ##### Sidecar
 
@@ -657,15 +687,15 @@ connections or a remote repository, cloning to a local volume, in cases like the
 work and will only exit when the environment is ready for the main app container, The main app container will not start
 until the init container completes
 
-##### Notes
+##### Takeaways
 
-`Note that while the ambassador and adapter patterns might seem similar, they are meant for different tasks, while the
+Note that while the ambassador and adapter patterns might seem similar, they are meant for different tasks, while the
 adapter is meant as mostly translator or normalization level, for data, from one form to another. The ambassador pattern
 is meant for strictly handling communication between to containers or services, it abstracts away the communication
 details, for example Envoy, is a sidecar mesh, which serves to abstract away the database connection and communication
-details between a service and a database, of any type, it provides a common communications  protocol that the container
+details between a service and a database, of any type, it provides a common communications protocol that the container
 can use to communicate, without caring what is on the other side, as long as the other side also understands that
-protocol, but in all actuality the other side might be using the same pattern to receive the communication.`
+protocol, but in all actuality the other side might be using the same pattern to receive the communication.
 
 ### Deployments
 
@@ -675,7 +705,7 @@ that wraps around a Pod and adds features such as self-healing, scaling, zero-do
 rollbacks.
 
 Behind the scenes, `Deployments, DeamonSets and StatefulSets` are implemented as controllers that run as watch loops
-constantly observing the cluster making sure observed state matches desired state.
+constantly observing the cluster and the k8s API Server making sure observed state matches desired state.
 
 ### Services
 
@@ -704,7 +734,7 @@ routing.
 allows other Services, Pods or Containers to communicate without having to worry about the fact that a target Pod can
 die`
 
-## Virtual clusters
+## Kubernetes clusters
 
 Namespaces are the native way to divide a single k8s cluster into multiple virtual clusters, these are not the standard
 Linux kernel namespaces, that we have already looked at, the ones responsible for namespacing processes on the kernel
@@ -725,12 +755,11 @@ workloads together. Every k8s cluster has set of pre created namespaces, virtual
 ```sh
 # show the list of all namespaces in the current cluster
 $ kubectl get namespaces
-# one might get an output like that,
-> NAME STATUS AGE
-> kube-system Active 3d
-> default Active 3d
-> kube-public Active 3d
-> kube-node-lease Active 3d
+NAME            STATUS AGE
+kube-system     Active 3d
+default         Active 3d
+kube-public     Active 3d
+kube-node-lease Active 3d
 ```
 
 The default namespace is where newly created objects go unless you explicitly specify otherwise, Kube-system is where
@@ -902,39 +931,39 @@ spec:
                           cpu: 0.1
 ```
 
-- `apiVersion`: At the top the API version is specified that is to be used.
+-   `apiVersion`: At the top the API version is specified that is to be used.
 
-- `kind`: that is the type of the object that is being defined, in this case the Deployment
+-   `kind`: that is the type of the object that is being defined, in this case the Deployment
 
-- `metadata`: gives the Deployment a name, this should be a valid DNS name, so, that means alphanumeric the dot and the
+-   `metadata`: gives the Deployment a name, this should be a valid DNS name, so, that means alphanumeric the dot and the
   dash are valid, avoid exotic characters.
 
-- `spec`: this section is where most of the action is, anything directly below spec relates to the Deployment, anything
+-   `spec`: this section is where most of the action is, anything directly below spec relates to the Deployment, anything
   nested below refers to the actual behavior of the deployment object
 
-  - `spec.template` is the Pod template the Deployment uses to stamp out the Pod replicas, in this example the
-      Pod template defines a single container Pod.
+-   `spec.template` is the Pod template the Deployment uses to stamp out the Pod replicas, in this example the
+  Pod template defines a single container Pod.
 
-  - `spec.replicas` is how many pod replicas the deployment should create and manage.
+-   `spec.replicas` is how many pod replicas the deployment should create and manage.
 
-  - `spec.selector` is a list of labels that pods must have in order for the deployment to manage them, notice how
-      the Deployment selector matches the labels assigned to the pod.
+-   `spec.selector` is a list of labels that pods must have in order for the deployment to manage them, notice how
+  the Deployment selector matches the labels assigned to the pod.
 
-  - `spec.revisionHistoryLimit` tells Kubernetes how may older version of `ReplicaSet` to keep, keeping more gives you
-      more rollback options but keeping too many can bloat the object, this can be a problem on large cluster with lots of
-      software releases.
+-   `spec.revisionHistoryLimit` tells Kubernetes how may older version of `ReplicaSet` to keep, keeping more gives you
+  more rollback options but keeping too many can bloat the object, this can be a problem on large cluster with lots of
+  software releases.
 
-  - `spec.progressDeadlineSeconds` tells kubernetes how long to wait during a rollout for each new replica to come
-      online, the example sets a 5 minute deadline, meaning that each new replica has 5 minutes to complete up before
-      kubernetes considers the rollout stalled, to be clear the clock is reset after each new replica comes up meaning each
-      step in the rollout gets its own 5 minute window.
+-   `spec.progressDeadlineSeconds` tells kubernetes how long to wait during a rollout for each new replica to come
+  online, the example sets a 5 minute deadline, meaning that each new replica has 5 minutes to complete up before
+  kubernetes considers the rollout stalled, to be clear the clock is reset after each new replica comes up meaning each
+  step in the rollout gets its own 5 minute window.
 
-  - `spec.strategy` tells the deployment controller how to update the pods when a rollout occurs. There are some more
-      details to take a look at here, first the `maxUnavailable` - which tells that no more than one Pod below the desired
-      state should considered valid state, meaning that somehow two pods failed, getting us at 8, the kubelet will try to
-      scale up to 10. The `maxSurge` - which means that we should not have more than one pod above the desired state, i.e if
-      somehow the deployments overshoot 10, i.e become 12, the additional pods will be scaled down to match the desired
-      state.
+-   `spec.strategy` tells the deployment controller how to update the pods when a rollout occurs. There are some more
+  details to take a look at here, first the `maxUnavailable` - which tells that no more than one Pod below the desired
+  state should considered valid state, meaning that somehow two pods failed, getting us at 8, the kubelet will try to
+  scale up to 10. The `maxSurge` - which means that we should not have more than one pod above the desired state, i.e if
+  somehow the deployments overshoot 10, i.e become 12, the additional pods will be scaled down to match the desired
+  state.
 
 ```sh
 # to activate the deploy configuration
@@ -969,10 +998,10 @@ You design apps which each discrete microservice as its own Pod. For convenience
 and more - you wrap the pod in their own higher level controller such a Deployment. Each Deployment describes all the
 following
 
-- How many Pods replicas
-- What image to use for the Pods container
-- What network ports to expose
-- Details about how to perform rolling updates
+-   How many Pods replicas
+-   What image to use for the Pods container
+-   What network ports to expose
+-   Details about how to perform rolling updates
 
 In the case of Deployments when you post the YAML file to the API server, the Pods get scheduled to healthy nodes and a
 deployment and `ReplicaSets` work together to make the magic happen. The `ReplicaSet` controller sits in a watch loop making
@@ -1022,14 +1051,14 @@ Replicas:              10 desired | 4 updated | 11 total | 11 available | 0 unav
 StrategyType:          RollingUpdate
 MinReadySeconds:       10
 RollingUpdateStrategy: 1 max unavailable, 1 max surge
-<Snip>
+
 Conditions:
-Type                   Status Reason
-----                   ------ ------
-Available              True MinimumReplicasAvailable
-Progressing            Unknown DeploymentPaused
-OldReplicaSets:        hello-deploy-85fd664fff (7/7 replicas created)
-NewReplicaSet:         hello-deploy-5445f6dcbb (4/4 replicas created)
+Type            Status                  Reason
+----            ------                  ------
+Available       True                    MinimumReplicasAvailable
+Progressing     Unknown                 DeploymentPaused
+OldReplicaSets: hello-deploy-85fd664fff (7/7 replicas created)
+NewReplicaSet:  hello-deploy-5445f6dcbb (4/4 replicas created)
 ```
 
 The `deployment.kubernetes.io` annotation shows the object is on revision 2, the revision 1, was the initial rollout and
@@ -1115,10 +1144,10 @@ Name: hello-deploy-5445f6dcbb
 Selector: app=hello-world,pod-template-hash=5445f6dcbb
 
 $ kubectl get pods --show-labels
-NAME READY STATUS LABELS
-hello-deploy-5445f6dcbb.. 1/1 Running app=hello-world,pod-template-hash=5445f6dcbb
-hello-deploy-5445f6dcbb.. 1/1 Running app=hello-world,pod-template-hash=5445f6dcbb
-hello-deploy-5445f6dcbb.. 1/1 Running app=hello-world,pod-template-hash=5445f6dcbb
+NAME                      READY STATUS  LABELS
+hello-deploy-5445f6dcbb.. 1/1   Running app=hello-world,pod-template-hash=5445f6dcbb
+hello-deploy-5445f6dcbb.. 1/1   Running app=hello-world,pod-template-hash=5445f6dcbb
+hello-deploy-5445f6dcbb.. 1/1   Running app=hello-world,pod-template-hash=5445f6dcbb
 ```
 
 So you can see how the different levels of objects actually are linked together through the pod template hash, along
@@ -1148,13 +1177,13 @@ scaling down removes Pods. Rolling updates also replace existing Pods with compl
 a massive IP churn, and demonstrates why you should never connect directly to any particular pod. You also need to know
 3 fundamental things about Kubernetes Services
 
-- First when talking about Services, we are talking about Service object in the Kubernetes world that provides a stable
-  networking for Pods. Just like a Pod, ReplicaSet and Deployment, Services are defined through a manifest YAML file,
-  posted to the API server.
+-   First when talking about Services, we are talking about Service object in the Kubernetes world that provides a stable
+  networking for Pods. Just like a `Pod`, `ReplicaSet` and `Deployment`, `Services` are defined through a manifest YAML
+  file, posted to the API server.
 
-- Second every Service gets its own stable IP address, its own stable DNS name and its own stable port.
+-   Second every Service gets its own stable IP address, its own stable DNS name and its own stable port.
 
-- Third, Services use labels and selectors to dynamically select the Pods to send traffic to.
+-   Third, Services use labels and selectors to dynamically select the Pods to send traffic to.
 
 ### Theory
 
@@ -1315,12 +1344,12 @@ curl http://two.default.svc.cluster.local
 
 What are the exact elements of this FQDN specified in the curl request:
 
-- `two`: The name of the Service to call.
+-   `two`: The name of the Service to call.
 
-- `default`: The namespace where the Service `two` is deployed. If the Service is in a different namespace, replace
+-   `default`: The namespace where the Service `two` is deployed. If the Service is in a different namespace, replace
   default with that namespace name.
 
-- `svc.cluster.local`: The default domain for Services in Kubernetes, The `svc.cluster.local` domain is the default DNS
+-   `svc.cluster.local`: The default domain for Services in Kubernetes, The `svc.cluster.local` domain is the default DNS
   suffix for Services in Kubernetes. It is defined in the `CoreDNS` or `kube-dns` configuration. The configuration is
   typically stored in a **ConfigMap** named `coredns` (or `kube-dns` in older clusters) in the `kube-system` namespace.
 
@@ -1332,7 +1361,7 @@ responsible for and matches based on the selector labels`
 Accessing Services from outside the cluster, Kubernetes has two types of Services for requests originating from outside
 the cluster - `NodePort` and `LoadBalancer`
 
-- `NodePort` Services build on top of the `ClusterIP` type and enable external access via a dedicated port on every cluster
+-   `NodePort` Services build on top of the `ClusterIP` type and enable external access via a dedicated port on every cluster
   node, we call this port the `NodePort`. Since the default service type is `ClusterIP` and it registers a DNS name virtual IP
   and port with the cluster's DNS. `NodePort` Services build on this by adding a `NodePort` that can be used to reach the
   service from outside the cluster. Below is a type of `NodePort` service
@@ -1361,11 +1390,11 @@ spec:
 Pods on the cluster can access this service by the name magic-sandbox, on port 8080. Clients connecting from outside the
 cluster can send traffic to any cluster node on port 30081.
 
-- `LoadBalancer` service types make external access even easier by integrating with an internet facing load balancer, on
-  your underlying cloud platform, You get a high performance highly available public IP or DNS name that you can access
-  the service from, you can even register friendly DNS names to make access even simpler, you do not need to know the
-  cluster node names or IP. `LoadBalancer` services are tightly coupled with cloud providers. They may not work in
-  on-premises environments without additional configuration (e.g., using `MetalLB`).
+-   `LoadBalancer` service types make external access even easier by integrating with an internet facing load balancer, on
+    your underlying cloud platform, You get a high performance highly available public IP or DNS name that you can access
+    the service from, you can even register friendly DNS names to make access even simpler, you do not need to know the
+    cluster node names or IP. `LoadBalancer` services are tightly coupled with cloud providers. They may not work in
+    on-premises environments without additional configuration (e.g., using `MetalLB`).
 
 `LoadBalancer has the benefit that there is a load balancer service/server infront of the cluster nodes, and unlike the
 NodePort type, we do not hit a cluster node IP directly, we hit the IP or domain name of the load balancer, which would
@@ -1389,7 +1418,10 @@ spec:
 What happens if we have a node inside of which we have deployed multiple pods that match the given service, would k8s
 load balance between the pods within the node itself ? Yes, most often the used algorithm is just simple round-robin,
 meaning that all pods on the given node for a given matching service/selector will be hit sequentially, one after the
-other, in a round robin style. This is often done by the `kube-proxy`
+other, in a round robin style.
+
+`Note these Types of services are strictly for accessing the service from outside the cluster, service based pod - pod
+communication, is handled differently, and is explored in depth below`
 
 ### Registration
 
@@ -1404,12 +1436,12 @@ based on a DNS technology called `CoreDNS`, and runs as a k8s native app.
 
 The actual registration is divided in two parts - we can call them front and back end, briefly this is what is going on:
 
-- The front end - that is the actual API server receiving the request to deploy the service on the cluster, there are
-  certain steps (see below) that happen here, like registering the service IP in the cluster DNS creating the Service
-  object, and other auxiliary objects
+-   `The front end` - that is the actual API server receiving the request to deploy the service on the cluster, there are
+    certain steps (see below) that happen here, like registering the service IP in the cluster DNS creating the Service
+    object, and other auxiliary objects
 
-- The back end - this is all work that needs to be done on the actual node that runs the pods matching the new service,
-  through the selector metadata. This is for example configuring `iptables` on the actual nodes
+-   `The back end` - this is all work that needs to be done on the actual Node that runs the Pods through the selector
+    metadata. This is for example configuring `iptables or IPVS rules` on the actual nodes
 
 ```sh
 # to list the actual pods which are running the coredns deployment
@@ -1434,12 +1466,12 @@ kube-dns ClusterIP 192.168.200.10 <none>      53/UDP,53/TCP,9153/TCP 28d
 
 So how does the process of service registration work:
 
-1. You post a new service manifest to the API server.
-2. The request is authenticated authorized and subject to admission policies
-3. The service is allocated a stable virtual IP address called `ClusterIP`
-4. An endpoints object i.e `EndpointSlices` is created to hold a list of healthy pods matching the service label selector
-5. The pod network is configured to handle traffic sent to the `ClusterIP`
-6. The service name and IP are registered with the cluster DNS service
+1.  You post a new service manifest to the API server.
+2.  The request is authenticated authorized and subject to admission policies
+3.  The service is allocated a stable virtual IP address called `ClusterIP`
+4.  An endpoints object i.e `EndpointSlices` is created to hold a list of healthy pods matching the service label selector
+5.  The pod network is configured to handle traffic sent to the `ClusterIP`
+6.  The service name and IP are registered with the cluster DNS service
 
 The step 6 is the secret sauce, we mentioned earlier that the cluster DNS is a kubernetes native app. This means it
 knows it is running on k8s and implements a controller that watches the API server for new Service objects, any time it
@@ -1491,8 +1523,8 @@ being assigned `ClusterIP`, which are registered with the cluster DNS service, a
 
 For service discovery to work apps need to know both of the following:
 
-- The name of the other app they want to connect to - that is the name of service fronting the pods
-- How to convert the name of to an IP address
+-   The name of the other app they want to connect to - that is the name of service fronting the pods
+-   How to convert the name of the Service to an IP address that corresponds to a Pod managed by the Service
 
 Apps developers are responsible for point 1, which is normal, They need to code apps with the names of other apps they
 want to consume, Actually they need to code the names of Services fronting the remote apps, or in other words the pods
@@ -1523,11 +1555,11 @@ means the DNS resolver will treat it as a complete domain name and **will not ap
 **Unqualified Hostname:** A hostname without a trailing dot (e.g., `host`) is considered unqualified. In this case, the
 DNS resolver will append search domains (if configured) to attempt resolution.
 
-- `nameserver` - well that is pretty self explanatory, this is pointing at the IP address of the cluster DNS service, this
+-   `nameserver` - well that is pretty self explanatory, this is pointing at the IP address of the cluster DNS service, this
   is a must have in order to resolve the Service names, otherwise there is no way for us to map the Service name to an
   actual `ClusterIP`, and eventually to an actual `EndpointSlices` and to a physical Pod IP address
 
-- `search` - this one is a bit more complex, first we have to understand what an FQDN is, those are domain names that end
+-   `search` - this one is a bit more complex, first we have to understand what an FQDN is, those are domain names that end
   with a dot `.`, usually the dot is omitted in most cases but according to the spec a fully qualified domain name is only
   the one that ends with a dot, if it does not it is not FQDN by omission, meaning that if we use the following hostname
   in our app configuration `ent` to refer to the enterprise service, this would be seen as non FQDN, therefore according
@@ -1538,18 +1570,184 @@ ent.default.svc.cluster.local`, in that order it will try each and every one of 
   as it will consider this a FQDN and directly try to resolve `ent.` ip address from the cluster DNS service, which will
   fail.
 
-- `options` - directive allows you to configure additional resolver behavior. In our example, `options ndots:5` specifies
+-   `options` - directive allows you to configure additional resolver behavior. In our example, `options ndots:5` specifies
   a threshold for the number of dots (`.`) in a hostname before the resolver treats it as a fully qualified domain name
   (FQDN).
 
 So what is the process, how and by whom is the `resolv.conf` file actually get interpreted, in order to obtain the actual
 IP address to establish TCP connection to
 
-1. **Application:** Your app calls `getaddrinfo("example.com")` internally, take `curl` as simple example
-2. **Resolver Library:** The resolver library (glibc) reads `/etc/resolv.conf` to determine the nameserver and search domains.
-3. **DNS Query:** The resolver library sends a DNS query to the specified nameserver.
-4. **Kernel:** The kernel handles the network communication (e.g., sending TCP packets to the DNS server).
-5. **Response:** The resolver library processes the DNS response and returns the IP address to your app.
+1.  **Application:** Your app calls `getaddrinfo("example.com")` internally, take `curl` as simple example
+2.  **Resolver Library:** The resolver library (glibc) reads `/etc/resolv.conf` to determine the nameserver and search domains.
+3.  **DNS Query:** The resolver library sends a DNS query to the specified nameserver.
+4.  **Kernel:** The kernel handles the network communication (e.g., sending TCP packets to the DNS server).
+5.  **Response:** The resolver library processes the DNS response and returns the `ClusterIP` address of the service to your app.
+
+This is however not the end, having the `ClusterIP`, does not help much since it is on a different network, if we want our
+Pod for service `ent` to talk to another Pod for service `cer`, we need to know the IP of at least one Pod from the
+`cer` service, how does that happen. Enter `Subnet masks, Gateways, IPVS and iptables`...
+
+### Network magic
+
+`ClusterIP` are on a special network called the `service network` and there are no routes to it, this means containers send
+all `ClusterIP` traffic to their default gateway. In this case a default gateway is where devices send traffic when
+there is no known route, normally the default gateway forwards traffic to another device with a larger routing table in
+hope it will have a route to the destination network.
+
+The way this works, is that as we know each device on a network has a local routing table, this routing table tells it
+how to route outgoing traffic, i.e to which gateway to send the traffic, when the destination network is remote, when it
+is local the traffic sent directly. So here is a brief overview of the communication process
+
+-   **Your device**: `192.168.1.10`
+-   **Local network**: `192.168.0.0`
+-   **Default gateway**: `192.168.1.1`
+-   **Destination**: `www.google.com` (let’s say its IP is `142.250.190.78`)
+
+| Destination Network | Subnet Mask   | Gateway       | Interface | Type              |
+| ------------------- | ------------- | ------------- | --------- | ----------------- |
+| 192.168.1.0         | 255.255.255.0 | 0.0.0.0       | eth0      | (Local Network)   |
+| 172.16.0.0          | 255.240.0.0   | 192.168.1.253 | eth0      | (Remote Network)  |
+| 10.0.0.0            | 255.0.0.0     | 192.168.1.254 | eth0      | (Remote Network)  |
+| 0.0.0.0             | 0.0.0.0       | 192.168.1.1   | eth0      | (Default Gateway) |
+
+Now providing a bit more detail, so when your device wants to transmit traffic it needs to know where to send it to,
+this is done by using the subnet mask, the subnet mask is used to determine which network a given IP belongs to, using
+the routing table, your device gets the IP - `142.250.190.78` and applies the subnet masks from the routing table, top
+to bottom, first it checks against `255.255.255.0`, the resulting network from the masking the destination IP is
+`142.250.190.0`, it checks to see `if the destination network produced for this subnet mask in the table matches`, in
+this case it does not, the destination network for this mask `255.255.255.0` says `192.168.1.0`, no match, move to the
+next entry in the table. Now if we take a close look we will see that none of the destination networks, match, after the
+mask is applied the only one which does match, is the last one with a mask of `0.0.0.0`, it always matches, that is the
+default gateway, which is usually the last entry in the table, when no other subnet mask matches, that is our last hope,
+send the traffic to the default gateway, in this case `192.168.1.1`. So here is how the process usually goes:
+
+1.  Your device wants to send data to `142.250.190.78`.
+
+2.  It checks its local routing table and sees that `142.250.190.78` is not in the local network (`192.168.1.x`).
+
+3.  The subnet masking and routing table mapping says, "Send this to the default gateway, we did not find any other
+    match in the routing table (`192.168.1.1`)."
+
+4.  The default gateway device) receives the data, checks its own routing table, and forwards it to the internet, or
+    another gateway device
+
+5.  The response comes back to the router, which sends it to your device
+
+`The key takeaway here is to realize that the subnet masking is a process that involves matching two pairs of values,
+from the table, when an IP is masked against a subnet mask, that produces a destination network address, that address
+has to match the destination network in the routing table, in order to consider the subnet masking a match, otherwise
+move to the next entry in the IP routing table`
+
+The container's default gateway sends the traffic to the node it is running on, the node does not have a route to the
+service network either, so it sends it to its own default gateway, doing this causes the traffic to be processed by the
+node's kernel which is where the magic happens, Every kubernetes node runs a system service called `kube-proxy`, At a
+high level the proxy is responsible for capturing traffic destined for `ClusterIP` and redirecting it to the IP
+addresses of Pods matching the Service's label selector. `kube-proxy` is running on the node and is Pod based kubernetes
+native app, that implements a controller watching the API server for new Service and Endpoint objects - in other words
+this boils down to Pods being created and destroyed, on other Nodes. When it sees them it creates local `IPVS` rules
+telling the Node how to intercept traffic destined for these Service's `ClusterIP` and by "proxy" to the Pods being
+managed by these Service/Endpoint objects and forward it to actual Pod IPs.
+
+This means that every time a Node's kernel processes traffic headed for an address on the Service Network a trap occurs
+and the traffic is redirected to the IP of a healthy pod matching the service's label selector. Meaning the Node itself
+becomes its own load balancer for traffic between other nodes, and pods on these nodes. `There is NO separate
+intermediate physical mediator service network which is responsible for the traffic,` instead the network model between
+the pods is FLAT, meaning nodes on a cluster communicate directly with each other, and the IP mapping happens thanks to
+kube-proxy running on the Pod which dynamically configures the `iptables` or in newer versions of k8s `IPVS` rules
+
+Kubernetes originally used `iptables` to do this trapping and load-balancing. However it was replaced by `IPVS` in
+kubernetes 1.11. This is because `IPVS` is a high performance kernel based `L4 load balancer` that scales better than
+`iptables` and implements better load balancing. The previous implementation which was using `iptables`, was not well
+suited, since `iptables` are meant to be used first and fore most for firewall configurations not for load balancing
+traffic
+
+`Key takeaway, from everything said above, you will notice that the actual LOAD BALANCING between Pod to Pod
+communication, that is internally between pods on different nodes, happens by the Nodes themselves or rather by the IPVS
+which is the kernel level load balancer implementation in Linux, while the external to Service and subsequently to Pod
+communication, happens through an Ingress controller or the standard LoadBalancer Service type, so there is a definitive
+DISTINCTION OF HOW TRAFFIC IS HANDLED INSIDE THE CLUSTER, as compared to OUTSIDE FROM/OF IT`
+
+### Network Traffic
+
+So let us summarize the process, of how the entire network communication between Pods on different Nodes works
+
+1.  Query the DNS with the service name for the stable `ClusterIP` IP of the service
+2.  Receive the `ClusterIP` address
+3.  Send traffic to the `ClusterIP` address
+4.  No route, send to container's default gateway
+5.  Forward to node
+6.  No route, send to the node's default gateway
+7.  Processed by the Node's kernel,
+8.  Trap by `ipvs` rule
+9.  Rewrite IP destination to field to IP
+
+Assume that using the example with the `enterprise` and `cerritos` from above, the enterprise app is sending traffic to
+`cerritos` app, first up it needs the host name of the service running the `cerritos` apps, that would be `cer` that is
+defined in the manifest of the Service as well as the actual `enterprise` app configuration, done by the developers
+themselves. An instance of the `enterprise` app, read a container running on a node, tries to send traffic to the `cer`
+service. But networks work with numbers not names or strings. So the container hosting the `enterprise` app sends the
+name `cer` to the pre configured DNS service on the container (the nameserver in the `/etc/resolv.conf` file). It is
+asking the DNS service to resolve this name `cer` to an actual stable IP address. The DNS service returns a stable
+`ClusterIP` address and the `enterprise` app sends the traffic to that address. However `ClusterIP` are on a special
+`service network`, they are not accessible from the Nodes, and the container does not have a route to them. So it sends
+it to the default gateway, which forwards it to the host Node. The Node does not have a route either, so it sends it to
+its own default gateway. However en-route, the request is processed and intercepted by the Node's Kernel. Now beforehand
+the `kube-proxy` service running on the Node, has already been watching for new Endpoints i.e Pods, on the cluster and
+already having configured the `IPVS` rules, it knows all the Pods and their IPs matching the target Service label, the
+kernel simply uses these rules to trigger a trap, and the request is redirected to an IP address of a Pod that matches
+the Service label selector, the `IPVS` implementation in the kernel as mentioned is a load balancer, meaning that
+subsequent requests to the same Service will hit other Pods, meaning the mapping will resolve to other IPs of Pods
+matching the Service label, maybe on a round robin principle, based on how the `IPVS` is configured, but that is not
+that important
+
+### Namespaces
+
+Every cluster has an address space and Kubernetes Namespaces partition it. Cluster address spaces are based on a DNS
+domain that we call the cluster domain. The domain name is usually cluster.local and objects have unique names within
+it. For example a service called `ent` will have fully qualified name (FQDN) of `ent.default.svc.cluster.local`. The
+format is `<object-name>.<namespace>.svc.cluster.local`.
+
+Namespaces let you partition the address space below the cluster domain level. For example creating a couple of
+Namespaces called `dev` and `acc`, will give you two new address spaces.
+
+-   `dev`: `<object-name>.dev.svc.cluster.local`
+-   `acc`:`<object-name>.acc.svc.cluster.local`
+
+Object names have to be unique within a Namespace, but not across Namespaces, For example you can not have two Services
+named the same in the same Namespace, but you can if they were to be in different namespaces. This is useful for
+parallel development and production configuration. Objects can connect to services, in the local Namespace using short
+names such as simply specifying the `<object-name>` (that is no magic, we already mentioned above this is thanks to
+service discovery, the pre-configured `/etc/resolv.conf` and all that network magic already discussed above)
+
+Imagine we had two services both in different namespaces both with different names, `svc1 in namespace dev and svc2 and
+in namespace acc`, we want to hit them from a Pod called `svc3` in a third namespace, `default` one
+
+Here is a cool trick that will prove that the namespaces are nothing really complex simply domain name context
+separators, imagine we have the following `resolv.conf` file in our container
+
+```conf
+search svc.cluster.local cluster.local default.svc.cluster.local dev.svc.cluster.local acc.svc.cluster.local
+nameserver 192.168.200.10
+```
+
+We can still use the short names of these services, `svc1` and `svc2`, without providing the FQDN, Why ? Well the
+`resolv.conf` file will do the heavy lifting, it will take the search config, and start attempting to send the host
+names to the DNS cluster server, in order starting from i
+
+-   `svc1.svc.cluster.local` - no hit, there is no such service in the system/unnamed namespace
+-   `svc1.svc.default.svc.cluster.local` - no hit, there is no such service in the default namespace
+-   `svc1.dev.svc.cluster.local` - we have a hit, since it is deployed on the dev namespace that is its actual FQDN
+
+The DNS will resolve for the - `svc1.dev.svc.cluster.local` - will return the IP address and the rest will be handled by
+the `IPVS` rules and the kernel, as we have already seen above.
+
+Now, this is not something that one should or even can do, since the `/etc/resolv.conf` file is not mutable, it is
+maintained and managed by the k8s runtime and environment, even if we were to change it manually, that would be on a per
+container instance, and will not persist across Pod and container replication
+
+The example above, was aiming to show, and link the different networking concepts we have examined, and how they
+interlink, from the moment the request is made by the app, using the unqualified domain name, down to the actual IP
+address and traffic routing to the target Pod.
 
 ### Skeleton
 
@@ -1575,25 +1773,25 @@ spec:
         chapter: services
 ```
 
-- `apiVersion`: At the top the API version is specified that is to be used.
+-   `apiVersion`: At the top the API version is specified that is to be used.
 
-- `kind`: that is the type of the object that is being defined, in this case the Service
+-   `kind`: that is the type of the object that is being defined, in this case the Service
 
-- `metadata`: gives the Service a name, this should be a valid DNS name, so, that means alphanumeric the dot and the
+-   `metadata`: gives the Service a name, this should be a valid DNS name, so, that means alphanumeric the dot and the
   dash are valid, avoid exotic characters.
 
-- `spec`: this section is where most of the action is, anything directly below spec relates to the Service, anything
+-   `spec`: this section is where most of the action is, anything directly below spec relates to the Service, anything
   nested below refers to the actual behavior of the service object
 
-  - `spec.type`: In this case it is configured as `NodePort` not a default `ClusterIP`, for the sake of this example
+-   `spec.type`: In this case it is configured as `NodePort` not a default `ClusterIP`, for the sake of this example
 
-  - `spec.port`: this is the port on which the service listens to
+-   `spec.port`: this is the port on which the service listens to
 
-  - `spec.targetPort`: this is the port on which the app inside the container listens to
+-   `spec.targetPort`: this is the port on which the app inside the container listens to
 
-  - `spec.nodePort`: this is the cluster wide port on which the service can be accessed from the outside
+-   `spec.nodePort`: this is the cluster wide port on which the service can be accessed from the outside
 
-  - `spec.protocol`: by default, using TCP, but UDP for example is also a probable option, based on the type of app
+-   `spec.protocol`: by default, using TCP, but UDP for example is also a probable option, based on the type of app
 
 ```sh
 # to just deploy the service manifest file
@@ -1620,25 +1818,23 @@ svc-test-sbhbj IPv4 8080 10.42.1.119,10.42.0.117,10.42.1.120... 6m38s
 
 # to get the details for the given endpoint object for the svc-test
 $ kubectl describe endpointslices svc-test-sbhbj
-Name: svc-test-sbhbj
-Namespace: default
-Labels: endpointslice.kubernetes.io/managed-by=endpointslice-controller.k8s.io
-kubernetes.io/service-name=svc-test
+Name:        svc-test-sbhbj
+Namespace:   default
+Labels:      endpointslice.kubernetes.io/managed-by=endpointslice-controller.k8s.io kubernetes.io/service-name=svc-test
 Annotations: endpoints.kubernetes.io/last-change-trigger-time: 2021-02-05T20:01:31Z
 AddressType: IPv4
 Ports:
-Name Port Protocol
----- ---- --------
+Name         Port Protocol
+
 Endpoints:
 - Addresses: 10.42.1.119
     Conditions:
-    Ready: true
-    Hostname: <unset>
+    Ready:     true
+    Hostname:  <unset>
     TargetRef: Pod/svc-test-84db6ff656-wd5w7
-    Topology: kubernetes.io/hostname=k3d-gsk-book-server-0
+    Topology:  kubernetes.io/hostname=k3d-gsk-book-server-0
 - Addresses: 10.42.0.117
     <Snip>
-Events: <none>
 ```
 
 Take a note at the `Endpoints:` section, which describes in detail all (output abbreviated) Pods and their IP addresses,
@@ -1649,23 +1845,27 @@ If we were to change the type of this service which in the manifest above is of 
 one simply needs to change the configuration slightly to `type: LoadBalancer` and remove the config for `nodePort:
 30001`, the rest will be `automagically` done by the cloud provider, internally Kubernetes will interface with the cloud
 provider's internal load balancer, and setup the required configurations to deploy and make the service accessible over
-the load balancer's host name (which is managed and owned by the cloud provider directly). This can also be done in an
+the load balancers' host name (which is managed and owned by the cloud provider directly). This can also be done in an
 on premise location, but the load balancer setup is something that we would have to do manually, for example using
 something like `MetalLB`, which has a native integration with Kubernetes.
 
 ```sh
+# to inspect the state of the service in a continuous loop, and see when the external-ip is assigned, use the --watch arg
+# usually the external ip will take some time to get populated since there is some non trivial setup to be done when the
+# new load balancer instance is setup by the cloud provider
 $ kubectl get svc --watch
-NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
-svc-test LoadBalancer 10.43.128.113 172.21.0.4 9000:32688/TCP 47s
+NAME     TYPE         CLUSTER-IP    EXTERNAL-IP PORT(S)        AGE
+svc-test LoadBalancer 10.43.128.113 172.21.0.4  9000:32688/TCP 47s
 ```
 
 The external IP columns shows the public address of the service assigned to by your cloud provider. On some cloud
 platforms this might be a DNS name, instead of an IP, and it may take a minute to let the setup complete.
 
 Note that it is very much the case that the cloud provider would create a separate load balancer service instance per
-service, that is configured with `LoadBalancer`, this is to provide maximal isolation from the other services, which
+service, that is configured with `LoadBalancer`, this is to provide maximum isolation from the other services, which
 provides better encapsulation. Each load balancer server instance will be configured to connect to the underlying
-Service
+Service. This however has some (actually a lot of issues and drawbacks) in the next section, these drawbacks will be
+addressed using another core Kubernetes object called `Ingress`
 
 ### Clean up
 
@@ -1674,7 +1874,7 @@ Clean up the lab with the following command, these will delete the Deployment an
 
 ```sh
 # make sure to delete the resources that were deployed, this will clean up all of the internal resources created by the
-# kubelet on the node
+# kubernetes controllers and the kubelet on the node, through a simple POST to the API server
 $ kubeclt delete -f deploy.yml -f svc.yml -f lb.yml
 ```
 
@@ -1687,25 +1887,25 @@ Services. However both of these have limitations. `NodePort` only work on high p
 knowledge of node names or IPs `LoadBalancer` Services fix this but require a 1-to-1 mapping between an internal Service
 and a cloud load balancer. This means a cluster with 25 internet facing, apps will need 25 cloud load balancers, and
 cloud load balancers are not cheap. They may also be a finite resource you may be limited to how many cloud load
-balancer instances you can provision.
+balancer instances you can provision, regardless of how much money you are ready to pay them !
 
 Ingress fixes this by exposing multiple Service through a single cloud load balancer, it creates a `LoadBalancer`
-Service, on port 80 or 443 and uses host based and path based routing to send traffic to the correct backend Service.
+Service, on port `80 or 443 and uses host based and path based routing to send traffic to the correct backend Service`.
 
 ### Architecture
 
-Ingress is a stable resource in the Kubernetes API. It went general availability in Kubernetes 1.19 after being in beta
-for over 15 releases. During the 3+ years it was in alpha and beta service meshes increased in popularity and there is
+Ingress is a stable resource in the Kubernetes API. It went `general availability in Kubernetes 1.19` after being in beta
+for over 15 releases. During the 3+ years it was in alpha and beta, service meshes increased in popularity and there is
 some overlap in functionality, as a result if you plan to run a service mesh you may not need ingress. Ingress is
-defined in the `networking.io` API sub group as a `v1` object and is based on the usual two constructs
+defined in the `networking.io` API sub group as a `v1` object and is based on the usual two constructs:
 
-- A controller
-- An object spec
+-   A controller - running in a reconciliation loop, to handle the state
+-   An object spec - a well defined and versioned manifest specification
 
 The object spec defined rules that govern traffic routing and the controller implements the rules. However a lot of
 Kubernetes clusters do not ship with a built in ingress controller you have to install your own. This is the opposite of
-other API resources, such as Deployments and `ReplicaSets`, which have a built in pre configured controller. However
-some hosted Kubernetes clusters such as GKE have installed one. Once you have an Ingress controller you deploy Ingress
+other API resources, such as `Deployments` and `ReplicaSets`, which have a built in pre-configured controller. However
+some hosted Kubernetes clusters such as `GKE` have installed one. Once you have an Ingress controller you deploy Ingress
 objects with rules that govern how traffic hitting the Ingress is routed
 
 On the topic of routing, Ingress operates at a layer 7 of the OSI model, also known as the app layer. This means it has
@@ -1725,12 +1925,62 @@ host based routing pattern, and it is almost identical for path based routing
 
 A quick side node, The OSI model is the reference model for modern networking, it comprises seven layers, numbered from
 1-7, with the lowest layer concerned with things like signaling and electronics - hardware, the middle layers dealing
-with reliability through things like acks and retries and the higher layers adding awareness of user apps such as HTTPS
+with reliability through things like `acks` and retries and the higher layers adding awareness of user apps such as HTTPS
 services, Ingress operates at a layer 7, also known as the app layer and implements HTTP intelligence
 
-`Ingress exposes multiple CLUSTERIP service through a single cloud load balancer, you create and deploy ingress objects,
+`Ingress exposes multiple ClusterIP Services through a single cloud load balancer, you create and deploy ingress objects,
 which are rules governing how traffic reaching the load balancer is routed to the backend services, the ingress
 controller which you usually have to install yourself uses hostnames and paths to make intelligent routing decisions.`
+
+So from 40k feet, what is going on on a high level is that the ingress controller is actually exposed as an actual
+Service object in the k8s environment, unlike other controllers, which are not, the Ingress controller is exposed
+through a load balancer type Service, to the public internet, then that controller is actually backed an image under
+the hood, usually NGINX server, which actually does the active on demand routing which is defined in the Ingress object.
+
+Common Ingress Controllers include
+
+-   **NGINX**
+-   **HAProxy**
+-   **AWS ALB**
+-   **Traefik**
+
+-   The Ingress Controller is typically deployed as a **Kubernetes Deployment** or **DaemonSet** and runs as a pod in the
+  cluster.
+
+    1.  **Ingress Controller Deployment:**
+
+        -   The Ingress Controller is deployed as a pod (or multiple pods) in the cluster.
+        -   It listens for incoming traffic and routes it based on the Ingress rules.
+
+    2.  **Service for the Ingress Controller:**
+
+        -   A **Service** is created to expose the Ingress Controller to external traffic.
+        -   The type of this Service can be:
+            -   **LoadBalancer** (for cloud providers that support external load balancers).
+            -   **NodePort** (for exposing the Ingress Controller on specific ports of the cluster nodes).
+            -   **ClusterIP** (for internal-only access, though this is less common for Ingress Controllers).
+
+    3.  **Ingress Rules:**
+        -   The Ingress resource defines rules for routing traffic to backend services.
+        -   The Ingress Controller reads these rules and configures itself, its running Pods (e.g., NGINX, Traefik) to route traffic accordingly.
+
+-   What Makes the Ingress Controller Unique, from other controllers ?
+
+-   **Backed by an Image:** The Ingress Controller is implemented as a custom application (e.g., NGINX, Traefik) running
+  in a container. This is different from most other Kubernetes controllers, which are part of the Kubernetes control plane
+  and are not exposed to external traffic.
+
+-   **Exposed to the Internet:** The Ingress Controller is typically exposed via a **Service** (e.g., `LoadBalancer` or
+  `NodePort`) to handle external HTTP/HTTPS traffic. This means it is directly accessible from outside the cluster.
+
+-   **Interfaces with External Traffic:** Unlike other k8s controllers, the Ingress Controller interacts directly with
+  external clients (e.g., web browsers, APIs) to route traffic to backend services.
+
+### Skeleton
+
+<!-- TODO: ---- ingress skeleton ----- -->
+
+## Storage
 
 ## Getting Kubernetes
 
