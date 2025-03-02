@@ -91,7 +91,7 @@ features which abstract the container runtime and make it interchangeable
 
 ## Kubernetes and Docker swarm
 
-In 2016 and 2017 we had the orchestrator wards, where `Docker Swarm`, `Mesosphere DCOS`, and `Kubernetes` completed to become
+In 2016 and 2017 we had the orchestrator wars, where `Docker Swarm`, `Mesosphere DCOS`, and `Kubernetes` completed to become
 the de-facto container orchestrator. To cut a long story short, Kubernetes WON.
 
 There is a good chance you will hear people talk about how Kubernetes relates to Google's Borg and Omega systems, as
@@ -222,20 +222,54 @@ care of its own business and leaves everything else alone. This is key to the di
 adheres to the Unix philosophy. Controllers are control loops that watch the state of the cluster and make changes to
 bring the current state closer to the desired state. Some core controller components
 
--   **Node Controller**: Manages node lifecycle.
+- **Node Controller**: Manages node lifecycle.
 
--   **Service Controller**: Ensures that traffic is routed to the correct pods on the fly.
+- **Service Controller**: Ensures that traffic is routed to the correct pods on the fly.
 
--   **Replication Controller**: Ensures the desired number of Pod replicas are running.
+- **Replication Controller**: Ensures the desired number of Pod replicas are running.
 
--   **Deployment Controller**: Manages updates to Pods and `ReplicaSets`.
+- **Deployment Controller**: Manages updates to Pods and `ReplicaSets`.
 
--   **Ingress Controller**: Manages Ingress resources and configures external access to services.
+- **Ingress Controller**: Manages Ingress resources and configures external access to services.
 
--   **Ingress Controller** is a special type of controller that handles Ingress resources. It is not part of the control
+- **Ingress Controller** is a special type of controller that handles Ingress resources. It is not part of the control
   plane itself but is instead a user-deployed component that runs as a Pod in the cluster. It watches for Ingress
   resources and configures external load balancers or proxies (e.g., NGINX, Traefik) to route traffic to the appropriate
   services.
+
+`K8s objects allow the definition of something called annotations, these are key value pairs/maps which are a way to
+store metadata or configuration information, which is a general purpose way that is used by different k8s controllers,
+to configure their own behavior, each object in k8s is controller by an accompanying controller, this controller is
+responsible for managing the objects in the control plane, and each controller has specific features which can be
+enabled using the annotation metadata when defining the object manifest itself, the annotation values are tied to the
+object, but are parsed and enforced by the controller which manages the specific type of object, this is important to
+understand, controllers are stateless processors of the stateful k8s environment and objects`
+
+Here is an example of a manifest snippet which shows how annotations are defined in a manifest, each is specific to the
+target object in this case the target objects are ingress and deployment, do not concern yourselves with these types of
+objects, the important part to take a note of is that these annotation values are bound to the specific object
+"instance" and its manifest. The object instances are in this case defined by the `metadata.name`, the name is a special
+property in k8s which gives the created object a unique name that k8s can use to identify the object uniquely in the k8s
+environment, it is not only meant to be read by users, but the k8s control plane and controllers as well
+
+```yml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: my-ingress # defines a new name for the ingress object to create
+    annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: / # Rewrite URL paths
+        nginx.ingress.kubernetes.io/ssl-redirect: "true" # Redirect HTTP to HTTPS
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: my-deployment # defines a new name for the deployment object to create
+    annotations:
+        my-controller/scale-to: "5" # Custom annotation for scaling
+        sidecar.istio.io/inject: "true" # Enable istio sidecar injection
+        autoscaling.alpha.kubernetes.io/metrics: '{"type":"Resource","resource":{"name":"cpu","targetAverageUtilization":50}}' # metrics configuration
+```
 
 #### The scheduler
 
@@ -420,9 +454,9 @@ have Pods. The simplest model is to run a single container in every Pod. This is
 container interchangeably. However there are advanced use cases that run multiple containers in a single Pod, Powerful
 examples of multi container Pods include:
 
--   Service meshes
--   Containers with a tightly coupled log scraper
--   Web containers supported by a helper container pulling updated content
+- Service meshes
+- Containers with a tightly coupled log scraper
+- Web containers supported by a helper container pulling updated content
 
 `The point is that a Kubernetes Pod is a construct for running one or more containers. A pod is an object, defined
 declaratively in the k8s state, they are not physical entities that run on the Nodes, they are used by the kubelet
@@ -503,8 +537,8 @@ configuration. When we have talked about updating Pods, we have really meant del
 new one having the new configuration The immutable nature of Pods is a key aspect of cloud native microservices, design
 and patterns and forces the following:
 
--   When updates are needed replace all old pods with new ones that have the updates
--   When failures occur replace failed Pods with new identical ones
+- When updates are needed replace all old pods with new ones that have the updates
+- When failures occur replace failed Pods with new identical ones
 
 To be clear you never update the running pod, you always replace it with a new pod containing the updates, you also
 never log onto failed pods and attempt fixes you build fixes into an updated pod and replace failed ones with the update
@@ -554,7 +588,7 @@ how to run the set of containers the Pods 'manage', what resources to allocate f
 grained control a container might require. This is needed because there is NO equivalent 'container' spec which can do
 this, so an intermediate control object like the Pod is needed to do just THAT`
 
-Labels let you group pods and associate them with other obEcts in powerful ways, annotations let you add experimental
+Labels let you group pods and associate them with other objects in powerful ways, annotations let you add experimental
 features and integrations with 3rd party tools and services, Probes let you test the health and status of Pods, enabling
 advanced scheduling, updates and more. Affinity and anti affinity rules give you control over where Pods run,
 Termination control lets you to gracefully terminate Pods and the app s they run, Security policies let you enforce
@@ -805,14 +839,14 @@ the YAML manifest file. We will declaratively deploy a simple app to the shield 
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-    namespace: shield <<== Namespace
+    namespace: shield # Namespace
     name: default << ServiceAccount name
 ---
 apiVersion: v1
 kind: Service
 metadata:
-    namespace: shield <<== Namespace
-    name: the-bus <<== Service name
+    namespace: shield # Namespace
+    name: the-bus # Service name
 spec:
     ports:
     - nodePort: 31112
@@ -824,8 +858,8 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-    namespace: shield <<== Namespace
-    name: triskelion <<== Pod name
+    namespace: shield # Namespace
+    name: triskelion # Pod name
 <snip>
 ```
 
@@ -931,34 +965,34 @@ spec:
                           cpu: 0.1
 ```
 
--   `apiVersion`: At the top the API version is specified that is to be used.
+- `apiVersion`: At the top the API version is specified that is to be used.
 
--   `kind`: that is the type of the object that is being defined, in this case the Deployment
+- `kind`: that is the type of the object that is being defined, in this case the Deployment
 
--   `metadata`: gives the Deployment a name, this should be a valid DNS name, so, that means alphanumeric the dot and the
+- `metadata`: gives the Deployment a name, this should be a valid DNS name, so, that means alphanumeric the dot and the
   dash are valid, avoid exotic characters.
 
--   `spec`: this section is where most of the action is, anything directly below spec relates to the Deployment, anything
+- `spec`: this section is where most of the action is, anything directly below spec relates to the Deployment, anything
   nested below refers to the actual behavior of the deployment object
 
--   `spec.template` is the Pod template the Deployment uses to stamp out the Pod replicas, in this example the
+- `spec.template` is the Pod template the Deployment uses to stamp out the Pod replicas, in this example the
   Pod template defines a single container Pod.
 
--   `spec.replicas` is how many pod replicas the deployment should create and manage.
+- `spec.replicas` is how many pod replicas the deployment should create and manage.
 
--   `spec.selector` is a list of labels that pods must have in order for the deployment to manage them, notice how
+- `spec.selector` is a list of labels that pods must have in order for the deployment to manage them, notice how
   the Deployment selector matches the labels assigned to the pod.
 
--   `spec.revisionHistoryLimit` tells Kubernetes how may older version of `ReplicaSet` to keep, keeping more gives you
+- `spec.revisionHistoryLimit` tells Kubernetes how may older version of `ReplicaSet` to keep, keeping more gives you
   more rollback options but keeping too many can bloat the object, this can be a problem on large cluster with lots of
   software releases.
 
--   `spec.progressDeadlineSeconds` tells kubernetes how long to wait during a rollout for each new replica to come
+- `spec.progressDeadlineSeconds` tells kubernetes how long to wait during a rollout for each new replica to come
   online, the example sets a 5 minute deadline, meaning that each new replica has 5 minutes to complete up before
   kubernetes considers the rollout stalled, to be clear the clock is reset after each new replica comes up meaning each
   step in the rollout gets its own 5 minute window.
 
--   `spec.strategy` tells the deployment controller how to update the pods when a rollout occurs. There are some more
+- `spec.strategy` tells the deployment controller how to update the pods when a rollout occurs. There are some more
   details to take a look at here, first the `maxUnavailable` - which tells that no more than one Pod below the desired
   state should considered valid state, meaning that somehow two pods failed, getting us at 8, the kubelet will try to
   scale up to 10. The `maxSurge` - which means that we should not have more than one pod above the desired state, i.e if
@@ -998,10 +1032,10 @@ You design apps which each discrete microservice as its own Pod. For convenience
 and more - you wrap the pod in their own higher level controller such a Deployment. Each Deployment describes all the
 following
 
--   How many Pods replicas
--   What image to use for the Pods container
--   What network ports to expose
--   Details about how to perform rolling updates
+- How many Pods replicas
+- What image to use for the Pods container
+- What network ports to expose
+- Details about how to perform rolling updates
 
 In the case of Deployments when you post the YAML file to the API server, the Pods get scheduled to healthy nodes and a
 deployment and `ReplicaSets` work together to make the magic happen. The `ReplicaSet` controller sits in a watch loop making
@@ -1177,13 +1211,13 @@ scaling down removes Pods. Rolling updates also replace existing Pods with compl
 a massive IP churn, and demonstrates why you should never connect directly to any particular pod. You also need to know
 3 fundamental things about Kubernetes Services
 
--   First when talking about Services, we are talking about Service object in the Kubernetes world that provides a stable
+- First when talking about Services, we are talking about Service object in the Kubernetes world that provides a stable
   networking for Pods. Just like a `Pod`, `ReplicaSet` and `Deployment`, `Services` are defined through a manifest YAML
   file, posted to the API server.
 
--   Second every Service gets its own stable IP address, its own stable DNS name and its own stable port.
+- Second every Service gets its own stable IP address, its own stable DNS name and its own stable port.
 
--   Third, Services use labels and selectors to dynamically select the Pods to send traffic to.
+- Third, Services use labels and selectors to dynamically select the Pods to send traffic to.
 
 ### Theory
 
@@ -1344,14 +1378,14 @@ curl http://two.default.svc.cluster.local
 
 What are the exact elements of this FQDN specified in the curl request:
 
--   `two`: The name of the Service to call.
+- `two`: The name of the Service to call.
 
--   `default`: The namespace where the Service `two` is deployed. If the Service is in a different namespace, replace
+- `default`: The namespace where the Service `two` is deployed. If the Service is in a different namespace, replace
   default with that namespace name.
 
--   `svc.cluster.local`: The default domain for Services in Kubernetes, The `svc.cluster.local` domain is the default DNS
+- `svc.cluster.local`: The default domain for Services in Kubernetes, The `svc.cluster.local` domain is the default DNS
   suffix for Services in Kubernetes. It is defined in the `CoreDNS` or `kube-dns` configuration. The configuration is
-  typically stored in a **ConfigMap** named `coredns` (or `kube-dns` in older clusters) in the `kube-system` namespace.
+  typically stored in a **`ConfigMap`** named `coredns` (or `kube-dns` in older clusters) in the `kube-system` namespace.
 
 `Services uses a special auxiliary EndpointSlices object internally, to manage the endpoints for the pods the service is
 responsible for and matches based on the selector labels`
@@ -1361,7 +1395,7 @@ responsible for and matches based on the selector labels`
 Accessing Services from outside the cluster, Kubernetes has two types of Services for requests originating from outside
 the cluster - `NodePort` and `LoadBalancer`
 
--   `NodePort` Services build on top of the `ClusterIP` type and enable external access via a dedicated port on every cluster
+- `NodePort` Services build on top of the `ClusterIP` type and enable external access via a dedicated port on every cluster
   node, we call this port the `NodePort`. Since the default service type is `ClusterIP` and it registers a DNS name virtual IP
   and port with the cluster's DNS. `NodePort` Services build on this by adding a `NodePort` that can be used to reach the
   service from outside the cluster. Below is a type of `NodePort` service
@@ -1390,11 +1424,11 @@ spec:
 Pods on the cluster can access this service by the name magic-sandbox, on port 8080. Clients connecting from outside the
 cluster can send traffic to any cluster node on port 30081.
 
--   `LoadBalancer` service types make external access even easier by integrating with an internet facing load balancer, on
-    your underlying cloud platform, You get a high performance highly available public IP or DNS name that you can access
-    the service from, you can even register friendly DNS names to make access even simpler, you do not need to know the
-    cluster node names or IP. `LoadBalancer` services are tightly coupled with cloud providers. They may not work in
-    on-premises environments without additional configuration (e.g., using `MetalLB`).
+- `LoadBalancer` service types make external access even easier by integrating with an internet facing load balancer, on
+  your underlying cloud platform, You get a high performance highly available public IP or DNS name that you can access
+  the service from, you can even register friendly DNS names to make access even simpler, you do not need to know the
+  cluster node names or IP. `LoadBalancer` services are tightly coupled with cloud providers. They may not work in
+  on-premises environments without additional configuration (e.g., using `MetalLB`).
 
 `LoadBalancer has the benefit that there is a load balancer service/server infront of the cluster nodes, and unlike the
 NodePort type, we do not hit a cluster node IP directly, we hit the IP or domain name of the load balancer, which would
@@ -1436,12 +1470,12 @@ based on a DNS technology called `CoreDNS`, and runs as a k8s native app.
 
 The actual registration is divided in two parts - we can call them front and back end, briefly this is what is going on:
 
--   `The front end` - that is the actual API server receiving the request to deploy the service on the cluster, there are
-    certain steps (see below) that happen here, like registering the service IP in the cluster DNS creating the Service
-    object, and other auxiliary objects
+- `The front end` - that is the actual API server receiving the request to deploy the service on the cluster, there are
+  certain steps (see below) that happen here, like registering the service IP in the cluster DNS creating the Service
+  object, and other auxiliary objects
 
--   `The back end` - this is all work that needs to be done on the actual Node that runs the Pods through the selector
-    metadata. This is for example configuring `iptables or IPVS rules` on the actual nodes
+- `The back end` - this is all work that needs to be done on the actual Node that runs the Pods through the selector
+  metadata. This is for example configuring `iptables or IPVS rules` on the actual nodes
 
 ```sh
 # to list the actual pods which are running the coredns deployment
@@ -1485,7 +1519,7 @@ property, this is why it is important that service names are a valid DNS names a
 apiVersion: v1
 kind: Service
 metadata:
-    name: valid-dns-name-goes-here <<== this is the secret sauce and should be a valid dns name
+    name: valid-dns-name-goes-here # this is the secret sauce and should be a valid dns name
 ```
 
 Now that the service front end is registered and can be discovered by other apps, the back end needs building so there
@@ -1523,8 +1557,8 @@ being assigned `ClusterIP`, which are registered with the cluster DNS service, a
 
 For service discovery to work apps need to know both of the following:
 
--   The name of the other app they want to connect to - that is the name of service fronting the pods
--   How to convert the name of the Service to an IP address that corresponds to a Pod managed by the Service
+- The name of the other app they want to connect to - that is the name of service fronting the pods
+- How to convert the name of the Service to an IP address that corresponds to a Pod managed by the Service
 
 Apps developers are responsible for point 1, which is normal, They need to code apps with the names of other apps they
 want to consume, Actually they need to code the names of Services fronting the remote apps, or in other words the pods
@@ -1555,11 +1589,11 @@ means the DNS resolver will treat it as a complete domain name and **will not ap
 **Unqualified Hostname:** A hostname without a trailing dot (e.g., `host`) is considered unqualified. In this case, the
 DNS resolver will append search domains (if configured) to attempt resolution.
 
--   `nameserver` - well that is pretty self explanatory, this is pointing at the IP address of the cluster DNS service, this
+- `nameserver` - well that is pretty self explanatory, this is pointing at the IP address of the cluster DNS service, this
   is a must have in order to resolve the Service names, otherwise there is no way for us to map the Service name to an
   actual `ClusterIP`, and eventually to an actual `EndpointSlices` and to a physical Pod IP address
 
--   `search` - this one is a bit more complex, first we have to understand what an FQDN is, those are domain names that end
+- `search` - this one is a bit more complex, first we have to understand what an FQDN is, those are domain names that end
   with a dot `.`, usually the dot is omitted in most cases but according to the spec a fully qualified domain name is only
   the one that ends with a dot, if it does not it is not FQDN by omission, meaning that if we use the following hostname
   in our app configuration `ent` to refer to the enterprise service, this would be seen as non FQDN, therefore according
@@ -1570,7 +1604,7 @@ ent.default.svc.cluster.local`, in that order it will try each and every one of 
   as it will consider this a FQDN and directly try to resolve `ent.` ip address from the cluster DNS service, which will
   fail.
 
--   `options` - directive allows you to configure additional resolver behavior. In our example, `options ndots:5` specifies
+- `options` - directive allows you to configure additional resolver behavior. In our example, `options ndots:5` specifies
   a threshold for the number of dots (`.`) in a hostname before the resolver treats it as a fully qualified domain name
   (FQDN).
 
@@ -1598,10 +1632,10 @@ The way this works, is that as we know each device on a network has a local rout
 how to route outgoing traffic, i.e to which gateway to send the traffic, when the destination network is remote, when it
 is local the traffic sent directly. So here is a brief overview of the communication process
 
--   **Your device**: `192.168.1.10`
--   **Local network**: `192.168.0.0`
--   **Default gateway**: `192.168.1.1`
--   **Destination**: `www.google.com` (let’s say its IP is `142.250.190.78`)
+- **Your device**: `192.168.1.10`
+- **Local network**: `192.168.0.0`
+- **Default gateway**: `192.168.1.1`
+- **Destination**: `www.google.com` (let’s say its IP is `142.250.190.78`)
 
 | Destination Network | Subnet Mask   | Gateway       | Interface | Type              |
 | ------------------- | ------------- | ------------- | --------- | ----------------- |
@@ -1663,9 +1697,7 @@ traffic
 
 `Key takeaway, from everything said above, you will notice that the actual LOAD BALANCING between Pod to Pod
 communication, that is internally between pods on different nodes, happens by the Nodes themselves or rather by the IPVS
-which is the kernel level load balancer implementation in Linux, while the external to Service and subsequently to Pod
-communication, happens through an Ingress controller or the standard LoadBalancer Service type, so there is a definitive
-DISTINCTION OF HOW TRAFFIC IS HANDLED INSIDE THE CLUSTER, as compared to OUTSIDE FROM/OF IT`
+which is the kernel level load balancer implementation in Linux`
 
 ### Network Traffic
 
@@ -1710,8 +1742,8 @@ format is `<object-name>.<namespace>.svc.cluster.local`.
 Namespaces let you partition the address space below the cluster domain level. For example creating a couple of
 Namespaces called `dev` and `acc`, will give you two new address spaces.
 
--   `dev`: `<object-name>.dev.svc.cluster.local`
--   `acc`:`<object-name>.acc.svc.cluster.local`
+- `dev`: `<object-name>.dev.svc.cluster.local`
+- `acc`:`<object-name>.acc.svc.cluster.local`
 
 Object names have to be unique within a Namespace, but not across Namespaces, For example you can not have two Services
 named the same in the same Namespace, but you can if they were to be in different namespaces. This is useful for
@@ -1734,9 +1766,9 @@ We can still use the short names of these services, `svc1` and `svc2`, without p
 `resolv.conf` file will do the heavy lifting, it will take the search config, and start attempting to send the host
 names to the DNS cluster server, in order starting from i
 
--   `svc1.svc.cluster.local` - no hit, there is no such service in the system/unnamed namespace
--   `svc1.svc.default.svc.cluster.local` - no hit, there is no such service in the default namespace
--   `svc1.dev.svc.cluster.local` - we have a hit, since it is deployed on the dev namespace that is its actual FQDN
+- `svc1.svc.cluster.local` - no hit, there is no such service in the system/unnamed namespace
+- `svc1.svc.default.svc.cluster.local` - no hit, there is no such service in the default namespace
+- `svc1.dev.svc.cluster.local` - we have a hit, since it is deployed on the dev namespace that is its actual FQDN
 
 The DNS will resolve for the - `svc1.dev.svc.cluster.local` - will return the IP address and the rest will be handled by
 the `IPVS` rules and the kernel, as we have already seen above.
@@ -1773,25 +1805,25 @@ spec:
         chapter: services
 ```
 
--   `apiVersion`: At the top the API version is specified that is to be used.
+- `apiVersion`: At the top the API version is specified that is to be used.
 
--   `kind`: that is the type of the object that is being defined, in this case the Service
+- `kind`: that is the type of the object that is being defined, in this case the Service
 
--   `metadata`: gives the Service a name, this should be a valid DNS name, so, that means alphanumeric the dot and the
+- `metadata`: gives the Service a name, this should be a valid DNS name, so, that means alphanumeric the dot and the
   dash are valid, avoid exotic characters.
 
--   `spec`: this section is where most of the action is, anything directly below spec relates to the Service, anything
+- `spec`: this section is where most of the action is, anything directly below spec relates to the Service, anything
   nested below refers to the actual behavior of the service object
 
--   `spec.type`: In this case it is configured as `NodePort` not a default `ClusterIP`, for the sake of this example
+- `spec.type`: In this case it is configured as `NodePort` not a default `ClusterIP`, for the sake of this example
 
--   `spec.port`: this is the port on which the service listens to
+- `spec.port`: this is the port on which the service listens to
 
--   `spec.targetPort`: this is the port on which the app inside the container listens to
+- `spec.targetPort`: this is the port on which the app inside the container listens to
 
--   `spec.nodePort`: this is the cluster wide port on which the service can be accessed from the outside
+- `spec.nodePort`: this is the cluster wide port on which the service can be accessed from the outside
 
--   `spec.protocol`: by default, using TCP, but UDP for example is also a probable option, based on the type of app
+- `spec.protocol`: by default, using TCP, but UDP for example is also a probable option, based on the type of app
 
 ```sh
 # to just deploy the service manifest file
@@ -1899,8 +1931,8 @@ for over 15 releases. During the 3+ years it was in alpha and beta, service mesh
 some overlap in functionality, as a result if you plan to run a service mesh you may not need ingress. Ingress is
 defined in the `networking.io` API sub group as a `v1` object and is based on the usual two constructs:
 
--   A controller - running in a reconciliation loop, to handle the state
--   An object spec - a well defined and versioned manifest specification
+- A controller - running in a reconciliation loop, to handle the state
+- An object spec - a well defined and versioned manifest specification
 
 The object spec defined rules that govern traffic routing and the controller implements the rules. However a lot of
 Kubernetes clusters do not ship with a built in ingress controller you have to install your own. This is the opposite of
@@ -1923,7 +1955,7 @@ host based routing pattern, and it is almost identical for path based routing
 
 `For this to wrok name resolution needs to point to the appropriate DNS names to the public endpoint of the Ingress load balancer`
 
-A quick side node, The OSI model is the reference model for modern networking, it comprises seven layers, numbered from
+A quick side note, The OSI model is the reference model for modern networking, it comprises seven layers, numbered from
 1-7, with the lowest layer concerned with things like signaling and electronics - hardware, the middle layers dealing
 with reliability through things like `acks` and retries and the higher layers adding awareness of user apps such as HTTPS
 services, Ingress operates at a layer 7, also known as the app layer and implements HTTP intelligence
@@ -1934,53 +1966,1695 @@ controller which you usually have to install yourself uses hostnames and paths t
 
 So from 40k feet, what is going on on a high level is that the ingress controller is actually exposed as an actual
 Service object in the k8s environment, unlike other controllers, which are not, the Ingress controller is exposed
-through a load balancer type Service, to the public internet, then that controller is actually backed an image under
-the hood, usually NGINX server, which actually does the active on demand routing which is defined in the Ingress object.
+through a load balancer type Service, to the public internet, then that service is actually backed by pods with the
+NGINX image under the hood, which actually does the active on demand routing which is defined in the Ingress object.
 
-Common Ingress Controllers include
+Common Ingress Controllers include different implementations, but amongst the most popular options are:
 
--   **NGINX**
--   **HAProxy**
--   **AWS ALB**
--   **Traefik**
+- **NGINX**
+- **HAProxy**
+- **AWS ALB**
+- **Traefik**
 
--   The Ingress Controller is typically deployed as a **Kubernetes Deployment** or **DaemonSet** and runs as a pod in the
+- The Ingress Controller is typically deployed as a **Kubernetes Deployment** or **DaemonSet** and runs as a pod in the
   cluster.
 
     1.  **Ingress Controller Deployment:**
 
-        -   The Ingress Controller is deployed as a pod (or multiple pods) in the cluster.
-        -   It listens for incoming traffic and routes it based on the Ingress rules.
+        - The Ingress Controller is deployed as a pod (or multiple pods) in the cluster.
+        - It listens for incoming traffic and routes it based on the Ingress rules.
 
     2.  **Service for the Ingress Controller:**
 
-        -   A **Service** is created to expose the Ingress Controller to external traffic.
-        -   The type of this Service can be:
-            -   **LoadBalancer** (for cloud providers that support external load balancers).
-            -   **NodePort** (for exposing the Ingress Controller on specific ports of the cluster nodes).
-            -   **ClusterIP** (for internal-only access, though this is less common for Ingress Controllers).
+        - A **Service** is created to expose the Ingress Controller to external traffic.
+        - The type of this Service can be:
+            - **LoadBalancer** (for cloud providers that support external load balancers).
+            - **NodePort** (for exposing the Ingress Controller on specific ports of the cluster nodes).
+            - **ClusterIP** (for internal-only access, though this is less common for Ingress Controllers).
 
     3.  **Ingress Rules:**
-        -   The Ingress resource defines rules for routing traffic to backend services.
-        -   The Ingress Controller reads these rules and configures itself, its running Pods (e.g., NGINX, Traefik) to route traffic accordingly.
+        - The Ingress resource defines rules for routing traffic to backend services.
+        - The Ingress Controller reads these rules and configures itself, its running Pods (e.g., NGINX, Traefik) to route traffic accordingly.
 
--   What Makes the Ingress Controller Unique, from other controllers ?
+- What Makes the Ingress Controller Unique, from other controllers ?
 
--   **Backed by an Image:** The Ingress Controller is implemented as a custom application (e.g., NGINX, Traefik) running
+- **Backed by an Image:** The Ingress Controller is implemented as a custom application (e.g., NGINX, Traefik) running
   in a container. This is different from most other Kubernetes controllers, which are part of the Kubernetes control plane
   and are not exposed to external traffic.
 
--   **Exposed to the Internet:** The Ingress Controller is typically exposed via a **Service** (e.g., `LoadBalancer` or
+- **Exposed to the Internet:** The Ingress Controller is typically exposed via a **Service** (e.g., `LoadBalancer` or
   `NodePort`) to handle external HTTP/HTTPS traffic. This means it is directly accessible from outside the cluster.
 
--   **Interfaces with External Traffic:** Unlike other k8s controllers, the Ingress Controller interacts directly with
+- **Interfaces with External Traffic:** Unlike other k8s controllers, the Ingress Controller interacts directly with
   external clients (e.g., web browsers, APIs) to route traffic to backend services.
+
+```txt
+The Ingress controller is essentially a glorified service + pods that run a reverse proxy (like NGINX, Traefik, HAProxy,
+etc.). Its primary responsibility is to:
+
+1.  Watch for Ingress resources: The Ingress controller monitors the Kubernetes API for changes to Ingress objects.
+
+2.  Configure the reverse proxy: Based on the rules defined in the Ingress objects, the Ingress controller dynamically
+    configures the reverse proxy (e.g., NGINX) to route traffic to the appropriate backend services.
+
+3.  Handle traffic routing: The reverse proxy (e.g., NGINX) then routes incoming traffic to the correct backend services
+    based on the configured rules.
+```
+
+### Network Traffic
+
+The network traffic from external parties or clients like browsers or any other client consumer into the cluster
+targeted at the ingress controller is first hitting the load balancer (assume that NGINX is the used implementation)
+container. As we have already established, the way the ingress controller is implemented is through k8s Services and
+Pods, which use the preferred load balancer implementation/image.
+
+Now here is the interesting part, as we have already seen above, the usual Pod to Pod communication within a cluster
+happens with the help of `IPVS` or `iptables`, depending on the implementation/configuration. The `crucial part` here is
+to understand that the ingress controller pods are also working in the exact same way, one might think that for them the
+load balancing is performed by the proxy alone, but that is not the case, even in this case, the actual traffic is load
+balanced by the `IPVS` or `iptables` configuration, the load balancer (NGINX) in our case is only used to create the
+configurations and do the actual routing.
+
+In the ingress controller k8s object, defines the routing and mapping that basically says which route should be mapped
+to which service, this configuration is directly transferred to the underlying to the underlying load balancer,in our
+example NGINX
+
+So here is how it works, on a high level, the steps that a client traffic request will go through to hit an underlying
+cluster pod
+
+1.  Client sends and HTTP request to the k8s cluster, given the host name of the cluster
+
+2.  Load balancing ingress controller is deployed as a `LoadBalancer` type Service
+
+3.  Ingress controller (NGINX) receive the request, and it matched against its configured routing rules, from the
+    Ingress object
+
+4.  Ingress controller in this case NGINX forwards, to the correct K8s service
+
+5.  `CoreDNS` resolves the name of that service and returns the virtual `ClusterIP` address of the service
+
+6.  Kube-proxy has already configured the `IPVS` or the `iptable` rules for that service, since it runs on a `watchloop`
+
+7.  Kernel seeing the request made from the ingress controller pods, matches the virtual `ClusterIP` of the service
+    against the actual physical Pod IP addresses
+
+8.  Traffic is sent over directly to one of these real physical IP addresses, and a pod for the target service is hit
+
+Now looking at the flow above, you will immediately notice that starting from step 5, the steps are exactly one to one
+the same steps that a Pod to Pod would take to actually communicate traffic to another Pod, this is because as we have
+already established the ingress controller, and the ingress object, are special types of objects, which in essence
+procure a normal native k8s service and k8s pod objects at the end of the day, they are just like any other service and
+pod.
+
+Key point to take into account here is namespaces, if the ingress object manifest specifies a namespace, for the ingress
+controller that implies that the routing mapping will be created against that namespace, which means that only services
+from that namespace will be hit, in all actuality what is going on is that simply the `/etc/resolv.conf` file is
+configured with `search` rule to only look in that target namespace, so it will be capable of resolving the `/ClusterIP`
+addresses only of hosts which are part of that namespace
+
+### Cluster Traffic
+
+So how does that tie into the actual cluster, and the public internet, how do we access the actual service from the
+public internet on a given cluster. As we have already seen the ingress controller is deployed as either a `NodePort` or
+`LoadBalancer` service, usually a `LoadBalancer`.
+
+A k8s cluster itself is not directly exposed to the public internet, and certainly not through a single IP address.
+Instead individual services are exposed and each service can have its own external IP or hostname, Here is how the
+process works
+
+When the NGINX controller is created and as we have already established, the NGINX controller is a glorified method of
+creating a `LoadBalancer` Service is created, the cloud provider provisions a load balancer (e.g. for AWS - ELB, GCP
+Load Balancer). The load balancer gets an external IP, or hostname, which you can use to access the service. If the load
+balancer's external IP is 203.0.133.10, you can hit <http://203.0.113.0> which will directly hit the exposed load
+balancer service or in other words the ingress controller service and the actual ingress controller pods.
+
+Lets use an example, say that Multiple Users are on the Cloud Platform, usually not each user will receive his own
+cluster, unless we are speaking about enterprise customers, or generally high value users, the cluster is shared between
+users, users however will have their resources namespaced.
+
+`In a shared Kubernetes cluster, namespaces are the primary mechanism for isolating resources between users or teams.
+Namespaces provide a logical boundary for resources, ensuring that objects created by one user or team do not interfere
+with those created by another. Let’s dive into how namespaces work and how they are used to separate objects between
+users.`
+
+- User A:
+
+- Creates a Kubernetes cluster and deploys an Ingress controller.
+- The Ingress controller is exposed with an external IP 203.0.113.10.
+- Configures DNS to point `myapp.com` to 203.0.113.10.
+
+- User B:
+
+- Creates a separate Kubernetes cluster and deploys an Ingress controller.
+- The Ingress controller is exposed with an external IP 203.0.113.20.
+- Configures DNS to point `myapi.com` to 203.0.113.20.
+
+- Traffic Flow:
+
+- When a client accesses `myapp.com`, DNS resolves it to 203.0.113.10, and the request is routed to User A’s cluster.
+- When a client accesses `myapi.com`, DNS resolves it to 203.0.113.20, and the request is routed to User B’s cluster.
 
 ### Skeleton
 
-<!-- TODO: ---- ingress skeleton ----- -->
+The skeleton of the ingress manifest file is relatively simple, however there are a few things to take a note of, first
+as all other k8s objects, these can be namespaces as well, the service mapping will be applied as already mentioned only
+to services in that namespace, therefore you have to make sure that the service rules and the namespace match and that
+namespace has a service with that name already created
 
-## Storage
+```yml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: example-ingress # the name of the ingress object
+    namespace: app-namespace # the name of the specific namespace
+spec:
+    rules:
+        - host: example.com
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: app-service # only services which are in the app-namespace will be hit, so this service better be there
+                            port:
+                                number: 80
+```
+
+Here is an example with the ingress controller configured to use TLS and on top of that in the regular `pass through`
+mode, which is basically making the ingress controller act as a dumb forwarder, meaning that there is no way for the
+ingress controller to read the request, therefore there is no way to configure sub path routing for a service, meaning
+we can only rely on `SNI`, to resolve the hostname
+
+```yml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: passthrough-ingress
+    annotations:
+        nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+spec:
+    tls:
+        - hosts:
+              - example.com
+              - api.example.com
+    rules:
+        - host: example.com
+          http:
+              paths:
+                  - path: /
+                    backend:
+                        service:
+                            name: example-service
+                            port:
+                                number: 443
+        - host: api.example.com
+          http:
+              paths:
+                  - path: /
+                    backend:
+                        service:
+                            name: api-service
+                            port:
+                                number: 443
+```
+
+A small side tangent, what is really `SNI` - server name indication is an extension of the TLS protocol that allows a
+client to specify the hostname it is trying to connect to during the initial handshake. This is crucial for servers
+hosting multiple websites or services on a single IP address, like our beloved k8s clusters and cloud platform
+providers. So that is how that works, is it rather simple, when you have encrypted traffic and no way to decrypt it, the
+`SNI` springs into action, and the ingress/NGINX service is able to determine at the very least the hostname, that is why
+route/path based routing is not possible, because it is part of the headers, and those are encrypted (so is the original
+host name information by the way, were it not for `SNI` extension, we would not be able to read the host name either), `SNI`
+does not help here
+
+1.  Client Hello: When a client initiates a TLS connection, it sends a "Client Hello" message that includes the `SNI`
+    extension, specifying the hostname (e.g., example.com) it wants to access.
+
+2.  Server Selection: The server uses the `SNI` information to select the correct SSL/TLS certificate for the requested
+    hostname.
+
+3.  Handshake Completion: The server responds with the appropriate certificate, and the TLS handshake proceeds as usual,
+    securing the connection.
+
+Here is another example which in this case uses a re-encrypt approach, meaning that it terminated the connection exactly
+at the ingress controller pods, and the traffic down to the target services and their pods is re-encrypted by a special
+certificate provided in the configuration. This process is often called TLS edge termination, the certificate to
+re-encrypt the traffic is called edge certificate
+
+```yml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: example-ingress
+    annotations:
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+    tls:
+        - hosts:
+              - example.com
+          secretName: example-tls # this is the certificate to be used for re-encrypting the traffic to the pod
+    rules:
+        - host: example.com
+          http:
+              paths:
+                  - path: /app
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: app-service
+                            port:
+                                number: 80
+                  - path: /api
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: api-service
+                            port:
+                                number: 80
+```
+
+## Physical Storage
+
+Storage is critical to most real world production apps, fortunately, k8s has a mature and feature rich storage
+subsystem, called the `persistent volume subsystem`
+
+K8s supports lots of storage back ends and each requires slightly different configuration, The examples here are made to
+work with Google k8s engine, clusters and will not work on other cluster types. The principle and theory that you will
+learn is applicable to all types of Kubernetes though
+
+### The big picture
+
+As mentioned k8s supports many storage providers, block, file and object storage from a variety of external systems that
+can be in the cloud or your on premise datacenters. However no matter what type of storage or where it comes from when
+its exposed on k8s it is called a volume. Azure File resources surfaced in k8s are called volumes as are block devices
+from HPE. Modern volumes are based on the Container Storage Interface (CSI) which is an open standard aimed at providing
+a clean storage interface for container orchestrators such as k8s. Prior to the CSI all storage plugins were implemented
+as part of the main k8s code tree. This meant that they had to be open source and all updates and bug fixes were tied to
+the main k8s release cycle. This was a nightmare for developers & maintainers. However now with the existence of CSI
+storage vendors no longer need to open source their code.
+
+### The Storage Providers
+
+K8s uses storage from a wide range of external systems. These can native cloud services such as AW Elastic Block Store,
+Azure File, but can also be traditional on premise storage arrays providing NFS volumes and such. Other options exist
+but the take home point is that k8s gets its storage from a wide range of external systems including battle hardened
+enterprise grade systems, from all the major data management companies. Some obvious restrictions apply. For example you
+can not use AWS storage services if your k8s service is running on Microsoft Azure.
+
+Each provider or provisioner needs CSI plugin to expose their storage assets to k8s, the plugin usually runs as a set of
+Pods in the kube-system Namespace.
+
+### The CSI - Container Storage Interface
+
+The Container storage interface is a vital piece of the k8s storage jigsaw and has been instrumental in bringing
+enterprise grade storage from traditional vendors to k8s. However unless you are a developer writing storage plugins you
+are unlikely to interact with it very often. It is an open source project that defines a standards based interface so
+that storage can be leveraged in an uniform way across multiple container orchestrators. For example a storage vendor
+should be able to write a single CSI plugin that works across multiple orchestrators such as k8s and docker swarm. In
+practice k8s is the focus but docker is implementing support for the CSI as well.
+
+In the k8s world the CSI is the preferred way to write plugins, drivers and means that plugin code no longer needs to
+exist in the main k8s code tree. It also exposes a clean interface and hides all the ugly volume machinery inside of the
+k8s code.
+
+From a day to day perspective your main interaction with the CSI will be referencing the appropriate CSI plugin in your
+YAML manifest files and reading its documentation to find supported features and attributes. Sometimes we call these
+plugins - "provisioners" especially when we talk about storage classes later.
+
+### The Persistent Volume Subsystem
+
+This is where we will spend most of our time configuring and interacting with storage. At a high level persistent
+volumes (PV) are how external storage assets are represented in k8s, Persistent volume claims (PVC) are like tickets
+that grant a Pod access to the persistent volume, the Storage Classes (SC) make it all possible and dynamic.
+
+Here is an example - assume that you have an external storage system with two tiers of storage, - flash/ssd fast
+storage, and mechanical slow archive storage (hard drives). You would expect apps on your k8s cluster to use both, so
+you can crate two Storage Classes and map them as follows:
+
+| External tier | K8s Storage class name |
+| ------------- | ---------------------- |
+| SSD           | sc-fast                |
+| MECHANICAL    | sc-slow                |
+
+With that Storage class in place apps can create volumes on the fly by creating persistent volume claims (PVC)
+referencing either of the storage classes. Each time this happens the CSI plugin referenced in the SC instructs the
+external storage system to create an appropriate storage asset. This is automatically mapped to a Persistent Volume (PV)
+on K8s and the app uses the persistent volume claims or PVC to claim it and mount it for use.
+
+The section below tries to link all the components of the persistent volume subsystem, as best as it can, giving an
+example with 3 different persistent volume providers - `NFS, Ceph and AWS`, all of those are simply storage providers,
+which allow us to store data of any type, the underlying implementation is not important, what is important to
+understand is that we need the components of the persistent volume subsystem to be able to interact with them within our
+pods
+
+A PV is a piece of storage in the cluster that has been provisioned by an administrator or dynamically provisioned
+using a `StorageClass`. PVs represent the actual storage resources available in the cluster, such as a disk on AWS EBS, a
+GCP Persistent Disk, or an NFS share. PVs are cluster-wide resources and are not tied to a specific namespace. They
+exist independently of Pods and PVCs. Think of a PV as a physical hard drive or a network-attached storage device.
+
+`The PV of persistent volume actually represents the physical storage devices that the cloud platform is exposing to the
+user, that would be things like hard drives, solid state drives, NAS (Network attached storage) and more. These are
+stting at the lowest level in the the persistent volume system hierarchy in the k8s environment`
+
+A `StorageClass`, this is an abstraction on top of the persistent volume, the `StorageClass` basically is responsible for
+creating the link between the physical device / persistent volume and the PVC and the Pods which would later on use
+them. This happens through the use of plugins or provisioners, these plugins are the custom vendor drivers which know
+how to interact with the underlying persistent volume - for example Network File System (NFS) or Ceph (a storage system
+that provides object, block and file storage). These have to be configured externally of the cluster, the `StorageClass`
+provides the means of providing an interface to interact with them, through the plugin (provisioner), the actual plugin
+has to be installed on a per use case basis, meaning based on which type of persistent volume provider one would like to
+use. Think of the `StorageClass` as the way to define the systems drivers for persistent volumes, to enable interaction
+with them, these system drivers are implemented by the plugin/provisioner which is defined in the `StorageClass` object
+
+So here is the definition that a systems administrator, or a user would have to perform to setup the link between a
+persistent volume system, like NFS, Ceph and so on, to allow the cluster and the pods within to be configured to
+interact with those custom storage providers. The example below is usually what a systems administrator on the cluster
+would do, since most of the regular users would really rely on the default `StorageClass` provided by the cloud platform,
+there are cases where the users - large enterprise organizations might provide their own `StorageClass` for more exotic
+persistent volume vendors
+
+```yml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+    name: nfs-storage
+provisioner: cluster.local/nfs-client
+parameters:
+    archiveOnDelete: "false"
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+    name: ceph-rbd
+provisioner: rook-ceph.rbd.csi.ceph.com
+parameters:
+    clusterID: rook-ceph
+    pool: replicapool
+    imageFormat: "2"
+    imageFeatures: layering
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+    name: aws-ebs
+provisioner: ebs.csi.aws.com
+parameters:
+    type: gp2 # General Purpose SSD
+    encrypted: "true" # Optional: Enable encryption
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+```
+
+A PVC is a request for storage by a user. It is a way for users to ask for a specific amount of storage with certain
+characteristics (e.g., size, access mode). PVCs act as a "middleman" between Pods and PVs. They allow users to request
+storage without needing to know the details of the underlying storage infrastructure. PVCs are namespaced resources,
+meaning they belong to a specific namespace. When a PVC is created, Kubernetes binds it to a PV that matches the
+requested size and access mode. Think of a PVC as a "ticket" that a user creates to request storage. The ticket is then
+matched to an available physical storage device or in other words a persistent volume (PV) - like a "hard drive".
+
+So here are the definitions of the PVCs for the storage classes mentioned above, as we can see the PVC reference the
+name of the storage class, in this case we have 3 different ones - NFS, Ceph and AWS. These provide the rules on how
+these storage classes and in particular the actual persistent volumes will be accessed by the pods which require access
+to them.
+
+```yml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: nfs-pvc
+spec:
+    accessModes:
+        - ReadWriteMany
+    resources:
+        requests:
+            storage: 10Gi
+    storageClassName: nfs-storage
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: ceph-pvc
+spec:
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 10Gi
+    storageClassName: ceph-rbd
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: aws-ebs-pvc
+spec:
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 10Gi
+    storageClassName: aws-ebs
+```
+
+A Pod is the smallest deployable unit in Kubernetes. They can request storage by referencing a PVC. Pods are ephemeral,
+meaning they can be created, deleted, and rescheduled frequently. However, the data stored in a PV (via a PVC) persists
+even if the Pod is deleted. It needs storage to read/write data, which it gets by mounting a PVC.
+
+Here is the final part of the puzzle, linking the PVC / claims with actual pods, which will use these storage class and
+persistent volume providers to mount inside their own environments, take a good look at the `volumeMounts` and the
+`volumes` properties, in the manifest below. The `volumes` links the pod with the `pvc` the `volumeMounts` tells the pod
+where to mount / what path to mount that `pvc` into the container. That way we have just made the ephemeral pod, which
+has no context of persistent storage, into something that can store data, now when if the pods die and are re-created
+they will be able to retain a persistent state
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: nfs-pod
+spec:
+    containers:
+        - name: nfs-container
+          image: nginx
+          volumeMounts:
+              - name: nfs-storage
+                mountPath: /usr/share/nginx/html
+    volumes:
+        - name: nfs-storage
+          persistentVolumeClaim:
+              claimName: nfs-pvc
+---
+apiVersion: v1
+kind: Pod
+metadata:
+    name: ceph-pod
+spec:
+    containers:
+        - name: ceph-container
+          image: nginx
+          volumeMounts:
+              - name: ceph-storage
+                mountPath: /usr/share/nginx/html
+    volumes:
+        - name: ceph-storage
+          persistentVolumeClaim:
+              claimName: ceph-pvc
+---
+apiVersion: v1
+kind: Pod
+metadata:
+    name: aws-ebs-pod
+spec:
+    containers:
+        - name: aws-ebs-container
+          image: nginx
+          volumeMounts:
+              - name: aws-ebs-storage
+                mountPath: /usr/share/nginx/html
+    volumes:
+        - name: aws-ebs-storage
+          persistentVolumeClaim:
+              claimName: aws-ebs-pvc
+```
+
+### The `StorageClass`
+
+As far as K8s goes storage classes are resources in the `storage.k8s.io/v1` API group. The resource type in `StorageClass`
+and you define them in regular YAML format manifest files, and they are posted to the API server for deployment, you can
+use the `sc` short name to refer to them when using `kubectl`
+
+As with all k8s yaml, kind tells the api server what type of object you are defining and the api version tells it which
+version of the schema to use, when creating it, metadata.name is an arbitrary string that lets you give the object a
+friendly name. This example is using fast-local.provisioner and tells Kubernetes which plugin to use and the parameters
+block let you fine tune the storage attributes, finally the `allowedTopologies` property lets you list where replicas
+should go. Also a few notes worth noting
+
+#### Skeleton
+
+```yml
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+    name: slow # the name of the storage class object
+annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/gce-pd # this is the plugin or provisioner spec/id
+parameters:
+    type: pd-standard # any parameters to enhance or configure the provisioner
+reclaimPolicy: Retain
+```
+
+1.  The `StorageClass` objects are immutable this means that you can not modify them after they are deployed
+
+2.  The metadata.name should be a meaningful name as it is how you and other objects refer to the class
+
+3.  The terms provisioner and plugin are used interchangeably
+
+4.  The parameters block is for plugin specific values and each plugin is free to support its own set of values
+    configuring this section requires knowledge of the storage plugin and associated storage back end. Each provisioner
+    usually provides documentation.
+
+#### Multiple `StorageClass` objects
+
+You can configure as many `StorageClass` as you would need. However each class can only relate to a single type of
+storage on a single back end. For example if you have a Kubernetes cluster with `StorageOS` and `Portworx` storage back end
+you will at needs least two `StorageClasses`, this is because you would need at the very least two provisioners/plugins
+which are for the two back ends, since they do not share the same internal working, therefore different plugin
+implementations are in order and required.
+
+One the flip side each back end storage system can offer multiple classes tiers of storage each of which, needs its own
+`StorageClass` on Kubernetes A simple example which will be explored later on, is that a slower standard persistent disk
+and the faster SSD persistent disk tiers offered by the Google Cloud back end. These are typically implemented with the
+following SC on the `GKE`
+
+1.  `standard-rwo` for the slower standard disk
+2.  `premium-rwo` for the faster SSD
+
+The following `StorageClass` defines a block storage volume on a `Commvault Hedvig` array that is replicated between
+data centers in `Sunderland and New York`, it will only work if you have `Commvault Hedvig` storage systems and
+appropriate replication configured on the storage system.
+
+```yml
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+    name: sc-hedvig-rep
+    annotations:
+provisioner: io.hedvig.csi
+parameters:
+    backendType: "hedvig-block"
+    rp: "DataCenterAware"
+    dcName: "sunderlang,new-york"
+```
+
+#### Volume settings
+
+There are few other important settings you can configure in a `StorageClass`, such as access mode, reclaim policy.
+Kubernetes supports three access modes for volumes - `READWRITEONCE (RWO), READWRITEMANY (RWM), READONLYMANY (ROM)`.
+
+##### Access Mode
+
+The access mode type specifies that and by what a given storage class can be accessed,
+
+- `ReadWriteOnce(RWO)` - defines a persistent volume, that can only be bound as R/W by a single Node, and by proxy a Pod,
+  attempts to write or read data from another Pod, will fail, this is idea for stateful aps like databases where only one
+  app can access the data at a time, to retain atomicity.
+
+- `ReadWriteMany(RWX)` - defines a persistent volume, that can be bound as a R/W by multiple Nodes, and by proxy Pods,
+  this behavior is strictly dependent on the underlying apps, since such concurrent reads and writes are unpredictable,
+  and the underlying apps have to be able to handle this gracefully. A good use case is apps that need shared data, and
+  that can publish that shared data in real time like content management systems, but the data they publish does not
+  necessarily interfere with each other, and can be published without concurrent conflicts.
+
+- `ReadOnlyMany(ROX)` - defines a persistent volume that can be bound as a R/O by multiple Nodes, and by proxy Pods, these
+  are meant for read only, access and are mostly useful for app configurations, stateful read only configurations, which
+  are used to bootstrap the apps and Pods and are also used during the runtime of these apps and services.
+
+What are the general guidelines on which type of access mode is used where:
+
+- Use `ReadWriteOnce (RWO)` for stateful applications like databases.
+
+- Use `ReadOnlyMany (ROX)` for sharing static immutable data across multiple apps.
+
+- Use `ReadWriteMany (RWX)` for applications that need shared read-write access, like file/ftp servers.
+
+##### Reclaim policy
+
+A volume's `ReclaimPolicy` tell kubernetes how to deal with a persistent volume when its PVC is released. Two policies
+currently exist - `Delete and Retain`.
+
+`Delete` is the most dangerous and its the default for Persistent volumes, It deletes the Persistent Volume and associated
+storage resource on the external storage system when the PVC is released. This means all data will be lost! You should
+obviously use this policy with caution.
+
+`Retain` will keep the associated persistent volume object on the cluster as well as any data stored on the associated
+external asset. However other PVCs are prevented from using it in future. The obvious disadvantage is it requires manual
+clean up.
+
+#### StorageClass Summary
+
+The `StorageClass` lets you dynamically create physical back end storage resources that get automatically mapped to a
+Persistent Volumes on Kubernetes. You define `StorageClasses` in YAML files that reference a plugin or provisioner and tie
+them to a particular tier of storage back end. For example high performance SSD storage in the AWS Mumbai Region. The
+`StorageClass` needs a name and you deploy it using the `kubectl` apply. Once deployed the `StorageClass` watches the API
+server for new PVC objects referencing its name. When matching `PVCs` appear the `StorageClass` dynamically creates the
+required asset on the back end storage system and maps it to a persistent volume on the K8s environment. Apps can then
+claim it with a PVC.
+
+### Hands on
+
+As we have already established the `StorageClass` are usually created by system administrators, on most cloud platform,
+those `StorageClass` are mostly generic ones providing the needed basic capabilities for users and their pods to interact
+with a persistent storage medium.
+
+#### Using existing `StorageClass`
+
+The following command will list all SC defined on a typical (in our example GKE cluster), based on the type of cloud
+platform provider and cluster those will likely be different
+
+```sh
+$ kubectl get sc
+NAME         PROVISIONER           RECLAIMPOLICY        VOLUMEBINDINGMODE
+premium-rwo  pd.csi.storage.gke.io Delete               WaitForFirstConsumer
+standard     (default)             kubernetes.io/gce-pd Delete Immediate
+standard-rwo pd.csi.storage.gke.io Delete               WaitForFirstConsumer
+```
+
+There is quite a lot to learn from the output. First up all three SC were automatically created when the cluster was
+built by the actual cloud provider (Google in this case). This is common on hosted Kubernetes platforms, but your
+cluster may not have any The one on the second line is listed as the default, This means it will be used by any PVC that
+do not explicitly specify an SC, Default SC are only useful in development environments and times when you do not have
+specific storage requirements, in production environments you should explicitly use a named SC in your PVC that meets
+the requirements of the app. The `PROVISIONER` column shows two of the SC using the CSI plugin the other is using the
+legacy in-tree plugin, built into the source tree of k8s, The `RECLAIMPOLICY` is set to Delete as for all three. This
+means any PVC that use these `SC` will create `PV` and volumes that will e deleted when the PVC is deleted, This will
+result in data being lost, The alternative is Retain. Setting `VOLUMEBINDINGMODE` to immediate will create the volume on
+the external storage system as soon as the PVC is created, if you have multiple data centers or cloud regions, the
+volume might be created in a different data center or region than the Pod that eventually consume it. Setting the
+`WaitForFirstConsumer` will delay creation until the Pod using the PVC is created. This ensures that the volume will be
+created in the same data center or region as the Pod and actually the Node where the pod is running on.
+
+You can use `kubectl` describe to get more detailed information, just as with any other k8s object, and `kubectl get sc
+<name> -o yaml` will show the full configuration in YAML format.
+
+```sh
+$ kubectl describe sc premium-rwo
+Name:                 premium-rwo
+IsDefaultClass:       No
+Annotations:          components.gke.io/component-name=pdcsi-addon...
+Provisioner:          pd.csi.storage.gke.io
+Parameters:           type=pd-ssd
+AllowVolumeExpansion: True
+MountOptions:         <none>
+ReclaimPolicy:        Delete
+VolumeBindingMode:    WaitForFirstConsumer
+Events:               <none>
+```
+
+Let us create a new volume using the `premium-rwo` `StorageClass`, the premium one is a basic fast SSD storage, First
+let us list any existing persistent volumes and persistent volume claims, we will quickly see that there are none,
+created by us, which is normal, those are user managed objects, unlike most of the `StorageClass` objects which are rarely
+provisioned by regular users, outside of enterprise organizations, which have more exotic needs.
+
+```sh
+$ kubectl get pv
+No resources found
+
+$ kubectl get pvc
+No resources found
+```
+
+The following PVC definition uses the `premium-rwo` storage class / driver and reserves or requests 10 gigs of storage,
+with the proper access type - `ReadWriteOnce`, this means that the persistent volume created by this PVC eventually, will
+only be accessible by only one single PVC, that is, and the command to create it following the manifest below
+
+```yml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: pvc-prem
+spec:
+    accessModes:
+        - ReadWriteOnce
+    storageClassName: premium-rwo
+    resources:
+        requests:
+            storage: 10Gi
+```
+
+```sh
+$ kubectl apply -f pvc.yaml
+persistentVolumeClaim/pvc-prem created
+```
+
+The following commands will show a PVC has been created, however it is in the pending state and no `PV - persistent
+volume` has been created on the actual underlying storage device, This is because the `premium-rwo` `StorageClass`
+volume binding mode is set to `WaitForFirstConsumer`, as we have seen above, when we described that `StorageClass`,
+meaning that it will not provision a volume until a Pod claims it.
+
+```sh
+$ kubectl get pv
+No resources found
+
+$ kubectl get pvc
+NAME     STATUS  VOLUME CAPACITY ACCESS
+pvc-prem Pending premium-rwo     1m
+```
+
+Create the Pod from the following manifest document, and that will then mount a volume via the `pvc-prem`
+`PersistentVolumeClaim` which will in turn actually provision the persistent volume on the storage device through the
+use of the `StorageClass` and drivers/plugin/provisioner
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: volpod
+spec:
+    volumes:
+        - name: data
+          persistentVolumeClaim:
+              claimName: pvc-prem
+    containers:
+        - name: ubuntu-ctr
+          image: ubuntu:latest
+          command:
+              - /bin/bash
+              - "-c"
+              - "sleep 60m"
+          volumeMounts:
+              - mountPath: /data
+                name: data
+```
+
+This will actually force the persistent volume to be created since we now have a pod that is using it actually, the
+`volumeMounts` above show that the `pvc-prem` will be bound to /data in the container. The volumes section defines what
+volumes are defined for the pod, in this case it is just one, and that one uses the already created `claimName`
+`pvc-prem`. Give the pod some time to start and after that log out the output of `kubectl get pv`
+
+```sh
+# provision the pod, with the spec provided above, for this example we mostly care about the pv that will be created
+$ kubectl apply -f pod.yml
+pod/prempod created
+
+# wait for some time before doing this, to allow for the pod and all resources to actually get provisioned
+$ kubectl get pv
+NAME         CAPACITY MODES RECLAIM POLICY STATUS  CLAIM            STORAGECLASS
+pvc-796af... 10Gi     RWO   Delete         Bound   default/pvc-prem premium-rwo
+```
+
+To drop the resources we have just created, one would simply do the following, however remember what will happen with
+the persistent volume, since the `StorageClass` defines is at Delete as the `ReclaimPolicy`, then the persistent volume
+will also be deleted once nothing is bound to it anymore.
+
+```sh
+# deletes the pod, however the persistent volume will also go away, since the StorageClass defines the ReclaimPolicy as delete
+$ kubectl delete pod prempod
+```
+
+### Creating new `StorageClass`
+
+What about creating a custom `StorageClass` object, that is then used to create a new volume just as the examples above.
+The storage class that we will create is defined in the following manifest file, and is of the following properties
+
+- Fast SSD device, `pd-ssd`
+- Replicated - `regional-pd`
+- Create on demand - `volumeBindingMode: WaitForFirstConsumer`
+
+```yml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+    name: sc-fast-repl
+provisioner: pd.csi.storage.gke.io
+parameters:
+    type: pd-ssd
+    replication-type: regional-pd
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Retain
+#allowedTopologies:
+#- matchLabelExpressions:
+#  - key: topology.kubernetes.io/zone
+#    values:
+#    - europe-west2-b
+#    - europe-west2-c
+```
+
+`Remember that the parameters above, are strictly for the provisioner to use, in this case it is a proprietary google
+based storage provisioner/plugin - pd.csi.storage.gke.io these parameters are meaningless for any other provisioner
+generally`
+
+The parameters field in a `StorageClass` is a key value pair map that allows you to pass configuration options to the
+provisioner, these parameters share specific to the provisioner and the underlying storage system, for example the AWS
+EBS - uses parameter names such as type, Ceph might use parameters like `pool`, `clusterID`, `imageFormat`, and NFS
+might use parameters like server and path. These parameters are not standardized across all CSI drivers or provisioners,
+each CSI driver or provisioner is defining its own set of supported parameters based on the capabilities of the storage
+backend. The CSI spec standardizes the API for communication between the k8s and the storage backend but it does not
+enforce specific parameters.
+
+```sh
+# provision the storage class, remember that it is immutable once created there is no changing it
+$ kubectl apply -f my-sc.yml
+storageclass.storage.k8s.io/sc-fast-repl
+
+# list the details of all storage classes, where we can see the new one being created
+$ kubectl get sc
+NAME         PROVISIONER           RECLAIMPOLICY VOLUMEBINDINGMODE
+premium-rwo  pd.csi.storage.gke.io Delete        WaitForFirstConsumer
+sc-fast-repl pd.csi.storage.gke.io Retain        WaitForFirstConsumer
+```
+
+Now to deploy a new manifest of a persistent volume claim that is going to use the new `StorageClass`, we can simply use
+the following manifest as follows. The manifest below is a simple manifest for a PVC that is using the custom storage
+class created above, just as with any other PVC, the volume size is specified and the `accessModes`,
+
+```yml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: pvc2
+spec:
+    accessModes:
+        - ReadWriteOnce
+    storageClassName: sc-fast-repl
+    resources:
+        requests:
+            storage: 20Gi
+```
+
+Finally the final steps is to create a new Pod, that is going to be using this PVC, similarly to before as we have
+created the custom storage class with `WaitForFirstConsumer`, that means that the volume would be only created on demand
+when at least one pod with a valid PVC that is bound to that `StorageClass` is configured to be used in a Pod.
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: volpod
+spec:
+    volumes:
+        - name: data
+          persistentVolumeClaim:
+              claimName: pvc2
+    containers:
+        - name: ubuntu-ctr
+          image: ubuntu:latest
+          command:
+              - /bin/bash
+              - "-c"
+              - "sleep 60m"
+          volumeMounts:
+              - mountPath: /data
+                name: data
+```
+
+Since the Pod and PVC were both deployed with a manifest, we can simply either use the manifest files, to delete them,
+or manually delete the objects, usually the preferred way is to use the same manifest files used to create the objects,
+to remove them, to remove them, execute the following
+
+```sh
+# delete the pod
+$ kubectl delete -f volpod.yml
+
+# delete the persistent claim
+$ kubectl delete -f pvc2.yml
+```
+
+Now even those are now deleted, the `kubectl get pv` will show that the persistent volumes still exist. This is because
+the storage class it was created from is using the Retain policy. This keep the persistent volume associated with the
+back end volumes and the data even when the PVC are deleted.
+
+## `ConfigMaps` & Secrets
+
+Most business app comprise of two main parts - the app and the configuration. A simple example is a web server such as
+NGINX or httpd. Neither are very useful without a configuration. However when you combine them with a configuration they
+become extremely useful.
+
+In the past we coupled the app and the configuration into a single easy to deploy unit. As we moved into the early days
+of cloud native microservices and apps we brought this model with us. However it is an anti-pattern in the cloud native
+world. You should de couple the app and the configuration.
+
+### The big picture
+
+As already mentioned most apps need configuration to function correctly, This does not change in the k8s world, Let us
+consider a simple example - we would like to deploy modern apps to K8s and have 3 distinct environments, - Dev, Test,
+and Prod. The developers write and update the app, initial testing is performed in the dev environment, further testing
+is done in the test environment here more stringent rules are taken. Finally stable components graduate to the prod
+environment.
+
+However each env, has subtle differences, this includes things such as number of nodes, configuration of nodes, network
+and security policies different sets of credentials and certificates and more. You currently package each app
+microservice with its configuration backed into the container. With this in mind you have to perform all of the
+following on every business app
+
+- Build three distinct images, for each env, each of which will have backed in the different configurations for each env
+- Store the images in three distinct repositories, (dev, test and prod)
+- Run each version of the image in a specific environment
+
+Every time you change the config of an app, even the smallest change like fixing a typo, you will need to build and
+package and entirely new image and perform some type of update to the entire app.
+
+There are several drawbacks to the approach of storing the app and its configuration as a single artifact - container
+image. As your dev, test and prod environments have different characteristics each env needs its own image, A dev or
+test image will not work in the prod env, because of things like different security credentials and restrictions. This
+requires extra work to create an maintain 3x copies of each app. This complicates matters and increases the chances of
+mistakes, including things that work in dev and test but not prod.
+
+How should it work then ? Well you should be able to build a single version of your app, that is shared across all three
+environments, you store a single image in a single repo, you run a single version of that image in all environments. To
+make this work you build your app and images as generically as possible with no embedded configuration, you then create
+and store configurations in a separate objects, and apply a configuration to the app at the time it is run. For example
+you have a single copy of a web server that you can deploy to all three environments. When you do deploy it to prod you
+apply the prod configuration. When you run it in dev you apply the dev configuration and so on.
+
+In this model you create and test a single version of each app image, and you can even re use images across different
+apps. For example a hardened stripped down NGINX image can be used by lots of different apps, just load different
+configurations at run time
+
+### `ConfigMaps`
+
+K8s provides an object called a `ConfigMap`, that lets you store configuration data outside of a Pod, it also lets you
+dynamically inject the config into a Pod at run-time. When we use the term Pod we really mean container, after all it is
+ultimately the container that receives the configuration data and runs the app, but the pod is the logical object that
+the `ConfigMap` is bound to, since the Pod is the overarching manager of the containers and images that are being run
+
+`ConfigMaps` are first class objects in the k8s API, under the core API group and they are in v1 of the API. They are
+stable, and have been around for a while, you can operate on them with the usual `kubectl` commands and they can be
+defined and deployed via the usual manifest YAML file format
+
+#### Premise
+
+`ConfigMap` are typically used to store non sensitive configuration data such as environment variables and entire
+configuration files, hostnames, server ports, account names etc. You should not use the `ConfigMap` to store sensitive
+data as certificates and password. K8s provides a different object called a Secret, for storing sensitive data. Secrets
+and `ConfigMaps` are very similar in design and implementation the major difference is that k8s takes steps to obscure the
+data stored in secrets. It makes no such efforts to obscure data stored in `ConfigMaps`
+
+The way `ConfigMaps` are defined is as a map of key value pairs and we call each key value pair and entry.
+
+- Keys are an arbitrary name that can be created from alphanumeric, dashes, dots and underscores
+- Values can contain anything really, including multiple lines with carriage returns
+- Keys and values are separated by a colon - `key: value`
+
+More complex examples can store entire configuration files like that, below is the actual value that the `ConfigMap` stores:
+
+```txt
+key: conf
+value:
+    directive in;
+    main block;
+    http {
+        server {
+        listen 80 default_server;
+        server_name *.nigelpoulton.com;
+        root /var/www/nigelpoulton.com;
+        index index.html
+            location / {
+                root /usr/share/nginx/html;
+                index index.html;
+            }
+        }
+}
+```
+
+Once the data is stored in a `ConfigMap` it can be injected into containers at run time via any of the following methods
+
+- Environment variables
+- Arguments to the container's startup command
+- Files and volumes
+
+All of the methods work seamlessly with existing app, in fact all an app sees is its configuration data in either - env
+variable, an argument or a file on the filesystem. The app is unaware the data originally came from a `ConfigMap` or a
+Secret type of object. The most flexible of the three methods is the volume option, whereas the most limited are the
+startup command.
+
+A K8s native app is one that knows its running on k8s and can talk to the k8s API. As a result they can access
+`ConfigMap` data directly via the API without needing things like environment variables, startup arguments or variables
+and volumes. This can simplify app configuration, but the app will only run in k8s environment.
+
+#### Definition
+
+```sh
+$ kubectl create configmap testmap1 \
+    --from-literal shortname=AOS \
+    --from-literal longname="Agents of Shield"
+
+$ kubectl describe cm testmap1
+Name:        testmap1
+Namespace:   default
+Labels:      <none>
+Annotations: <none>
+Data
+====
+longname:
+----
+Agents       of Shield
+shortname:
+----
+AOS
+Events:      <none>
+```
+
+#### Creating
+
+The most basic example, creating a new config map object directly from the command line, without using any manifest
+files, this is solely to demonstrate how they can be created, but in the real world, the preferred creation method is
+always the YAML manifest way.
+
+```yml
+kind: `ConfigMap`
+apiVersion: v1
+metadata:
+  name: multimap
+data:
+  given: Nigel
+  family: Poulton
+```
+
+Here is a proper example, which uses the regular manifest file to create a new `ConfigMap`, notice that the config map is
+given a name, and also that the data section, specifies the number of key value pairs which are representing the data
+this config map provides.
+
+```sh
+kubectl apply -f multimap.yml
+```
+
+The manifest below uses the special pipe characters, that tells the k8s api to treat everything after the pipe as a
+literal value, meaning that the actual value of the key `config` is the multi line text, which we can see after the pipe
+character, that is cool since this is a good way to represent values which can be later on mounted as files form the
+config map. This is often used to inject complex configurations, such as json files, or even shell scripts
+
+```yml
+kind: `ConfigMap`
+apiVersion: v1
+metadata:
+name: test-conf
+data:
+    config: |
+        env = plex-test
+        endpoint = 0.0.0.0:31001
+        char = utf8
+        vault = PLEX/test
+        log-size = 512M
+```
+
+#### Injecting
+
+Binding the `ConfigMap` to a pod and injecting it is the next step. Looking at each of the 3 methods to inject
+`ConfigMaps`, and their pros and cons
+
+##### Environment variables
+
+A common way to get `ConfigMap` data into a container is via environment variables. You create the `ConfigMaps` then you
+map its entries int environment variables in the container section of a Pod template. When the container is started the
+environment variables appear in the container as standard Linux or Windows environment variables, we use a combination
+of `configMapKeyRef`, where the name of the key and the name of the source `ConfigMap` must be provided
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: envpod
+spec:
+    containers:
+        - name: ctr1
+          image: busybox
+          command: ["sleep"]
+          args: ["infinity"]
+          env:
+              - name: FIRSTNAME
+                valueFrom:
+                    configMapKeyRef:
+                        name: multimap
+                        key: given
+              - name: LASTNAME
+                valueFrom:
+                    configMapKeyRef:
+                        name: multimap
+                        key: family
+```
+
+When the Pod is schedules and the container started, the `FIRSTNAME` and `LASTNAME` will be created as standard Linux
+environment variables inside the container. Apps can use these like regular variables because they are. Run the
+following to deploy the pod from the manifest above,
+
+```sh
+$ kubectl appy -f envpod.yml
+
+$ kubectl exec envpod -- env | grep NAME
+HOSTNAME  = envpod
+FIRSTNAME = Nigel
+LASTNAME  = Poulton
+```
+
+A drawback to using `ConfigMaps` with environment variables is that environment variables are static, This means that
+updates made to the map are not reflected in running containers. For example if you update the values of the given and
+family entries in the `ConfigMap` environment variables in existing containers will not see those updates. This is a major
+reason environment variables are not very good
+
+##### Startup arguments
+
+This concept is simple, you specify a startup command for a container, and then customize it with variables, the
+following pod template is showing that, how a single container is called with `args1`. Also if you play a close attention
+you will notice that this is also using the environment variables approach.
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: startup-pod
+    labels:
+        chapter: configmaps
+spec:
+    restartPolicy: OnFailure
+    containers:
+        - name: container
+          image: busybox
+          # that is the startup command for the container, in other words the ENTRYPOINT from Dockerworld
+          command: ["/bin/sh", "-c", "echo First name $(FIRSTNAME) last name $(LASTNAME)", "wait"]
+          env:
+              - name: FIRSTNAME
+                valueFrom:
+                    configMapKeyRef:
+                        name: multimap
+                        key: given
+              - name: LASTNAME
+                valueFrom:
+                    configMapKeyRef:
+                        name: multimap
+                        key: family
+```
+
+##### Volumes & Files
+
+Using the `ConfigMaps` with volumes is the most flexible option. You can reference entire configuration files as well as
+make updates to the `ConfigMap` and have them reflected in running containers. This means you can make changes to entries
+in the `ConfigMap` after you have deployed a container and those changes be seen in the container and available for running
+apps. The updates may take a minute or so to appear in the container. But how is the `ConfigMap` exposed as a volume you
+may ask ?
+
+Well first what is the process of creating such a config map, that would be simply creating a `ConfigMap` object,
+afterwards this `ConfigMap` object is bound to or as a volume to a Pod, and mounted into the container. Entries in the
+`ConfigMap` would appear in the container is individual files
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: cmvol
+spec:
+    volumes:
+        - name: volmap # this is the name of the volume and we have bound a value to it below
+          configMap:
+              name: multimap # the bound value and here we are re-using the multimap we have created
+    containers:
+        - name: container # name the container, for the pod
+          image: nginx # tell the container what image to use
+          volumeMounts: # specifies a list of volumes to the pod
+              - name: volmap # tell the pod which volume to use
+                mountPath: /etc/name # tell the pod where to exactly mount this volume
+```
+
+Now what would the effect of this be, the values inside the `multimap` `ConfigMap` are two key value pairs. The config
+map has two keys given and family, these will be used to create the names of the files, while the values for these keys
+will be used to populate the files, therefore the contents of the files will be Nigel and Poulton respectively. This is
+quite powerful since we can define the configuration for any application and any changes to the config map will
+correctly reflect the changes in the file.
+
+### Secrets
+
+Secrets are almost identical to `ConfigMaps`, they hold app configuration data that is injected into containers at
+run-time. However Secrets are designed for sensitive data such as passwords, certificates and OAuth tokens.
+
+#### Security & Secrets
+
+Are secrets really secure, The quick answer to this question is no, but there is a slightly longer answer. Despite being
+designed for sensitive data, kubernetes does not encrypt Secrets. It merely obscures them as base 64 encoded values that
+can easily be decoded, fortunately it is possible to configure encryption at rest with `EncryptionConfiguration` objects,
+and most service meshes encrypt network traffic. A typical workflow for Secret is as follow.
+
+1.  The secret is created and persisted to the cluster store as an un-encrypted object
+2.  A pod that uses it gets scheduled to a cluster node
+3.  The secret is transferred over the network un-encrypted to the node
+4.  The kubelet on the node starts the Pod and its containers
+5.  The Secret is mounted into the container via an in memory tmpfs file system and decoded from base64 to plain text
+6.  The app consumes it
+7.  When the pod is deleted the secret is deleted from the node.
+
+While it is possible to encrypt the secret in the cluster store and leverage a service mesh to encrypt it in flight on
+the network, it is always mounted as plain text in the Pod, container. This is so the app can consume it without having
+to perform decryption or base64 decoding operations. Also the use of in memory tmpfs file systems mean they are never
+persisted to disk on a node. So to cut a long story short, no secrets are not very secure, but you can take extra steps
+to make them secure. They are also limited to 1MB of size. An obvious use case for Secrets is a generic TLS termination
+proxy for use across your dev, test and prod, environments. You create a standard image, and load the appropriate TLS
+keys at run time for each environment.
+
+By default every pod gets a secret mounted into it as a volume which it uses to authenticate itself if it talks to the
+API server, if we take a look at any running pod in our cluster we will be able to use the describe command from kubectl
+and we can actually see the `defulat-token-s9nmx` which is a secret value that is mounted into the container
+automatically by the kubectl so it can communicate with the API server, that is simple API token, to call the REST
+endpoints with.
+
+```sh
+$ kubectl describe pod <podname>
+
+Name:                                          cmvol
+Namespace:                                     default
+<Snip>
+Containers:
+ctr:
+Container                                      ID: containerd://0de32d677251cbbda3ebe53e8...
+Image:                                         nginx
+Mounts:
+ /etc/name                                     from volmap (rw)
+ /var/run/secrets/kubernetes.io/serviceaccount from default-token-s9nmx (ro)
+ <Snip>
+ Volumes:
+ default-token-s9nmx:
+ Type:                                         Secret (a volume populated by a Secret)
+ SecretName:                                   default-token-s9nmx
+ Optional:                                     false
+ QoS                                           Class: BestEffort
+<Snip>
+```
+
+`Also note where this is mounted, /var/run/secrets/kubernetes.io/, this is a common way for k8s to prefix its own
+resources with kubernetes.io, in this case the secret is mounted under /var/run/secrets and the kubernetes specific
+folder`
+
+```sh
+$ kubectl get secrets
+
+NAME                TYPE                                DATA AGE
+default-token-s9nmx kubernetes.io/service-account-token 3    21d
+```
+
+You might get an output similar to this one, which will show the list of currently active secrets, one of which will be
+the actual certificate we, attached to the Pod itself, and used by the Pod to communicate with the REST server of the
+control plane.
+
+```sh
+$ kubectl describe secret default-token-s9nmx
+
+Name:                              default-token-s9nmx
+Namespace:                         default
+Labels:                            <none>
+Annotations:                       kubernetes.io/service-account.name: default
+kubernetes.io/service-account.uid: c5b5a4b3-3c5c...
+Type:                              kubernetes.io/service-account-token
+Data
+====
+    token:                             eyJhbGciOiJSUzI1NiIsIm...
+    ca.crt:                            570 bytes
+    namespace:                         7 bytes
+```
+
+#### Making secrets
+
+As we have already seen the secrets are not encrypted in the cluster store (etcd) they are not encrypted in flight, not
+encrypted on the network and not encrypted when surfaced in a container. There are ways to encrypt them, but at the end
+of the day the container has to have a way to read these secrets in plain text, either by decrypting them itself, or
+having the secret decrypted when delivered or mounted into the container. Now by default when we create secrets in the
+manifest file, the contents of the manifest file or more precisely the `data` section of the manifest must contain the
+base64 version of the secret or data
+
+```yml
+apiVersion: v1
+kind: Secret
+metadata:
+    name: tkb-secret
+    labels:
+        chapter: configmaps
+type: Opaque
+data: # provide a base64 encoded data, the api server will accept it as is
+    username: bmlnZWxwb3VsdG9u
+    password: UGFzc3dvcmQxMjM=
+# stringData: # provide the raw data, the api server will base64 encode it itself
+#   username: myusername
+#   password: mypassword
+```
+
+```sh
+# to apply the secret manifest from above
+$ kubectl apply -f secret.yml
+```
+
+Here in this example the `data` contains values that are already encoded in base64, this is crucial to remember because,
+the `data` field does not contain a value that is not encoded in base64, the API server will reject the secret, meaning
+posting the manifest will fail, to provide the raw un-encoded data in raw plain text one should use the `stringData`
+field, instead of the `data` one.
+
+```sh
+# to decode the value and see the actual value
+$ echo <base-64-encoded-vlaue> | base64 -d
+```
+
+#### Using secrets
+
+The most flexible way to inject a secret into a pod (container) is via a special type of volume called a secret volume.
+The following YAML describe a single container Pod with a Secret volume called "secret-vol" based on the secret manifest
+from above, created in the previous step.
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: secret-pod
+    labels:
+        topic: secrets
+spec:
+    volumes:
+        - name: secret-vol
+          secret:
+              secretName: tkb-secret
+    containers:
+        - name: secret-ctr
+          image: nginx
+          volumeMounts:
+              - name: secret-vol
+                mountPath: /etc/secret
+                readOnly: true
+```
+
+The main difference between the `ConfigMap` type volumes and the Secret type volumes is that the Secret volumes are
+automatically mounted as read only, and also the data in these volumes is decoded from base64 to base plain text before
+hand, so they can be mounted as the actual value the base64 encoding is representing. To apply this pod we do the usual
+
+```sh
+# create a pod where the secret is mounted under /etc/secret
+$ kubectl apply -f secret-pod.yml
+```
+
+## `StatefulSet`
+
+For the purposes of this discussion a stateful app is one that creates and saves valuable data, an example might be an
+app that saves data about client sessions and uses it for future sessions. Other examples include databases and other
+data stores. `StatefulSet` are the logical equivalent of Deployments in the K8s world. While the spec structure is
+similar, there are some differences:
+
+- `StatefulSet`:
+
+    - Includes fields like `serviceName` (to associate with a headless service).
+    - Supports `volumeClaimTemplates` for creating `PersistentVolumeClaims` (PVCs) for each pod.
+    - Does not support the strategy field for updates (it always uses a rolling update strategy).
+
+- `Deployment`:
+
+    - Includes a strategy field to define update strategies (e.g., RollingUpdate or Recreate).
+    - Does not have `serviceName` or `volumeClaimTemplates`.
+
+### Theory of `StatefulSet`
+
+It is often useful to compare the `StatefulSets` with Deployments both are first class API objects and follow the
+typical kubernetes controller architecture, they are both implemented as controller that operate reconciliation loops
+watching the state of the cluster, via the API server and moving the observed state into sync with the desired state.
+Deployments and `StatefulSets` also support self healing scaling updates and more. However there are some vital
+differences between `StatefulSets` and Deployments. `StatefulSets` guarantee:
+
+- Predictable and persistent Pod names
+- Predictable and persistent DNS hostnames
+- Predictable and persistent volume bindings
+
+These three properties form the sate of Pod, sometimes referred to as its sticky ID. `StatefulSets` ensure this state/id
+is persisted across failures scaling and other scheduling operations making them ideal for apps that require unique pods
+that are not interchangeable.
+
+A quick example failed Pods managed by a `StatefulSet` will be replaced by new Pods with the exact same Pod name the exact
+same DNS hostname, and the exact same volumes. This is true even if the replacement pod is started on a different
+cluster node. The same is not true of Pods managed by a Deployment.
+
+```yml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: tkb-sts
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: mongo
+    serviceName: "tkb-sts"
+    template:
+        metadata:
+            labels:
+                app: mongo
+        spec:
+            containers:
+                - name: ctr-mongo
+                  image: mongo:latest
+```
+
+The name of the `StatefulSet` is `tkb-sts` and it defines three pod replicas running the `mongo:latest` image. You post
+this to the API server it is persistent to the cluster store the replicas are assigned to cluster nodes and the
+`StatefulSet` controller monitors the state of the cluster making sure observed state matches the desired state, that is
+the big picture, let us take a closer look at some the major characteristics of `StatefulSet` before walking through an
+example
+
+### `StatefulSet` naming
+
+All Pods managed by a `StatefulSet` get predictable and persistent names. These names are vital and are the core of how
+Pods are started self healed, scaled, deleted and attached to volumes and more. The format of the `StatefulSet` Pod
+names is `<StatefulSetName>-<Integer>`. The integer `is a zero based index ordinal which is just a fancy way of saying
+number starting from 0`. The first Pod created by a `StatefulSet` always get index ordinal 0, and each subsequent Pod
+gets the next highest. Assuming the previous YAML snippet the first Pod created will be called `tks-sts-0`, the second
+will be called `tsb-sts-1`. Be ware that `StatefulSet` names need to be a valid DNS names so no exotic characters are
+allowed, this rule and its reasons will come in play later.
+
+### `StatefulSet` creation
+
+Another fundamental characteristic of the `StatefulSet` is that controlled and ordered way they start and stop Pods.
+`StatefulSet` create one Pod at a time, and always wait for previous Pods to be running and ready before creating the
+next. This is different than from Deployments that use a `ReplicaSet` controller to start all Pods at the same time,
+causing potential race conditions.
+
+As per the previous YAML snippet `tkb-sts-0` will be started first and must be running and ready before the
+`StatefulSet` controller starts `tkb-sts-1`. The same applies to subsequent Pods - `tkb-sts-1` needs to be running and
+ready before `tkb-sts-2` starts and so on.
+
+Scaling operations are also governed by the same ordered startup rules. For example scaling from 3 to 5 replicas will
+start a new Pod called `tkb-sts-3` and wait for it to be in the running and ready state, before creating `tkb-sts-4`
+Scaling down follows the same rules in reverse, the controller terminates the Pod with the highest index ordinal
+(number) first waits for it to fully terminate before terminating the Pod with the next highest ordinal.Knowing the
+order in which Pods will be scaled down as well knowing that Pods will not be terminated in parallel is a game changer
+for many stateful apps. For example clustered apps that store data can potentially lose data if multiple replicas go
+down at the same time. `StatefulSet` guarantee this will never happen You can also inject other delays via things like
+`terminationGracePeriodSeconds`, to further control the scaling down process. All in all `StatefulSets` bring a lot to
+the table for clustered apps that create and store data.
+
+Finally it is worth noting that `StatefulSets` controllers do their own self healing and scaling, this is
+architecturally different to Deployments which use a separate `ReplicaSet` helper controller for these operations
+
+`All in all StatefulSet provide a robust predictable and easy to manage control flow over the deployment lifecycle of
+pods. This is crucial for services which require more fine grained control over their own lifecycle and other dependent
+components`
+
+### Deleting `StatefulSet`
+
+There are two major things to consider when deleting a `StatefulSet` object,
+
+Firstly deleting a `StatefulSet` does not terminate Pods in order, With this in mind you may want to scale a
+`StatefulSet` to 0 replicas before deleting it You can also use the `terminationGracePeriodSeconds` to further control
+the way Pods are terminated. It is common to set this to at least 10 seconds to give apps running in the Pods a chance
+to flush local buffers and safely commit any writes that are still in-flight
+
+### `StatefulSet` & volumes
+
+Volumes are an important part of the `StatefulSet` Pod stick ID and state. When `StatefulSet` Pod is created any volumes it
+needs are created at the same time and named in a special way that connects them to the right Pod. That means that each
+volume created by the PVC. Volumes are appropriately decoupled from Pods via the normal Persistent Volume Claims system.
+This means volumes have separate lifecycle to Pods, allowing them to survive Pod failures and termination operations.
+For example any time a `StatefulSet` Pod fails or is terminated associate volumes are unaffected. This allows replacement
+Pods to attach to the same storage as the Pods they are replacing. This is true even if replacement Pods are schedule
+to different cluster nodes.
+
+The same is true for scaling operations if a `StatefulSet` Pod is deleted as part of a scale down operation subsequent
+scale up operations will attach new Pods to the surviving volumes that match their names, this behavior can be a life
+saver if you accidentally delete a `StatefulSet` Pod especially if it is the last replica.
+
+So here is something to take a good note of, of how `Deployments` and `StatefulSets` differ in their usage of the
+persistent volumes and persistent volume claims:
+
+If you have a Deployment, every replica of the Deployment is identical, aside from its name. In particular, every
+replica will share the same `PersistentVolumeClaim` and the same underlying `PersistentVolume`.
+
+Conversely, each replica of a `StatefulSet` gets its own `PersistentVolumeClaim`, assuming you use the
+`volumeClaimTemplates`: field to declare the PVC. If anything causes the `StatefulSet` to scale up, the new Pod will get
+a new empty `PersistentVolume`. If it scales down, the `PersistentVolume` is preserved, and if it scales up again, the
+previous `PersistentVolume` is reused.
+
+`Important to note how the names of the unique PVC objects are generated when using the volumeClaimTemplates, since each
+of the pvc objects is created for each pod replica, the name is generated from the name defined under
+volumeClaimTemplates, in the StatefulSet spec, and using the ordinal number of the pod it is attached to.`
+
+### Handling Failures
+
+The `StatefulSet` controller observes the state of the cluster and attempts to keep observed state in sync with the
+desired state. The simplest example is a Pod failure, if you have a `StatefulSet` called `tkb-sts` with 5 replicas, and
+`tkb-sts-3` fails, the controller will start a replacement Pod with the same name and attach it to the same volumes it was
+already attached to. However if a failed Pod recovers after Kubernetes has replaced it you will have two identical Pods
+trying to write to the same volume. This can result in data corruption. As a result the `StatefulSet` controller is
+extremely careful how ti handles failures.
+
+Possible node failures are very difficult to deal with. For example, if Kubernetes loses contact with a node, how does
+it know if the node has failed / is down and will never recover or if its temporary glitch, such as network partition a
+crashed kubelet or the node is simply rebooting. To complicate matters further the controller can not even force the Pod
+to terminate as the local kubelet may never receive the instruction to do that. With all of this in ind, manual
+intervention is needed before K8s will replace Pods on failed nodes.
+
+`Unlike deployments, where once the Pod is considered failed, it will never be re-started or ever re instated back into
+the k8s environment, meaning that a brand new one will be created and the old one will be completely de commissioned, in
+the StatefulSet world, that is not the case a pod might actually recover so the stateful state controller has to be more
+conservative when managing failed Pods, unlike its Deployment and ReplicaSet counterpart`
+
+### Network & Headless
+
+We have already said that `StatefulSet` are for apps that need Pods to be predictable and long lived as a result other
+parts of the app as well as other apps may need to connect directly to individual Pods. To make this possible
+`StatefulSet` use a headless service to create predictable DNS names for every pod replica they manage. Other apps can
+then query DNS service for the pull list of Pod replicas and use these details to connect directly to the Pods. The
+following YAML snippet shows a headless Service called mongo-prod that is listed in the `StatefulSet` YAML.
+
+```yml
+apiVersion: v1
+kind: Service
+metadata:
+    name: mongo-prod
+spec:
+    clusterIP: None
+    selector:
+        app: mongo
+        env: prod
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: sts-mongo
+spec:
+    serviceName: mongo-prod
+```
+
+Let us explain the terms headless Service and governing Service. A headless Service is just a regular K8s service object
+without an IP address (see that the `ClusterIP` is not set, or rather is set to none). This tells K8s that this service
+will and must not receive any virtual `ClusterIP` address. It become a `StatefulSet` governing service when you list it
+in the `StatefulSet` manifest under `spec.serviceName`. When the two objects are combined like this the Service will
+create `DNS SRV` records for each Pod replica that matches the label selector of the headless Service. Other Pods and apps
+can then find members of the `StatefulSet` by performing DNS lookup against the name of the headless Service.
+
+### Skeleton
+
+The snippets below represent the general skeleton and structure of a deployment stage for a `StatefulSet`, which includes
+the creation and definition of all components that tie into the `StatefulSet` - like PVC, `StorageClasses`, headless
+Services and more.
+
+First lets create the most low level structure - `StorageClass`, that will be the entry point for the PVC later, even
+though most cloud providers do have default SC objects, it is good to see how it all ties together, of course in the
+real world you will end up using the SC provided by the cloud provider most likely.
+
+Nothing fancy, the `StorageClass` below, just defines that the store is of type SSD, which is using the plugin -
+`pd.csi.storage.gke.io`. This is specific to the google cloud provider services, but it will be pretty similar for other
+providers as well, in this case the `StorageClass` represents a basic fast storage - backed by a solid state drive
+
+```yml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+    name: flash
+provisioner: pd.csi.storage.gke.io
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+parameters:
+    type: pd-ssd
+```
+
+Here is the headless service definition, we know it is headless by the fact that the `ClusterIP` here is set to `none`,
+this is pretty much the only difference with the regular k8s service objects
+
+```yml
+apiVersion: v1
+kind: Service
+metadata:
+    name: dullahan
+    labels:
+        app: web
+spec:
+    ports:
+        - port: 80
+          name: web
+    clusterIP: None
+    selector:
+        app: web
+```
+
+Finally the `StatefulSet`, this one, has a bit more meat to it. Here we can see some of the most prominent differences
+compared to the Deployment object, like the `terminationGracePeriodSeconds` fields, also notice that most of the spec of
+the Pod in the `template` section is pretty much the same as in the Deployment object, the `template` section as we know
+already defines the properties of the Pod object that would be created by the k8s environment
+
+Now take a look at the most interesting part that differs significantly from the way we define Pod templates in the
+Deployments, that is `volumeClaimTemplates`, you may notice that the format and spec of this section matches perfectly
+with the spec of a `PersistentVolumeClaim` object, that is because it is, however since we have already mentioned above,
+we know that the `PersistentVolumeClaim` for `StatefulSet` have to be bound to Pod instances, unlike with Deployments'
+Pods.
+
+That is why the PVC is defined in the spec of the `StatefulSet`, that way for each new replica of the Pod, a new PVC
+will be created and by proxy a new fresh volume which will be independent of the volumes created for the other PVCs and
+Replicas, the PVC will be bound to the name of the Pod. That is why it is also important that the name of the pod
+template - `spec.serviceName` to be DNS format compliant
+
+```yml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: tkb-sts
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: web
+    serviceName: "dullahan"
+    template:
+        metadata:
+            labels:
+                app: web
+        spec:
+            terminationGracePeriodSeconds: 10
+            containers:
+                - name: ctr-web
+                  image: nginx:latest
+                  ports:
+                      - containerPort: 80
+                        name: web
+                  volumeMounts:
+                      - name: nginx-data
+                        mountPath: /usr/share/nginx/data
+                      - name: config-data
+                        mountPath: /usr/share/nginx/config
+    volumes:
+        - name: config-data
+          persistentVolumeClaim:
+              claimName: config-data
+    volumeClaimTemplates:
+        - metadata:
+              name: nginx-data
+          spec:
+              accessModes: ["ReadWriteOnce"]
+              storageClassName: "flash"
+              resources:
+                  requests:
+                      storage: 1Gi
+```
+
+Note that we can still use the regular way to defined volumes for `StatefulSet`, the regular way being the one supported
+by the Deployment object, however these will not be bound to the underlying Pods as with stateful services, what would
+be the use case for the basic volume and PVC definition ? Well we could bind read only configuration data for example,
+that does not require stateful and Pod bound volumes. It is just important to keep in mind that the
+`volumeClaimTemplates` DOES NOT REPLACE the regular method of defining PVCs for pods through the `spec.volumes` section
+
+Given the `volumeClaimTemplates` form above and the name for that defined in `metadata.name`, `nginx-data`, the names of
+the PVC objects that will be created under the hood and tied to the Pod replicas will use the base name
+`nginx-data-<ordinal>`, the ordinal number will be the same as for the pod the PVC is bound to. Remember that the name
+of the Pods are actually generated from the name of the `StatefulSet`, and also appended an ordinal value which
+represents their replication order or in other words ID. That means that a pod with an ordinal or 3 was the 4th Pod
+replica to be started, remember that these ordinals start from 0.
+
+The key takeaway here is to really understand that unlike Deployments, the `StatefulSet` are really tied, tightly coupled
+with the underlying service which exposes the Pods created by the `StatefulSet`, that can be seen in the fact that the
+headless service name is actually present in the spec of the `StatefulSet`, unlike with Deployments where the interlinking
+part is the Pod, between a Deployment and a Service, here the Service is directly linked to the `StatefulSet` expressed in
+the property `spec.serviceName`, that is because other elements of the `StatefulSet` are also tied in to the name of the
+headless service - like the name resolution of the dynamic PVC objects that are created for each Pod replica in the
+`StatefulSet`
+
+Finally the DNS names that would be resolvable for each Pod will be generated using the `StatefulSet` name along with
+the service name and the ordinal of the Pod, in this case, having the example above we will have the following DNS
+names, `tbk-sts-0.dullahan.default.svc.cluster.local`, and so on - the general structure that the DNS name will follow
+is `tbk-sts-<n>.dullahan.default.svc.cluster.local`, where `<n>` is going to be the ordinal index of the Pod replica
+starting from 0, the `tbk-sts` is the name of the `StatefulSet` object, and the `dullahan` is the name of the headless
+service
+
+### Network traffic
+
+
 
 ## Getting Kubernetes
 
@@ -2004,6 +3678,5 @@ infrastructure for you, the ultimate responsibility remains with you.
 ### DIY Kubernetes
 
 By far the hardest way to get a Kubernetes cluster is to build it yourself. Yes, installations such as these are
-possible are a lot easier now than they used to be, but they can still be hard. However they provide most flexibility
-and give you ultimate control - which can be good for learning
-
+possible, and are a lot easier now than they used to be, but they can still be hard. However they provide most
+flexibility and give you ultimate control - which can be good for learning
