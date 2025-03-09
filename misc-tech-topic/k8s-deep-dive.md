@@ -113,7 +113,7 @@ with Omega and Borg
 At the highest level, Kubernetes is two things - A cluster to run apps on & an orchestrator of cloud native microservice
 apps.
 
-#### Kubernetes as OS
+#### Kubernetes as an OS
 
 Kubernetes has emerged as the de-facto platform for deploying and managing cloud native apps, in many ways it is like an
 operating system for the cloud. In the same way that Linux abstracts the hardware differences between server platforms,
@@ -3328,14 +3328,14 @@ similar, there are some differences:
 
 -   `StatefulSet`:
 
-  -   Includes fields like `serviceName` (to associate with a headless service).
-  -   Supports `volumeClaimTemplates` for creating `PersistentVolumeClaims` (PVCs) for each pod.
-  -   Does not support the strategy field for updates (it always uses a rolling update strategy).
+-   Includes fields like `serviceName` (to associate with a headless service).
+-   Supports `volumeClaimTemplates` for creating `PersistentVolumeClaims` (PVCs) for each pod.
+-   Does not support the strategy field for updates (it always uses a rolling update strategy).
 
 -   `Deployment`:
 
-  -   Includes a strategy field to define update strategies (e.g., RollingUpdate or Recreate).
-  -   Does not have `serviceName` or `volumeClaimTemplates`.
+-   Includes a strategy field to define update strategies (e.g., RollingUpdate or Recreate).
+-   Does not have `serviceName` or `volumeClaimTemplates`.
 
 ### Theory
 
@@ -3697,7 +3697,7 @@ Cluster Cluster details and credentials are stored in a `kubeconfig` file. Tools
 which cluster to send commands to as well as which credentials use, it is usually stored in the following locations:
 
 -   Windows: `C: \Users\<user>\.kube\config`
--   Unix:    `/home/<user>/.kube/config`
+-   Unix: `/home/<user>/.kube/config`
 
 Many Kubernetes installations can automatically merge cluster endpoint details and credentials into your existing
 `kubeconfig`, for example every `GKE` cluster provides a `gcloud` command that will merge the necessary cluster details
@@ -3751,7 +3751,7 @@ Authorization happens immediately after successful authentication and you will s
 Kubernetes authorization is pluggable and you can run multiple authorization modules on a single cluster. As soon as any
 of the modules authorization requests is made, it moves on to admission control.
 
-#### RBAC
+#### Access control
 
 The most common authorization module is RBAC - role based access control. At the highest level it is all about three
 things - users, actions and resources. Which users can perform which actions against which resources in the cluster. The
@@ -3772,7 +3772,7 @@ safer.
 Two concepts are vital to understanding Kubernetes `RBAC` - `Roles` and `RoleBindings`:
 
 `Roles` define a set of permissions and `RoleBindings` grant those permissions to users. The following resource manifest
-defines a Role object it is called read deployments and grants permissions  to get, watch, and list Deployments objects
+defines a Role object it is called read deployments and grants permissions to get, watch, and list Deployments objects
 in the shield namespace.
 
 ```yml
@@ -3782,9 +3782,9 @@ metadata:
     namespace: shield
     name: read-deployments
 rules:
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    verbs: ["get", "watch", "list"]
+    - apiGroups: ["apps"]
+      resources: ["deployments"]
+      verbs: ["get", "watch", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -3792,9 +3792,9 @@ metadata:
     name: read-deployments
     namespace: shield
 subjects:
-  - kind: User
-    name: sky # This is the authenticated user, that was given the role
-    apiGroup: rbac.authorization.k8s.io
+    - kind: User
+      name: sky # This is the authenticated user, that was given the role
+      apiGroup: rbac.authorization.k8s.io
 roleRef:
     kind: Role
     name: read-deployments # This is the Role from above to bind to the user
@@ -3805,17 +3805,744 @@ If both of these are deployed to a cluster an authenticated user called sky will
 `kubectl get deployments -n shield` It is important to understand that the username listed in the `RoleBindings` has to be
 a string and has to match the username that was successfully authenticated.
 
-#### Closer look
+#### Roles & Resources
 
-The previous Role object has three properties, - `apiGroups, resources and verbs`. Together these define which actions
+The previous `Role` object has three properties, - `apiGroups, resources and verbs`. Together these define which actions
 are allowed against which objects, `apiGroups` and `resources` define the object, and `verbs` define the actions. The
 example allows read access (get, watch, and list) against Deployment objects. The following table shows `apiGroups` and
 resources combinations.
 
-## Getting Kubernetes
+```txt
+apiGroup         resource     Kubernetes API path
+””               pods         /api/v1/namespaces/{namespace}/pods
+””               secrets      /api/v1/namespaces/{namespace}/secrets
+“storage.k8s.io” storageclass /apis/storage.k8s.io/v1/storageclasses
+“apps”           deployments  /apis/apps/v1/namespaces/{namespace}/deployments
+```
+
+An empty set of double quotes `""` in the `apiGroup` field indicates the core `apiGroup`, all other api sub-groups need
+specifying as a string enclosed in double quotes. The `apiGroup` is important since it namespaces the different kubernetes
+resources and have to be specified for a given resource that belongs to the given `apiGroup`, unless it is part of the
+default one which is represented as already mentioned by the empty quotes `""`. Kubernetes uses a standard set of verbs
+to describe the actions a subject can perform on a resource. Verb names are self explanatory and case sensitive, the
+following table lists them and demonstrates the REST based nature of the API by showing how they map to HTTP methods, it
+also lists some common HTTP response codes.
+
+| HTTP method | Kubernetes verbs    | Common responses               |
+| ----------- | ------------------- | ------------------------------ |
+| POST        | create              | 201 created, 403 Access Denied |
+| GET         | get, list and watch | 200 OK, 403 Access Denied      |
+| PUT         | update              | 200 OK, 403 Access Denied      |
+| PATCH       | patch               | 200 OK, 403 Access Denied      |
+| DELETE      | delete              | 200 OK, 403 Access Denied      |
+
+The kubernetes verbs column lists the verbs you use in the rules section of a Role object. Running the following command
+shows all API resources supported on your cluster. It also shows API group and supported verbs and is a great resource
+for helping build rule definitions
+
+```sh
+$ kubectl api-resources --sort-by name -o wide
+NAME                       SHORTNAMES APIVERSION                   NAMESPACED KIND                      VERBS                                                       CATEGORIES
+apiservices                           apiregistration.k8s.io/v1    false      APIService                create,delete,deletecollection,get,list,patch,update,watch  api-extensions
+bindings                              v1                           true       Binding                   create
+certificatesigningrequests csr        certificates.k8s.io/v1       false      CertificateSigningRequest create,delete,deletecollection,get,list,patch,update,watch
+clusterrolebindings                   rbac.authorization.k8s.io/v1 false      ClusterRoleBinding        create,delete,deletecollection,get,list,patch,update,watch
+clusterroles                          rbac.authorization.k8s.io/v1 false      ClusterRole               create,delete,deletecollection,get,list,patch,update,watch
+deployments                deploy     apps/v1                      true       Deployment                create,delete,deletecollection,get,list,patch,update,watch  all
+ingresses                  ing        networking.k8s.io/v1         true       Ingress                   create,delete,deletecollection,get,list,patch,update,watch
+pods                       po         v1                           true       Pod                       create,delete,deletecollection,get,list,patch,update,watch  all
+replicasets                rs         apps/v1                      true       ReplicaSet                create,delete,deletecollection,get,list,patch,update,watch  all
+replicationcontrollers     rc         v1                           true       ReplicationController     create,delete,deletecollection,get,list,patch,update,watch  all
+resourcequotas             quota      v1                           true       ResourceQuota             create,delete,deletecollection,get,list,patch,update,watch
+roles                                 rbac.authorization.k8s.io/v1 true       Role                      create,delete,deletecollection,get,list,patch,update,watch
+secrets                               v1                           true       Secret                    create,delete,deletecollection,get,list,patch,update,watch
+services                   svc        v1                           true       Service                   create,delete,deletecollection,get,list,patch,update,watch  all
+statefulsets               sts        apps/v1                      true       StatefulSet               create,delete,deletecollection,get,list,patch,update,watch  all
+storageclasses             sc         storage.k8s.io/v1            false      StorageClass              create,delete,deletecollection,get,list,patch,update,watch
+```
+
+This table represents the abridged version of the original, which contains many more objects which the kubernetes
+environment manages by default, the table above only lists most of the objects which were already looked at so far, and
+also those being one of the most important ones
+
+Also take a note of the `SHORTNAMES` column which is an alias for the actual resource name, all resources which define a
+`SHORTNAME` can be referred by it in all contexts such as manifest files, shell commands and so on.
+
+And if we take a good look with the role manifest definition above, we can clearly see that the rules, objects, verbs
+and resources match with the table output above such as
+
+```yml
+rules:
+    - apiGroups: ["apps"]
+      resources: ["deployments"]
+      verbs: ["get", "watch", "list"]
+```
+
+To refer to all objects one can use the asterisk (\*), that would bind the verbs to all objects which are exposed by the
+Kubernetes environment, For example the following rule block grants all actions on all resources in every API group,
+(basically cluster admin). It is just for demonstration purposes and you would probably never want to do this in the
+actual world, or in actual production grade Kubernetes clusters
+
+```yml
+rules:
+    - apiGroups: ["*"]
+      resources: ["*"]
+      verbs: ["*"]
+```
+
+#### Cluster roles
+
+So far we have seen how to create `Roles` and `RoleBindings`. However, Kubernetes actually has 4 RBAC objects, `Roles,
+ClusterRoles, RoleBindings and ClusterRoleBindings`.
+
+`Roles` and `RoleBindings` are namespaced objects. This means they can only be applied to a single Namespace,
+`ClusterRole` and `ClusterRoleBindings` are cluster wide objects and apply to all Namespaces. All 4 are defined in the
+same API sub group and their YAML structures are almost identical.
+
+A powerful pattern is to define Roles at the cluster level and bind them to a specific Namespace via `RoleBinding`. This
+lets you define common roles once and re use them across multiple Namespaces. For example the following YAML defines the
+same read-deployments role but this time at the cluster level, this can be re-used in selected Namespaces via a regular
+`RoleBinding`
+
+```yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    name: read-deployments
+rules:
+    - apiGroups: ["apps"]
+      resources: ["deployments"]
+      verbs: ["get", "watch", "list"]
+```
+
+Look closely at the previous YAML manifest, the only difference with the earlier one is that the kind here is defined as
+`ClusterRole`, instead of a Role, and it does not have a metadata.namespace property, since there is no meaning in
+namespacing object in this case the cluster role that should be cluster wide.
+
+#### Existing resources
+
+As you might have figured out, there is a set of pre-defined Roles and Bindings, granting permissions to an all powerful
+user. Many will also configure `kubectl` to operated under the context of that user. The following example walks you
+through the pre-defined and pre-created user roles and bindings, on a docker desktop cluster the names of Pods and RBAC
+objects will be different on other clusters, but the principles will be the same and it gives you an idea of how things
+are made to work.
+
+Mnikube runs API server in Pod in the kube-system namespace. It has an --authorization flag that tells Kubernetes which
+authorization modules to use. The following command shows the node and RBAC modules are both enabled.
+
+```sh
+$ kubectl get pods -n kube-system
+NAME                               READY   STATUS    RESTARTS      AGE
+coredns-668d6bf9bc-mtpmm           1/1     Running   1 (23h ago)   23h
+etcd-minikube                      1/1     Running   1 (23h ago)   23h
+kube-apiserver-minikube            1/1     Running   1 (23h ago)   23h
+kube-controller-manager-minikube   1/1     Running   1 (23h ago)   23h
+kube-proxy-z9gf9                   1/1     Running   1 (23h ago)   23h
+kube-scheduler-minikube            1/1     Running   1 (23h ago)   23h
+storage-provisioner                1/1     Running   3 (22h ago)   23h
+
+$ kubectl describe pod/kube-apiserver-minikube -n kube-system | grep authorization
+--authorization-mode=Node,RBAC
+```
+
+You wont be able to interrogate the API server like this on a hosted Kubernetes cluster, This is because critical
+control plane features like this are hidden from you. `Minikube` also updates your kube config files with the cluster
+called `minikube`, here is how one config file might look like for `Minkube` that would be located at `$HOME/.kube/config`
+
+```yml
+apiVersion: v1
+clusters:
+    - cluster:
+          certificate-authority: /home/asmodeus/.minikube/ca.crt
+          extensions:
+              - extension:
+                    last-update: Sat, 08 Mar 2025 16:27:39 EET
+                    provider: minikube.sigs.k8s.io
+                    version: v1.35.0
+                name: cluster_info
+          server: https://127.0.0.1:60703
+      name: minikube
+contexts:
+    - context:
+          cluster: minikube
+          extensions:
+              - extension:
+                    last-update: Sat, 08 Mar 2025 16:27:39 EET
+                    provider: minikube.sigs.k8s.io
+                    version: v1.35.0
+                name: context_info
+          namespace: default
+          user: minikube
+      name: minikube
+current-context: minikube
+kind: Config
+preferences: {}
+users:
+    - name: minikube # Here is the name of the user that is created
+      user:
+          client-certificate: /home/asmodeus/.minikube/profiles/minikube/client.crt # client credentials
+          client-key: /home/asmodeus/.minikube/profiles/minikube/client.key # client credentials
+```
+
+Note that we can also see the client's certificate and the private key, by client that would imply the client that
+interfaces with the API server, in our case that is `kubectl`, this is mandatory to be able to contact the API server,
+especially on non local cluster deployments, this provides the authorization step, in this case this allows the API
+server to establish that the client instance connecting to it is authorized to talk to it
+
+`RABC` is enabled and a user `kubeconfig` is created, the user is called `minikube`, now let us take a look at the
+cluster role and the cluster role bindings, objects which are pre-configured to grant permissions to that user. Here are
+some of the cluster role bindings which are bound to the `ClusterRole` named `cluster-admin`, these are not all.
+
+```sh
+$ kubectl get clusterrolebindings | grep cluster-admin
+NAME                                                            ROLE                                                                               AGE
+cluster-admin                                                   ClusterRole/cluster-admin                                                          23h
+minikube-rbac                                                   ClusterRole/cluster-admin                                                          23h
+
+$ kubectl describe clusterrolebindings minikube-rbac
+Name:         minikube-rbac
+Labels:       <none>
+Annotations:  <none>
+Role:
+  Kind:  ClusterRole # the cluster role type
+  Name:  cluster-admin # the name of the cluster role
+Subjects:
+  Kind            Name     Namespace
+  ----            ----     ---------
+  ServiceAccount  default  kube-system
+```
+
+As a result of these bindings all commands in a default on premise `minikube` installation are executed with the
+cluster-admin permissions. This might be OK for development environments and on premise testing environments, but
+certainly not okay for production ones. How let us see what exactly is defined for this cluster role in its manifest file
+
+```sh
+$ kubectl describe clusterrole cluster-admin
+Name:         cluster-admin
+Labels:       kubernetes.io/bootstrapping=rbac-defaults
+Annotations:  rbac.authorization.kubernetes.io/autoupdate: true
+PolicyRule:
+  Resources  Non-Resource URLs  Resource Names  Verbs
+  ---------  -----------------  --------------  -----
+  *.*        []                 []              [*]
+             [*]                []              [*]
+```
+
+As you can see it allowed everything, for every resource and every verb or action that can be performed on the cluster,
+which is normal for that type of environment as mentioned already.
+
+`Authorization ensures that already authenticated users are allowed to carry out the actions they are attempting. RBAC
+is a popular Kubernetes authorization module and implements least privilege access based on a deny by default model
+where all actions are assumed to be denied unless a rule exists that allows it, The model is similar to a whitelist
+firewall where everything is blocked and you open up access by creating allow rules. Kubernetes RBAC uses Roles and
+ClusterRole to create permissions and it uses RoleBinding and ClusterRoleBinding to grant those permissions to users, in
+other words to bind them to the users, these bindings objects serve as a middle man to allow us to create different
+permutations and combinations of role objects to grant to users, this way we can achieve the most granular access
+granting and permission model`
+
+### Admission control
+
+Admission control runs immediately after successful authentication and authorization, and it is all about policies there
+two types of admission controllers - Mutating and Validating. The names are self explanatory, Mutating controllers check
+for compliance and can modify requests whereas validating controllers check for policy compliance but cannot modify
+requests Mutating controllers always run first and both types only apply to requests that will modify state. Requests to
+read state are not subjected to admission control.
+
+Assume a quick example where all new and updated objects to your cluster must have the env-prod label. A mutating
+controller can check for the presence of the label and add it if it does not exist, on the flip side a validating
+controller can only reject the request if it does not exist. The following command on a `minikube` cluster shows the API
+server is configured to use the `NodeRestriction` admission controller, amongst others
+
+```sh
+$ kubectl describe pod/kube-apiserver-minikube -n kube-system | grep admission
+--enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,NodeRestriction,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota
+```
+
+Most real world clusters will have a lot more admission controllers enabled. There are lots of admission controllers but
+the `AlwaysPUllImage` controller is a great example. It is a mutating controller that sets the
+`spec.containers.imagePullPolicy` of all new Pods to always. This means that images for all containers in all Pods will
+always be pulled form the registry. This accomplishes quite a few things, including the following
+
+-   Preventing the use of locally cached images that could be malicious
+-   Preventing other Pods and processes using locally cached images
+-   Forcing the container runtime to present valid credentials to the registry to get the image
+
+If any admission controller rejects a request the request is immediately rejected without checking other admission
+controllers. However if all admission controllers approve the request it gets persisted to the cluster store, As
+previously mentioned there are lots of admission controllers and they are becoming more and more important in real world
+production clusters
+
+### General Summary
+
+The authentication layer is responsible for validating the identity of the request. Client certificates are commonly used
+to integration with `AD` and other `IAM` services is recommended for production clusters. Kubernetes does not have its own
+identity database, meaning it does not store or manage user accounts or credentials.
+
+The authorization layer checks whether the authenticated user is authorized to carry out the action in the request. This
+layer is also pluggable and the most common module is RBAC. The RBAC module comprises 4 objects that define permissions
+and assigns them to the users.
+
+Admission control, kicks in after the client/user is authenticated and authorized and is responsible for enforcing
+policies. Validating admission controller reject request if htey do not conform to the policy, where as mutating
+admissions controllers can modify the incoming request to the API server, in other words to mutate the incoming object
+manifest to enhance or override the structure of the document according to some policies,
 
 This section will describe a few fast and quick ways to obtain Kubernetes. Will also introduce you to `kubectl`, the
 Kubernetes command line tool.
+
+## Kubernetes API
+
+Understanding the Kubernetes API, and how it works is vital to mastery of Kubernetes. However it can be extremely
+confusing, if you are new to the API.
+
+### Theory
+
+As already seen Kubernetes is API centric, the entire functionality is based around interacting with the API server,
+through the user level client, in this case `kubectl`. This means that everything in Kubernetes is about the API. And
+everything goes through the API server. We will get into the details soon, but for now let us just look at the big
+picture.
+
+Clients `send` request to kubernetes to create, read, update and delete objects such as Pods and Services and so on. For
+the most part you will use `kubectl` to send these requests however, you can craft them in code or use the API testing
+and development tools to generate them The point is no matter how you generate requests they go to the API sever where
+they are authenticated and authorized, assuming they pass these checks they are executed on the cluster. If a create
+request is posted, the object is deployed to the cluster and the serialized state of it is persisted to the cluster
+store (etcd).
+
+### Serialization
+
+Kubernetes serializes objects such a Pods and Services, as JSON strings to be send over HTTP. The process happens in
+both directions with clients like `kubectl` serializing the object when posting to the api server and the api server
+serializing the response back to clients. In the case of Kubernetes the serialized state of objects are also persisted
+to the cluster store which is usually based on the etcd database service
+
+So in Kubernetes serialization is the process of converting an object to into a JSON string to be sent over an HTTP
+connection and persisted to the cluster store. However as well as JSON Kubernetes also supports Protobuf as a
+serialization schema. This is faster and moreefficient and scales better than JSON. But it is not user friendly, when it
+comes to introspection and troubleshooting. At the time of writing Protobuf is mainly sued for internal cluster traffic,
+whereas son is used when communicating with external clients.
+
+One final thing on serialization, when clients send requests to the API server they use the content type head to list
+the serialization schema they support. For example a client that only supports JSON will specify `Content-Type:
+application/json` in the HTTP header of the request. Kubernetes will honour this with a serialized response in JSON
+
+### The API server
+
+The API server exposes the API over a secure RESTful, interface using HTTPS. It acts as the front end to the API and is
+a bit like Grand Central for Kubernetes everything talks to everything else via the REST API calls to the API server.
+
+-   ALL `kubectl` commands go to the API server (creating, retrieving, updating deleting objects)
+-   ALL node `kubelets` watch the API server for new tasks and report status to the API server
+-   ALL control lane services communicate via the API server, NOT directly to each other
+
+The API server is a Kubernetes control plane service. This usually means that it runs as a set of Pods in the
+kube-system Namespace on the control plane nodes of your cluster. If you build and manage your own Kubernetes clusters
+you need to make sure the control plane is highly available and has enough performance to keep the API server up and
+running and responding quickly to requests. If you are using the hosted Kubernetes cluster the way the API server is
+implemented including the performance and availability will be hidden away from you.
+
+The main job of the API server is to make API available to clients inside and outside the cluster. It uses TLS to
+encrypt the client connection and i leverages of a bunch o authentication and authorization mechanisms to ensure only
+valid requests are accepted and actioned upon. Requests from internal and external sources all have to pass through the
+same authentication and authorization.
+
+The API is RESTful. This is a jargon for a modern web API that accepts CRUD style requests via standard HTTPS methods.
+Every standard HTTP method like PUT, DELETE, UPDATE, POST can be mapped to a corresponding verb in the Kubernetes world
+as far as role verbs are concerned.
+
+It is common for the API server to be exposed on port 443 or 6443 but its possible to configure it to operate on whatever
+port you require, running the following command shows the address and port of your Kubernetes cluster is exposed on
+
+```sh
+$ kubectl cluster-info
+Kubernetes control plane is running at https://127.0.0.1:60703
+CoreDNS is running at https://127.0.0.1:60703/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+```
+
+A few words on how the RESTful nature of the client maps to the KUBERNETES API server. REST is short for -
+`REpresentational State Transfer` and its the de-facto standard for communicating with web based API. System such as
+Kubernetes that use REST are often referred to as RESTful. REST requests comprise a verb and a path to a resource. Verbs
+related to actions and are the standard HTTP methods you saw in the previous chapters. The following example shows a
+`kubectl` command and the associated REST path that will list all pods in the shield namespace.
+
+```sh
+kubectl get pods --namespace shield
+```
+
+```http
+GET /api/v1/namespaces/shield/pods
+```
+
+To visualise this, start a `kubectl` proxy and use curl to generate the request. The `kubectl` proxy command exposes the
+api on your localhost adapter and takes care of the authentication process. You can use a different port.
+
+```sh
+$ kubectl proxy --port 9000 & # start the proxy process in the background
+
+$ curl http://localhost:9000/api/v1/namespaces/shield/pods
+{
+    "kind": "PodList",
+    "apiVersion": "v1",
+    "metadata": {
+    "resourceVersion": "484812"
+    },
+    "items": []
+}
+```
+
+The example returned an empty list because there are no pods in that namespace. Responses from the API server include
+common HTTP response codes content type and the actual payload, as you learned earlier the chapter, Kubernetes uses JSON
+as its preferred content type, as a result the previous `kubectl` get command will result in an HTTP 200 (OK) response
+code, the content type will be application/json and the payload will be serialized to JSON, list all Pods in the shield
+Namespace, Run one of the previous curl commands again but with the flag -v - which sends for verbose, and that will
+list the headers which are being sent and received from and to the API server.
+
+```sh
+$ curl -v http://localhost:9000/api/v1/namespaces/shield/pods
+> GET /api/v1/namespaces/shield/pods HTTP/1.1
+> Accept: */*
+>
+< HTTP/1.1 200 OK
+< Content-Type: application/json
+< X-Kubernetes-Pf-Flowschema-Uid: 499d0001-d874-4b06-ba...c37f7
+< X-Kubernetes-Pf-Prioritylevel-Uid: aeb490e6-1890-41ab...94e82
+<
+{
+    "kind": "PodList",
+    "apiVersion": "v1",
+    "metadata": {
+    "resourceVersion": "487845"
+    },
+    "items": []
+}
+```
+
+### The API
+
+The API is where all Kubernetes resources are defined, it is large, modular. When Kubernetes was originally created teh
+API was monolithic in design with all resources existing in a single global namespace, however as kubernetes grew it
+became necessary to divide the API into smaller more manageable groups, these are `core, apps, rbac and netowrking`
+
+### The CORE
+
+The resources in the core group are mature objects that were created in the early days of Kubernetes before the API was
+divided into groups. They tend to be fundamental objects such as Pods, Nodes, Services, Deployments, Secrets and so on.
+The are located in the API below /api/v1 (now it should be clear what /v1 refers to, the core api, the one that
+Kubernetes started with). The following table lists some example paths for resources in the core group, you will
+sometimes see and hear these paths referred to as REST path.
+
+| Resources  | Path                                     |
+| ---------- | ---------------------------------------- |
+| Pods       | /api/v1/namespaces/{namespace}/pods/     |
+| Services   | /api/v1/namespaces/{namespace}/services/ |
+| Nodes      | /api/v1/nodes/                           |
+| Namespaces | /api/v1/namespaces/                      |
+
+Notice that some objects are namespaced and some are not Namespaced objects have a longer REST paths as you have to
+include two additional name segments, For example listing all pods in the shield namespace requires the following path
+
+```http
+GET /api/v1/namespaces/shield/pods/
+```
+
+Expected HTTP response code from read requests are either 200, or 401. On the topic of these rest paths, GVR stand for
+group-version-resource and can be a good way to remember the structure of the REST paths, in the Kubernetes API
+
+### Named Groups
+
+The named API groups are the future of the API, these all new resources go into named groups, Sometimes we refer to them
+as sub-groups. Each of the named groups is a collection of related resources. For example the apps groups is where all
+resources that manage apps workloads such as `Deployments ReplicaSets, DaemonSets, StatefulSets` are defined. Likewise,
+the `networking.k8s.io` group is where `Ingresses and Ingress Classes`, Networking policies and other network related
+resources exist, notable exceptions to this pattern are older resources in the core groups that came along afterwards,
+like Pods were they invented today, would probably go in the apps groups, and Services would go in the
+networking.k8s.io, group. Resources in the named groups live below the /apis/{group-name}/{version}/path. The following
+table lists some examples
+
+| Resource     | Path                                                                    |
+| ------------ | ----------------------------------------------------------------------- |
+| Ingress      | /apis/networking.k8s.io/v1/namespaces/{namespace}/ingresses/            |
+| RoleBinding  | /apis/rbac.authorization.k8s.io/v1/namespaces/{namespace}/rolebindings/ |
+| ClusterRole  | /apis/rbac.authorization.k8s.io/v1/clusterroles/                        |
+| StorageClass | /apis/storage.k8s.io/v1/storageclasses/                                 |
+
+Notice how the URI paths for named groups start with /apis and include the name of the groups. This is different to the
+core group that starts with /api in the singular and does not include a group name, in fact in places you will see the
+core API groups referred to by empty double quotes. This is because when the API was first designed no thought was given
+to groups - everything was just in the API. Dividing the API into smaller groups makes it more scalable and easier to
+navigate it also makes it easier to extend. The following command are good for seeing API related info for your cluster.
+`kubectl api-resources` is great for seeing which resources are available on your cluster as well on which API groups
+they are served from. It also shows resource short names and whether objects are namespaced or cluster scoped. The
+command `kubectl api-versions` will on the other hand show you what API versions are supported on your cluster, it does
+not list which resources belong to which API it is good for finding out whether you have things such as alpha, APIS
+enabled or not.
+
+```sh
+$ kubectl api-resources
+NAME                              SHORTNAMES                      APIVERSION              NAMESPACED KIND
+bindings                          v1                              true                    Binding
+----------------------------------------------------------------------------------------------------------------------
+configmaps                        cm                              v1                      true       ConfigMap
+endpoints                         ep                              v1                      true       Endpoints
+events                            ev                              v1                      true       Event
+limitranges                       limits                          v1                      true       LimitRange
+namespaces                        ns                              v1                      false      Namespace
+nodes                             no                              v1                      false      Node
+persistentvolumeclaims            pvc                             v1                      true       PersistentVolumeClaim
+persistentvolumes                 pv                              v1                      false      PersistentVolume
+pods                              po                              v1                      true       Pod
+podtemplates                      v1                              true                    PodTemplate
+replicationcontrollers            rc                              v1                      true       ReplicationController
+resourcequotas                    quota                           v1                      true       ResourceQuota
+secrets                           v1                              true                    Secret
+serviceaccounts                   sa                              v1                      true       ServiceAccount
+services                          svc                             v1                      true       Service
+----------------------------------------------------------------------------------------------------------------------
+ingressclasses                    networking.k8s.io/v1            false                   IngressClass
+poddisruptionbudgets              pdb                             policy/v1               true       PodDisruptionBudget
+clusterrolebindings               rbac.authorization.k8s.io/v1    false                   ClusterRoleBinding
+clusterroles                      rbac.authorization.k8s.io/v1    false                   ClusterRole
+rolebindings                      rbac.authorization.k8s.io/v1    true                    RoleBinding
+roles                             rbac.authorization.k8s.io/v1    true                    Role
+priorityclasses                   pc                              scheduling.k8s.io/v1    false      PriorityClass
+csidrivers                        storage.k8s.io/v1               false                   CSIDriver
+csinodes                          storage.k8s.io/v1               false                   CSINode
+csistoragecapacities              storage.k8s.io/v1               true                    CSIStorageCapacity
+storageclasses                    sc                              storage.k8s.io/v1       false      StorageClass
+volumeattachments                 storage.k8s.io/v1               false                   VolumeAttachment
+```
+
+```sh
+$ kubectl api-versions
+admissionregistration.k8s.io/v1
+apiextensions.k8s.io/v1
+apiregistration.k8s.io/v1
+apps/v1
+authentication.k8s.io/v1
+authorization.k8s.io/v1
+autoscaling/v1
+autoscaling/v2
+batch/v1
+certificates.k8s.io/v1
+coordination.k8s.io/v1
+discovery.k8s.io/v1
+events.k8s.io/v1
+flowcontrol.apiserver.k8s.io/v1
+networking.k8s.io/v1
+node.k8s.io/v1
+policy/v1
+rbac.authorization.k8s.io/v1
+scheduling.k8s.io/v1
+storage.k8s.io/v1
+v1
+```
+
+This one command can be quote useful when one would like to inspect the different kind and version fields of api
+resources, supported on your cluster, the output is trimmed but it should give the general idea of what one might
+receive as output
+
+```sh
+$ for kind in `kubectl api-resources | tail +2 | awk '{ print $1 }'`; \
+            do kubectl explain $kind; done | grep -e "KIND:" -e "VERSION:"
+KIND:    Namespace
+VERSION: v1
+KIND:    Node
+VERSION: v1
+--------------------------------
+KIND:    HorizontalPodAutoscaler
+VERSION: autoscaling/v1
+KIND:    CronJob
+VERSION: batch/v1beta1
+KIND:    Job
+VERSION: batch/v1
+--------------------------------
+```
+
+The command could be used on actual self hosted and no premise hosted Kubernetes cluster and services. This could turn
+out to be useful for debugging or auguring information on resources and their source API
+
+## Thread modeling
+
+Thread modeling is the process of identifying vulnerabilities so you can put measures in place to prevent and mitigate
+them. This section will introduce the popular STRIDE model and shows how it can applied to Kubernetes. STRIDE defines
+the six categories of potential thread
+
+-   Spoofing
+-   Tampering
+-   Repudiation
+-   Information disclosure
+-   Denial of service
+-   Elevation of privilege
+
+While the model is good it is important to keep in mind that it is just a model, and models do not guarantee to cover
+all possible threats possible. However they are a good at providing a structured way to look at things, for the rest of
+the section, we will take a look at each of the six thread categories in turn, and how we can prevent and mitigate them.
+
+### Spoofing
+
+Spoofing is pretending to be somebody else with the aim of gaining extra privilege on a system. Kubernetes is comprised
+of lots of small components that work together, these include control plane service such as the API server, controller
+manager scheduler cluster store, and others. It also includes Node components such as the kubelet and container runtime.
+Each of these has its own set of privileges that allow it to interact with and even modify the cluster, even though
+Kubernetes implements a least privilege model, spoofing the identity of any of these can cause problems
+
+If you read the RBAC and API security section, you will know that Kubernetes requires all components to authenticate,
+via a cryptographically signed certificates. This is good and Kubernetes makes it easy to auto rotate certificates and
+the likes. However it is vital you consider the following.
+
+1.  A typical Kubernetes installation will auto generate a self signed certificate authority (CA). This is the CA that
+    will issue certificates to all cluster components. And while its better than nothing on this own its probably not
+    enough for production environments
+
+2.  Mutual TLS, is only as secure as the CA issuing the certificates, compromising the CA can render the entire `mTLS`
+    layer ineffective, so keep the CA secure.
+
+A good practice is to ensure that certificates issued by the internal Kubernetes CA are only used and trusted within the
+Kubernetes cluster. This requires careful approval of certificate signing requests and you need to make sure the
+Kubernetes CA does not get added as a trusted CA for any system outside of Kubernetes
+
+As mentioned in previous sections all internal and external requests to the API server are subject to authentication and
+authorization checks, as a result in API server needs a way to authenticate internal and external sources, a good way to
+do this is having two trusted key pairs:
+
+-   one for authenticating internal systems
+-   the other for authenticating external systems
+
+In this model you would use the cluster's self signed CA to issue keys to internal systems, you would also configure
+Kubernetes to trust one or more trusted 3rd party CAs to issue keys to external systems.
+
+As well as spoofing access to the cluster there is also the threat of spoofing an app for app-to-app communications.
+This is when one Pod spoofs another. Fortunately you can leverage Secrets to mount certificates into the Pods that are
+used to authenticate Pod identity.
+
+While on the topic of Pods every Pod has an associated `ServiceAccount` that is used to provide an identity, for the Pod
+within the cluster. This is achieved by automatically mounting a service account token into every Pod as a Secret. Two
+points to note:
+
+1.  The service account token allows access to the API server
+2.  Most Pods probably do not need to access the API server
+
+With these two points in mind, it is often recommended to set `automountServiceAccountToken` to false for Pods that you
+know do not need to communicate wit the API server. The following Pod manifest shows how to do this. ###
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: service-account-example-pod
+spec:
+    serviceAccountName: some-service-account
+    automountServiceAccountToken: false
+<Snip>
+```
+
+If the Pod does need to talk to the API server, the following non default configurations are worth exploring. -
+`expiratoinSeconds` and `audience`. These two let you force a time when the token will expire as well as restrict the
+entities in works with. The following example inspired from official Kubernetes docs sets and expiry period of one hour
+and restricts it to the vault audience in a projected volume.
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: nginx
+spec:
+    containers:
+    - image: nginx
+    name: nginx
+    volumeMounts:
+    - mountPath: /var/run/secrets/tokens
+      name: vault-token
+      serviceAccountName: my-pod
+volumes:
+- name: vault-token
+  projected:
+    sources:
+    - serviceAccountToken:
+      path: vault-token
+      expirationSeconds: 3600
+      audience: vault
+```
+
+### Tampering
+
+Tampering is the act of changing something in a malicious way so you can cause one of the following, denial of service,
+and elevation of privilege. Tampering can hard to avoid so a common counter measure is to make it obvious when something
+has been tampered with. A common example outside of information security is packaging medication. Most over the counter
+drugs are packaged with tamper proof seals. jthese make it easy to see if the product has been tampered with. Let us
+have a quick look at some of the cluster components that can be tampered with.
+
+#### Kubernetes components
+
+All of the following Kubernetes components, if tampered with can cause harm or issues - `etcd`, configuration files,
+container runtime binaries, container images, kubernetes binaries and more. Generally speaking tampering happens either
+in transit or at rest. In transit refers to data while it is being transmitted over the network, where as at rest refers
+to data stored in memory or on disk. TLS is a great tool for protecting against in transit tampering, as it provides
+built in integrity guarantees you will be warned if the data has been tampered with. The following recommendations can
+also help prevent tampering with data when it is at rest in Kubernetes
+
+. Restrict access to the servers that are running Kubernetes components i.e the control plane.
+
+-   Restrict access to repositories that store Kubernetes configuration files
+-   Only  perform remote bootstrapping over SSH
+-   Restrict access to your image repository and associated repositories
+
+This is not and exhaustive list, but if you implement it you will greatly reduce the changes of having your data
+tampered with while at rest. As well as the items listed it is goog production hygiene to configure auditing and
+alerting for important binaries and config files. If configured and monitored correctly these can help detect potential
+tampering attacks. The following example uses a common Linux audit daemon to audit access to the docker binary it also
+audits attempts to the change the binary file attributes
+
+```sh $ auditctl -w /usr/bin/docker -p wxa -k audit-docker```
+
+#### Kubernetes applications
+
+As well as infrastructure components, apps components are also potential tampering targets. A good way to prevent live
+Pod from being tampered with is setting its filesystems to read only. This guarantees filesystem immutability and can be
+accomplished through a Pod Security Policy or the `securityContext` section of a Pod manifest file.
+
+You can make a container root filesystem read only by setting the `readOnlyFilesystem` property, As previously
+mentioned, this can be set via a `PodSecurityPolicy`, object or in Pod manifest files. The same can be done for other
+filesystems that are mounted into containers, via the `allowedHostPaths` property
+
+The following YAML manifest shows how to use both settings in a Pod manifest spec, the `allowedHostPaths` section makes
+sure anything mounted beneath /test will be read only. The two examples represent the same functionality, one is simply
+a separate object represented by the `PodSecurityPolicy`, which is relatively new in the Kubernetes spec and that is why
+it is not under `v1`, the stable `apiVersion`, but rather under a new beta version api path `policy/v1beta1`. In the
+future when the spec of that object is cleaned up, it will be put under the `policy/v1` `apiVersion` path
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: readonly-test
+spec:
+    securityContext:
+        readOnlyRootFilesystem: true
+        allowedHostPaths:
+            - pathPrefix: "/test"
+              readOnly: true
+---
+apiVersion: policy/v1beta1 # Will change in a future versions, when the object spec gets out of the beta stage
+kind: PodSecurityPolicy
+metadata:
+    name: tampering-example
+spec:
+    readOnlyRootFilesystem: true
+    allowedHostPaths:
+        - pathPrefix: "/test"
+          readOnly: true
+```
+
+### Repudiation
+
+At a very high level Repudiation is creating doubt about something. Non Repudiation is providing proof about something.
+In the context of information security non Repudiation
+
+## Real world security
+
+TODO: finish this
 
 ### Kubernetes playground
 

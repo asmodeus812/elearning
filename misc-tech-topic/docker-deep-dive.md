@@ -124,7 +124,7 @@ In the early days it was common for 3rd party plugins to be better than the nati
 However this presented some business model challenges for Docker, After all, Docker has to turn a profit at some point
 to be a viable long term business. As a result, the batteries that are included are getting better and better.
 
-## Open container initiative - OCI
+## Open container initiative
 
 The `OCI` is a relatively new governance council responsible for standardizing the most fundamental components of
 container infrastructure such as image format and container `runtime`. It is also true that no discussion of the OCI is
@@ -146,6 +146,196 @@ analogy that is often used when referring to these two standards is rail tracks.
 on standard sizes and properties of rail tracks. Leaving everyone else free to build better trains carriages better
 signaling systems better stations, all safe in the knowledge that they will work on the standardized tracks. Nobody
 wants two competing standards for rail track sizes
+
+## Kernel
+
+Control groups and namespaces are foundational features in the Linux kernel that enable containerization by providing
+resource control and isolation. Together they form the building blocks for container runtimes like Docker, Podamn and
+Kubernetes. To appreciate their role it is essential to understand each in depth and how they synergize to create the
+container abstraction.
+
+### Control groups (cgroups)
+
+Control groups are a Linux kernel feature that provides mechanisms for limiting prioritizing and monitoring the usage of
+system resource such as CPU, memory and disk I/O, and network bandwidth. Introduced in 2007, cgroups allow processes to
+be grouped hierarchically and to apply resource constraints or quotas at at the group level. Cgroups work by organizing
+processes into "control groups", which are hierarchical structures where resource limits and accounting are defined.
+This hierarchy is represented as virtual filesystem (often mounted at `/sys/fs/cgroup`), with directories corresponding
+to cgroups. Each cgroup can enforce specific limits to priorities for a particular type of resource. For instance:
+
+1.  CPU and CPU Shares: Cgroups allow limiting the amount of CPU time a process or group of processes can use. For
+    example, if two containers are running on the same host, you can allocate more CPU time to one container over the
+    other.
+
+2.  Memory Limits: By setting memory constraints, cgroups ensure that a process cannot exceed a specific memory
+    threshold, thereby preventing memory exhaustion on the host system.
+
+3.  Block in/out network bandwidth: these can be throttled to ensure fair sharing among processes or to priorities
+    critical workloads.
+
+Cgroups are hierarchical, meaning resource limits propagate downward in the tree. This hierarchy enables complex
+configurations, such as allocating a fixed percentage of CPU to a parent cgroup and then subdividing that allocation
+among child cgroups.
+
+Without cgroups processes running on the same host would contend for resources without constraints leading to potential
+resource starvation or overuse. In the context of containers, cgroups ensure that each container operates within its
+allocated resources, making them predictable, and performant even in multi tenant environment.
+
+### Namespaces (namespaces)
+
+Namespaces, another Linux kernel feature isolate global system resources for groups of processes, by scoping resources,
+namespaces provide the illusion that a process or group of processes is running on its own system, separate from the
+others. This isolation is the backbone of containerization, as it ensures that processes inside a container are unaware
+of and unaffected by the processes and resources outside their namespace.
+
+There are several types of namespaces, each targeting a specific system resource or function:
+
+1.  PID Namespace: Provides isolation for process ID. Processes inside a PID namespace see a separate process tree
+    starting from PID 1, often the init system within the container. This ensures that processes in one container cannot
+    see or signal processes in another container or the host
+
+2.  Mount namespace: isolates filesystem mount points. Each container can have its own root filesystem and mount points
+    separate from the host or other containers. This is critical for providing a private file system view for
+    containers.
+
+3.  UTS namespace: isolates system identifiers such as host name domain name. This allows containers to have their own
+    hostname decoupled from the host system's identity
+
+4.  Network namespace: isolates network resources, including IP addresses routing tables and sockets. Containers can
+    have their own virtual network interfaces and IP address, managed independently of the host or other containers.
+
+5.  `IPC` namespace: isolates inter process communication resources, such as shared memory and semaphores ensuring that
+    contains cannot inadvertently interfere with one another's IPC mechanisms
+
+6.  User namespace: provides user and group ID isolation , allowing process inside a container to have different user ID
+    from the host.
+
+By leveraging namespaces each container can function as if it is running on a standalone system with a private set of
+resources. However, the host kernel orchestrates and manages these namespaces allowing containers to coexist on a shared
+kernel.
+
+### Cgroup & Namespaces
+
+Cgroups and namespace complement each other to create the container abstraction:
+
+1.  Isolation - namespaces ensure that a container processes , network, filesystem and other system resources are
+    isolated from the host and from the other containers. This isolation is crucial for security and the lightweight
+    vitalization illusion that containers offer.
+
+2.  Resource control - control groups regulate how much of the resources isolated by the namespaces a container can
+    consume, this combination prevents resource contention ensuring fair and predictable usage.
+
+For example a container running a web server might operate within its own network namespace, with its own virtual NIC
+and IP address, mount namespace, with a private filesystem view, and PID namespace, with its own process tree.
+Simultaneously, cgroups ensure that the container cannot exceed 512MB of RAM and 50% of the CPU usage.
+
+## Containerization
+
+Containers are not independent operating systems like virtual machines, they are processes running on the host operating
+system, constrained and isolated by cgroups and namespaces. These technologies allow containers to share the host kernel
+while appearing isolated, enabling the following key benefits
+
+1.  Lightweight - since containers share the host kernel, the require far fewer resources than VM which emulate hardware
+    and run separate OS instances.
+
+2.  Fast start and shutdown - containers start quickly because they do not boot an entire operating system. They are
+    essentially just processes with extra isolation, running on the host, just any other user level user process
+
+3.  Scalability - with cgroups enforcing resource limits, many containers can run concurrently on the same host without
+    over provisioning
+
+Modern container runtimes like Docker encapsulate these capabilities by automating the creation and management of
+namespaces and cgroups for each container, Tools like Kubernetes further build on this foundation to orchestrate
+containers across distributes systems, ensuring high availability and scalability.
+
+In conclusion cgroups and namespaces by isolating and managing resources, transform the Linux kernel into a powerful
+platform for containerization. They encapsulate processes in a lightweight portable and secure manner, paving the way
+for the cloud native ecosystem that underpins much of today's software industry and infrastructure
+
+## More kernel components
+
+Beyond the already mentioned components the Linux kernel contains a lot of other components which facilitate the
+deployment and containerization of applications as we know them nowadays. Here are some of them
+
+### OverlayFS
+
+That is a union filesystem that allows multiple layers of filesystems to be stacked. It plays a key role in
+containerization by enabling the creation of lightweight writable layers on top of read-only image layers. The way it
+works is that when a container is created, a writable layer is added on top of a resad only base image. Any modification
+made by the container are written to this top layer, while the base image remains unchanged. This enables:
+
+-   Efficient sharing of base images between containers.
+-   Minimal disk usage since only changes are stored.
+-   Fast container creation by simply stacking layers
+
+In containers the `OverlayFS` underpins the storage driver mechanism in Docker and other container runtimes, making
+image building sharing and running highly efficient.
+
+### Seccomp
+
+Seccomp is a Linux kernel security feature that restricts the system calls (syscalls) a process can make. Containers use
+seccomp to reduce the attack vector / surface by preventing them from invoking potentially dangerous syscalls. The way
+this works is that seccomp operates as syscall filter. A process or container is provided with a list of allowed
+syscalls, any syscall not on the list is blocked. This is typically configured using a seccomp profile.
+
+In containerization this play key role in protecting the host from container exploits by limiting access to sensitive
+syscalls, enables fine grained control over what containers can and cannot do or execute
+
+### Capabilities
+
+Linux capabilities break down the all powerful root privileges into discrete units of authority. Containers often run as
+root within their own namespaces but they are stripped of unnecessary capabilities to mitigate risks. The way this works
+is by having the kernel allowing processes to drop or retain specific capabilities, like CAP_NET_ADMIN, for network
+management. For example a container may have the ability to bind to privileged ports but not modify kernel parameters
+
+In containerization this enhances security by limiting what containers can do, even when running as root, reduces the
+risk of privilege escalation.
+
+### AppArmor & SELinux
+
+These are two kernel frameworks for enforcing mandatory access control (MAC) policies. These frameworks restrict how
+applications or containers interact with the system. The way they work is that AppArmor defines file and process level
+access policies for containers, it is path-based meaning access is controlled based on file paths. SELinux uses labels
+to define granular access policies for processes, files and other resources.
+
+In containerization ensures that containers can only access files, directories and resources explicitly allowed by their
+profiles or labels, also protects the host system from compromised or malicious containers.
+
+### Capabilities & NNP
+
+Beyond capabilities the "No New Privileges" is a kernel flag feature that ensures a process cannot gain additional
+privileges through mechanism like `setuid` binaries. The way this works is that when `NNP` is enabled, even if a
+containerized process runs a binary with `setuid` permissions, it cannot escalate its privileges.
+
+`setuid - short for set user identity allow users to run an executable with the file system permissions of the
+executable's owner, and to change behavior in directories. They are often used to allow users on a computer system to
+run programs with a temporarily elevated privileges to perform a specific task.`
+
+### Device control
+
+The Linux kernel provides mechanism for controlling access to hardware devices through the device cgroup and the `mknod`
+syscall. The way this works is that the device cgroup allows fine grained control over which devices a container can
+access - block devices, character devices etc. Containers can also be restricted from creating new device nodes using
+`mknod`
+
+In containerization prevents unauthorized access to host devices like storage or network interfaces, limits the
+potential for containers to interact directly with sensitive hardware
+
+### Network virtualization
+
+Linux networking stack provides features that are critical for container networking, including virtual Ethernet (`veth`)
+pairs, network bridges and like `iptables`. The way this works containers are typically connected to the host network
+through virtual Ethernet pairs, where one end resides in the container's network namespace and the other in the host's
+namespace or bridge. Network bridges like `docker0` or `CNI` plugins create virtual networks to interconnect containers
+
+### Resource limits
+
+Resource limits - `rlimits` provide per-process controls over resources like file descriptors, stack size, and CPU time.
+While not as flexible as cgroups, `rlimits` play a complementary role in containerized environments. The way this works
+is that `rlimits` are set using the `setrlimit` syscall, constraining individual process behavior.
+
+In containerization it is used to impose additional resource restrictions at the process level, prevents runaway
+resource consumption within a container by a rogue process
 
 # Components
 
@@ -286,15 +476,15 @@ the container execution and container runtime code entirely removed from the dae
 specialized tools such as runc (container runtime) and containerd (container supervisor)
 
 -   runc - as already mentioned `runc` is the reference implementation of the OCI container runtime spec, Docker, Inc was
-    heavily involved in defining the spec and developing runc. Runc is small, it is effectively a lightweight CLI that wraps
-    around `libctaoniner`, it has a single purpose in life - to create containers.
+  heavily involved in defining the spec and developing runc. Runc is small, it is effectively a lightweight CLI that wraps
+  around `libctaoniner`, it has a single purpose in life - to create containers.
 
 -   containerd - in order to use `runc`, the Docker engine needed something to act as a bridge between the `deamon` and
-    `runc`. This is where `containerd` comes into the picture. `Containerd` implements the execution logic that was pulled
-    out of the Docker daemon, this logic was obviously refactored and tuned when it was written as `containerd`.
-    `Containerd` is a container supervisor - it is responsible for container `lifecycle` operations such as starting and
-    stopping containers, pausing and un-pausing them and destroying them. Like `runc` `containerd` is small lightweight and
-    designed for a single task in life - only interested in container `lifecycle` operations.
+  `runc`. This is where `containerd` comes into the picture. `Containerd` implements the execution logic that was pulled
+  out of the Docker daemon, this logic was obviously refactored and tuned when it was written as `containerd`.
+  `Containerd` is a container supervisor - it is responsible for container `lifecycle` operations such as starting and
+  stopping containers, pausing and un-pausing them and destroying them. Like `runc` `containerd` is small lightweight and
+  designed for a single task in life - only interested in container `lifecycle` operations.
 
 The most common way of starting containers is using the Docker CLI. The following docker container run command will
 start a simple new container based on the alpine:latest image
@@ -323,7 +513,7 @@ container's parent `runc` terminated, the associated containers-shim process bec
 of the responsibility of the shim performs a container's parent include
 
 -   keeping any stdin and stdout streams open so that when the `deamon` is restarted the container does not terminate due to
-    pipes being closed.
+  pipes being closed.
 -   reports the container's exit status back to the daemon.
 
 On a Linux system the components we have discussed are implemented as separate binaries as follows:
@@ -1067,15 +1257,15 @@ Swarm initialized: current node (d21lyz...c79qzkx) is now a manager.
 This command can be broken down as follows
 
 -   `docker swarm init` tells Docker daemon to initialize a new swarm and make this node the first manager. It also
-    enables the swarm mode on the node.
+  enables the swarm mode on the node.
 
 -   `advertise-addr` is the IP and port that other nodes should use to connect to this manager. The flag is optional but it
-    gives you control over which IP gets used on nodes with multiple IPs. It also gives you the chance to specify an IP
-    address that does not exit on the node such as a load balancing IP address.
+  gives you control over which IP gets used on nodes with multiple IPs. It also gives you the chance to specify an IP
+  address that does not exit on the node such as a load balancing IP address.
 
 -   `listen-addr` lets you specify which IP and port you want to listen on for swarm traffic. This will usually match the
-    address provided in `advertise-addr`, but is useful in situations where you want to restrict swarm to a particular IP on a
-    system
+  address provided in `advertise-addr`, but is useful in situations where you want to restrict swarm to a particular IP on a
+  system
 
 #### Extending
 
@@ -1385,45 +1575,45 @@ however there are a few other. Not all deployment strategies are listed below, h
 are, along with their pros and cons depending on the circumstances
 
 -   Recreate Target - stops the old version entirely before deploying the new one, all instances of the app are replaced
-    simultaneously. This is simple to implement, and guarantees no coexistence of old and new versions, no resource hogging.
-    However there is a downtime during deployment process, clients experience a complete service outage. This is suitable
-    for non critical apps where downtime is acceptable
+  simultaneously. This is simple to implement, and guarantees no coexistence of old and new versions, no resource hogging.
+  However there is a downtime during deployment process, clients experience a complete service outage. This is suitable
+  for non critical apps where downtime is acceptable
 
 -   Rolling Update - Gradually replaces old instances with new ones, one or a few at a time, continues until all instances are
-    updated. It has minimal downtime, allows monitoring of new instances as they are deployed and put into action, reduces
-    deployment risk compared to an all-at-once strategy. However old and new versions coexist during the deployment which
-    may cause inconsistencies, it also requires careful planning for compatibility between versions. Common for stateless or
-    backward compatible apps
+  updated. It has minimal downtime, allows monitoring of new instances as they are deployed and put into action, reduces
+  deployment risk compared to an all-at-once strategy. However old and new versions coexist during the deployment which
+  may cause inconsistencies, it also requires careful planning for compatibility between versions. Common for stateless or
+  backward compatible apps
 
 -   Blue-Green - Deploys the new version (green) alongside the current version (blue) in parallel, traffic is switched to
-    the new version once it is verified to be working, the old version remains available as a fallback. The cool thing here
-    is that there is no downtime, seamless transition for users, easy and fast rollback, since the old version is still
-    active and running. However resource intensive since both the versions are working or active at the same time, complex
-    traffic routing needs to be setup in order to make this viable and transparent to the end user.
+  the new version once it is verified to be working, the old version remains available as a fallback. The cool thing here
+  is that there is no downtime, seamless transition for users, easy and fast rollback, since the old version is still
+  active and running. However resource intensive since both the versions are working or active at the same time, complex
+  traffic routing needs to be setup in order to make this viable and transparent to the end user.
 
 -   Canary - deploys the new version to a small subset of users or servers first, gradually increases the percentage of
-    traffic routed to the new version, full roll-out occurs after successful validation. Allows controlled testing in
-    production with minimal risk, issues can be caught early and affect fewer users, rollbacks are easier during initial
-    stages. Requires dynamic traffic routing and monitoring systems, and takes longer to fully deploy compared to the other
-    strategies
+  traffic routed to the new version, full roll-out occurs after successful validation. Allows controlled testing in
+  production with minimal risk, issues can be caught early and affect fewer users, rollbacks are easier during initial
+  stages. Requires dynamic traffic routing and monitoring systems, and takes longer to fully deploy compared to the other
+  strategies
 
 -   Feature toggle - deploys the new version with features disabled, features are enabled incrementally via
-    configuration toggles without redeploying the code. There is a minimal risk, features can be turned off instantly if
-    issues occur, allows gradual roll-out of new functionality, supports A/B testing and phased roll-outs. However in
-    increases code complexity, as well as there is a risk of stale toggles cluttering the codebase i.e obsolete
-    features.
+  configuration toggles without redeploying the code. There is a minimal risk, features can be turned off instantly if
+  issues occur, allows gradual roll-out of new functionality, supports A/B testing and phased roll-outs. However in
+  increases code complexity, as well as there is a risk of stale toggles cluttering the codebase i.e obsolete
+  features.
 
 -   Shadow - deploys the new version alongside the old version but does not expose it to users, the new version processes
-    mirrored traffic for testing purposes. No impact on live users, allows the real-world testing of the new version, High
-    resource usage, in effect you have two production environments, and does not test user interactions with the new
-    versions, rather testers or QA do that, which is not really the same
+  mirrored traffic for testing purposes. No impact on live users, allows the real-world testing of the new version, High
+  resource usage, in effect you have two production environments, and does not test user interactions with the new
+  versions, rather testers or QA do that, which is not really the same
 
 -   A/B Testing - deploys multiple versions at the same time - the old and the new. Routes a subset of users to the new
-    version while the rest continue using the old version. Collects metrics to compare performance and user experience.
-    Provides direct insights into user preferences, and performance of different versions, allows for controlled exposure to
-    the new version. However it requires robust traffic routing and user segmentation, risk of user confusion if versions
-    behave differently. Requires a robust traffic routing and user segmentation. Risk of user confusion if version
-    behave differently
+  version while the rest continue using the old version. Collects metrics to compare performance and user experience.
+  Provides direct insights into user preferences, and performance of different versions, allows for controlled exposure to
+  the new version. However it requires robust traffic routing and user segmentation, risk of user confusion if versions
+  behave differently. Requires a robust traffic routing and user segmentation. Risk of user confusion if version
+  behave differently
 
 # Networking
 
@@ -1451,16 +1641,16 @@ The Docker platform itself offers some excellent native security technologies, a
 that they are amazingly simple to use.
 
 -   Docker Swarm mode is secure by default, you get all the following with zero configuration required - cryptographic
-    node ID, mutual authentication, automatic CA configuration, automatic certificate rotation, encrypted cluster store,
-    encrypted networks.
+  node ID, mutual authentication, automatic CA configuration, automatic certificate rotation, encrypted cluster store,
+  encrypted networks.
 
 -   Docker content trust lets yo sign your images and verify the integrity and publisher of images you pull
 
 -   Docker Security Scanning analyses Docker images, detects known vulnerabilities and provides you with a detailed
-    report.
+  report.
 
 -   Docker secrets - makes secrets first class citizens in the Docker ecosystem, they get stored in the encrypted
-    cluster store, encrypted in flight when delivered to containers, and stored in in-memory filesystems when in use
+  cluster store, encrypted in flight when delivered to containers, and stored in in-memory filesystems when in use
 
 ## Definition
 
@@ -1476,12 +1666,12 @@ same OS without having port conflicts, it also lets us run multiple apps on the 
 configuration files and shared libraries.
 
 -   You can run multiple web servers, each requiring port 443 on a single OS. To do this you jut run each web server app
-    inside its own network `namespace`.This works because each network `namespace` gets its own IP address and full range of
-    ports.
+  inside its own network `namespace`.This works because each network `namespace` gets its own IP address and full range of
+  ports.
 
 -   You can run multiple apps each requiring their own particular version of a shared library or configuration file. To do
-    this you run each app inside of its own mount namespace. This works because each mount `namespace` can have its own
-    isolated copy of any directory on the system (/etc, /var, /dev etc.)
+  this you run each app inside of its own mount namespace. This works because each mount `namespace` can have its own
+  isolated copy of any directory on the system (/etc, /var, /dev etc.)
 
 Docker on Linux currently utilizes the following kernel types of `namespaces`:
 
@@ -1496,23 +1686,23 @@ Docker on Linux currently utilizes the following kernel types of `namespaces`:
 net, mnt, ipc, uts and potentially user namespaces`. The organized collection of these is what we call a container.
 
 -   PID - `namespace` - docker uses the pid `namespace` to provide isolated process trees for each container, every
-    container gets it own process tree meaning that every container can have its own PID 1, PID `namespaces` also mean that a
-    container can not have see or access to the process tree of other containers or host processes it's running on
+  container gets it own process tree meaning that every container can have its own PID 1, PID `namespaces` also mean that a
+  container can not have see or access to the process tree of other containers or host processes it's running on
 
 -   Network - docker uses the net `namespace` to provide each container its own isolated network stack, this stack
-    includes interfaces, IP addresses, port ranges, and routing tables, for example every container gets its own `eth0`
-    interface with its own unique IP and range of ports
+  includes interfaces, IP addresses, port ranges, and routing tables, for example every container gets its own `eth0`
+  interface with its own unique IP and range of ports
 
 -   Mount - every container gets its own unique isolate `root/filetsystem`. This means that every container can have its
-    own `/etc, /var, /dev etc`. Processes inside of a container cannot access the mount `namesapce` of the Linux host, or other
-    containers, they can only see and access their own isolate mount `namespace`.
+  own `/etc, /var, /dev etc`. Processes inside of a container cannot access the mount `namesapce` of the Linux host, or other
+  containers, they can only see and access their own isolate mount `namespace`.
 
 -   Inter process communication - docker uses the IPC `namespace` for shared memory access within a container. It also
-    isolates the container from shared memory outside of the container.
+  isolates the container from shared memory outside of the container.
 
 -   User - docker lets you use the user `namespace` to map users inside of a container to a different user on the Linux
-    host, a common example would be mapping the root user of a container to a non-root user on the Linux host, user
-    `namespaces` are quite new to Docker and are currently optional
+  host, a common example would be mapping the root user of a container to a non-root user on the Linux host, user
+  `namespaces` are quite new to Docker and are currently optional
 
 -   UTS - docker uses the UTS `namespace` to provide each container with its own `hostname`.
 
@@ -1679,6 +1869,7 @@ blue). Now the challenge here is how to distribute the secret to the workers, wi
 tasks/containers that must not see it.
 
 ```txt
+
 ```
 
 1.  The secret is created and posted to the Swarm
@@ -1688,3 +1879,4 @@ tasks/containers that must not see it.
 5.  The secret is mounted into the containers of the blue service as an un-encrypted file /run/secrets/. This is an in memory tmpfs filesystem.
 6.  Once the container service task completes the in memory filesystem is torn down
 7.  The red containers service cannot access the secret.
+
