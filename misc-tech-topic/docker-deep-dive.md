@@ -476,15 +476,15 @@ the container execution and container runtime code entirely removed from the dae
 specialized tools such as runc (container runtime) and containerd (container supervisor)
 
 -   runc - as already mentioned `runc` is the reference implementation of the OCI container runtime spec, Docker, Inc was
-  heavily involved in defining the spec and developing runc. Runc is small, it is effectively a lightweight CLI that wraps
-  around `libctaoniner`, it has a single purpose in life - to create containers.
+    heavily involved in defining the spec and developing runc. Runc is small, it is effectively a lightweight CLI that wraps
+    around `libcontainer`, it has a single purpose in life - to create containers.
 
 -   containerd - in order to use `runc`, the Docker engine needed something to act as a bridge between the `deamon` and
-  `runc`. This is where `containerd` comes into the picture. `Containerd` implements the execution logic that was pulled
-  out of the Docker daemon, this logic was obviously refactored and tuned when it was written as `containerd`.
-  `Containerd` is a container supervisor - it is responsible for container `lifecycle` operations such as starting and
-  stopping containers, pausing and un-pausing them and destroying them. Like `runc` `containerd` is small lightweight and
-  designed for a single task in life - only interested in container `lifecycle` operations.
+    `runc`. This is where `containerd` comes into the picture. `Containerd` implements the execution logic that was pulled
+    out of the Docker daemon, this logic was obviously refactored and tuned when it was written as `containerd`.
+    `Containerd` is a container supervisor - it is responsible for container `lifecycle` operations such as starting and
+    stopping containers, pausing and un-pausing them and destroying them. Like `runc` `containerd` is small lightweight and
+    designed for a single task in life - only interested in container `lifecycle` operations.
 
 The most common way of starting containers is using the Docker CLI. The following docker container run command will
 start a simple new container based on the alpine:latest image
@@ -513,7 +513,8 @@ container's parent `runc` terminated, the associated containers-shim process bec
 of the responsibility of the shim performs a container's parent include
 
 -   keeping any stdin and stdout streams open so that when the `deamon` is restarted the container does not terminate due to
-  pipes being closed.
+    pipes being closed.
+
 -   reports the container's exit status back to the daemon.
 
 On a Linux system the components we have discussed are implemented as separate binaries as follows:
@@ -550,7 +551,7 @@ and lightweight. This means that the images they are build from are usually smal
 parts. For example Docker images do not sip with 6 different shells, they do not contain a kernel, all containers
 running on a docker host share access to the host's kernel. For these reasons we sometimes say images contain just
 enough operating system - usually OS related files and filesystem objects. The official Alpine Linux docker image is
-about 4mb, in size and is an extreme example of how small Docker images can be. The official Ubuntu Docker image which
+about `4mb`, in size and is an extreme example of how small Docker images can be. The official Ubuntu Docker image which
 is currently about 120MB. Windows based images tend to be bigger than Linux ones, because of the way that the Windows OS
 works, For example the latest Microsoft .NET image is over 2GB when pulled and uncompressed, the windows server nano
 (2016) is slightly over 1GB.
@@ -891,10 +892,12 @@ docker container ls -a
 # start the container back up
 docker container start percy
 
-# start a new bash process and attach to the container, one can also use the attach instead of exec to attach to an already running process
+# start a new bash process and attach to the container, one can also use the attach instead of exec to attach to an
+# already running process
 docker container exec -it percy bash
 
-# attach to the process running in the container, that would by default attach to stdout, and only to stdin if the process was started interactively, with the -i flag
+# attach to the process running in the container, that would by default attach to stdout, and only to stdin if the
+# process was started interactively, with the -i flag
 docker container attach
 
 cd temp
@@ -1277,8 +1280,8 @@ docker swarm join-token manager
 To add a manager to this swarm, run the following command: docker swarm join --token SWMTKN-1-0uahebax...ue4hv6ps3p 10.0.0.1:2377
 ```
 
-Notice that the commands to join a worker and a manager are identical apart from the join tokens (SWMTKN ending in
-either c87tu8dx2c or ue4hv6ps3p). This means that whether a node joins as a worker or a manager depends entirely on
+Notice that the commands to join a worker and a manager are identical apart from the join tokens (`SWMTKN` ending in
+either `c87tu8dx2c` or `ue4hv6ps3p`). This means that whether a node joins as a worker or a manager depends entirely on
 which token you use when joining it. These tokens should be protected, as these are all that is required to join a node
 to a swarm.
 
@@ -1289,7 +1292,7 @@ docker swarm join --token SWMTKN-1-0uahebax...c87tu8dx2c 10.0.0.1:2377
 ```
 
 To add `wrk1` and join it to the swarm using the docker swarm join command with the correct token for a worker node
-(c87tu8dx2c). Note that one can keep retrieving tokens for a manager with the docker swarm join-token worker, this would
+(`c87tu8dx2c`). Note that one can keep retrieving tokens for a manager with the docker swarm join-token worker, this would
 produce a new unique token which can be used to add a new worker to the swarm
 
 #### Adding manager
@@ -1298,8 +1301,8 @@ produce a new unique token which can be used to add a new worker to the swarm
 docker swarm join --token SWMTKN-1-0uahebax...ue4hv6ps3p 10.0.0.1:2377
 ```
 
-To add mgr1 and join in to the swarm using the docker swarm join command with the correct token for a manager
-(ue4hv6ps3p). Note that one can keep retrieving tokens for a manager with the docker swarm join-token manager, this
+To add `mgr1` and join in to the swarm using the docker swarm join command with the correct token for a manager
+(`ue4hv6ps3p`). Note that one can keep retrieving tokens for a manager with the docker swarm join-token manager, this
 would produce a new unique token which can be used to add a new manager to the swarm
 
 #### Listing
@@ -1380,7 +1383,7 @@ actions is needed, if they do not match the swarm takes actions so that they do.
 constantly making sure that the actual state matches the desired state, on a constant loop.
 
 As an example if one of the workers hosting one of the 5 containers tasks fails the actual state for the `web-fe` service
-will drop from 5 running tasks to 4, this will no longer match the desired state of 5, so Docker will start a new web-fe
+will drop from 5 running tasks to 4, this will no longer match the desired state of 5, so Docker will start a new `web-fe`
 task to bring actual state back in line with the desired state. This behavior is very powerful and allows the service to
 self-heal in the event of node failures and the likes.
 
@@ -1516,7 +1519,7 @@ docker service create --name uber-svc --network uber-net -p 80:80 --replicas 12 
 ```
 
 ```sh
-# list the current services, which are activee
+# list the current services, which are active
 docker service ls
 ID           NAME        REPLICAS            IMAGE
 dhbtgvqrg2q4 uber-svc    12/12               nigelpoulton/tu-demo:v1
@@ -1620,8 +1623,8 @@ are, along with their pros and cons depending on the circumstances
 In the real world, containers have to be able to communicate with each other reliably and securely even when they are on
 different hosts, on different networks. This is where overlay networking comes in to play. It allows you to create a
 flat secure layer 2 network spanning multiple hosts, that containers can connect to. Containers on this network can then
-communicate directly. Behind the scenes the docker networking stack is comprised of `libnetwork` and drivers. Libnetwork
-is the canonical implementation of the container network model (CNM) and drivers are pluggable components that implement
+communicate directly. Behind the scenes the docker networking stack is comprised of `libnetwork` and drivers. `Libnetwork`
+is the canonical implementation of the container network model (`CNM`) and drivers are pluggable components that implement
 different networking technologies and topologies.
 
 ## Definition
@@ -1726,7 +1729,7 @@ Linux root account is made up of a long list of capabilities, some these include
 
 -   `CAP_SHOWN` - lets you change file ownership
 -   `CAP_NET_BIND_SERVICE` - lets you bind a socket to low numbered network ports
--   `CAP_SETUID` - lets you elevate the privilege level of a process
+-   `CAP_SETUPID` - lets you elevate the privilege level of a process
 -   `CAP_SYS_BOOT` - lets you reboot the system.
 
 Docker works with capabilities so that you can run containers as root, but strip out the root capabilities that you do
@@ -1876,7 +1879,6 @@ tasks/containers that must not see it.
 2.  It gets stored in the encrypted cluster store
 3.  The blue service is created and the secret is attached to it
 4.  The secret is encrypted in flight while it is delivered to the containers in the blue service
-5.  The secret is mounted into the containers of the blue service as an un-encrypted file /run/secrets/. This is an in memory tmpfs filesystem.
+5.  The secret is mounted into the containers of the blue service as an unencrypted file /run/secrets/. This is an in memory tmpfs filesystem.
 6.  Once the container service task completes the in memory filesystem is torn down
 7.  The red containers service cannot access the secret.
-

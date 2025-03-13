@@ -48,7 +48,7 @@ make it easier for potential customers to get off AWS and into their cloud. Goog
 with containers at scale, for example huge google apps such as Search and Gmail have been running at extreme scale on
 containers for a lot of years, since way before Docker brought us easy to use containers. To orchestrate and manage
 these containerised apps, Google had a couple of in-house proprietary systems called Borg and Omega. Well Google took
-the lessons leaned from these systems, and created a new platform called Kubernetes, and donated it to the newly formed
+the lessons learned from these systems, and created a new platform called Kubernetes, and donated it to the newly formed
 `Cloud Native Computing Foundation (CNCF)` in 2014, as an open source project. Kubernetes enables two things Google and the
 rest of the industry needs
 
@@ -78,10 +78,10 @@ such as starting and stopping containers.
 
 Assume you have a Kubernetes cluster with 10 nodes, to run your production app. Behind the scenes each cluster node is
 running Docker as its container runtime. This means Docker is the low-level technology that starts and stops the
-containerised apps. Kubernetes is the higher level technology that looks after the bigger picture, such as deciding
-which nodes to run containers on, deciding when to scale up or down, and execute updates. Docker is not the only
-container runtime that Kubernetes supports, it also does support `gVisor`, `containerd` and `kata`. Kubernetes has
-features which abstract the container runtime and make it interchangeable
+containerised apps. Kubernetes is the higher level technology that looks after the bigger picture, it tells docker how
+to do that, also it is deciding which nodes to run containers on, deciding when to scale up or down, and execute
+updates. Docker is not the only container runtime that Kubernetes supports, it also does support `gVisor`, `containerd`
+and `kata`. Kubernetes has features which abstract the container runtime and make it interchangeable
 
 1.  The container runtime interface (CRI) - is an abstraction layer that standardizes the way 3rd party container
     runtimes work with Kubernetes
@@ -192,7 +192,7 @@ backed by an image, which are responsible for the internal mechanisms and workin
 can say `kubernetes is run on itself, it is a self-bootstraping system`. Each of those components, will be investigated
 in depth, further down in this document, but for now this is the overarching way we can look at the kubernetes architecture.
 
-#### The API server
+#### The API Server
 
 The API server is the Grand Central of Kubernetes. All communication, between all components must go through the API
 server. It is important to understand that internal system components as well as external user components all
@@ -208,7 +208,7 @@ As mentioned already the api server is nothing more than a pod backed by an imag
 we can simply see those by doing - `kubectl get pods -n kube-system`. These will show you all pods part of the system
 namespace, and in there one will immediately notice, a pod called - `kube-apiserver`.
 
-#### The cluster store
+#### The Cluster Store
 
 The cluster store is the only stateful part of the control plane and persistently stores the entire configuration and
 state of the cluster. As such it is vital components of every Kubernetes cluster - no cluster store, no cluster. The
@@ -225,7 +225,7 @@ As with all distributed databases, consistency of writes to the database is vita
 same value originating from different places needs to be handled. `etcd` uses the popular RAFT consensus algorithm to
 accomplish this.
 
-#### The controller manager
+#### The Controller Manager
 
 The controller manager implements all the background controllers that monitor cluster components and respond to events.
 Architecturally, it is a controller of controllers, meaning it spawns all the independent controllers and monitors them.
@@ -296,7 +296,7 @@ metadata:
         autoscaling.alpha.kubernetes.io/metrics: '{"type":"Resource","resource":{"name":"cpu","targetAverageUtilization":50}}' # metrics configuration
 ```
 
-#### The scheduler
+#### The Scheduler
 
 At a high level, the scheduler watches the API server for new work tasks and assigns them to appropriate healthy worker
 nodes. Behind the scenes, it implements complex logic that filters out nodes incapable of running tasks and the ranks
@@ -311,7 +311,7 @@ many tasks is it currently running. Each is worth points and the node with the m
 If the scheduler does not find a suitable node, the task is not schedule and gets marked as pending. The scheduler is
 not responsible for running tasks just picking the nodes to run them. A task is normally a Pod/container.
 
-#### The Kubelet
+#### The Node
 
 The kubelet is main Kubelet agent and runs on every cluster node. In fact, it is common to use the terms node and
 kubelet interchangeably. When you join a node to a cluster the process installs the kubelet which is then responsible
@@ -324,7 +324,7 @@ control plane and lets the control plane decide what actions to take. For exampl
 it is not responsible for finding another node to run it on. It simply reports back to the control plane and the control
 plane decides what to do.
 
-#### The Kubeproxy
+#### The Proxy
 
 The last piece of the node puzzle is the `kube-proxy`. This runs on every node and is responsible for local cluster
 networking. It ensures each node gets its own unique IP address, and it implements local `iptables` or `IPVS` rules to
@@ -356,7 +356,7 @@ cilium, and weave-net, enable networking capabilities based on the cluster needs
 `containerd is the container supervisor and runtime logic stripped out from docker engine. It was donated to the CNCF by
 Docker Inc, and has a lot of community support. Other CRI container runtimes also exist.`
 
-#### The DNS service
+#### The DNS
 
 As well as the various control plane and node components, every Kubernetes cluster has an internal `DNS` service, that
 is vital to service discovery. The cluster's `DNS` service has a static IP address that is hard coded into every Pod on
@@ -4224,7 +4224,7 @@ The API is where all Kubernetes resources are defined, it is large, modular. Whe
 API was monolithic in design with all resources existing in a single global namespace, however as kubernetes grew it
 became necessary to divide the API into smaller more manageable groups, these are `core, apps, rbac and netowrking`
 
-### The CORE
+### The core
 
 The resources in the core group are mature objects that were created in the early days of Kubernetes before the API was
 divided into groups. They tend to be fundamental objects such as Pods, Nodes, Services, Deployments, Secrets and so on.
@@ -4538,7 +4538,297 @@ spec:
 ### Repudiation
 
 At a very high level Repudiation is creating doubt about something. Non Repudiation is providing proof about something.
-In the context of information security non Repudiation
+In the context of information security non Repudiation is proving certain actions were carried out by certain
+individuals. Digging a little deeper non-repudiation includes the ability to provide
+
+-   `What` happened
+-   `When` it happened
+-   `Who` made it happen
+-   `Where` is happened
+-   `Why` is happened
+-   `How` it happened
+
+Answering the last two usually requires the correlation of several events over a period of time fortunately auditing of
+Kubernetes API server events can usually help answer these questions the Following is an example of an API server audit
+event (you may need to manually enable auditing on your API server).
+
+```json
+{
+    "kind":"Event",
+    "apiVersion":"audit.k8s.io/v1",
+    "metadata":{ "creationTimestamp":"2020-03-03T10:10:00Z" },
+    "level":"Metadata",
+    "timestamp":"2020-03-03T10:10:00Z",
+    "auditID":"7e0cbccf-8d8a-4f5f-aefb-60b8af2d2ad5",
+    "stage":"RequestReceived",
+    "requestURI":"/api/v1/namespaces/default/persistentvolumeclaims",
+    "verb":"list",
+    "user": {
+        "username":"fname.lname@example.com",
+        "groups":[ "system:authenticated" ]
+    },
+    "sourceIPs":[ "123.45.67.123" ],
+    "objectRef": {
+        "resource":"persistentvolumeclaims",
+        "namespace":"default",
+        "apiVersion":"v1"
+    },
+    "requestReceivedTimestamp":"2010-03-03T10:10:00.123456Z",
+    "stageTimestamp":"2020-03-03T10:10:00.123456Z"
+}
+```
+
+Although the API server is central to most things in Kubernetes it is not the only components that requires auditing for
+non repudiation, at a minimum you should collect audit logs from container runtimes, kubelets and the apps running on
+your cluster. This is without even mentioning network firewalls and the likes.
+
+Once you start auditing multiple components you quickly need a centralized location to store and correlate events, a
+common way to do this is deploying an agent to all nodes via a `DeamonSet`. The agent collects logs (runtime, kubelet,
+apps...)
+
+If you do this it is vital the centralized log store is secure, if the security of the store is compromised you can no
+longer trust the logs, and their contents can be repudiated. To provide non repudiation relative to tampering with
+binaries and configuration files it might be useful to use an audit daemon that watches for write actions on certain
+files and directories on your Kubernetes Masters and Nodes. For example earlier in the chapter you saw an example that
+enabled auditing of changes to the docker binary, with this enabled starting a new container with the docker run command
+will generate an event like this:
+
+```txt
+type=SYSCALL msg=audit(1234567890.123:12345): arch=abc123 syscall=59 success=yes exit=0 a0=12345678abc\
+a1=0 a2=abc12345678 a3=a items=1 ppid=1234 pid=12345 auid=0 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 \
+s\
+gid=0 fsgid=0 tty=pts0 ses=1 comm="docker" exe="/usr/bin/docker" subj=system_u:object_r:container_runt\
+ime_exec_t:s0 key="audit-docker"
+type=CWD msg=audit(1234567890.123:12345): cwd="/home/firstname"
+type=PATH msg=audit(1234567890.123:12345): item=0 name="/usr/bin/docker" inode=123456 dev=fd:00 mode=0\
+100600 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:container_runtime_exec_t:s0
+```
+
+Audit logs like this when combined and correlated with Kubernetes audit features create a comprehensive and trustworthy
+picture that can not be repudiated.
+
+### Information Disclosure
+
+Information disclosure is when sensitive data is leaked, there are lots of ways it can happen including hacked data
+stores and API that unintentionally expose sensitive data.
+
+#### Protecting cluster data
+
+In the Kubernetes world the entire configuration of the cluster is stored in the cluster store (usually etcd). This
+includes network and storage configuration as well as passwords and other sensitive data in Secrets. For obvious reasons
+this makes the cluster store a prime target for information disclosure attacks. As a minimum you should limit and audit
+access to the nodes hosting the cluster store, as will be seen in the next paragraph, gaining access to the cluster node
+can allow the logged-on user to bypass some of the security layers
+
+Kubernetes 1.7 introduced encryption of Secrets but does not enable it by default. Even when this becomes default, the
+data encryption key (DEK) is stored on the same node as the Secret. This means gaining access to a node lets you to
+bypass encryption completely. This is especially worrying on nodes that host the cluster store (etcd nodes).
+
+Fortunately Kubernetes 1.11 enabled a beta feature that lets you store key encryption keys (KEK), outside of your
+Kubernetes cluster. These types of keys are used to encrypt and decrypt data encryption keys and should be safely
+guarded. You should seriously consider Hardware security modules (HSM) or cloud based key management stores (KMS) for
+storing your encryption keys. Keep an eye on upcoming versions of Kubernetes for further improvements of Secrets.
+
+#### Protecting data in Pods
+
+As previously mentioned, Kubernetes has an API resource called a Secret that is the preferred way to store and share
+sensitive data such as passwords. For example a front end container accessing an encrypted back end database can have
+the key to decrypt the database mounted as a secret. This is far better solution than storing the decryption keys in
+plain text file or environment variable.
+
+It is also common to store data and configuration information outside of Pods and containers in persistent volumes and
+config maps. If the data on these is encrypted keys for decrypting them should also be stored in Secrets. With all of
+this in mind it is vital that you consider the caveats outlined in the previous section relative to Secrets and how
+their encryption keys are stored. You do not want to do the hard work of locking the house but leaving the key on the
+door
+
+## Denial of Service
+
+Denial of Service is all about making something unavailable. There are many types of `DoS` attacks, but a well known
+variation is overloading a System to the point it can no longer service requests. In the Kubernetes world a potential
+attack might be to overload the API server so that cluster operations grind to a halt, even essential system services
+have to communicate via the API server
+
+### Protecting cluster resources
+
+It is a time honored best practice to replicate essential control plane service on a multiple nodes for a high
+availability. Kubernetes is no different and you should run multiple Masters in an HA configuration, for your production
+environments. Doing this prevents a single Master from becoming a single point of failure. In relation to certain types
+of denial of service attacks, an attacker may need to attack more than one Master to have a meaningful impact. You
+should also consider replicating control plane nodes across availability zones. This may prevent a denial of service
+attack on the network of a particular availability zone from taking down your entire control plane. The same principle
+applies to worker nodes. Having multiple worker nodes not only allows the scheduler to spread your app over multiple
+nodes and availability zones, it may also render DOS attacks on a single node or zone ineffective (or less effective).
+You should also configure appropriate limits for the following:
+
+-   Memory
+-   Processor
+-   Storage
+-   Kubernetes objects
+
+Placing limits on things can help prevent important systems resources from being starved therefore preventing potential
+denial of service attacks. Limiting Kubernetes objects includes things like limiting the number of `ReplicaSets`, Pods,
+Services, Secrets and `ConfigMaps` in particular Namespace. Here is an example manifest file/snippet that limits the
+number of Pod objects in the `skippy` namespace to 100
+
+```yml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+    name: pod-quota
+spec:
+    hard:
+        pods: "100"
+```
+
+There is another feature also called `podPidsLimit`, which restricts the number of processes a Pod can create. Assume a
+scenario where a Pod is the target of a fork bomb attack, this is a specialised attack where a rogue process creates as
+many new processes as possible in an attempt to consume all resources on a system and grind it to a halt. Placing a
+limit on the number of processes a Pod can create will prevent the Pod from exhausting the resources of the node and
+confine the impact of the attack to the Pod. Once the `podPidsLimit` is exhausted a Pod will typically be restarted.
+
+### Protecting the API server
+
+The API server exposes a RESTful interface over a TCP socket making it susceptible to botnet based denial of service
+attacks, the following may be helpful in either preventing or mitigating such attacks.
+
+-   Highly available masters. Having multiple API server replicas running on multiple nodes across multiple availability zones
+-   Monitoring and alerting API server requests based on sane thresholds
+-   Using things like firewalls to limit API server exposure to the internet.
+
+As well as botnet DOS attacks an attacker may also attempt to spoof a user or other control plane service in an attempt
+to cause an overload. Fortunately, Kubernetes has robust authentication and authorization controls to prevent
+spoofing. However even with a robust RBAC model, it is vital that you safeguard access to accounts with high privileges.
+
+### Protecting the cluster store
+
+Cluster configuration is stored in etcd, making it vital that etcd be available and secure. The following
+recommendations help accomplish this:
+
+-   Configure an HA etcd cluster with either 3 or 5 nodes
+-   Configure monitoring and alerting of requests to etcd
+-   Isolate etcd at the network level so that only members of the control plane can interact with it
+
+A default installation of Kubernetes installs etcd on the same servers as the rest of the control plane. This is usually
+fine for development and testing however large production clusters should seriously consider a dedicated etcd, cluster.
+This will provide better performance and greater resilience. On the performance front etcd is probably the most common
+choking point for large Kubernetes clusters. With this in mind, you should perform testing to ensure the infrastructure
+it runs on is capable of sustaining performance at scale, a poorly performing etcd can be as bad as an etcd cluster
+under a sustained attack. Operating a dedicated etcd cluster also provides additional resilience by protecing it from
+other parts of the control plane that might be compromised. Monitoring and alerting etcd should be based on sane
+thresholds and a good place to start is by monitoring etcd log entries.
+
+### Protecting application components
+
+Most Pods expose their main service on the network and without additional controls in place anyone with access to the
+network can perform a DOS attack on the POD. Fortunately, Kubernetes provides Pod resource requests limits to prevent
+such attacks from exhausting Pod and Node resources, As well as these the following will be helpful.
+
+-   Define Kubernetes Network Policies to restrict Pod to Pod and Pod to external communications
+-   Utilize mutual TLS and API token based authentication for application level authentication reject any unauthenticated
+    requests
+
+
+## Elevation of privilege
+
+Privilege escalation is gaining higher access than what is granted usually in order to cause damage or gain unauthorized
+access. Let us look at a few way to prevent this in a Kubernetes environment.
+
+### Protecting the API server
+
+Kubernetes offers several authorization modes, that help safeguard access to the API server. These include - RBAC,
+Webhook, Node. You should run multiple authorizers at the same time. For example a common best practice is to always
+have RBAC and node enabled.
+
+RBAC mode lets you restrict API operations to sub sets of users. These users can be regular users accounts as well as
+system services. The idea is that all requests to the API server must be authenticated and authorized. Authentication
+ensures that requests are coming from the validated user, whereas authorization ensures that validated user is allowed
+to perform the requested operation. For example, can Lily create Pods ? In this example Lily is the user, create is the
+operation, and Pods is the resource. Authentication makes sure that it really is Lily that is making the request and
+authorization determines if she is allowed to create Pods.
+
+Webhook mode lets you offload authorization to an external REST based policy engine. However it requires additional
+effort to build and maintain the external engine. It also makes the external engine a potential single point of failure
+for every request, to the API server. For example if the external webhook system becomes unavailable you may not be able
+to make any requests to the API server. With this in mind, you should be rigorous in vetting and implementing any
+webhook authorization service
+
+### Protecting Pods
+
+The next few sections will look at a few of the technologies that help reduce the risk of elevation of privilege attacks
+against Pods and containers, we will look at the following - preventing processes from running as root, dropping
+capabilities filtering syscalls.
+
+#### Root processes
+
+The root user is the most powerful user on a Linux system and it always User ID 0. Therefore running application
+processes as root is almost always a bad idea as it grants the app process full access to the container. This is mad
+even worse by the fact that the root user of container often has unrestricted root access on the host system as well.
+Fortunately Kubernetes lets you force container processes to run as unprivileged non root users. The following Pod
+manifest configures all containers that are part of this Pod to run processes as UID 1000. If the Pod has multiple
+containers all processes in all containers will run as UID 1000.
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: demo
+spec:
+    securityContext: # Applies to all containers in this Pod
+        runAsUser: 1000 # Non-root user
+containers:
+- name: demo
+  image: example.io/simple:1.0
+```
+
+The `runAsUser` is one of the many settings that can be configured as part of what we refer to as `PodSecurityPolicy`. It
+is possible for two or more Pods to be configured with the same `runAsUser`. When this happens, the containers from both
+Pods will run with the same security context and potentially have access to the same resources. This might be fine if
+they are replicas of the same Pod or container. However there is a high chance this will cause problems if they are
+different containers. For example two different containers with R/W access to the same host directory or volume can
+cause data corruption bot writing to the same dataset without coordinating write operations). Shared security contexts
+also increase the possibility of compromised container tampering with a dataset it should not have access to
+
+With this in mid, it is possible to use the `securityContext.runAsUser` property at the container level instead of the Pod
+level:
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+name: demo
+spec:
+    securityContext: # Applies to all containers in this Pod
+        runAsUser: 1000 # Non-root user
+containers:
+    - name: demo
+      image: example.io/simple:1.0
+      securityContext:
+        runAsUser: 2000 # Overrides the Pod setting
+```
+
+This example sets the UID to 1000 at the pod level, but overrides it at the container level, so that processes in one
+particular container run a UID 2000. Unless otherwise specified all other containers in the Pod will use UID 1000. A
+couple of other things that might help get around the issue of multiple Pods and containers using the same UID include -
+enabling user namespaces, maintaining a map of UID usage.
+
+User namespaces is a Linux kernel technology that allows a process to run as root within a container, but run as a
+different user outside of the container. For example a process can run as UID 0 (the root user) in the container). But
+get mapped to UID 1000 on the host. This can be a good solution for processes that need to run as root inside the
+container but you should check it has full support from your version of Kubernetes and your container runtime.
+Maintaining a map of UID usage is a clunky way to prevent multiple different Pods and containers using overlapping UID,
+it is a bit of a hack and requires strict adherence to a gated release process for releasing Pods into production.
+
+#### Drop capabilities
+
+While user namespaces allow container processes to run as root inside the container but not on the host machine it
+remains a fact that most processes do not really need to run as full root inside the container. However it is equally
+true that many processes do require more privileges than a typical non root user. What is needed is a way to grant the
+exact set of privileges to process requires in order to run. Enter capabilities.
+
+Time for some theory and background history. We have already said that the root user is the most powerful user on the
+Linux system. However its power is a combination of lots of small privileges that we call capabilities. For example the
+`SYS_TIME`
 
 ## Real world security
 
