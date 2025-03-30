@@ -2077,10 +2077,10 @@ Lets use an example, say that Multiple Users are on the Cloud Platform, usually 
 cluster, unless we are speaking about enterprise customers, or generally high value users, the cluster is shared between
 users, users however will have their resources namespaced.
 
-`In a shared Kubernetes cluster, namespaces are the primary mechanism for isolating resources between users or teams.
-Namespaces provide a logical boundary for resources, ensuring that objects created by one user or team do not interfere
-with those created by another. Let’s dive into how namespaces work and how they are used to separate objects between
-users.`
+In a shared Kubernetes cluster, namespaces are the primary mechanism for isolating resources between users or teams.
+Namespaces provide a logical boundary for resources, ensuring that objects created by one user or team do not
+interfere with those created by another. Let’s dive into how namespaces work and how they are used to separate
+objects between users.
 
 -   User A:
 
@@ -2766,12 +2766,12 @@ parameters:
     replication-type: regional-pd
 volumeBindingMode: WaitForFirstConsumer
 reclaimPolicy: Retain
-#allowedTopologies:
-#- matchLabelExpressions:
-#  - key: topology.kubernetes.io/zone
-#    values:
-#    - europe-west2-b
-#    - europe-west2-c
+# allowedTopologies:
+# - matchLabelExpressions:
+#   - key: topology.kubernetes.io/zone
+#     values:
+#     - europe-west2-b
+#     - europe-west2-c
 ```
 
 `Remember that the parameters above, are strictly for the provisioner to use, in this case it is a proprietary google

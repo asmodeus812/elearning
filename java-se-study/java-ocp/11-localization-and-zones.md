@@ -138,7 +138,7 @@ of the company (such as Sun or Oracle). Other than these one can also have less 
 
 ```txt
 The default locale is fr_CA
-The default language code is fr and the name is fran‡ais
+The default language code is fr and the name is franÂ‡ais
 The default country code is CA and the name is Canada
 The default variant code is and the name is
 ```

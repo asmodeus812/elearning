@@ -1,7 +1,7 @@
 # Preface
 
 `UTC (Coordinated Universal Time) is closely aligned with Greenwich Mean Time (GMT) in terms of timekeeping. Both
-are based on the time at the Prime Meridian (0ø longitude), which runs through Greenwich, London.`
+are based on the time at the Prime Meridian (0Ã¸ longitude), which runs through Greenwich, London.`
 
 The new Java date and time API is provided in the java.time package. This new API in Java 8 replaces the older classes
 supporting date and time related functionality such as the `Date`, `Calendar` and `TimeZone` classes provided as part of

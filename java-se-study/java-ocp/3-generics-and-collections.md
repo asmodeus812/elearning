@@ -569,7 +569,7 @@ pipeline, mutates the source stream instance/object, adding transformations to t
 actions are not performed until special terminal or termination operations are invoked on the stream instance, only then
 the actual pipeline springs into motion executing all actions previously specified on that stream instance, and a final
 result is obtained (usually the call to the termination action, returns the actual final result of the transformation
-pipelne)
+pipeline)
 
 ```java
 class StreamPipelineComponents {
