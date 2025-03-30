@@ -36,7 +36,7 @@ shortcomings of the `VM` model. The container model the container is roughly ana
 difference though, is that every container does not require a full blown OS. In fact all containers on a single host
 share a single OS. This frees up huge amounts of system resources such as CPU, RAM and storage. It also reduces
 potential licensing costs and reduces the overhead of OS patching and other maintenance. This results in savings on the
-ap-ex and op-ex fronts. Containers are also fast to start and ultra-portable. Moving container workloads from your
+`ap-ex` and `op-ex` fronts. Containers are also fast to start and ultra-portable. Moving container workloads from your
 laptop to the cloud and then to virtual machines or bare metal in your data center is a breeze.
 
 ### Linux containers

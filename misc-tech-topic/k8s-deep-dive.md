@@ -3486,7 +3486,7 @@ We have already said that `StatefulSet` are for apps that need Pods to be predic
 parts of the app as well as other apps may need to connect directly to individual Pods. To make this possible
 `StatefulSet` use a headless service to create predictable DNS names for every pod replica they manage. Other apps can
 then query DNS service for the pull list of Pod replicas and use these details to connect directly to the Pods. The
-following YAML snippet shows a headless Service called mongo-prod that is listed in the `StatefulSet` YAML.
+following YAML snippet shows a headless Service called `mongo-prod` that is listed in the `StatefulSet` YAML.
 
 ```yml
 apiVersion: v1
@@ -3516,7 +3516,7 @@ can then find members of the `StatefulSet` by performing DNS lookup against the 
 
 ### Network traffic
 
-todo: write here
+Unlike regular services, the ones represented by `StatefulSet`, will not have a virtual `ClusterIP` address, the headless service,
 
 ### Skeleton
 
@@ -4365,19 +4365,23 @@ out to be useful for debugging or auguring information on resources and their so
 ## Thread modeling
 
 Thread modeling is the process of identifying vulnerabilities so you can put measures in place to prevent and mitigate
-them. This section will introduce the popular STRIDE model and shows how it can applied to Kubernetes. STRIDE defines
-the six categories of potential thread
+them. This section will introduce the popular `STRIDE` model and shows how it can applied to Kubernetes. `STRIDE` defines
+the six categories of potential thread. The word `STRIDE` is an abbreviation which stands for the following:
 
--   Spoofing
--   Tampering
--   Repudiation
--   Information disclosure
--   Denial of service
--   Elevation of privilege
+-   `S`poofing
+-   `T`ampering
+-   `R`epudiation
+-   `I`nformation disclosure
+-   `D`enial of service
+-   `E`levation of privilege
 
 While the model is good it is important to keep in mind that it is just a model, and models do not guarantee to cover
 all possible threats possible. However they are a good at providing a structured way to look at things, for the rest of
 the section, we will take a look at each of the six thread categories in turn, and how we can prevent and mitigate them.
+
+In 2019 the `CNCF` (Cloud Native Computing Foundation) commissioned a third party security audit of Kubernetes. There
+were several findings including threat modeling manual code reviews, dynamic penetration testing and cryptography
+review. All findings were given a difficulty and severity level, and all high severity
 
 ### Spoofing
 
@@ -4449,20 +4453,20 @@ metadata:
     name: nginx
 spec:
     containers:
-    - image: nginx
+        - image: nginx
     name: nginx
     volumeMounts:
-    - mountPath: /var/run/secrets/tokens
-      name: vault-token
-      serviceAccountName: my-pod
+        - mountPath: /var/run/secrets/tokens
+          name: vault-token
+          serviceAccountName: my-pod
 volumes:
-- name: vault-token
-  projected:
-    sources:
-    - serviceAccountToken:
-      path: vault-token
-      expirationSeconds: 3600
-      audience: vault
+    - name: vault-token
+      projected:
+          sources:
+              - serviceAccountToken:
+                path: vault-token
+                expirationSeconds: 3600
+                audience: vault
 ```
 
 ### Tampering
@@ -4485,7 +4489,7 @@ also help prevent tampering with data when it is at rest in Kubernetes
 . Restrict access to the servers that are running Kubernetes components i.e the control plane.
 
 -   Restrict access to repositories that store Kubernetes configuration files
--   Only  perform remote bootstrapping over SSH
+-   Only perform remote bootstrapping over SSH
 -   Restrict access to your image repository and associated repositories
 
 This is not and exhaustive list, but if you implement it you will greatly reduce the changes of having your data
@@ -4494,7 +4498,7 @@ alerting for important binaries and config files. If configured and monitored co
 tampering attacks. The following example uses a common Linux audit daemon to audit access to the docker binary it also
 audits attempts to the change the binary file attributes
 
-```sh $ auditctl -w /usr/bin/docker -p wxa -k audit-docker```
+`sh $ auditctl -w /usr/bin/docker -p wxa -k audit-docker`
 
 #### Kubernetes applications
 
@@ -4554,27 +4558,27 @@ event (you may need to manually enable auditing on your API server).
 
 ```json
 {
-    "kind":"Event",
-    "apiVersion":"audit.k8s.io/v1",
-    "metadata":{ "creationTimestamp":"2020-03-03T10:10:00Z" },
-    "level":"Metadata",
-    "timestamp":"2020-03-03T10:10:00Z",
-    "auditID":"7e0cbccf-8d8a-4f5f-aefb-60b8af2d2ad5",
-    "stage":"RequestReceived",
-    "requestURI":"/api/v1/namespaces/default/persistentvolumeclaims",
-    "verb":"list",
+    "kind": "Event",
+    "apiVersion": "audit.k8s.io/v1",
+    "metadata": { "creationTimestamp": "2020-03-03T10:10:00Z" },
+    "level": "Metadata",
+    "timestamp": "2020-03-03T10:10:00Z",
+    "auditID": "7e0cbccf-8d8a-4f5f-aefb-60b8af2d2ad5",
+    "stage": "RequestReceived",
+    "requestURI": "/api/v1/namespaces/default/persistentvolumeclaims",
+    "verb": "list",
     "user": {
-        "username":"fname.lname@example.com",
-        "groups":[ "system:authenticated" ]
+        "username": "fname.lname@example.com",
+        "groups": ["system:authenticated"]
     },
-    "sourceIPs":[ "123.45.67.123" ],
+    "sourceIPs": ["123.45.67.123"],
     "objectRef": {
-        "resource":"persistentvolumeclaims",
-        "namespace":"default",
-        "apiVersion":"v1"
+        "resource": "persistentvolumeclaims",
+        "namespace": "default",
+        "apiVersion": "v1"
     },
-    "requestReceivedTimestamp":"2010-03-03T10:10:00.123456Z",
-    "stageTimestamp":"2020-03-03T10:10:00.123456Z"
+    "requestReceivedTimestamp": "2010-03-03T10:10:00.123456Z",
+    "stageTimestamp": "2020-03-03T10:10:00.123456Z"
 }
 ```
 
@@ -4642,14 +4646,14 @@ this in mind it is vital that you consider the caveats outlined in the previous 
 their encryption keys are stored. You do not want to do the hard work of locking the house but leaving the key on the
 door
 
-## Denial of Service
+### Denial of Service
 
 Denial of Service is all about making something unavailable. There are many types of `DoS` attacks, but a well known
 variation is overloading a System to the point it can no longer service requests. In the Kubernetes world a potential
 attack might be to overload the API server so that cluster operations grind to a halt, even essential system services
 have to communicate via the API server
 
-### Protecting cluster resources
+#### Protecting cluster resources
 
 It is a time honored best practice to replicate essential control plane service on a multiple nodes for a high
 availability. Kubernetes is no different and you should run multiple Masters in an HA configuration, for your production
@@ -4687,26 +4691,31 @@ many new processes as possible in an attempt to consume all resources on a syste
 limit on the number of processes a Pod can create will prevent the Pod from exhausting the resources of the node and
 confine the impact of the attack to the Pod. Once the `podPidsLimit` is exhausted a Pod will typically be restarted.
 
-### Protecting the API server
+#### Protecting the API server
 
 The API server exposes a RESTful interface over a TCP socket making it susceptible to botnet based denial of service
 attacks, the following may be helpful in either preventing or mitigating such attacks.
 
--   Highly available masters. Having multiple API server replicas running on multiple nodes across multiple availability zones
+-   Highly available masters. Having multiple API server replicas running on multiple nodes across multiple availability
+    zones
+
 -   Monitoring and alerting API server requests based on sane thresholds
+
 -   Using things like firewalls to limit API server exposure to the internet.
 
 As well as botnet DOS attacks an attacker may also attempt to spoof a user or other control plane service in an attempt
 to cause an overload. Fortunately, Kubernetes has robust authentication and authorization controls to prevent
 spoofing. However even with a robust RBAC model, it is vital that you safeguard access to accounts with high privileges.
 
-### Protecting the cluster store
+#### Protecting the cluster store
 
 Cluster configuration is stored in etcd, making it vital that etcd be available and secure. The following
 recommendations help accomplish this:
 
 -   Configure an HA etcd cluster with either 3 or 5 nodes
+
 -   Configure monitoring and alerting of requests to etcd
+
 -   Isolate etcd at the network level so that only members of the control plane can interact with it
 
 A default installation of Kubernetes installs etcd on the same servers as the rest of the control plane. This is usually
@@ -4718,23 +4727,23 @@ under a sustained attack. Operating a dedicated etcd cluster also provides addit
 other parts of the control plane that might be compromised. Monitoring and alerting etcd should be based on sane
 thresholds and a good place to start is by monitoring etcd log entries.
 
-### Protecting application components
+#### Protecting application components
 
 Most Pods expose their main service on the network and without additional controls in place anyone with access to the
 network can perform a DOS attack on the POD. Fortunately, Kubernetes provides Pod resource requests limits to prevent
 such attacks from exhausting Pod and Node resources, As well as these the following will be helpful.
 
 -   Define Kubernetes Network Policies to restrict Pod to Pod and Pod to external communications
--   Utilize mutual TLS and API token based authentication for application level authentication reject any unauthenticated
-    requests
 
+-   Utilize mutual TLS and API token based authentication for application level authentication reject any
+    unauthenticated requests
 
-## Elevation of privilege
+### Elevation of privilege
 
 Privilege escalation is gaining higher access than what is granted usually in order to cause damage or gain unauthorized
 access. Let us look at a few way to prevent this in a Kubernetes environment.
 
-### Protecting the API server
+#### Protecting the API server
 
 Kubernetes offers several authorization modes, that help safeguard access to the API server. These include - RBAC,
 Webhook, Node. You should run multiple authorizers at the same time. For example a common best practice is to always
@@ -4753,13 +4762,13 @@ for every request, to the API server. For example if the external webhook system
 to make any requests to the API server. With this in mind, you should be rigorous in vetting and implementing any
 webhook authorization service
 
-### Protecting Pods
+#### Protecting Pods
 
 The next few sections will look at a few of the technologies that help reduce the risk of elevation of privilege attacks
 against Pods and containers, we will look at the following - preventing processes from running as root, dropping
 capabilities filtering syscalls.
 
-#### Root processes
+##### Root processes
 
 The root user is the most powerful user on a Linux system and it always User ID 0. Therefore running application
 processes as root is almost always a bad idea as it grants the app process full access to the container. This is mad
@@ -4777,8 +4786,8 @@ spec:
     securityContext: # Applies to all containers in this Pod
         runAsUser: 1000 # Non-root user
 containers:
-- name: demo
-  image: example.io/simple:1.0
+    - name: demo
+      image: example.io/simple:1.0
 ```
 
 The `runAsUser` is one of the many settings that can be configured as part of what we refer to as `PodSecurityPolicy`. It
@@ -4804,7 +4813,7 @@ containers:
     - name: demo
       image: example.io/simple:1.0
       securityContext:
-        runAsUser: 2000 # Overrides the Pod setting
+          runAsUser: 2000 # Overrides the Pod setting
 ```
 
 This example sets the UID to 1000 at the pod level, but overrides it at the container level, so that processes in one
@@ -4828,29 +4837,127 @@ exact set of privileges to process requires in order to run. Enter capabilities.
 
 Time for some theory and background history. We have already said that the root user is the most powerful user on the
 Linux system. However its power is a combination of lots of small privileges that we call capabilities. For example the
-`SYS_TIME`
+`SYS_TIME`, capability allows a user to set the system clock, whereas the NET_ADMIN capability allows a user to perform
+network related operations such as modifying the local routing table and configuring local interfaces, the root user
+holds every capability and is therefore extremely powerful.
+
+Having a modular set of capabilities like this allows you to be extremely granular when granting permissions. Instead of
+an all or nothing (root or non-root) approach you can grant a process the exact set of capabilities it requires to run.
+
+There are currently over 30 capabilities and choosing the right ones can be daunting. With this in mind, an out of the
+box Docker runtime drops over half of them by default. This is a sensible default that is designed to allow most
+processes to run, without leaving the keys in the front door. While sensible defaults like these are better than nothing
+they are often not good enough for a lot of production environments.
+
+A common way to find the absolute minimum set of capabilities an app requires is to run it in a test environment, with
+all capabilities dropped. This will cause the app to fail and log messages about the missing permissions. You map those
+permissions to capabilities add them to the app Pod spec and run the app again. You rinse and repeat this process until
+the app runs properly with the minimum set of capabilities.
+
+As good as this is there are a few things to consider. Firstly you must perform extensive testing of your app. The last
+thing you want is a production edge case that you had not accounted for in your test environment. Such occurrences can
+crash your app in production. Secondly every fix and update to your app requires the exact same extensive testing
+against the capability set.
+
+With these considerations in mind, it is vital that you have testing procedures and production release process that can
+handle all of this. By default Kubernetes implements the default set of capabilities implemented by your chosen
+container runtime. However you can override this in a pod security policy, or as part of the container `securityContext`
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: capability-test
+spec:
+    containers:
+    - name: demo
+      image: example.io/simple:1.0
+      securityContext:
+        capabilities:
+        add: ["NET_ADMIN", "CHOWN"]
+```
+
+#### Filter syscalls
+
+Seccomp short for secure computing is similar in concept to capabilities but works by filtering syscalls rather than
+capabilities. The way a Linux process asks the kernel to perform an operation is by issuing a syscall . Seccomp lets you
+control which syscalls a particular container can make to the host kernel. As with capabilities a least privilege model
+is preferred where the only syscalls a container is allowed to make are those the ones it needs to in order to function
+and run properly. Seccomp went GA in Kubernetes in 1.19 and can be used in different ways based on the following seccomp
+profiles.
+
+1.  Non-blocking: Allow a Pod to run and records every syscall it makes to an audit log, you can use to create a custom
+    profile. The idea is to run your app, Pod in a `dev/test` environment and make it do everything designed to do. When
+    you are done you will have a log file listing every syscall the Pod needs in order to run. You then use this to create a
+    custom profile that only allows the syscalls the app needs least privilege
+
+2.  Blocking: Blocks all syscalls, it is extremely secure, but prevents Pod from doing anything useful
+
+3.  Runtime: forced a Pod to use the seccomp profile, defined by its container runtime. This is a common place to start
+    if you have not created a custom profile yet. Profiles that ship with container runtimes (like Docker and containerd)
+    are not the most secure in the world, but they are not wide open either. They are usually designed to be balance of
+    usable and secure and they are thoroughly tested.
+
+4.  Custom: A profile that only allows the syscalls your app needs in order to run. Everything else is blocked. It is a
+    common to extensively test your app in dev/test with a non blocking profile that records all syscalls to a log. You
+    then use this log to identify the syscalls your app makes and build the customized profile. The danger with this
+    approach is that your app has some edge case that you miss with your testing. If you this happens your app can fail in
+    production when i when it hits an edge case and uses a syscall not captured in the logs during testing
+
+#### Privilege escalation
+
+The only way to create a new process in Linux is for one process to clone itself and then load a new instructions to the
+new process (very simplified, but the original process is called the parent process and the copy is the child, this is
+called process forking).
+
+By default Linux allows a child process to claim more privileges than its parent. This is usually a bad idea. In fact
+you will often want a child process to have the same or less privileges than its parent. This is especially true for
+containers as their security configurations are defined  against their initial configuration and not against potentially
+escalated privileges.
+
+Fortunately it is possible to prevent privilege escalation through a `PodSecurityPolicy` or the `securityContext`
+property of an individual container.
+
+#### Pod security policies
+
+As you have seen throughout the sections one can enable security settings on a per Pod basis by setting security context
+attributes in individual Pod manifest files. However this approach does not scale well, it requires developers and
+operators to remember to do this for every Pod manifest spec, and is prone to errors. Pod security Policies offer a
+better way.
+
+Pod security policies allow you to define a security settings at the cluster level. You can then apply them to targeted
+set of Pods as part of the deployment process. This approach scales better requires less effort from developers and
+admins and is less prone to error, it also lends itself to situations where you have a team dedicated to securing apps
+in production.
+
+Pod Security Policies are implemented as an admission controller and in order to use them, a Pod `ServiceAccount` must be
+authorized to use it. Once this is done policies are applied to new requests to create Pods as they pass through the API
+admission chain.
 
 ## Real world security
 
-TODO: finish this
+In the previous sections it was described how to thread model the Kubernetes security using the `STRIDE` model. In this
+section the common security related challenges will be covered that are likely to be encountered in the real world, when
+implementing a Kubernetes cluster.
 
-### Kubernetes playground
+While every Kubernetes deployment is different there are many similarities as a result the examples you will see will
+apply to most Kubernetes deployments large and small. Now then we are not offering cookbook style solutions, instead we
+will be looking at things from the kind of high level view a security architect has. The section is split into the
+following sub-sections
 
-Playgrounds are the quickest and easiest way to get Kubernetes but they do not function for production, Popular examples
-include `Play with Kubernetes, Katakoda, Docker Desktop, minikube, k3d and more`
+-   CI/CD pipeline
+-   Infrastructure and networking
+-   Identity and access management
+-   Security monitoring and auditing
 
-### Hosted Kubernetes
+### CI/CD pipeline
 
-All of the major cloud platforms offer a hosted Kubernetes service. This is a model where you outsource a bunch of
-Kubernetes infrastructure to your cloud provider, letting them take care of things like high availability, performance
-and updates.
+Containers are a revolutionary app packaging and runtime technology. On the packaging front they bundle apps code and
+dependencies into an image, as well as code and dependencies images contain the commands required to run the app. This
+has enabled containers to hugely simplify the process of building sharing and running apps, it also overcome the
+infamous - it worked on my laptop.
 
-Of course not all hosted Kubernetes solutions are equal and even though your cloud provider is managing a lot of the
-infrastructure for you, the ultimate responsibility remains with you.
+However containers make running dangerous code easier than ever before, With this in mind let us look at some ways you
+can secure the flow of app code from a developer laptop to production servers.
 
-### DIY Kubernetes
-
-By far the hardest way to get a Kubernetes cluster is to build it yourself. Yes, installations such as these are
-possible, and are a lot easier now than they used to be, but they can still be hard. However they provide most
-flexibility and give you ultimate control - which can be good for learning
-
+#### Image Repositories
