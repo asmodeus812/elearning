@@ -500,21 +500,27 @@ svc/app-cli command`.
 ```sh
 $ oc describe svc/app-cli
 
-Name:              app-cli
-Namespace:         image-uploader
-Labels:            app=app-cli
-Annotations:       openshift.io/generated-by=OpenShiftNewApp
-Selector:          app=app-cli,deploymentconfig=app-cli
-Type:              ClusterIP
-IP:                172.30.51.80
-Port:              8080-tcp  8080/TCP
-TargetPort:        8080/TCP
-Endpoints:         172.17.0.5:8080
-Port:              8443-tcp  8443/TCP
-TargetPort:        8443/TCP
-Endpoints:         172.17.0.5:8443
-Session Affinity:  None
-Events:            <none>
+Name:                     app-cli
+Namespace:                image-uploader
+Labels:                   app=app-cli
+                          app.kubernetes.io/component=app-cli
+                          app.kubernetes.io/instance=app-cli
+                          app.kubernetes.io/name=php
+Annotations:              openshift.io/generated-by: OpenShiftNewApp
+Selector:                 deployment=app-cli
+Type:                     ClusterIP
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.217.4.162
+IPs:                      10.217.4.162
+Port:                     8080-tcp  8080/TCP
+TargetPort:               8080/TCP
+Endpoints:
+Port:                     8443-tcp  8443/TCP
+TargetPort:               8443/TCP
+Endpoints:
+Session Affinity:         None
+Internal Traffic Policy:  Cluster
 ```
 
 Now note that there are the fields which are IP addresses, these are the IP addresses that each service gets, these are
@@ -537,7 +543,7 @@ next sections,. To create a route for the app-cli run the following command -
 
 ```sh
 $ oc expose svc/app-cli
--> route "app-cli" exposed
+route.route.openshift.io/app-cli exposed
 ```
 
 As we discussed earlier, OpenShift uses projects to organize applications. An application project is included in the URL
@@ -557,11 +563,14 @@ $ oc describe route/app-cli
 
 Name:                   app-cli
 Namespace:              image-uploader
-Created:                19 seconds ago
+Created:                13 seconds ago
 Labels:                 app=app-cli
+                        app.kubernetes.io/component=app-cli
+                        app.kubernetes.io/instance=app-cli
+                        app.kubernetes.io/name=php
 Annotations:            openshift.io/host.generated=true
-Requested Host:         app-cli-image-uploader.192.168.42.124.nip.io
-                          exposed on router router 19 seconds ago
+Requested Host:         app-cli-image-uploader.apps-crc.testing
+                           exposed on router default (host router-default.apps-crc.testing) 13 seconds ago
 Path:                   <none>
 TLS Termination:        <none>
 Insecure Policy:        <none>
@@ -569,7 +578,7 @@ Endpoint Port:          8080-tcp
 
 Service:        app-cli
 Weight:         100 (100%)
-Endpoints:      172.17.0.5:8443, 172.17.0.5:8080
+Endpoints:      <none>
 ```
 
 The output tells you that the host configuration added to the HAProxy the service associated with the route and the
@@ -712,8 +721,9 @@ be used to login into a provided cluster. As long as you have a locally setup pr
 cluster's ssh agent
 
 ```sh
-# this will allow you to login into the minishift cluster instance
-$ minishift ssh
+# this will allow you to login into the crc virtual machine, which represents the actual single cluster node that is
+# being simulated locally
+$ ssh -i ~/.crc/machines/crc/id_ed25519 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 2222 core@127.0.0.1
 ```
 
 To extract the process id of the running container we have to do a few more things, first we can list all running
@@ -837,6 +847,7 @@ host, as well as any logical volumes. It confirms that docker has been creating 
 
 ```sh
 $ sudo lsblk
+
 NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
 vda    252:0    0   31G  0 disk
 ├─vda1 252:1    0    1M  0 part
@@ -879,13 +890,22 @@ up system. To confirm that each container has a unique hostname log into your cl
 -u developer -p developer <cluster-url>`. The `oc` command line tools has a functionality that's similar to docker exec,
 instead of passing in the short ID for the container however you can pass it the pod in which you want to execute the
 command. After logging in to your `oc` client, scale the app-cli application to two pods with the following command `oc
-scale dc/app-cli --replicas=2`, in this case the `dc` in the command stands for deployment config, this is the shorthand
-name for the object type. This will cause an update to your app-cli deployment config and trigger the creation of a new
-app-cli pod. You can get the new pod's name by running the command `oc get pods | grep "Running"`. The grep call
-prevents the output of pods in a completed state so you see only active pods in the output. Because the container
-hostname is its corresponding pod name in OpenShift you know which pod you were working with using docker directly.
+scale deployment/app-cli --replicas=2`, in this case the `dc` in the command stands for deployment config, this is the
+shorthand name for the object type. The deployment config is the old 3.xx version of the deployment object which was
+simply renamed in the 4.xx version to deployment. The command with newer versions would look like a little bit
+different, but pretty much the same - `oc scale deployment/app-cli --replicas=2`
+
+This will cause an update to your app-cli deployment config and trigger the creation of a new app-cli pod. You can get
+the new pod's name by running the command `oc get pods | grep "Running"`. The grep call prevents the output of pods in a
+completed state so you see only active pods in the output. Because the container hostname is its corresponding pod name
+in OpenShift you know which pod you were working with using docker directly.
 
 ```sh
+# first make sure that we scale up the deployment of the app, which would mean that we have to alter the deployment,
+# that would cause OpenShift to bring two new pods, when they are ready the old ones will be removed,
+$ oc scale deployment/app-cli --replicas=2
+deployment.apps/app-cli scaled
+
 # we grep only the ones in running state, making sure to avoid additional unwanted pods in completed state which will
 # only pollute the output
 $ oc get pods | grep "Running"
@@ -918,10 +938,10 @@ container identifier as provided by the orchestrator or docker`
 ### PID namespace
 
 Because PID are how one app sends signals and information to other apps isolating visible PID in a container to only the
-app in it is an important security feature. This is accomplished using the PID namespaces. On a linux server the ps
+app in it is an important security feature. This is accomplished using the PID namespaces. On a linux server the `ps`
 command shows all running processes along with their associated PID on the host. This command typically has a lot of
 output on a buys system. The `--ppid` option limits the output to a single PID and any child processes it has spawned,
-from your app node, run the ps command with the `--ppid` option and include the PID you obtained for your app-cli
+from your app node, run the `ps` command with the `--ppid` option and include the PID you obtained for your app-cli
 container. Here you can see that the process for PID 7825 is httpd and that it has spawned several other processes:
 
 ```sh
@@ -951,6 +971,7 @@ because you want to see all the PID visible from within the app-cli container.
 ```sh
 # notice that here we use the pod's directly
 $ oc exec app-cli-5b9c58956d-p7jpn -- ps
+
 PID TTY          TIME CMD
     1 ?        00:00:01 httpd
     28 ?        00:00:00 cat
@@ -1144,7 +1165,7 @@ information tracked about the RC helps to establish its relationships to the oth
 # to make sure that we create, a replication controller instances, which will be done when we use scale, on the existing
 # deployment, the replication controller is an evolution of the replica controller, but it is basically the same object
 # that is representing the actual replicas being managed by the orchestrator
-oc scale dc/app-cli --replicas=2
+oc scale deployment/app-cli --replicas=2
 deploymentconfig.apps.openshift.io "app-cli" scaled
 ```
 
@@ -1162,10 +1183,11 @@ in next sections.
 Also need to note that the command below will return the list of RC only if there were ever any replicas created, if the
 app pods were never replicated, meaning that there was only ever one pod for the deployment config, then no RC object
 will be created, make sure that you have had created replicas for the given deployment, otherwise you might not receive
-the expected result, from `oc get rc`
+the expected result, from `oc get rs`
 
 ```sh
-$ oc describe rc/app-cli-1
+# describe the replication controller
+$ oc describe rs/app-cli-1
 
 Name:         app-cli-1
 Namespace:    image-uploader
@@ -1199,16 +1221,12 @@ Pod Template:
     Environment:  <none>
     Mounts:       <none>
   Volumes:        <none>
-Events:
-  Type    Reason            Age   From                    Message
-  ----    ------            ----  ----                    -------
-  Normal  SuccessfulCreate  5m    replication-controller  Created pod: app-cli-1-vsk5q
-  Normal  SuccessfulCreate  1m    replication-controller  Created pod: app-cli-1-gkg9h
 ```
 
-`Note that more recent versions of openshift will by default use the ReplicationSet instead of the ReplicationController
-object, this is because the new set object is more feature full, and the old ReplicationController is being phased out,
-ultimately it is the same object, with some new nice features added on top of the manifest and object specification`
+`Note that more recent versions of openshift will by default use the ReplicationController instead of the
+ReplicationController object, this is because the new set object is more feature full, and the old ReplicationController
+is being phased out, ultimately it is the same object, with some new nice features added on top of the manifest and
+object specification`
 
 #### Labels and selectors
 
@@ -1234,9 +1252,24 @@ link up to them, they are `not simply meant for tagging human readable informati
 will create and monitor apps pods with the following labels:
 
 ```txt
-Labels: app=app-cli
-        deployment=app-cli-1
-        deploymentconfig=app-cli
+# this is the labels and selector sections from a describe command run against the deployment of the app-cli, you can
+# see that in our case the deployment object is tagged with many labels, and the selector in this case matches the
+# in the pod template. The labels for the dpeloyment are mostly kubernetes specific, and only one is really the user
+# defined one which is app=app-cli
+Name:                   app-cli
+Namespace:              image-uploader
+CreationTimestamp:      Mon, 26 May 2025 15:10:39 +0300
+Labels:                 app=app-cli
+                        app.kubernetes.io/component=app-cli
+                        app.kubernetes.io/instance=app-cli
+                        app.kubernetes.io/name=php
+Selector:               deployment=app-cli
+
+# pod contains only one label, which is matched against the selector section in the deployment above, that is how they
+# are interlinked, and that is how OpenShift knows which pods belong to which deployments, the same rule is true and
+# followed for any other OpenShift object, that is how relations between them are build in Kubernetes and OpenShift
+Pod Template:
+  Labels:       deployment=app-cli
 ```
 
 The fastest way to delete the pods for the app-cli deployments is through the command line. This process shouldn't be
@@ -1253,7 +1286,7 @@ label, we can use the following - `oc delete all --selector app=app-cli`. This w
 which are attached or related and associated to the given label.
 
 Returning back to the pod for which we removed or detached the label, you might be wondering whether the abandoned pod
-will still receive traffic from users. It turns out that the service obect, responsible for network traffic, also works
+will still receive traffic from users. It turns out that the service object, responsible for network traffic, also works
 on the concept of labels and selectors. To determine whether the abandoned pod would have served traffic, you need to
 look at the Selector field in the service object. You can get this selector information about the app-cli service by
 running the following `oc describe svc app-cli | grep Selector` this will print out the selector label for the service,
@@ -1334,7 +1367,7 @@ healthy. Liveness probes can check container health three ways:
 
 - HTTP checks if a given URL endpoint served by the container, and evaluates the HTTPS status response code
 - Container execution check - a command typically a script that is run at intervals to verify that the container is
-  behaving as expected. a non zero exit code from the command results in a liveness check failure.
+  behaving as expected. Non zero exit code from the command results in a liveness check failure.
 - TCP socket check - Checks that a TCP connection can be established on a specific TCP port in the app pod.
 
 Note that the HTTP response code is a three digit number supplied by the server as part of the HTTP response headers in
@@ -1348,8 +1381,13 @@ service that it needs isn't functional. Modern apps should have code to graceful
 If you need an app to wait for a missing service dependency you can use readiness probes., which are covered later on in
 this section. For legacy apps that require an ordered startup sequence of replicated pods, you can take advantage of a
 concept called stateful sets, which we will cover later on. To make creating probes easier, a health check wizard is
-built in the OpenShift web interface, using the wizard will help you avoid formatting isues that can result from
+built in the OpenShift web interface, using the wizard will help you avoid formatting issues that can result from
 creating the raw YAML template by hand.
+
+```sh
+$ oc set probe deployment/app-cli --liveness --get-url=http://:8080/ --initial-delay-seconds=5
+deployment.apps/app-cli probes updated
+```
 
 After one adds the liveness probe, there are ways to check how the liveness probe has been reflected in the final
 deployment configuration by simply inspecting the deployment object, and we will notice that there is indeed a new line
@@ -1362,46 +1400,23 @@ the container
 ```sh
 # here is the command which will inspect and show the liveness probe, that was recently configured, most of the data for
 # the deployment was omitted, just to show the probe info from the otherwise big deployment describe command dump
-$ oc describe dc -l app=app-cli
+$ oc describe deployment -l app=app-cli
 
-Name:           app-cli
-Namespace:      image-uploader
-Created:        8 minutes ago
-Labels:         app=app-cli
-Annotations:    openshift.io/generated-by=OpenShiftNewApp
-Latest Version: 1
-Selector:       app=app-cli,deploymentconfig=app-cli
-Replicas:       2
-Triggers:       Config, Image(app-cli@latest, auto=true)
-Strategy:       Rolling
-Template:
+Name:                   app-cli
 Pod Template:
-  Labels:       app=app-cli
-                deploymentconfig=app-cli
-  Annotations:  openshift.io/generated-by=OpenShiftNewApp
+  Labels:       deployment=app-cli
+  Annotations:  openshift.io/generated-by: OpenShiftNewApp
   Containers:
    app-cli:
-    Image:              172.30.1.1:5000/image-uploader/app-cli@sha256:478fe6428546186cfbb0d419b8cc2eab68af0d9b7786cc302b2467e5f11661db
-    Ports:              8443/TCP, 8080/TCP
-    Host Ports:         0/TCP, 0/TCP
-    Environment:        <none>
-    Mounts:             <none>
-  Volumes:              <none>
-
-Deployment #1 (latest):
-        Name:           app-cli-1
-        Created:        7 minutes ago
-        Status:         Complete
-        Replicas:       2 current / 2 desired
-        Selector:       app=app-cli,deployment=app-cli-1,deploymentconfig=app-cli
-        Labels:         app=app-cli,openshift.io/deployment-config.name=app-cli
-        Pods Status:    2 Running / 0 Waiting / 0 Succeeded / 0 Failed
-
-Events:
-  Type          Reason                          Age     From                            Message
-  ----          ------                          ----    ----                            -------
-  Normal        DeploymentCreated               7m      deploymentconfig-controller     Created new replication controller "app-cli-1" for version 1
-  Normal        ReplicationControllerScaled     3m      deploymentconfig-controller     Scaled replication controller "app-cli-1" from 1 to 2
+    Image:         image-registry.openshift-image-registry.svc:5000/image-uploader/app-cli@sha256:17c9ec389e0e130b3891e25e64b53cda350a6223732f62f56032b42cb361ffd1
+    Ports:         8080/TCP, 8443/TCP
+    Host Ports:    0/TCP, 0/TCP
+    Liveness:      http-get http://:8080/ delay=5s timeout=1s period=10s #success=1 #failure=3
+    Environment:   <none>
+    Mounts:        <none>
+  Volumes:         <none>
+  Node-Selectors:  <none>
+  Tolerations:     <none>
 ```
 
 Here is how the actual YAML manifest file, or at least the part that would contain the `livenessProbe` configuration
@@ -1446,8 +1461,10 @@ probe it will not receive user requests. If it never passes the readiness probe,
 fail and never be made available to users. To create the readiness probe use the command line and run the command:
 
 ```sh
-$ oc set probe dc/app-cli --readiness --get-url=http://:8080/notreal --initial-delay-seconds=5
-deploymentconfig "app-cli" updated
+# this will again as any other deployment update cause the old pods to be deleted and new ones will be spun up in their
+# place which would represent the new state
+$ oc set probe deployment/app-cli --readiness --get-url=http://:8080/notreal --initial-delay-seconds=5
+deployment.apps/app-cli probes updated
 ```
 
 The output includes a message that the deployment was updated. Just like a liveness probe, creating a readiness probe
@@ -1457,12 +1474,34 @@ get pods`
 ```sh
 $ oc get pods
 
-NAME               READY     STATUS      RESTARTS   AGE
-app-cli-1-build    0/1       Completed   0          9m
-app-cli-1-gkg9h    1/1       Running     0          4m
-app-cli-1-vsk5q    1/1       Running     0          8m
-app-cli-2-deploy   1/1       Running     0          24s
-app-cli-2-h65v4    0/1       Running     0          22s
+NAME                     READY STATUS    RESTARTS AGE
+app-cli-1-build          0/1   Completed 0        8d
+app-cli-59c7ff6b74-h7q8r 1/1   Running   0        14m
+app-cli-59c7ff6b74-pnldz 1/1   Running   0        14m
+app-cli-6d69c87c88-lm4tc 0/1   Running   0        67s
+```
+
+Note below that the liveness probe is fine, and is reporting that there are no failures while that is not true for the
+readiness probe, which is reporting a failed state, which is expected after having it configured with a non existing
+endpoint to check against
+
+```sh
+Name:                   app-cli
+Pod Template:
+  Labels:       deployment=app-cli
+  Annotations:  openshift.io/generated-by: OpenShiftNewApp
+  Containers:
+   app-cli:
+    Image:         image-registry.openshift-image-registry.svc:5000/image-uploader/app-cli@sha256:17c9ec389e0e130b3891e25e64b53cda350a6223732f62f56032b42cb361ffd1
+    Ports:         8080/TCP, 8443/TCP
+    Host Ports:    0/TCP, 0/TCP
+    Liveness:      http-get http://:8080/ delay=5s timeout=1s period=10s #success=1 #failure=3
+    Readiness:     http-get http://:8080/notreal delay=5s timeout=1s period=10s #success=1 #failure=3
+    Environment:   <none>
+    Mounts:        <none>
+  Volumes:         <none>
+  Node-Selectors:  <none>
+  Tolerations:     <none>
 ```
 
 The new pod is running, but will never be ready (1/1), that is because our probe was configured to check for a non
@@ -1481,6 +1520,12 @@ previous deployment. The reason for the failure will be shown in the event view 
 command line tool or the web console Because events are easier to read through the web console user interface, let us
 check that out there. Expand the panel in the events view, and you will be able to see the deployment has failed, and
 why that was, the reason will be stated as well.
+
+```sh
+# make sure to restore the readiness probe to point to the correct, endpoint, that is at least valid, that would drop
+# the old pods, and make sure the newly created ones are all in a valid state where both the liveness and readiness probe
+$ oc set probe deployment/app-cli --readiness --get-url=http://:8080/ --initial-delay-seconds=5
+```
 
 ## Auto-scaling with metrics
 
@@ -1509,7 +1554,7 @@ human intervention is called autoscaling. Developers can set limits and objectiv
 demand, and administrators can limit the number of pods to a defined range. The indicators that OpenShift uses to
 determine if the app needs more of fewer pods are based on pod metrics such as CPU and memory usage. But those pod
 metrics are not available out of the box, to use metrics in OpenShift the administrators must deploy the OpenShift metrics
-tack. This metric stack comprises several popular open source technologies, like `Hawkular, Heapster, and Apache
+tack. This metric stack comprises several popular open source technologies, like `Prometheus, Hawkular, Heapster, and Apache
 Cassandra`. Once the metric stack is installed, OpenShift autoscaling has the objective measures it needs to scale pods
 up and down on demand.
 
@@ -1526,35 +1571,28 @@ shift infra project, from the command line
 
 ```sh
 # before running that command make sure you have switched and logged into the administrator user, otherwise the regular
-# user does not have access and will not even be able to see this project, note that the admin password is none, it is
-# not required for the local development version of the minishift instance
-$ oc login https://192.168.42.124:8443 -u system:admin
-$ oc project openshift-infra
+# user does not have access and will not even be able to see system infra projects
+$ oc console --credentials
+$ oc login <cluster-ip> -u <kubeadmin> -p <adminpassword>
 
-Now using project "openshift-infra" on server "https://192.168.42.124:8443".
-```
+# this is the important bit, that would change the default cluster version object, which controls certain flags/switches
+# determining which features are enabled or not, in this case we remove the first entry from the default overrides, which would restore the default behavior, and enable metrics
+$ oc describe clusterversion/version
+$ oc patch clusterversion/version --type='json' -p '[{"op":"remove", "path":"/spec/overrides/0"}]'
+$ oc get pods -n openshift-monitoring
 
-OpenShift provides an `Ansible` playbook called `openshift-metrics.yml` to install the OpenShift metrics stack. The playbook
-comes with reasonable default settings but can also be customized by passing environment variables, on the command line,
-Switch to the virtual machine/cluster that is running OpenShift on your host first and then run the following command
-
-```sh
-# login into the cluster virtual machine, first from there we can run the setup stage for the metrics stack, to install
-$ minishift ssh
-```
-
-If all the tasks run properly the end of the output should show no errors, or failed tasks as in that would indicate
-that the stack was installed just fine. If the deployment fails, double check that the environment variables you passed
-to `openshift-metrics.yml` are accurate
-
-After the playbook completes check from the command line that the metric stack is running. Similar to other features in
-OpenShift the stack is deployed as several different pods. You may have to wait a couple of minutes for the system to
-pull down the metrics container images and start. You can use the watch command to check the results of `oc get pods`
-every two seconds
-
-```sh
-# this will make sure to watch the output of the get pods command, which will terminate once the command returns
-$ watch oc get pods
+alertmanager-main-0                                      0/6     Pending   0          8m4s
+cluster-monitoring-operator-6db6cb4c67-6gcmn             1/1     Running   0          8m23s
+kube-state-metrics-79fb78866f-dvf4q                      3/3     Running   0          8m5s
+metrics-server-7d57d94644-2hbkw                          1/1     Running   0          8m
+monitoring-plugin-d9d9ccfc8-97z98                        0/1     Pending   0          7m59s
+node-exporter-xl7nq                                      2/2     Running   0          8m5s
+openshift-state-metrics-5476c76b54-qc49r                 3/3     Running   0          8m5s
+prometheus-k8s-0                                         0/6     Pending   0          7m59s
+prometheus-operator-55955cbfbc-c9q8n                     2/2     Running   0          8m15s
+prometheus-operator-admission-webhook-7cb5b87c4b-92jcz   1/1     Running   0          8m19s
+telemeter-client-bb985cdff-95fp8                         0/3     Pending   0          2m51s
+thanos-querier-67d44b859-29klf                           0/6     Pending   0          8m3s
 ```
 
 ### Understanding the metrics
@@ -1566,11 +1604,11 @@ tasks the node should execute with the OpenShift master. As an example of an rep
 started, the OpenShift scheduler which runs on a master eventually tasks an OpenShift node to start the pod. The
 command to start the pod is passed to the kubelet process running on the assigned OpenShift node. One of the additional
 responsibilities of the kubelet is to expose the local metrics available, to the Linux kernel through an HTTPS endpoint.
-The OpenShift metrics po use the metrics exposed by the kubelet on each OpenShift node as their data source. Although
+The OpenShift metrics pods use the metrics exposed by the kubelet on each OpenShift node as their data source. Although
 the kubelet exposes the metrics for individual nodes through HTTPS, no built in tools are available to aggregate this
 information and present a cluster wide view. This is where Prometheus comes in handy, it acts as the back end for
 metrics deployment, it queries the API server for the list of nodes and then queries each individual node to get the
-metrics for the entire cluster. It stores the metrics in its internal store dataset. On the frontend the Prometheus pod
+metrics for the entire cluster. It stores the metrics in its internal store data set. On the frontend the Prometheus pod
 processes the metrics. All metrics are exposed in the cluster through a common REST API to pull metrics into the
 OpenShift console. The API can also be used for integration into the third party tools or other monitoring solutions.
 
@@ -1579,7 +1617,7 @@ OpenShift console. The API can also be used for integration into the third party
 To implement pod autoscaling based around metrics you need a couple of simple things - first you need a metrics stack to
 pull and aggregate the metrics from the entire cluster and then make those metrics easily available. So far so good.
 Second you need an object to monitor the metrics and trigger the pod up and down. This object is called a Horizontal Pod
-Auto-scaler - HPA (Remember that abbreviation). and its main job is to define when OpenShift should change the number of
+Auto-scaler - HPA (Remember that abbreviation). And its main job is to define when OpenShift should change the number of
 replicas in an app deployment.
 
 #### Creating the HPA object
@@ -1590,7 +1628,7 @@ autoscale command`. Switch to the CLI and use the following command
 ```sh
 # note the scaling factor and conditions, we define the min and max number of replicas, and we also define where the
 # replicas should be created, in this case when the CPU usage reaches a certain threshold
-$ oc autoscale dc/app-cli --min 2 --max 5 --cpu-percent=75
+$ oc autoscale deployment/app-cli --min 2 --max 5 --cpu-percent=75
 ```
 
 A couple of things happen when you run that command. First you trigger an automatic scale up to two app-cli pods by
@@ -1602,22 +1640,40 @@ app-cli this command gets the name of the HPA object created by the `oc autoscal
 ```sh
 # this will list all HPA objects, in our case only one deployment has it, and we also have only one deployment anyway.
 $ oc get hpa
+NAME      REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+app-cli   Deployment/app-cli   cpu: <unknown>/75%   2         5         2          6d
+
+$ oc describe hpa/app-cli
 
 Name:                                                  app-cli
 Namespace:                                             image-uploader
 Labels:                                                <none>
 Annotations:                                           <none>
-CreationTimestamp:                                     Thu, 22 May 2025 20:39:15 +0300
-Reference:                                             DeploymentConfig/app-cli
+CreationTimestamp:                                     Tue, 20 May 2025 15:38:53 +0300
+Reference:                                             Deployment/app-cli
 Metrics:                                               ( current / target )
   resource cpu on pods  (as a percentage of request):  <unknown> / 75%
 Min replicas:                                          2
 Max replicas:                                          5
-Events:                                                <none>
+Deployment pods:                                       2 current / 2 desired
+Conditions:
+  Type           Status  Reason                   Message
+  ----           ------  ------                   -------
+  AbleToScale    True    SucceededGetScale        the HPA controller was able to get the target's current scale
+  ScalingActive  False   FailedGetResourceMetric  the HPA was unable to compute the replica count: failed to get cpu utilization: missing request for cpu in container app-cli of Pod app-cli-d97b4c84b-vbmsg
+
+Events:
+  Type     Reason                        Age                      From                       Message
+  ----     ------                        ----                     ----                       -------
+  Warning  FailedGetResourceMetric       8s                       horizontal-pod-autoscaler  failed to get cpu utilization: missing request for cpu in container app-cli of Pod app-cli-d97b4c84b-vbmsg
 ```
 
-The description displays some errors, especially around reporting the fact that the CPU utilization was not computed,
-note that we can see the `<unknown>` state in the table when we listed the HPA object above.
+The events sections displays some errors, especially around reporting the fact that the CPU utilization was not computed,
+note that we can see the `<unknown>` state in the table when we listed the HPA object above. The message states that:
+`failed to get cpu utilization: missing request for cpu in container app-cli of Pod app-cli-d97b4c84b-vbmsg`, meaning
+that the pods themselves were not configured to have any CPU resource limits, remember that above, we configured the
+auto-scaler, however that only tells OpenShift when to scale the pods, but since the pods have to resources restriction,
+how would any percentage of the CPU utilization be computed, we have to set a CPU utilization as well
 
 In OpenShift a resource request is a threshold you can set that affects scheduling and quality of service. It
 essentially provides the minimum of resources guaranteed to the pod. For example a user can set a CPU request of
@@ -1626,7 +1682,7 @@ guarantee that three will always be at least 400m of CPU time. CPU is measured i
 pods do not get individual cores they get time slices of CPU sharing the cores on the node with other pods. If a
 particular node has four CPU assigned to it, then 4000m are available, to all the running pods in that node.
 
-Resource requests also can be combines with a resource limit which is similar to a request but sets the maximum amounts
+Resource requests also can be combined with a resource limit which is similar to a request but sets the maximum amounts
 of resources guaranteed to the pod. Setting requests and limits also allows the user to set a quality of service level
 by default.
 
@@ -1640,15 +1696,16 @@ Setting a lower quality of service gives the schedule more flexibility by allowi
 Setting a higher quality of service limits flexibility but, give apps more consistent resources. Because choosing the
 quality of service is about finding reasonable defaults most app should fall into the `Burstable`
 
-Setting a CPU request, can be done by using the `oc set resources dc/app-cli --requests=cpu=400m`. As with other
+Setting a CPU request, can be done by using the `oc set resources deployment/app-cli --requests=cpu=400m`. As with other
 changes to the deployment, config, this results in a new deployment config object, it will in turn create new pods which
 will then replace the current ones once the set of new pods produced by the new deployment go into the ready state. Now
-we can list again the HPA objects and see if there are any issues
+we can list again the HPA objects and see if there are any issues. After we have run the above, we should now be able to
+test the auto scaling
 
 ### Testing the autoscaling setup
 
 To demonstrate that autoscaling works as expected you need to trigger the CPU threshold that we have previously set. To
-help reach this mark use the Apache benchmark instance that comes pre installed with `CentOS`, and is already available
+help reach this mark use the Apache benchmark instance that comes pre-installed with `CentOS`, and is already available
 in your path. Before you run the benchmarking test, make sure you are logged in the open shift console in another
 window, so you can switch over to see pods being spun up and down. Then go to the overview page for the `image-uploader`
 project and run the command in the following:
@@ -1656,8 +1713,19 @@ project and run the command in the following:
 ```sh
 # this will execute a total number of 50000 requests towards the pod, which will certainly cause overwhelming CPU usage,
 # and force the OpenShift and monitoring service to scale more pods
-$ ab -n 50000 -c 500
+$ ab -n 100000 -c 1000 http://app-cli-image-uploader.apps-crc.testing:8080/
 
+# now if you are lucky and the threshold was hit we can describe the HPA object, and see the following in the events
+# section, which shows that the pods were auto-scaled to 3 and then 4 based on CPU utilization requirements, the actual
+# number will really depend on your local systems capabilities and such
+$ oc describe hpa/app-cli
+Normal SuccessfulRescale 105s horizontal-pod-autoscaler  New size: 3; reason: cpu resource utilization (percentage of request) above target
+Normal SuccessfulRescale 105s horizontal-pod-autoscaler  New size: 4; reason: cpu resource utilization (percentage of request) above target
+
+# eventually those will be down scaled, but that would take time, this is described in the following section, which resolves the issue with
+# thrashing, the process of spinning up and down pods way too quickly over a short period of time , which OpenShift tries to avoid, do not
+# wonder why those 3 or 4 pods that were auto-scaled might stay 3 or 4 and take some time to get back to the original 2 or 1 replicas that
+# your deployment describes
 ```
 
 ### Avoiding thrashing
@@ -1707,7 +1775,7 @@ From a technology perspective containers are becoming the most important technol
 Developers can code apps and services without the need to design or even care about the underlying infrastructure.
 Operations teams can spend fewer resources designing the installation of apps. Apps and services can easily be moved not
 only between environments like QA testing and so on, in the software development pipeline but also between on premises
-and public cloud environments such as Amazon Web Services - AWS, Microsoft Azure and Google Compute Platform (GCP).
+and public cloud environments such as Amazon Web Services - `AWS`, `Microsoft Azure` and `Google Compute Platform (GCP)`.
 
 When apps need to be modified developers package new container images, which include the app, configuration and runtime
 dependencies. The container then goes through the software deployment pipeline, automated, testing and processing. Using
@@ -1737,7 +1805,7 @@ that is commonly used as the backbone for CI/CD pipelines because it has many pl
 technologies. Jenkins often becomes a Swiss army knife that is used to integrate disparate technologies into one
 pipeline
 
-### CI/CD:1 Creating a dev-environment
+### CI/CD:1 Creating an environment - TODO: this needs rewrite
 
 The first part of any CI/CD pipeline is the development environment. Here, container images are built tested and then
 tagged if they pass their tests. All container build happen in this environment. You will use pre-built template to spin
@@ -1745,8 +1813,8 @@ a up a simple app that runs on `Python`, and uses `MongoDB`, as a database. The 
 Git repository called `Gogs`, which comes pre-installed with the app already in it. `PostgresSQL`is also provided as a
 database for `Gogs`.
 
-This section will make heavy use of OpenShift templates to install apps. An OpenShift template is essentially an aray of
-objects, that can be parameterized and pun up on demand. In most cases the API obEcts created as part of the template
+This section will make heavy use of OpenShift templates to install apps. An OpenShift template is essentially an array of
+objects, that can be parameterized and pun up on demand. In most cases the API objects created as part of the template
 are all part of the same app, but that is not a hard requirement. Using OpenShift templates provides several features
 that are not available if you manually import objects:
 
@@ -1761,7 +1829,7 @@ templates - n openshift`. To see the raw templates files navigate to `/usr/share
 
 ```sh
 # here is the abridged version of the list of the command mentioned above, that pulls the list of templates which are
-# installed in the default openshift distribution, note that this list is about 1/3rd of the default templates, but
+# installed in the default OpenShift distribution, note that this list is about 1/3rd of the default templates, but
 # there are even more on platforms like github distributed by regular people that can be installed and setup in your
 # OpenShift cluster instance, proprietary ones certainly also exist
 NAME                                          DESCRIPTION                                                                        PARAMETERS        OBJECTS
@@ -1795,31 +1863,324 @@ $ oc new-project dev --display-name="ToDo App - DEV"
 
 # we need to configure the template, this template is included in a file which we can simply apply
 $ oc create -f https://raw.githubusercontent.com/OpenShiftInAction/chapter6/master/openshift-cicd-flask-mongo/OpenShift/templates/dev-todo-app-flask-mongo-gogs.json -n dev
+
+# now to instantiate the template itself we can simply do this will basically create a new app using all the objects
+# defined in the template, the template is nice because we can re-use it to duplicate apps easily, or use it as a way to
+# replicate common app setups and configurations
+$ oc new-app --template="dev/dev-todo-app-flash-mongo-gogs"
 ```
 
-Now to instantiate the template itself we can simply do
+### Deployment strategies
+
+So far in this section, you have learned how to build a container image and automate the promotion, of that image across
+different environments using native OpenShift automation in addition to Jenkins integration. But we have not discussed
+the exact sequence for ow the new version of the application is rolled out, The way you update your application in
+OpenShift is called a deployment strategy it is a critical component of supporting a wide variety of application in the
+platform. OpenShift supports several deployment strategies including the following:
+
+- Rolling - the default strategy. When pods consisting of the new image become ready by passing their readiness checks,
+  they slowly replace the old images, one by one, setting this deployment strategy is done in the deployment config object
+
+- Re-create - scales down to zero pods consisting of the old image and then begin to deploy the new pods. This strategy
+  has the cost of a brief downtime while waiting for the new pods to be spun up. Similar to rolling in order to use this
+  strategy it must be set in the deployment configuration object.
+
+- Blue/Green focuses on reducing risk by standing up the pods consisting of new images while the pods with the old
+  images remain running, this allows the user to test their code in a production environment. When the code has been fully
+  tested all new requests are sent to the new deployment. OpenShift implements this strategy using routes.
+
+- Canary - adds checkpoints to the blue/green strategy by rolling out a fraction of the new images at a time and
+  stopping. The user can test the application adequately before rolling out more pods. As with blue/green deployments this
+  strategy is implemented using OpenShift routes.
+
+- Dark launches - rolls out new code but does not make it available to users. By testing how the new code works in
+  production, the users can then later enable the features when its determined to be safe. This strategy has been made
+  popular at place like Facebook and Google. To accomplish dark launches the application code must have checks for certain
+  environment variables that are used to enable the new features. In OpenShift you can take advantage of that code by
+  toggling the new features on or off by setting the appropriate environment variables for the application deployment.
+
+    There are many considerations for choosing a deployment strategy. The rolling strategy upgrades your application the
+    most quickly while avoiding downtime, but it runs your old code side-by-side with your new code. For many stateful
+    application such as clustered application and databases this can be problematic. For example imagine that your new
+    deployment has any of the following characteristics
+
+- It is rolling out a new database schema
+- it has a long running transaction
+- it shared persistent storage among all the pods in the deployment
+- it uses clustering to dynamically discover other pods,
+
+In these cases it makes sense to use a re-create strategy instead of a rolling update. Databases almost always use the
+re-create strategy. You can check the strategy for the pod by doing a quick inspect of the deployment object for the
+target app. Stateless applications is a good fir for a rolling upgrade whereas databases make more sense to run using
+the re-create strategy. Both the rolling and the re-create strategies have extensible options including various
+parameters to determine the timing of the rollouts they also provide lifecycle hooks which allow code to be injected
+during the deployment process. Many users also choose to add blue green and canary style deployment strategies by
+combining the power of OpenShift routes with a rolling update or re create strategies, for application using rolling
+deployment adding a blue/green or canary style deployment allows the OpenShift user to reduce risk by providing a more
+controlled rollout using checkpoints. For application using the re-create deployment strategy adding blue/green or
+canary features lets the application avoid downtime. Both the blue/green and canary deployments use OpenShift routes to
+manage traffic across multiple services. To implement these deployment strategies an entire copy of the application is
+created with the new code. This copy includes the objects to run the application the deployment, service, replication
+controller, pods and so on. When adequate testing has been performed on the new code, the OpenShift route is patched to
+point to the service containing the new code. A blue/green deployment has the added benefit of testing code in production
+and because the old code is still running the app can be rolled back to the old code, if something breaks. Once downside
+to using blue/green deployments is that they require more infrastructure, because your application needs to double the
+resources while both versions of the code are running at the same time. A canary deployment is similar to a blue/green
+one except that whereas blue/green switches the route between services all at once, canary uses, weights to determine
+what percentage of traffic should go to the new and old services. You can modify the weights for the rollout using the
+OpenShift command line interface tool or the console.
+
+Here is a brief summary of the topics we have covered, we can say: That image streams enable automation and consistency
+for container images, you can use OpenShift triggers for even based image builds and deploys you can use DNS for service
+discovery. You can use environment variables for service discovery if dependencies are installed first. Image tagging
+automates the promotion of images between environments. Secrets mask sensitive data that needs to be decoupled from an
+image. Config maps provide startup arguments environment variables or files mounted in an image, OpenShift provides a
+Jenkins instance or a template with many useful plugins pre-installed, allowing regular Jenkinsfile pipelines to be
+executed and monitored form the OpenShift console, OpenShift supports many types of deployment strategies for a wide
+variety of applications.
+
+## Stateful applications
+
+The very first application we have deployed in OpenShift, the php web app that we have deployed, is the `image uploader`,
+Here are a few additional application features:
+
+- Shows you the full size image when you click it.
+- Shows you these images as thumbnails on the application page
+- Uploads images from your workstation
+- Verifies that what you are uploading is a standard image format
+
+It is not the next Instagram, but it is a simple enough to live in a couple of files of source code and be easy to edit
+and manipulate in OpenShift. You will use that simplicity to your advantage in this section. If you have not already go
+ahead and test out the image app, and upload a few images. After you do that your application should show these images
+on the home page as thumbnails
+
+When you deploy an application in OpenShift you can specify the minimum number of replicas instances of the application
+to keep running all the times If you do not specify a number, OpenShift will always keep at least one instance of your
+app running at all times. We initially discussed this in earlier sections, and used the feature in a more recent
+sections to scale up the image to more than one replicas. None of these replicas had persistent storage though. If one
+of the application pods was deleted or scaled down any data it had written would be gone as well. We can test this one.
+
+### Container storage
+
+After logging into your OpenShift cluster from the command line with the oc command line tool you can use the `oc get
+pods` command to get a list of all your running pods. The output of that will show that the app-cli has a few running
+pods, and a few completed ones, which are the build ones. The running ones are the actual application pods, as we
+already know. After that, lets delete one of the pods, or even both, using the `oc delete pod <pod-id>`
+
+Even after we delete one OpenShift will make sure that the desired state, meaning at least 2 replicas is fulfiled,
+therefore it will scale up the application, creating a new pod in place of the one we have just deleted, If we run the
+`oc get pods` one more time we will see that the new pod has a new `age` which is about 10 or so seconds, this is the
+time it took us to list the pods again, and in between that time OpenShift already created the new pod in place of the
+one we deleted
 
 ```sh
-# this will basically create a new app using all the objects defined in the template, the template is nice because we can re-use it to
-# duplicate apps easily, or use it as a way to replicate common app setups and configurations
-$ oc new-app --template="dev/dev/-toto-app-flash-mongo-gogs"
+$ oc login <cluster-ip> -u <kubeadmin> -p <adminpassword>
+
+$ oc get pods
+
+$ oc delete pod
+
+$ oc get pods
 ```
 
-The pods will take a few minutes to deploy, First the `Gogs`, PostgreSQL and MongoDB pods are deployed. A separate pod called `install-gogs`
-also automates the installation of `Gogs` by initializing PostgreSQL and cloning the remote Git repository, locally. When `Gogs` is fully
-installed with a local copy of the remote Git repository the `install-gogs` pod configures a webhook an event drive HTTPS callback that you
-will use to automate new builds in OpenShift. `Gogs` will recognize the event and send HTTP POST to the OpenShift API telling the OpenShift
-to start a new source to image. Every time there is a new commit the app will be rebuilt, once the `install-gogs` pod finishes it tasks it
-exits.
+Now that would seem to be the answer to just about everything wouldn't it. Applications automatically restart themselves
+when they go down. But before we close up shop take another look at your application web page. We can see that the
+images we have initially uploaded earlier are nowhere to be found , When a pod is deployed in OpenShift the storage that
+it used for the file system is ephemeral - it does not carry over from one instance of the application to the next. When
+application needs to be more permanent, you need to set up a persistent storage for use in OpenShift
 
-Next open the OpenShift console in your browser and navigate to the app by choosing App - Routes - <app-name>. You will see the app home
-page, verify that `Gogs` is running properly by navigating to the `gogs` route, if the `install-gogs` pod is not finished and marked completed you
-will see the database initialization instead. Once the pod has completed the installation process you will see the `Gogs` home page and will
-be ready to proceed.
+## Handling permanency
 
-Because the app is using Python the build process is very fast. For languages like Java that may take some time, to build using tools like
-Maven, you can enable incremental builds that allow the build pod to reuse build artifacts such as the Maven JAR and Maven POM that were
-imported during the build process. This avoids the redundancy of having to install the same dependencies multiple times for every build.
+In OpenShift persistent storage is available for data that needs to be shared with other pods or needs to persist pas
+the lifetime of any particular pod. Creating such permanent storage in pods is handles by persistent volumes - PV. These
+`PVs` in OpenShift use industry standard network based storage solutions to manage persistent data. OpenShift can use a
+long list of storage solutions to create persistent volumes - including, but not limited to the following:
 
-You now have a full development environment. By making some app code changes you can see the environment in action, and demonstrate many of
-the OpenShift automation features. Here you will edit the main landing page of the app.
+- `Gluster`
+- `Ceph RBD`
+- `OpenStack Cinder`
+- `Network file system - NFS`
+- `AWS elastic block storage`
+- `Google Cloud Platform persistent disk`
+- `HostPath` - local directories on the OpenShift nodes themselves, which are NOT ephemeral
+
+In the next chapter we will configure a persistent volume in OpenShift using the network file system - NFS
+
+## Creating volumes
+
+In OpenShift they rely on the listed types of network storage to make the storage available across all nodes in a
+cluster. For the examples in the next few sections you will use a persistent volume built with NFS storage. First we
+have to export a NFS volume on your OpenShift master. As we discussed early on in the sections your OpenShift cluster is
+currently configured to allow any user to log into the system as long as their password is not empty. Each new username
+is added to a local database, at first login. You created a user named dev and used that user to create a project and
+deployed the app-cli. The dev user can create projects and deploy apps but it does not have the proper permissions to
+make a cluster wide changes like attaching a persistent volume. We will take a much deeper look at how users are managed
+in OpenShift in future sections, but to create a persistent volume we need an admin level access user in the OpenShift
+cluster, luckily we can get that.
+
+### Logging in as the admin user
+
+When an OpenShift cluster is installed it creates a config file for a special user names kubeadmin or system:admin,
+depending on which OpenShift distribution we are using. The admin user is authenticated using an SSL certificate
+regardless of the authentication provider that is configured. Admin user has full administrative privileges on an
+OpenShift cluster. The key certificate for admin are placed in the Kubernetes config files in `~/.kube`, when the
+OpenShift cluster is installed., this makes it easier to run commands as admin. It is also possible to list the
+credentials of the users from the command line directly, or you can even observe the credentials being logged out to the
+terminal when the cluster is being started
+
+```txt
+# you might see something like this when the cluster is being started for the first time, otherwise refer to the help
+# documentation of the cluster tool you are using, that will point you to the right sub command to use to correctly
+# extract the credentials for the admin user
+
+The server is accessible via web console at:
+  https://console-openshift-console.apps-crc.testing
+
+Log in as administrator:
+  Username: kubeadmin
+  Password: pottH-ZrwmV-KscNd-CZheg
+
+Log in as user:
+  Username: developer
+  Password: developer
+```
+
+### Creating resources
+
+OpenShift makes extensive use of the configuration files written in YAML. These files are a human readable language that
+is often used for configuration files and to serialize data in a way that is easy for both humans and computers to
+consume. YAML is the default way to push data into and get data into Kubernetes and by proxy into OpenShift. In previous
+sections we have talked about OpenShift resources that are created when an application is built and deployed. These
+resources have documented YAML formatted templates so you can create and manage the resources easily. In later sections
+you will use several of these templates to create or change resources in OpenShift. For the application deployments you
+created in earlier sections, these templates were automatically generated and stored by OpenShift, when we created the
+new application or in other words when we run the `new-app` command.
+
+In this section you will use the template to create a persistent volume, this template is more like a specification,
+that even provides a version, that version tells Kubernetes which version of the specification revision we are using to
+create the given resource object, different revision versions might have some differences in the general layout and
+structure of the YAML specification file.
+
+```yml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: pv01
+spec:
+    capacity:
+        storage: 10Gi
+    accessModes:
+        - ReadWriteMany
+    nfs:
+        server: 192.168.122.100
+        path: /var/nfs-data/pv01
+    persistentVolumeReclaimPolicy: Recycle
+```
+
+So what type of information does this file or template contain really:
+
+- At the very start as we already mentioned, is the version of the object, in this case it is under revision `v1`.
+
+- First it is the type of resource the template will create different resources have different templates configurations
+  in this case you are creating a persistent volume
+
+- A name for the resource to be created, this is simply `pv01`, this is mandatory from a Kubernetes point of view, each
+  object of a given type/kind needs a unique name
+
+- Storage capacity for the persistent volume, that will be created measured in GB, in this example, each of the
+  persistent volumes is 2GB
+
+- Next is the access mode of the volume, we will dig into deeper later on
+
+- NFS path for this persistent volume
+
+- NFS server for this persistent volume , if you used another IP address for your master or used another server, you
+  will need to edit this value,
+
+- Recycle policy for the persistent volume that will be created. These policies dictate what and how data will be
+  disposed of once it is no longer being used by an application, we will dig deeper into those in the next sections
+
+### Physical volume
+
+To create a resources from a YAML template use the `oc create` or `oc apply` command along with the `-f parameter`,
+which will specify the template file you want to apply or process. To create the persistent volume for this example you
+will use the template block above, save it to a file, and run the command. Therefore the command might look something
+like that - `oc apply -f <directory/pv01.yml>`. What are some of the options used in the template above.
+
+The Access mode of the persistent volume, dictates how the different pods can access the persistent volume we have
+created, this is mostly to be able to reasonably deal with race conditions and resource locks, that might occur while
+data is being accessed - in any capacity, read or write
+
+- Read/Write (RWO) - This volume can be mounted as read write by a single node, in the OpenShift cluster, this is a useful
+  when you have workloads where a single application pod will be writing data. An example is a relational database, when
+  you know that all the writes to the persistent data will come from a single pod, that would be the pod that is running
+  database server/service
+
+- Read/Only Many (ROX) - This is for volumes where the volume can be mounted as read only by multiple OpenShift nodes. An
+  example of where this type of access mode is useful is when a horizontally scalable web application needs access to the
+  same static content such as images.
+
+- Read/Write Many (RWX) - That access mode is the option you will use for the persistent volume in this section. It allows
+  multiple nodes to mount this volume read from it and write to it. The `image uploader` application is a good example. When
+  you scale up the application in the next section multiple nodes will need to be able to read and write to the persistent
+  storage you are about to create
+
+A reclaim policy dictates how the persistent volume reclaims space after a storage claim on the persistent volume is no
+longer required. Two options are available:
+
+- Retain - with this reclaim policy all data is retained in the volume, reclaiming space is a manual process
+- Recycle - this reclaim policy automatically removed data when the claim is deleted, this one is the one we will be
+  using for the persistent volume created for this section
+
+### Using storage
+
+Now that we have created the persistent volumes it is time to take advantage of them in OpenShift application consume
+persistent storage using persistent volume claims. A persistent volume claim - PVC - can bedded into an application as
+volume using the command line or through the web interface, let us create one PVC first, on the command line and add it
+to the application
+
+The way the persistent volume claims match up with persistent volumes, first you need to know how persistent volumes
+and persistent volume claims match up to each other. In OpenShift PV represent the available storage, while the PVC,
+represent an application need for that storage - the claim for the storage. When you create a PVC, OpenShift look for
+the best fit among the available PV and reserves it for use by the PVC. In the example environment matches are based on
+two criteria :
+
+- Persistent Volume Size - OpenShift tries to take best advantage of available resources, when a PVC is created it
+  reserves the smallest PV available that satisfies its needs.
+
+- Data Access Mode - when a PVC is created OpenShift look for an available PV with at least the level of access required if
+  an exact match is not available it reserves a PV with more privileges that still satisfies the requirements for example
+  if a PVC is looking for a PV with a RWO (read/write) access mode it will use a PV with a RWX (read/write many) access
+  mode if one is available.
+
+Because all the persistent volumes in your environment are the same size matching them to a PVC will be straightforward,
+next you will create a PVC for your application to use.
+
+### Creating claims
+
+Now we will do something very similar to what we have already done for the persistent volume, create it from a template,
+again using YAML as the base manifest format, that will be fill up all the necessary fields that are required to attach
+our PVC to the application, and by proxy match that PVC with the persistent volume that we have already created for the
+cluster. There are few important parameters to take a note of:
+
+- The name of the PVC to be created, this is important, as it is core parameter for all Kubernetes and by
+  proxy/extension OpenShift objects, we can not really make one without an unique name
+
+- The access mode of the PVC, in this example the PVC will request the RWX (read/write many) this aligns with the
+  volumes we have already crated in previous section, which were all RWX.
+
+- The size of the storage required, this example creates a 2GB storage request which matches the size of the persistent
+  volume that you created in the previous section
+
+```yml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+    name: pvc-app-cli
+spec:
+    accessModes:
+        - ReadWriteMany
+    resources:
+        requests:
+            storage: 2Gi
+```
