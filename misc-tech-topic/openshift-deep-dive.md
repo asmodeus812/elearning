@@ -248,7 +248,7 @@ The most common task in OpenShift is deploying an app. Because this is the most 
 it as early as practical using both the command line and the web interface. So place bear with us. This section may seem
 a little repetitive.
 
-## Cluster options
+## Cluster runtimes
 
 Before we can start using OpenShift you have to deploy it. There a few options, to install OpenShift locally on your
 machine or on cloud providers. We are going to stop at tools like `Minishift` or `RedHat's CRC`.
@@ -277,28 +277,40 @@ crc console --credentials
 minishift console --credentials
 ```
 
+## Cluster installation
+
+To install a OpenShift cluster we have really two major options - `minishift` and `crc`. The latter of which is the more
+modern one which we will be using, this is a distribution provided by RedHat directly, and `crc` supports more modern
+versions of OpenShift, those would be any version =>4.xx.
+
+The runtime first needs a container runtime on your host machine, that is usually docker or podman or containerd,
+one of those need to be installed in order for you to be able to install `minishift`. However for the `crc` runtime the
+process is a bit different, while the `minishift` uses native container technologies to mimic the OpenShift cluster
+runtime, the `crc` product uses virtualization, meaning that you need to have the virtualization on your host enabled.
+For any modern windows, there is nothing more required here, as Hyper-V would be used to run the `crc` runtime,
+however for linux systems, you are required to install `KVM`. For linux systems there are a couple of more
+dependencies that need to be installed in order for you to be able to run the `crc` runtime:
+
+- `virtsh` - that is a general purpose virtual network daemon, that one is used to bridge the connection between the
+  `crc` runtime running in the virtual machine and your host
+- `KVM` - as already stated that is virtualization platform that is required core component to run the `crc` runtime,
+  once installed proceed further
+
+After having all dependencies installed on your platform simply download the `crc` runtime from the official RedHat
+website, that can be found here - `https://www.redhat.com/en/blog/codeready-containers`. Once you visit this page
+follow the instructions to setup the orchestration runtime.
+
+## Cluster login
+
 To enable ssh login into the virtual machine itself, if using the `crc` distribution, which is running the OpenShift
 cluster, add the following into your ssh config file located in `~/.ssh/config`. This will allow you to perform a simple
 ssh login command as such `ssh crc`. Also make sure that the certificate files specified in the configuration below
 exist, in the specified locations, they should for a local installation of `crc`, but if another local OpenShift cluster
 distribution is used, replace the paths to point to the locally installed certificate credentials on your machine.
 
-```sshconfig
-Host crc
-    HostName 127.0.0.1
-    Port 2222
-    User core
-    HashKnownHosts yes
-    StrictHostKeyChecking no
-    IdentityFile ~/.crc/machines/crc/id_ed25519
-    UserKnownHostsFile /dev/null
-```
-
-The `minishift` distribution, does not require any special ssh setup, since it provides a command line option to directly
-login into the cluster using `minishift ssh`
-
-The set of examples below will be using the `minishift` version along with an older version of `openshift` - 3.11
-instead of the, OpenShift version 4.xx which is mostly supported by `crc`
+The `minishift` distribution, does not require any special ssh setup, since it provides a command line option to
+directly login into the cluster using `minishift ssh`. The set of examples below will be using `crc` and the OpenShift
+version 4.xx which is supported by `crc` version
 
 Creating the projects can now be done using the tool. In OpenShift projects are the fundamental way apps are organized.
 Projects let users collect their apps into logical groups. They also serve other useful roles around security that we
@@ -312,10 +324,97 @@ project command changes the current working project from one to another. To spec
 specific project regardless of your current working project use the -n parameter with the project name you want the
 command to run against. This is a helpful option when you are writing scripts that use oc and act on multiple projects`
 
+There is a quick and dirty way to configure your local ssh client to work with the cluster node, and allow you to very
+quickly login into the node, by simply providing the name of the host, as shown below in the ssh/config file, this will
+send the correct identity material form your host machine to the cluster, and allow you to directly login into the
+cluster node itself, this is very useful, as we will need to interact with the cluster node to configure it in the
+future.
+
+```sshconfig
+Host crc
+    HostName 127.0.0.1
+    Port 2222
+    User core
+    HashKnownHosts yes
+    StrictHostKeyChecking no
+    IdentityFile ~/.crc/machines/crc/id_ed25519
+    UserKnownHostsFile /dev/null
+```
+
+The `minishift` has a direct argument that can be used on the command line which is much simpler, no additional
+configuration is required there - `minishift ssh`. This will do the same as the configuration above, and does not need
+any manual intervention from the user. You will land directly into the cluster node.
+
+## Cluster config
+
+There are certain amount of configuration options to be configured when or before starting the cluster, this is to
+ensure, that the cluster is going to perform well, or even be able to start, most of the default configurations are
+okay, however often enough the default resources that `crc` or `minishift` are using for `cpu` and memory resources are not
+good enough, preventing the clusters from working well or even starting in the first place. This is very important since
+the more features you enable the more resources you will need. There is no good way to calculate the exact resources
+that are going to be needed for a local deployment of these options. But a good estimate is that at the very least at
+least 16 GB or memory for `minishift` and 24 GB of memory for `crc` are required, as far as CPU configuration goes, the
+minimal requirements should start from 8 cores, for `minishift` and 10 for `crc`. Below are example snippets to set the
+configuration of the clusters globally, these require the cluster to be restarted if set while the cluster is running.
+
+```sh
+minishift config set --global disk-size 100GB # increase the base size of the node, by default that would be 30GB
+minishift config set --global memory 16GB # make sure that memory resources are not constrained too much
+minishift config set --global cpus 8 # enable more cpu cores to allow for better performance
+```
+
+```sh
+crc config set disk-size 100 # increase the base size of the node, by default that would be 30GB
+crc config set memory 24512 # make sure that memory resources are not constrained too much
+crc config set cpus 10 # enable more cpu cores to allow for better performance
+```
+
+There are other configuration options which will be looked into, which enable different features on the clusters, such
+as monitoring further down in the sections. There is another level of configuration that can be enabled on the cluster,
+that is not actually directly related to the cluster tool, that is the patch approach. The patch approach enables
+OpenShift features that are off by default, meaning that those, unlike the configuration options above, are not strictly
+related or specific to the clustering solution we are using - `crc` or `minishift`. Rather they are native OpenShift
+features that we can turn on or off, by patching the default `clusterversion` config object
+
+```sh
+# here is one such example, which actually removes an entry from the overrides section of the clusterversion/version
+# object, by doing that we modify the default out of the box behavior, whatever the overrides section were enabling or
+# disabling, you can run oc describe clusterversion/version to see what this object contains by default before doing
+# any modifications to it. This command is using the so called json-path, to remove the entry from the overrides array
+# and more precisely the 0-th index entry from the spec.overrides[]
+$ oc patch clusterversion/version --type='json' -p '[{"op":"remove", "path":"/spec/overrides/0"}]'
+```
+
+In future sections you will also see that the cluster node itself, contains several files under /etc which can be used
+to configure the cluster in more direct and manual way by directly editing these files, you will be able to modify the
+behavior of the cluster, directly. The files stored under /etc in the cluster provide more flexibility but should not be
+messed with too much unless you are aware of the changes you are going to be doing.
+
+## Cluster software
+
+There are ways to install software on our cluster, using the dnf or yum binaries, which are the package manages for
+the underlying linux distribution that the OpenShift cluster node is using which is CentOS
+
+```sh
+$ ssh crc # here are few preliminary steps, first login into the cluster node
+$ sudo -s # login as root user, this will make subsequent commands easier to execute directly
+$ subscription-manager register # will prompt you to enter your credentials to register this node against RedHat
+$ subscription-manager refresh # this will refresh the indexes and allow us to interact with the RedHat registries
+$ dnf clean all && dnf repolist -C # clean any left over artifacts
+$ dnf -y install httpd-tools ansible python3 pip --nogpgcheck # start installing utility applications to the cluster node
+```
+
+## First project
+
 To create a project you need to run the `oc new-project` command and provide a project name. For the first project use
 `image-uploader` as the project name
 
+As already mentioned the project term in OpenShift is actually what Kubernetes refers to as the so called namespaces,
+the OpenShift Projects are a way to separate different application contexts more effectively and also allow for a more
+general permission control over these contexts, by restricting which namespace or a project a user has access to easily
+
 ```sh
+# to create a new project just run the following, that would immediately change the context to that project, as well
 $ oc new-project image-uploader --display-name='Image Uploader Project'
 
 Now using project "image-uploader" on server "https://192.168.42.124:8443".
@@ -1165,7 +1264,7 @@ information tracked about the RC helps to establish its relationships to the oth
 # to make sure that we create, a replication controller instances, which will be done when we use scale, on the existing
 # deployment, the replication controller is an evolution of the replica controller, but it is basically the same object
 # that is representing the actual replicas being managed by the orchestrator
-oc scale deployment/app-cli --replicas=2
+$ oc scale deployment/app-cli --replicas=2
 deploymentconfig.apps.openshift.io "app-cli" scaled
 ```
 
@@ -1862,12 +1961,12 @@ also on top of that will make sure to setup the necessary template to our CI/CD 
 $ oc new-project dev --display-name="ToDo App - DEV"
 
 # we need to configure the template, this template is included in a file which we can simply apply
-$ oc create -f https://raw.githubusercontent.com/OpenShiftInAction/chapter6/master/openshift-cicd-flask-mongo/OpenShift/templates/dev-todo-app-flask-mongo-gogs.json -n dev
+$ oc create -f openshift/dev-todo-app-template.json -n dev
 
 # now to instantiate the template itself we can simply do this will basically create a new app using all the objects
 # defined in the template, the template is nice because we can re-use it to duplicate apps easily, or use it as a way to
 # replicate common app setups and configurations
-$ oc new-app --template="dev/dev-todo-app-flash-mongo-gogs"
+$ oc new-app --template="dev-todo-app-flask-mongo-gogs"
 ```
 
 ### Deployment strategies
@@ -1996,15 +2095,45 @@ the lifetime of any particular pod. Creating such permanent storage in pods is h
 `PVs` in OpenShift use industry standard network based storage solutions to manage persistent data. OpenShift can use a
 long list of storage solutions to create persistent volumes - including, but not limited to the following:
 
-- `Gluster`
-- `Ceph RBD`
-- `OpenStack Cinder`
-- `Network file system - NFS`
-- `AWS elastic block storage`
-- `Google Cloud Platform persistent disk`
-- `HostPath` - local directories on the OpenShift nodes themselves, which are NOT ephemeral
+- `CSI` - the container storage interface defines a standard interface for container orchestration systems, like
+  Kubernetes, to expose arbitrary storage systems to their container workloads. Once a CSI compatible volume driver is
+  deployed on a Kubernetes cluster, users may use the CSI volume type to attach or mount the volumes exposed by the CSI
+  driver. A CSI volume can be used in a Pod just like any other, we can have the pod reference a persistent volume claim,
+  which itself is referencing a persistent volume which itself defines the CSI driver to use.
 
-In the next chapter we will configure a persistent volume in OpenShift using the network file system - NFS
+- `NFS` - these types of volumes allow an existing NFS (Networking File System) share to be
+  mounted into a Pod, Unlike `emptyDir` which is erased when a Pod is removed the contents of an NFS volume are preserved
+  and the volume is merely unmounted. This means that an NFS volume can be pre-populated with data and that data can be
+  shared between pods. NFS can be mounted by multiple writers simultaneously. You must have your own NFS server running
+  with the share exported before you can use it, you can not specify NFS mount options in the Pod spec, these have to be
+  specified in the persistent volume document itself, for the volume.
+
+- `HostPath` - local directories on the OpenShift nodes themselves, which are NOT ephemeral, `hostPath` volume mounts a
+  file or directory from the host node file system into your pod. That is not something that most Pods will need, but it
+  offers a powerful escape hatch for some application
+
+- `Local` - a local volume represents a mounted local storage device such as a disk partition or directory, Local
+  volumes can only be used as statically created persistent volume objects, dynamic provisioning is not supported,
+  compared to `hostPath` volumes, local volumes are used in a durable and portable manner without manually scheduling pods
+  to nodes. These system is aware of the volume's node constraints by looking at the node affinity on the Persistent
+  volume, however local volumes are subject to the availability of the underlying node and are not suitable for all
+  applications. The pod using this volume is unable to run. Applications using the local volumes must be able to tolerate
+  this reduced availability as well as potential data loss, depending on the durability of the underlying disk
+
+Note that using the `HostPath` volume type presents many security risk. If you can avoid using a `hostPath` volume you
+should. For example define a local `PersistentVolume` instead, and use that. If you are restricting the access to specific
+directories on the node, using admission time validation, that restriction is only effective when you additionally
+require that any mounts of that `hostPath` volume are read only. If you allow a read-write mount of any host path by an
+untrusted Pod, the containers in that pod may be able to subvert the read-write host mount. Take care when using
+`hostPath` volumes, whether these are mounted as read-only or as read-write because:
+
+- Access to the host file system can expose privileged system credentials such as for the kubelet or privileged API keys.
+- Pod with identical configuration such as created from a Pod template, may behave differently on different nodes
+  due to different file on the nodes
+- `hostPath` volume usage is not treated as ephemeral storage usage. You need to monitor the disk usage by yourself
+  because excessive `hostPath` disk usage will lead to disk pressure on the node
+
+In the next chapter we will configure a persistent volume in OpenShift using the network file system - HostPath
 
 ## Creating volumes
 
@@ -2045,6 +2174,15 @@ Log in as user:
   Password: developer
 ```
 
+The example above, shows the example output for the `crc` deployment method of the OpenShift cluster, but similar output
+will be observed for the `minishift` deployment method, you have to take a note of the IP address of the cluster, since
+that will your point of entry to the API server and the user interface and console
+
+If you are unable to locate the password for the admin or developer, and you are using the `crc` or `minishift` methods,
+checkout your home directory for folders named `.crc` and `.minishift`, therein you will be able to find the details
+about the credentials stored in files. These are usually located in the following locations on your host machine -
+`$HOME/.crc/machines/crc/kubeadmin-password` or `$HOME/.minishift/machines/minishift/TODO`
+
 ### Creating resources
 
 OpenShift makes extensive use of the configuration files written in YAML. These files are a human readable language that
@@ -2068,13 +2206,26 @@ metadata:
     name: pv01
 spec:
     capacity:
-        storage: 10Gi
+        storage: 2Gi
     accessModes:
         - ReadWriteMany
     nfs:
-        server: 192.168.122.100
-        path: /var/nfs-data/pv01
+        # The IP address here refers to the IP address of the NFS server
+        # In our case we can use the address of the cluster node we have
+        # which runs on our local machine we can find the IP of that one in the
+        # .kube directory, under the .kube/config file, look for the ip address
+        # example of a cluster ip address -> server: 192.168.42.124
+        server: <cluster-ip-address>
+        path: /var/nfs-share/app-cli-pv01
+        # path: <path-inside-cluster-node>
     persistentVolumeReclaimPolicy: Recycle
+```
+
+```sh
+$ oc get pv
+
+NAME  CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS
+pv01  2Gi        RWX            Recycle          Available
 ```
 
 So what type of information does this file or template contain really:
@@ -2156,6 +2307,55 @@ two criteria :
 Because all the persistent volumes in your environment are the same size matching them to a PVC will be straightforward,
 next you will create a PVC for your application to use.
 
+First have to enable the NFS capabilities on the server, meaning that we have to create, and then enable the mount
+paths, that we are going to be using in the persistent volume. The script below does just that, you will notice that it
+creates 5 directories which can be used by 5 different PVC, they are simply named starting from `pv01` to `pv05`, and are
+under the directory - `/var/nfs-share/app-cil/{}`.
+
+```sh
+# make sure to configure the cluster first to enable emergency login, this will generate a passwd file in the .crc
+# directory on your host machine, this file will contain the password to the core user in the crc cluster node, which is
+# quite useful when you wish to run some sudo enabled commands in the node, after you run this config, restart the cluster
+# after the cluster is started search for the file - $HOME/.crc/machines/crc/passwd, and fetch the password for the core user
+crc config set enable-emergency-login true
+```
+
+```sh
+#!/bin/sh
+
+# create a file with the following contents, on the crc node itself, name it nfs.sh, and execute it, make the file
+# executable with chmod # +x nfs.sh, run this script as sudo, like so sudo ./nfs.sh. This will make the needed
+# directories and export them as nfs volumes which can later on be mounted and used by our persistent volume and the
+# persistent claims
+NUM_PVS=5
+PREFIX="app-cli"
+
+# go over the predefined number of persistent volumes to create, make a new directory for each one of them, under the
+# specified path, note that this path is matched exactly in the creation of persistent volume object above
+for i in $(seq -f "%02g" 1 ${NUM_PVS})
+do
+    mkdir -p "/var/nfs-share/${PREFIX}-pv${i}"
+    echo "/var/nfs-share/${PREFIX}-pv${i} *(rw,sync,no_root_squash)" >> /etc/exports
+done
+
+# make sure that the permissions for the directories are lax, to ensure that the directories can be written to and read
+# from, otherwise the container might not be able to save or read any data at all
+chmod -R 777 /var/nfs-share
+chown -R nfsnobody:nfsnobody /var/nfs-share
+exportfs -a
+```
+
+```sh
+# to checkout what was exported, you can cat out the file exports, and see all the volumes in there
+$ cat /etc/exports
+
+/var/nfs-share/app-cli-pv01 *(rw,sync,no_root_squash)
+/var/nfs-share/app-cli-pv02 *(rw,sync,no_root_squash)
+/var/nfs-share/app-cli-pv03 *(rw,sync,no_root_squash)
+/var/nfs-share/app-cli-pv04 *(rw,sync,no_root_squash)
+/var/nfs-share/app-cli-pv05 *(rw,sync,no_root_squash)
+```
+
 ### Creating claims
 
 Now we will do something very similar to what we have already done for the persistent volume, create it from a template,
@@ -2176,11 +2376,1081 @@ cluster. There are few important parameters to take a note of:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-    name: pvc-app-cli
+    name: pvc01
 spec:
+    # we are forcing this claim to bind to the pv01, this is usually not needed, but we would like to make sure that the
+    # claim will correctly be using the right persistent volume we have already created, the storageClassName is mandatory
+    # since otherwise this will error out on running apply
+    volumeName: pv01
+    storageClassName: ""
     accessModes:
         - ReadWriteMany
     resources:
         requests:
             storage: 2Gi
 ```
+
+We can then use the regular `oc` command to apply this configuration, first save that one into a file, and then we can
+simply run the `oc apply -f pv01.yml`, note that unlike the persistent volumes we are not required to use an admin
+user, the volumes are meant to be created by admins, but the claims are created for pods, by developers, usually what
+happens when a new deployment config is created is that the pod will refer to the volume claim by name, which should be
+created by the developers first.
+
+The one rule to remember is that the PVC needs to be created in the same project as the project for which it will
+provide storage. When the PVC is created it queries OpenShift to get available persistent volumes. It uses the criteria
+described to find the best match and then reserves that persistent volume, once that is done it can take a minute or so
+depending on the size of your cluster, for the PVC to become available to be used in an app as persistent storage. The
+following command shows how you can use the `oc` command line tool to provide information about the active persistent
+volume claims, in an OpenShift project.
+
+```txh
+# Note the following event, once the persistent volume claim is created, it will be lazily initialized, meaning that it
+# will not be 'created' per se, until at least one pod is actually using it, therefore it will stay in pending status
+# until that happens
+
+  Type    Reason                Age                  From                         Message
+  ----    ------                ----                 ----                         -------
+  Normal  WaitForFirstConsumer  7s (x14 over 3m16s)  persistentvolume-controller  waiting for first consumer to be created before binding
+```
+
+```sh
+# note that we have to first make sure that the currently set project is the one we are going to work with, either use
+# the -n flag when calling the command below, or just simply use oc project <project-name>, to first set the currently
+# active project context
+$ oc get pvc
+
+NAME          STORAGECLASS                   VOLUMEATTRIBUTESCLASS   AGE
+pvc-app-cli   crc-csi-hostpath-provisioner   <unset>                 27s
+```
+
+A PVC represents reserved storage available to the applications in your project. But it is not yet mounted into an
+active application. To accomplish that you need to mount your newly created PVC into an application as a volume.
+
+### Adding claims
+
+In OpenShift a volume is any filesystem file or data mounted into an application pod to provide persistent data. In this
+section we are concerned with persistent storage volumes. Volumes also are used to provide encrypted data, application
+configuration and other types of data as you saw in earlier sections. To add a volume you use the `oc volumes command`,
+The following example takes the newly created PVC and adds it into the app-cli application - the command is broken over
+multiple lines to make it more readable and understandable
+
+```sh
+# note that we need 3 primary things here, first is we need to tell it the type of volume, the name of the volume, and
+# where the volume will be mounted, meaning which path in the container will be linked to the volume, reading and writing
+# under that path will actually directly write/read to the persistent volume in this case the NFS server
+$ oc set volume deployment/app-cli --add \
+        --claim-name=pvc01 \
+        --type=PersistentVolumeClaim \
+        --mount-path=/opt/app-root/src/uploads
+
+# after this if we do describe the deployment we will be able to see the following output, the rest of it is removed, and only the volume information is shown, which allows us to see which claim our deployment is working with, and also the name of the volume which is as mentioned automatically generated
+$ oc describe deployment/app-cli
+
+...
+  Volumes:
+   volume-rpw2z:
+    Type:          PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:     pvc01
+    ReadOnly:      false
+...
+```
+
+By applying the volume to the deployment, for app-cli you can trigger a redeployment of the application automatically to
+incorporate the new persistent volume, the following parameters specified above are required and mandatory, as mentioned
+in the comment, they define the minimal number of known arguments that need to be specified for the volume to be created
+for our application.
+o
+Optionally you can also specify a name of the volume itself, with the --name parameter. If it is not set, OpenShift
+creates on dynamically, typically simply as a sequence of letters and numbers
+
+Using the `oc` describe command to list the details of the deployment we can now see that the volume is attached to the
+deployment and more precisely to the pod itself
+
+```sh
+# we can see below that the volume is attached to the pod, through the deployment
+$ oc describe deployment/app-cli
+
+# Here is an excerpt from from the describe above, we can see that the volume was created, and it was linked to the
+# persistent volume claim we have already created, and in turn that claim is linked to the persistent volume object
+# which is an NFS volume configured on the cluster node
+  Volumes:
+   volume-plc22:
+    Type:          PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:     app-cli
+    ReadOnly:      false
+```
+
+```yml
+# and this is how part of the spec of the deployment for the pod will look like, a volume is attached to the deployment, in this case a volume is given an automatic name, what is important here is that the volume is linked to a claim, the claim we already created above
+spec:
+    volumes:
+        - name: volume-plc22
+          persistentVolumeClaim:
+              claimName: app-cli
+```
+
+Because we have created the persistent volume and the claims to allow for multiple reads and writes by using the RWX
+access mode, when this application scale horizontally each new pod will mount the same PVC, and be able to read data
+from and write data to it. To sum up you just modified your containerized application to provide horizontally scalable
+persistent storage.
+
+## Volume mounts
+
+Because we are using NFS server, exports as the source for the persistent volume, it stands to reason that somewhere on
+the OpenShift nodes, those NFS volumes are mounted and created. You can see that this is the case by looking at the
+following example. SSH into the OpenShift node, locally where the containers are running, run the mount command and
+search for the mounted volumes from the IP address of the NFS server. The IP address of the OpenShift cluster should be
+format of 192.168.XXX.XXX
+
+```sh
+# after having ssh access to the node, we can run the mount command, replace the cluster-node-ipaddress with the ip
+# address of the cluster node
+$ mount | grep <cluster-node-ipaddress>
+
+```
+
+You will get multiple results, each of those will be for each pod that is running for the application, earlier in this
+section you used the `oc get pv` command and confirmed that the PV was being used by the app-cli, but that does not
+explain how the NFS volume is made available in the app-cli container's mount namespace.
+
+Earlier in previous section, we had a look at how the file system in a container is isolated from the rest of the
+containers that are running on the cluster host, and the cluster host/node itself, through the use of namespaces and
+more precisely the mount namespace which is one of the corner stone namespaces that the Linux kernel uses when dealing
+with containerized applications. The persistent volume mount however, is not added to the mount namespace of the app-cli
+containers. Instead the NFS mount is made available in the container using a technology called `bind mount`
+
+A bind mount, in a Linux is a special type of mounted volume where part fo the file system is mounted in a new new
+additional location. For app-cli the NFS mount for the persistent volume is mounted using a bind mount at
+/opt/app-root/src/uploads in the container mount namespace, using ta bind mount makes the content available
+simultaneously in two locations. A change in one location is automatically reflected in other location.
+
+Bind mounts are used for volumes for two primary reasons. First creating a bind volume mount on a Linux system is a
+lightweight operation in terms of performance and CPU requirements. That means redeploying a new container to replace an
+old one does not involve remounting a remote volume. This keeps container creation time low.
+
+Second this approach separates concerns for persistent storage, using bind mounted the container definition does not
+have to include specific information about the remote volume. The container only needs to define the name of the volume
+to mount. OpenShift abstract how to access the remote volume and make it available in the containers. The separation of
+concerns between administration and usage of a cluster is consistent OpenShift design feature.
+
+The goal of this section was to walk you through configuring the components that make a persistent storage available to
+a container in OpenShift. In the following sections, we will use persistent storage to create more scalable and
+resilient applications.
+
+# Stateful applications
+
+In previous sections we have created persistent storage for the image upload pods, which allowed data to persist past
+the lifecycle of a single pod. When a pod failed a new pod spun up in its place and mounted the existing persistent
+volume locally. Persistent storage in OpenShift allows many stateful applications to run in containers. Many other
+stateful applications still have requirements that are unsatisfied by persistent storage alone, for instance many
+workloads distribute data through replication which required application level clustering. In OpenShift this type of
+data replication requires direct pod to pod networking without going through the service layer. It is also very common
+for stateful applications such as databases to have their own custom load balancing and discovery algorithms, which
+require direct pod to pod access. Other common requirements for stateful applications include the ability to support
+sticky services and sessions as well as implement a predictable graceful shutdown.
+
+One of the main goals of the OpenShift container platform is to be a world class platform for stateless and stateful
+applications. In order to support stateful applications a variety of tools are available to make virtually any
+application container native. This chapter will walk you through the most popular tools including headless services,
+sticky sessions pod discovery techniques and stateful sets, just to name a few. At the end of this section you will walk
+through the power the stateful set, which bring many stateful applications to life on OpenShift
+
+### Enabling a headless services
+
+A good example of application clustering in everyday life is demonstrated by amazon's virtual shopping cart. Amazon
+customers browse for items and add them to a virtual shopping cart so they can potentially be purchased later. If an
+Amazon user is signed in to their account their virtual shopping cart will be persisted permanently because the data is
+stored in a database. But for users who are not signed in to an account the shopping cart is temporary. The temporary
+cart is implemented as in-memory cache in amazon's data centers. By taking advantage of an in-memory caching end users
+get fast performance which results in a better user experience. Once downside of using in-memory caching is that if a
+server crashed that data is lost. A common solution to this problem is data replication - when an application puts data
+in memory that data can be replicated to many different caches, which result in fast performance and redundancy.
+
+Before applications can replicate data among one another, they need a way to dynamically find each other. In previous
+sections, this concept was covered through the use of the service discovery in which pods use OpenShift service object.
+The OpenShift service object provides a stable IP and port that can be used to access one or more pods. For most cases
+having a stable IP and port to access one or more replicated pods is all that is required. But many types of
+applications such as thsoe that replicate data require the ability to find all the pods in a service and access each one
+directly, on demand.
+
+One working solution would be to use a single service object for each pod, giving the application a stable IP and port
+for each pod. Although this works nicely, it is not ideal because it can generate many service object which can become
+difficult to manage. A better solution is to implement a headless service and discover the application pod using an
+application specific discovery metrics. A headless service is a service object that does not load balance or proxy
+between backend pods. it is implemented by the setting - `spec.clusterIP` field to None, in the service API object.
+
+Headless services are most often used for application that need to access specific pods directly without going through
+the service proxy. Two common examples of headless service are clustered databases and applications that have a client
+side load balancing login built into them or the code. Later in this chapter we will explore an example of a headless
+service using MongoDB a popular NoSQL database.
+
+### Application clustering with WildFly
+
+In this section we will deploy a classic example of application level clustering in OpenShift using WildFly, a popular
+application server for Java based application runtimes. You will be deploying new application as part of this chapter so
+create a new project as follows
+
+```sh
+$ oc new-project stateful-apps
+
+Now using project "stateful-apps" on server "https://api.crc.testing:6443".
+You can add applications to this project with the 'new-app' command. For example, try:
+    oc new-app rails-postgresql-example
+to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:
+    kubectl create deployment hello-node --image=registry.k8s.io/e2e-test-images/agnhost:2.43 -- /agnhost serve-hostname
+```
+
+It is important to note that this new example uses cookies stored in your browser to track your session, Cookies aer
+small pieces of data that servers ask your browser to hold to make your experience better. In this case a cookie will be
+stored in your browser with a simple unique identifier, a randomly generated string called `JSESSIONID`. When the user
+initially accesses the web application the server will reply with a cookie containing that java session id field and a
+unique identifier as the value. Subsequent access to the application will use the `JSESSIONID` to look up all information
+about the user's session, which is stored in a replication cache. It doe not matter which pod is accessed - the user
+experience will be the same
+
+The WildFly application that you will deploy will replicate the user data among all the pods in its service. The
+application will track which user the request comes from by checking the `JSESSIONID`, that is passed from the user's
+browser cookie. Because the user data will be replicated the end user will have consistent experience even if some pods
+die and new pods are accessed. Run the following `oc` command to create the new application.
+
+```sh
+# this will create the template that we will use to create the application and all required dependencies below
+$ oc create -f openshift/stateful-app-template.yml -n stateful-apps
+
+# to see the list of templates, we can now do the following, and use the name of our newly created template to create
+# the new application from it, as done below
+$ oc get templates
+
+# use the template to directly create the components of our new application, like so, specify the name of the template
+$ oc new-app --template="wildfly-oia-s2i"
+```
+
+Now that the application is deployed let us explore application clustering with WildFly on OpenShift. To demonstrate this we will do the following
+
+- add data to your session by registering users on the application page
+- make a note of the pod name
+- scale the service to two replicated pods. The WildFly application will then automatically replicate your session data in memory between pods
+- delete the original pod
+- verify that your session data is still active
+
+### Querying the OpenShift server
+
+Before we get started we need to modify some permissions for the default service account in your project which will be
+responsible for running the application pods. From the stateful app project run the following command to add the view
+role to the default service account. The view role will allow the pods running in the project to query the OpenShift API
+server directly. In this case the application will take advantage of the ability to query the OpenShift API server to
+find other WildFly application pods in the project. These other instances will send pod-to-pod traffic directly to each
+other and use their own application specific service discovery method and load balancing features for communication
+
+```sh
+# this will make sure to add to the service account the view role, the service accounts are named based on the project
+# name and you can see that in our command below too, that would be system:serviceaccount:stateful-apps:default
+$ oc policy \
+    add-role-to-user \
+    view \
+    system:serviceaccount:$(oc project -q):default \
+    -n $(oc project -q)
+
+clusterrole.rbac.authorization.k8s.io/view added: "system:serviceaccount:stateful-apps:default"
+```
+
+Start by registering a few users in the WildFly application page. List the pods for the project and remember their ids
+name. Then scale up these pods with the
+
+```sh
+# we first would like to the pods that we have, we can see that we have one running pod, which is where the application
+# lives, the rest are the build and deploy pods which are completed we do not care about them, we can see that the
+# application lives in a pod with id - wildfly-app-1-vr2kz
+$ oc get pods
+NAME                   READY   STATUS             RESTARTS   AGE
+wildfly-app-1-build    0/1     Completed          0          3h25m
+wildfly-app-1-deploy   0/1     Completed          0          3h24m
+wildfly-app-1-vr2kz    1/1     Running            0          3h24m
+
+# in between here, create a few Wildfly, accounts by visiting the application URL, first we can list the routes created
+# for our app, and then describe one of the routes, to find where this is exposed, after which action we can visit that
+# link
+$ oc get routes
+NAME                   HOST/PORT                                             PATH   SERVICES               PORT       TERMINATION     WILDCARD
+wildfly-app            wildfly-app-stateful-apps.apps-crc.testing                   wildfly-app            <all>                      None
+
+# from the description of the route we can see the request host, which in this case point to
+# http://wildfly-app-stateful-apps.apps-crc.testing, visit that URL and create a few accounts first, so we can see how the
+# data we create will persist over when later on we scale the pods
+$ oc describe route route/wildfly-app
+Name:                   wildfly-app
+Namespace:              stateful-apps
+Labels:                 app=wildfly-oia-s2i
+                        app.kubernetes.io/component=wildfly-oia-s2i
+                        app.kubernetes.io/instance=wildfly-oia-s2i
+                        application=wildfly-app
+                        template=wildfly-oia-s2i
+Requested Host:         http://wildfly-app-stateful-apps.apps-crc.testing
+
+# we can now scale up the deployment/deployment-config, which will cause the old pod to get deleted, and two new ones
+# will get created
+$ oc scale dc/wildfly-app --replicas=2
+
+# here we can see that the pods are now two, the old one is still there that would be the one with suffix vr2kz, but a
+# new with with a suffix 47nwb has now spun up
+$ oc get pods
+NAME                   READY   STATUS             RESTARTS   AGE
+wildfly-app-1-build    0/1     Completed          0          3h33m
+wildfly-app-1-deploy   0/1     Completed          0          3h31m
+wildfly-app-1-vr2kz    1/1     Running            0          3h31m
+wildfly-app-1-47nwb    1/1     Running            0          31s
+
+# now we can delete the original pod, the one ending with vr2kz, if your application works correctly, during the scaling
+# procedure, the application would have cloned / replicated over the data from the vr2kz original pod, to the new one
+# which ends with 47nwb, meaning that no data will be lost when the first pod get deleted
+$ oc delete pod wildfly-app-1-vr2kz
+
+# after we delete this pod, since our deployment config was modified to require two replicas a new one would be spun up
+# in its place, to keep the pod replicas at two (2) which is okay, the desired state is fulfiled, there is one new one
+# with suffix k7g28 in place of the one we deleted vr2kz
+$ oc get pods
+NAME                   READY   STATUS             RESTARTS   AGE
+wildfly-app-1-build    0/1     Completed              0          3h37m
+wildfly-app-1-deploy   0/1     Completed              0          3h36m
+wildfly-app-1-k7g28    1/1     Running                0          6s
+wildfly-app-1-47nwb    1/1     Running                0          4m41s
+```
+
+The two pods discovered each other with the help of a WildFly specific discovery mechanism designed for Kubernetes, the
+implementation is called KUBE_PING and its part of the `JGroups` project. When the second pod was started it queried the
+OpenShift API for all the pods in the current project. The API server then returned a list of pods in the current
+project. The KUBE_PING code in the WildFly server filtered the list of pods for those with special ports labeled ping.
+If any of the pods in the result set returned from the API server match the filter then the `JGroups` code in WildFly will
+attempt to join any existing clusters among the pods in the list.
+
+Take a moment to examine the result set from the pod perspective by navigating to any of the pods in the OpenShift
+console and clicking the terminal tab, then run this command to query the API server for a list of pods in the project
+matching the label `application=wildfly-app`
+
+```sh
+# first we can simply login into or remote ssh into one of the pods and inspect the contents of the environment which
+# shows what is the OpenShift config that WildFly would be using to query the server, in this case we run the following
+# inside the ssh session of one of the pods - env | grep -i kube, and we can see that we have these env variables, which
+# are used to determine which namespace to query, which is really the project name in OpenShift terms, and the labels to
+# filter on the pods, in our case to make sure it is looking only for pods that are the actual application that we care
+# about.
+OPENSHIFT_KUBE_PING_NAMESPACE=stateful-apps
+OPENSHIFT_KUBE_PING_LABELS=application=wildfly-app
+```
+
+### Verify the data replication
+
+Now that two pods a re successfully clustered together delete original pod from the OpenShift console or by the command
+line. The OpenShift replication controller will notice that a pod has been deleted and will spin up a new one in its
+place to ensure that there are still two replicas. If clustering gs working properly the original data you entered will
+still be available, even though it was originally stored in memory in a pod that no longer exists. Double check by
+refreshing the application in your browser. If the data is not longer there make sure that the policy command above was
+run correctly, it has to be run first before you do any other changes and before we start scaling and deleting pods
+
+### Other cases for direct pod access
+
+A java application server that needs to cluster application is just one common use case for direct pod discovery and
+access. Another example is an application that has its own load balancing or routing mechanisms such as shared data
+base. A shared database is one in which large data sets are stored i many small databases as opposed to one large
+database. Many sharded databases have intelligence built into their clients and drivers that allow for direct access to
+the correct shard without querying where the data resides. Sharded databases work well with OpenShift and have been
+implemented using MongoDB and Infinispan
+
+A typical sharded database implementation may include creating the service object as headless service. Once a headless
+service object is created DNS can be used as another service discovery mechanism or method. A DNS query for a given
+headless service will return A records for all the pods in the service. More information on the DNS and A records is
+available in next sections. Applications can then implement custom login to determine which pod to access. One popular
+application that uses DNS queries to determine which instances to access is Apache Kafka a fast open source messaging
+broker. Most implementations of Kafka on OpenShift and other kubernetes base platforms use headless services so the
+messaging brokers can access each other directly to send and replicate messages. The brokers find each other using DNS
+queries which are made possible by implementing a headless service.
+
+Other common use cases for direct access include more mundane IT workloads such as software agents that are used for
+backups and monitoring. Backup agents are often run with many traditional database workloads and implement features such
+as scheduled snapshots and point in time recovery of data. A monitoring agent often provides features such as real time
+alerting and visualization of an application. Often these agents may either run locally embedded as instrumented code in
+the application or communicate through direct network access. For many cases direct network access is required because
+the agents may communicate with more than one application across many servers. In these scenarios, the agents require
+consistent direct access to applications in order to fulfill their daily functions.
+
+### Describing sticky sessions
+
+In the WildFly example data is replicated between the WildFly server instances. A cookie with a unique identifier is
+generated automatically by the application and stored in your browser. By using a cookie the application can track which
+end user is accessing the application. This approach works well but has several drawbacks. The most obvious is that if
+the WildFly server did not support application clustering or did not have a discovery mechanism that works in OpenShift
+that application would produce uneven user experience. Without application clustering if there were two application pods
+one with user data and one without user data then the user would see their data like 50% of the time because requests
+are send round-robin manner between pods in a service
+
+Once common solution to this problem is to use sticky session. In the context of OpenShift enabling sticky sessions
+ensures that a user making requests into the cluster will consistently receive responses from the same pod for the
+duration of their session.
+
+This added consistently helps ensure a smooth user experience and allows many applications that store temporarily data
+locally in the container to be run in OpenShift. By default in OpenShift sticky session are implemented using cookies for
+HTTP based routes and some types of HTTPS based routes. The OpenShift router can reuse existing cookies or create new
+cookies. The WildFly application you created earlier created its own cookie so the router will use that cookie for the
+sticky session implementation. If cookies are disable or can not e used for the route sticky sessions are implemented
+using a load balancing scheme called source that uses the client's IP address as part of its implementation.
+
+### Toggling sticky sessions
+
+Let us see how sticky session work by toggling cookies on and off using the Linux curl command line tool, which can make
+HTTP requests to a server eight times and print the result. The WildFly application you have deployed has a couple of
+REST endpoints that have not been explored yet. The first endpoint can be used to print out the pod IP and hostname.
+Enter the following command to print out that information from 8 sequential HTTP requests to the app's route
+
+```sh
+# here we call curl 8 times against the route of our application, using the /rest/serverdata/ip endpoint
+for I in $(seq 1 8); \
+do \
+    curl -s \
+    "$(oc get route wildfly-app -o=jsonpath='{.spec.host}')/rest/serverdata/ip"; \
+    printf "\n"; \
+done
+
+# you will get something like that, as an output, we can see the host names which are really also corresponding to the
+# pod names as well as the IP addresses of those pods,
+{"hostname":"wildfly-app-1-tmkqj","ip":"10.217.0.164"}
+{"hostname":"wildfly-app-1-tmkqj","ip":"10.217.0.164"}
+{"hostname":"wildfly-app-1-tmkqj","ip":"10.217.0.164"}
+{"hostname":"wildfly-app-1-bhtbm","ip":"10.217.0.165"}
+{"hostname":"wildfly-app-1-bhtbm","ip":"10.217.0.165"}
+{"hostname":"wildfly-app-1-bhtbm","ip":"10.217.0.165"}
+{"hostname":"wildfly-app-1-bhtbm","ip":"10.217.0.165"}
+{"hostname":"wildfly-app-1-tmkqj","ip":"10.217.0.164"}
+```
+
+The output prints the hostname and the IP address of each pod four times, alternating back and forth between pods in a
+round robin pattern. That is as you would expect from the default behavior, the curl command does not provide any
+cookie or identifier method to tell OpenShift to not do the default round robin routing approach.
+
+Fortunately curl can save cookies locally in a text file that can be used for future HTTP requests, to the server. Use
+the following command to grab the cookie from the WildFly application and save it to a local file called `cookie.txt`
+
+```sh
+# first make sure to save the cookie by doing a regular request, then we will use that file to send it over for our 8
+# requests we are going to be doing, just as above, and inspect what we get as a result
+$ curl -o /dev/null \
+    --cookie-jar cookies.txt \
+    $(oc get route wildfly-app -o=jsonpath='{.spec.host}')/rest/serverdata/ip
+
+# here is the content of that file after we created it with the request above, we can see that this is the data of a
+# regular browser cookie, it contains the type of the cookie - http-only, and the host we are hitting as well, and some
+# other fields which are of no interest at the moment, along with a couple of cookie identifiers at the end
+$ cat cookie.txt
+# Netscape HTTP Cookie File
+#HttpOnly_wildfly-app-stateful-apps.apps-crc.testing FALSE / FALSE 0 e5cd79b5768b9bd942ee273490b6e8ec 38affa384fdb33244245b19937c8d6e8
+
+# here we first also save any cookies that the server provides us back and then send them back, to the server with each
+# HTTP request, this will ensure that the requests are pinned to a pod
+for I in $(seq 1 8); \
+do \
+    curl -s --cookie cookies.txt \
+    "$(oc get route wildfly-app -o=jsonpath='{.spec.host}')/rest/serverdata/ip"; \
+    printf "\n"; \
+done
+
+# and here is the output, now we can see that only one pod is being hit, there is no round robin pattern of access for the pods
+{"hostname":"wildfly-app-1-bhtbm","ip":"10.217.0.165"}
+{"hostname":"wildfly-app-1-bhtbm","ip":"10.217.0.165"}
+{"hostname":"wildfly-app-1-bhtbm","ip":"10.217.0.165"}
+{"hostname":"wildfly-app-1-bhtbm","ip":"10.217.0.165"}
+{"hostname":"wildfly-app-1-bhtbm","ip":"10.217.0.165"}
+{"hostname":"wildfly-app-1-bhtbm","ip":"10.217.0.165"}
+{"hostname":"wildfly-app-1-bhtbm","ip":"10.217.0.165"}
+{"hostname":"wildfly-app-1-bhtbm","ip":"10.217.0.165"}
+```
+
+### Limitations of cookies
+
+One limitation of using cookies for load balancing is that they do not work for HTTPS connections that use the
+pass-through routing. In pass through routing there is an encrypted connection from the client typically a browser all
+the way to the application pod. In this scenario cookies wont work, because the connection is encrypted and OpenShift
+has no way of decrypting it, there is no way for the routing layer in OpenShift to see the request. To solve this
+problem OpenShift uses the client IP address to implement sticky sessions. But this option has a couple of drawbacks.
+
+First many client IP addresses get translated using Network Address Translation (NAT), before reaching their
+destination. When a request is translated using NAT it replaces the often private IP address of the client with that of
+a public IP address. This frequently makes the client IP address the same for all users on a particular home or business
+network. Imagine a scenario in which you ran three pods to run an application for everyone in your office, but everyone
+in your office was being routed to the same pod because the requests are translated by NAT and are seen or appeared to
+be show the same source IP address.
+
+Second OpenShift uses an internal hashing schema based on the client IP address and the number of pods to determine is
+load balancing schema. When the number of replicas changes such as when you are using auto scaling it is possible to lose sticky sessions.
+
+For the rest of this section you will not need to instances of the WildFly application. So let us scale it back down
+
+```sh
+$ oc scale dc/wildfly-app --replicas=2
+deploymentconfig.apps.openshift.io "wildfly-app" scaled
+```
+
+## Shutting down applications
+
+So far in this section you have learned how to use sticky sessions to ensure that users have consistent experience in
+OpenShift. You have also learned how to use custom load balancing and service discovery in OpenShift services. To
+demonstrate custom load balancing you deployed an application that keeps users data in memory and replicates its data to
+other pods. When looking at clustering you entered data and then scaled up to two pods that replicated the data you
+entered. You then killed the original pod and verified that your data was still there. This approach worked well but in
+a controlled and limited capacity. Imagine a scenario in which autoscaling was enabled and the pods were spinning up
+and down more quickly. How would you know the application data had been replicated before the particular pod was killed
+
+- or even which pod was killed. OpenShift has several ways to solve this issue
+
+### Application grace period
+
+The easiest and most straightforward solution is to use a grace period for the pod to gracefully shut down. Normally
+when an OpenShift deletes a pod it sends the pod a Linux TERM signal, often abbreviated as SIGTERM. The SIGTERM acts as
+a notification to the process that it needs to finish what it is doing and then exit and pass control to the parent
+process. One caveat is that the application needs custom code to catch the signal and handle the shutdown sequence.
+Fortunately many application servers have this code built in. If the container does not exit within a given grace
+period, OpenShift sends a Linux KILL signal or SIGKILL, that immediately terminates the application.
+
+In this section, we will deploy a new a to demonstrate how OpenShift grace period works. In the same stateful apps
+project that you are already in run the following command to build and deploy the application
+
+```sh
+# this will create the project directly from the github using the resource template
+$ oc new-app \
+    -l app=graceful \
+    --context-dir=dockerfile-graceful-shutdown \
+    https://github.com/OpenShiftInAction/chapter8
+```
+
+The application may take a minute to build because it may need to pull down the new base image to build the application.
+Once the application is successfully built and running delete it with a grace period of 10 seconds.
+
+```sh
+# this will prompt the container runtime to wait 10 seconds before forcefully killing the container process, this gives
+# us a window of 10 seconds, within which we will take a look at the logs produces by the pod, see below
+$ oc delete pod -l app=graceful --graceperiod=10
+```
+
+When you run delete with a grace period of 10 seconds, OpenShift sends a SIGTERM signal immediately to the pod and then
+forcibly kills it in 10 seconds if it has not exited by itself within that time period. Quickly run the following
+command to see this plays our in the logs for the pod
+
+```sh
+# this will pull the logs for the pods that are running our app, we are using a sub shell command to select the pod-id
+# dynamically to make sure we do not lose time tracking it down, since we have 10 seconds to do this, to see the logs,
+# there is a way to see the logs of a killed pod as well, but that we will leave for future excessive
+$ oc logs -f $(oc get pods -l app=graceful -o=jsonpath='{.items[].metadat.nam}')
+
+# we can see that these are the logs the pod is printing while it is running, since it is an example application purely
+# created to test the SIGTERM it is waiting for us to send that signal, through the delete command, then after the signal
+# was caught it is now running the code that is in the signal hook or callback section
+Waiting for SIGTERM, sleeping for 5 seconds now...
+Waiting for SIGTERM, sleeping for 5 seconds now...
+Waiting for SIGTERM, sleeping for 5 seconds now...
+...
+Caught SIGTERM! Gracefully shutting down now
+Gracefully shutting down for 0 seconds
+Gracefully shutting down for 1 seconds
+Gracefully shutting down for 2 seconds
+Gracefully shutting down for 3 seconds
+Gracefully shutting down for 4 seconds
+Gracefully shutting down for 5 seconds
+Gracefully shutting down for 6 seconds
+Gracefully shutting down for 7 seconds
+Gracefully shutting down for 8 seconds
+Gracefully shutting down for 9 seconds
+```
+
+The process that is running is a simple bash script that waits for a SIGTERM signal and then prints a message to
+standard out until it is killed. In this case the pod was given a grace period of 10 seconds and the pods printed logs
+for approximately 10 seconds before it was forcibly killed. By default, the grace period is set to 30 seconds. If you
+have an important container, that you never want to kill or be killed, you must set the `terminationGracePeriodSeconds`
+field in the deployment to -1
+
+As we know in a container the main process runs as process PID - 1. This is very important and when handling linux
+signals, because only PID 1, receives the signal, although most containers have a single process many containers have
+multiple processes. In this scenario the main process needs to catch the signal and notify the other process in the
+container - `systemd` can also be used as a seamless solution. For containers with multiple processes that all need to
+handle linux signals it is best to use `systemd`, for this implementation.
+
+We can now proceed and delete this example app demo, bu doing `oc delete all -l app=graceful`, which will delete all
+resources, tagged with the label - graceful
+
+### Container lifecycle hooks
+
+Although catching basic linux signal such as SIGTERM is a best practice many application are not equipped to handle the
+Linux signal.s A nice way to externalize the logic from the application is to use the `preStop` hook and one of two
+container lifecycle hooks available in OpenShift. Container lifecycle hooks allow users to take predetermined actions
+during a container management lifecycle event. The two events available in OpenShift are as follows
+
+- `PreStop` - Executes a handler before the container is terminated, this event is blocking, meaning it must finish before
+  the pod is terminated.
+- `PostStart` - Executes a handler immediately after the container is started.
+
+Similar to readiness probes and liveness probes the handler can be a command that execute in the container, or it can be
+an HTTP call to an endpoint exposed by the container. Container lifecycle hooks can be used in conjunction with pod
+grace periods. If the `preStop` hook are used they take precedence over the pod deletion. SIGTERM will not be sent to the
+container until the `preStop` hook finishes executing.
+
+Container lifecycle hooks and linux signal handling are often used together but in many cases users decide which method
+to use for their application. The main benefit of using linux signal handling is that the application will always behave
+the same way, no matter where the image is run. It guarantees consistent and predictable shutdown behavior because the
+behavior is coded in the application itself. Sending SIGTERM signals on delete is fundamental not only to all kubernetes
+or OpenShift platforms but to all runtimes like docker, contaienrd and so on. If the user handles the SIGTERM signal in
+their application the image will behave consistently even if it is moved outside of OpenShift. Because the `preStop` hooks
+need to be explicitly added to the deployment or template there is no guarantee that the image will behave the same way
+in other environments. Many application such as third party application do not handle SIGTERM properly and the end user
+can not easily modify the code. In this case a `preStop` hook must be used. A good example of this is the NGINX server, a
+popular and lightweight HTTP server. When NGINX is sent a SIGTERM it exits immediately rather than forking NGINX image
+itself, and adding code to handle the linux SIGTERM signal an easy solution is to add a `preStop` hook that gracefully
+shuts down the NGINX server form the command line. A general rule to follow is that i you control the code, you should
+code your application to handle the SIGTERM if you do not control the code use a `preStop` hook if needed
+
+## Stateful sets
+
+So far in this chapter you have learned that OpenShift has many capabilities to support stateful application. These let
+users make traditional workloads first class citizens on OpenShift, but some application also require even more
+predictable startup and shutdown sequencing as well as predictable storage and networking identifying information.
+Imaging a scenario with the WildFly application in which data replication is critical to the user experience but a
+massive scaling event destroys too many pods at one time while replication is happening, how will the application
+recover ? Where will the data be replicated to ? Is it going to be lost forever ?
+
+To solve this problem OpenShift has a special object called a stateful set, known as pet set or older versions of
+OpenShift. A stateful set is a powerful tool in the OpenShift users toolbox to facilitate many traditional workloads in
+a modern environment. A stateful set object is used in place of a replication controller or replica set (in newer
+version of OpenShift platform) and it is the underlying implementation to ensure replicas in a service, but it does so
+in a more controlled way.
+
+A replication controller can not control the order of how pods are created or destroyed. Normally if a user configures a
+deployment to go from one to five replicas in OpenShift that task is passed to an replica set or controller that starts
+four new pods all at once. The order in which they are started, and marked as ready, is completely random and unknown
+
+### Deterministic sequence
+
+A stateful set brings a deterministic sequential order to pod creation and deletion. Each pod that is created also has
+an ordinal index number associated with it. The ordinal index indicates the startup order. For instance if the
+application WildFly application was using a stateful set with three replicas the pods would bee started and names in
+this order - `wildfly-app-0`, `wildfly-app-1`, `wildfly-app-2`. A stateful set also ensures that each pod is running and
+ready, (has passed the readiness probe) before the next pod is started, it is sequential. In the previous scenario
+`wildfly-app-2` would not be started until the `wildfly-app-1` was running and ready
+
+The reverse is also true, a replication set or controller will delete pods at random, when a command is given to reduce
+the number of replicas. A stateful set can also be used to controller shutdown sequence, it starts with the pod that has
+the highest ordinal index (n-1 replica) and works its way backward to meet the new replica requirements. A pod will not
+be shut down until the previous pod has been fully terminate. Refer back to the previous section regarding SIGTERM and
+lifecycle hooks which will also affect this behavior
+
+The controller shutdown sequence can be critical for many stateful application. In the case of the WildFly application
+user data is being shared between a number of pod. When the WildFly application is shut down gracefully a data
+synchronizes process may occur between the remaining pods in the application cluster. This process often be interrupted
+without the use of a stateful set because the pods are shut down in parallel. By using a predictable one-at-a-time
+shutdown sequence, the application is less likely to lose any data which results in a better user experience.
+
+### Examining a stateful set
+
+To see how stateful sets work first create a new project
+
+```sh
+# first create a new namespace project that we will be using to do our testing in
+$ oc new-project statefulset
+
+# then we can create the template from the provided file, which will be later used to create the actual app
+$ oc create \
+    -f openshift/stateful-set-template.yml \
+    -n statefulset
+template.template.openshift.io/mongodb-statefulset-replication-emptydir created
+
+# now create the application from the template we have created above
+$ oc new-app --template="mongodb-statefulset-replication-emptydir"
+
+# note how our two pods are correctly labeled with -0 and -1, these are the ordinal values of the pods, they were
+# created in that exact same order by the stateful set/controller
+$ oc get pods
+NAME      READY STATUS  RESTARTS AGE
+mongodb-0 1/1   Running 0        68s
+mongodb-1 1/1   Running 0        37s
+
+# now we can see the logs of the very first pod with index 0, and we can actually see how the pod is configured to look for other pods such as in this case pod with index 1, to replicate the data, that was added to the database, in this case a single entry of user was added, then that data was replicated to the other pod, you can clearly see how the mongodb-0 pod is trying to access the other pod through the deterministic IP/host address which in this case is the mongodb-1.mongodb-internal.statefulset.svc.cluster.local
+$ oc logs mongodb-0
+Successfully added user: { "user" : "oiauser", "roles" : [ "readWrite" ] }
+bye
+2025-06-09T12:08:35.000+0000 I REPL     [conn12] replSetReconfig admin command received from client
+2025-06-09T12:08:35.006+0000 I REPL     [conn12] replSetReconfig config object with 2 members parses ok
+2025-06-09T12:08:35.006+0000 I ASIO     [NetworkInterfaceASIO-Replication-0] Connecting to mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017
+2025-06-09T12:08:35.010+0000 I ASIO     [NetworkInterfaceASIO-Replication-0] Successfully connected to mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017
+2025-06-09T12:08:35.011+0000 I REPL     [ReplicationExecutor] New replica set config in use: { _id: "rs0", version: 2, protocolVersion: 1, members: [ { _id: 0, host: "mongodb-0.mongodb-internal.statefulset.svc.cluster.local:27017", arbi
+terOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 1, host: "mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017", arbiterOnly: false, buildIndexes: true, hidden: fal
+se, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 } ], settings: { chainingAllowed: true, heartbeatIntervalMillis: 2000, heartbeatTimeoutSecs: 10, electionTimeoutMillis: 10000, getLastErrorModes: {}, getLastErrorDefaults: { w: 1, wti
+meout: 0 }, replicaSetId: ObjectId('6846cec0fa37b01dd820333d') } }
+2025-06-09T12:08:35.011+0000 I REPL     [ReplicationExecutor] This node is mongodb-0.mongodb-internal.statefulset.svc.cluster.local:27017 in the config
+2025-06-09T12:08:35.011+0000 I REPL     [ReplicationExecutor] Member mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017 is now in state STARTUP
+2025-06-09T12:08:37.012+0000 I REPL     [ReplicationExecutor] Member mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017 is now in state SECONDARY
+
+# start scaling to 3 replicas, which will simply add one more, to the list above, notice that our pods are in the
+# ready state, which means that we will be able to scale them up, had the mongodb-1 pod been in a non ready 0/1 state,
+# our scale command would have failed, that is because the stateful set will not allow us to scale up when we have
+# pods that are not ready
+$ oc scale statefulset/mongodb --replicas=3 && oc get pods
+NAME      READY STATUS  RESTARTS AGE
+mongodb-0 1/1   Running 0        4m16s
+mongodb-1 1/1   Running 0        4m15s
+mongodb-2 1/1   Running 0        4s
+
+# now we can also look up the logs of the mongodb-0, we can see that now the newest pod which was the mongodb-2, is detected by the mongodb-0 pod, which then replicates its data to the mongodb-2 pod, using the same process as it did for the pod with ordinal index 1 above.
+$ oc logs mongodb-0
+2025-06-09T12:12:44.067+0000 I ASIO     [NetworkInterfaceASIO-Replication-0] Connecting to mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017
+2025-06-09T12:12:44.068+0000 I REPL     [ReplicationExecutor] New replica set config in use: { _id: "rs0", version: 3, protocolVersion: 1, members: [ { _id: 0, host: "mongodb-0.mongodb-internal.statefulset.svc.cluster.local:27017", arbi
+terOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 1, host: "mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017", arbiterOnly: false, buildIndexes: true, hidden: fal
+se, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 2, host: "mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, vot
+es: 1 } ], settings: { chainingAllowed: true, heartbeatIntervalMillis: 2000, heartbeatTimeoutSecs: 10, electionTimeoutMillis: 10000, getLastErrorModes: {}, getLastErrorDefaults: { w: 1, wtimeout: 0 }, replicaSetId: ObjectId('6846cec0fa3
+7b01dd820333d') } }
+2025-06-09T12:12:44.068+0000 I REPL     [ReplicationExecutor] This node is mongodb-0.mongodb-internal.statefulset.svc.cluster.local:27017 in the config
+2025-06-09T12:12:44.068+0000 I ASIO     [NetworkInterfaceASIO-Replication-0] Connecting to mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017
+2025-06-09T12:12:44.076+0000 I ASIO     [NetworkInterfaceASIO-Replication-0] Successfully connected to mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017
+2025-06-09T12:12:44.076+0000 I ASIO     [NetworkInterfaceASIO-Replication-0] Successfully connected to mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017
+2025-06-09T12:12:44.076+0000 I REPL     [ReplicationExecutor] Member mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017 is now in state STARTUP
+2025-06-09T12:12:46.077+0000 I REPL     [ReplicationExecutor] Member mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017 is now in state SECONDARY
+```
+
+Unlike previous use of the scale command this time you need to explicitly state that you are scaling a stateful set. In
+OpenShift console notice that the new pod that was created has a deterministic pod name with the ordinal index
+associated with it. Also the reason we are using the `statefulset` object to scale, instead of deployment, is because
+the `statefulset` is a replacement for the regular deployment object when working with stateful application contexts,
+such as this one. The `StatefulSet` has similar but also different properties in its specification than the `Delpoyment`
+this is to reflect the features that the `StatefulSet` exposes to the OpenShift users, related to managing application
+state
+
+Similar to the WildFly application the three MongoDB pods are replicating data to each other. To check that this
+replication is fully functional click any of the pods on the bottom of the mongodb stateful set Details page and then
+click the Terminal tab. Any commands executed here will execute in the pod. First log into the mongodb as the admin
+user, using `mongo admin -u admin -p oiaadminpassword`. After that check the status of the MongoDB replica set by typing
+`rs.status()` after the login was successful
+
+### Constant Network identity
+
+Stateful sets also provide a consistent means of determining the host-naming scheme for each pod in the set. Each
+predictable hostname is also associated with a predictable DNS entry. Examine the pod hostname for mongodb-0 by executing this command -
+
+```sh
+# we are again pulling the id of each pod or its name to exec a cat command from the context of each node, printing the
+# contents of the /etc/hostname file, which will show us the actual hostname of the pod
+$ for statefulpod in $(oc get pods -l name=mongodb -o=jsonpath='{.items[*].metadata.name}'); \
+    do \
+        oc exec $statefulpod -- cat /etc/hostname; \
+    done
+
+# these are the hostnames, these will correspond to the names of the pods themselves as we know, from the very firs
+# sections when we discussed the relationship between the container, container runtime, hostname and the orchestrator
+mongodb-0
+mongodb-1
+mongodb-2
+```
+
+We know that the hostname is the same as the pod name, that is something we have seen and investigated earlier in
+previous sections. The stateful set also ensures a DNS entry for each pod running in a stateful set. This can be found
+by executing the dig command using the DNS entry name for each pod. Find the IP addresses by executing the following
+command from one of the OpenShift nodes. Because the command relies on the OpenShift provided DNS it must be run from
+within the OpenShift environment to work properly
+
+`When you are using stateful sets the pod hostname in the DNS is listed in the format <pod name>.<service
+name>.<namespace>.svc.cluster.local`
+
+Because this example also contains a headless service, there are DNS A records for the pods associated with the headless
+service. Ensure that the pod IP into DNS match the previous listing by running this command from the OpenShift nodes
+
+```sh
+# login into the node itself first, through ssh
+$ ssh <cluster-node-host>
+
+# from within the cluster node, we can then execute the following piece of shell script which will use dig - DNS lookup
+# utility. Is a flexible tool for interrogating DNS name servers. It performs DNS lookups and displays the answers that
+# are returned from the name server(s) that were queried. Most DNS administrators use dig to troubleshoot DNS problems
+# because of its flexibility, ease of use, and clarity of output. Other lookup tools tend to have less
+# functionality than d
+$ for statefulpod in $(oc get pods -l name=mongodb -o=jsonpath='{.items[*].metadata.name}'); \
+    do \
+        dig +short $statefulpod.mongodb-internal.statefulset.svc.cluster.local; \
+    done
+```
+
+### Consistent persistent storage
+
+Pods running as part of a stateful set can also have their own persistent volume claims associated with each pod. But
+unlike a normal persistent volume claim, they remain associated with a pod and its ordinal index, as long as the
+stateful set exists. In the previous example you deployed an ephemeral stateful set without persistent storage. Imagine
+that the previous example was using persistent storage, and the pods were writing log files that included the pod
+hostname. You wold not want the persistent volume claim to later be mapped to the volume of a different pod with a
+different hostname because it would be hard to make sense of those log files, for debugging and auditing purposes.
+Stateful sets solve this problem by providing a consistent mapping through the use of a volume claim template which is a
+template the persistent volume associates with each pod. If a pod dies or is reschedules to a different node, then the
+persistent volume claim will be mapped only to the new pod that starts in its place with the same hostname as the old
+pod. Providing a separate and dedicate persistent volume claim for each pod in the stateful set is crucial for many
+different types of stateful applications which cannot use the typical deployment config model of sharing the same
+persistent volume claims across many applications instances.
+
+### The Stateful set limitations
+
+Under normal circumstances pods controller by a stateful set should not need to be deleted manually. But there are a few
+scenarios in which a pod being controller by a stateful set could be deleted by an outside force. For instance if the
+kubelet or node is unresponsive, then the API server may remove the pod after a given amount of time and restart it
+somewhere else in the cluster. A pod could also exit accidentally or could be manually removed by a user. In those cases
+it is likely that the ordinal index will be broken, New pods will be created with the same hostname and DNS entries, as
+the old pods but the IP addresses may be different. For this reason any application that relies on hard coded IP addresses
+is not a good idea, or fit for stateful sets. If the application can not be modified to use DNS or hostnames instead of
+IP addresses you should use a single service per pod for a stable IP address.
+
+Another limitation is that all the pods in a stateful set are replicas of each other which of course makes sense when
+you want to scale, But that would not help any situation in which disparate applications need to be started in a
+particular order. A classic example is a Java or NET application that throws errors if a database is unavailable, once
+the database is started then the application also needs to be restarted to refresh the connections. In that scenario, a
+stateful set would not help the order between the two disparate services
+
+### Non-native stateful applications
+
+One of the reasons OpenShift has gained so much market adoption is that traditional IT workloads work just as well as
+modern stateless applications. Yet there is still work to be done, one of the biggest promises of using containers is
+that applications will behave the same way between environments. Containers start form well known image binaries that
+contain the application and the configuration it needs to run. If a container dies a new one is started form the
+previous image binary that is identical to how the previous container was started. Once major problem with this model
+occurs for applications that are changed on the fly and store their information in a way that makes it difficult to
+re-create
+
+A good example of this issue can be seen with `wordpress` an extremely popular blogging application that was designed
+many years before containers became popular. In a given `wordpress` workflow a blogger might go to the admin portion of
+their web-site add some text and then save it, `wordpress` saves all that text in a database, along with any HTML and
+styling. When the blogger has completed this action the container has drifted form its original image. Container drift
+is normal for most applications but in this case, if the container crashed the blog would be lost, persistent storage
+can be used to ensure that the data is persisted. When a new `wordpress` pod starts it could map to the database and
+would have all the blogs available.
+
+But promoting such a snapshot of a database among various environments is a major challenge. There are many examples of
+using an event driven workflow that can be triggered to export and import a database after a blogger publishes content,
+but it is not easy nor is it native to the platform. Containers start from well known immutable container images, but
+engineering a reverse workflow in which images are created form running container instances is more error-prone and
+rigid. Other examples that have worked with some engineering include - applications that open a large number of ports
+applications that rely on hard coded IP addresses, and other legacy applications that rely on older Linux technologies
+
+# Operations & Security
+
+This section focuses on cluster wide concepts and knowledge you will need to effectively manage an OpenShift cluster at
+scale. These are some of the skills required for any operations teams managing an OpenShift cluster. In previous chapter
+is all about working with OpenShift integrated role based access control, you will change the authentication provider
+for your cluster, users and work with the system accounts buil into OpenShift along with the default roles for different
+user types. Other sections focus on the software define network that deployed as part of OpenShift this is how
+containers communicate with each other and how service discovery works in an OpenShift cluster. The we will bring
+everything together and look at OpenShift from security perspective. We will discuss how SELinux is used in OpenShift
+and how you can work with security policies to provide the most effective level of access for your application.
+
+## Permissions vs Wild-West
+
+Aa platforms like OpenShift are not effective for mulitple users without robust access and permissions management for
+various applications in OpenShift components. If every user had a full access to all your OpenShift resources it would
+truly be the wild west. Conversely if it was difficult to access resources, OpenShift would not be a good for much
+either. OpenShift has a robust authentication and access control system, that provides a good balance of self-service
+workflows to keep productivity up while limiting users to only what they need to get their job done. When you first
+deployed OpenShift the default configuration allowed any user name and non empty password field to log in. This
+authentication method uses the allow-all identity provider that comes with OpenShift.
+
+In OpenShift the identity provider is a plugin that defines how users can authenticate and the backend service that you
+want to connect for managing user information. Although the allow all provider is good enough when you are learning to
+use OpenShift when you need to enforce access rules you will need to change to a more secure authentication method. In
+the next section you will replace the allow-all provider with one that uses a local data base file
+
+We are going to use and configure the OpenShift cluster with an Apache htpasswd database for user access and set up a
+few users to use with that authentication source You will create the following users:
+
+- developer a user with permissions typical to those given to a developer in an OpenShift cluster
+- project-admin - a user with permissions typical of a developer or team lead in an OpenShift cluster
+- admin - a user with administrative control over the entire OpenShift cluster
+
+Please go through that now, and then continue with this section. After configuring OpenShift in that way, if you attempt
+to log in with your original dev or other user that user can not be authenticated because it is not in your htpasswd
+database, but if you log into using the new developer or any of the new users, you will no longer have access to the
+previous projects we have created - like the image-uploader and so forth, that is due to the fact that the old dev user
+would still own that namespace or project
+
+### Setting up authentication
+
+Many different user databases are available to the IO professionals for managing access and authentication. To
+interoperate with as many of these as possible, OpenShift provides 11 identity providers that interface with various
+user databases, including the allow all provider that you have been using so far in the cluster. These providers are as
+follows
+
+- allow all - allows any username and non-empty password to log in
+- deny all - does not allow any usernames and passwords to log in
+- htpasswd - authenticates with Apache htpasswd database files
+- keystone - user OpenStack Keystone as the authentication source
+- LDAP - authenticates using an LDAP provider like openLDAP
+- Basic - uses the Apache Basic authentication on a remote server to authenticate users
+- Request Header - uses custom http header for user authentication
+- GitHub - authenticates with github, using OAuth2
+- Gitlab - authenticates with gitlab, using OAuth2
+- Google - uses google OpenID connect for authentication
+
+Different authentication providers have different options that are specific to each provider unique format, for example
+the options available for the htpasswd provider are different than those required for the github provider, because these
+providers access such different user databases
+
+What is htpasswd - that is an utility from the old days, it goes all the way back to the first versions of the Apache
+web server in the later 90s, back then computers had so much less memory that the name of an application could affect
+system performance, applications names were typically limited to eight characters, to fit this tight requirement
+characters were often removed or abbreviated - and thus htpasswd was born.
+
+### Introduction to htpasswd
+
+The htpasswd provider uses the Apache style htpasswd files for authentication. These are simple databases that contain a
+list of usernames and their corresponding password in an encrypted format. Each line in the file represents a user. The
+user and password sections are separated with a colon (:). The password section includes the algorithms that was used to
+encrypt the password encapsulated with $ characters, and the encrypted password itself. Here is an example htpasswd file
+wit two users, admin and developer
+
+```htpasswd
+admin:$apr1$vUqfPZ/D$sTL5RCy1m5kS73bC8GA3F1
+developer:$apr1$oKuOUw1t$CEJSFcVXDH5Jcq7VDF5pU/
+```
+
+You create htpasswd files using the htpasswd command line tool, by default the htpasswd tool uses a custom encryption
+algorithms base on the md5 hashing.
+
+### Creating htpasswd files
+
+To create an htpasswd database file, you need to ssh into your master server or cluster node, on the master server the
+configuration files for the OpenShift master process are in the /etc/origin/master. There you will create the htpasswd
+file called `openshift.htpasswd` with three users - developer, project-admin, and admin - to act as the database for the
+htpasswd provider to interact with
+
+You need to run the htpasswd command to add each user, the first time you run the command be sure to include the -c
+option to create the new htpasswd file. First make sure that the htpasswd utility is installed, if not, take a look at
+the section which does that at the beginning of this document
+
+```sh
+# execute the following command to add the different users, and also create the htpasswd database file, make sure to use
+# the -c option only once, this will ensure that the file is created once, and any subsequent actions will append to the
+# database file instead of overriding it
+$ echo developer | htpasswd -i -c /etc/origin/master/openshift.htpasswd
+$ echo project-admin | htpasswd -i /etc/origin/master/openshift.htpasswd
+$ echo admin | htpasswd -i /etc/origin/master/openshift.htpasswd
+```
+
+### Changing the provider
+
+The configuration file for your OpenShift cluster master node is located in /etc/origin/master/master-config.yaml. When
+you configured OpenShift initially that file was created automatically, and remains unchanged so far.
+
+## Working with roles
+
+Roles are used to define permission for all users in an OpenShift cluster, in previous sections, you used the
+special admin to configure physical volumes on your cluster, the admin is a special user account. To work with roles
+you will use a new command line tool name `oadm` (short for OpenShift administration). It is installed by default on
+your cluster
+
+On your master node, the OpenShift deployment program setup up the root user, we can see the user information set up for
+the root user by running the following command as the root user on your master node OpenShift server - `oadm config
+view`. This allows administrators with access to the root user on an OpenShift master node server to have cluster
+administration access by default. It is useful, but it also means you have to make sure everyone who has root access ot
+your master server should be able to control your OpenShift cluster. For a smaller cluster like the one you have built
+this will work fine. But for a large cluster, the people who should have root access to your server and the people who
+should be able to administer OpenShift probably wont match. You can distribute this administrative certificate as needed
+for your cluster administrator workstations.
+
+### Assigning user roles
+
+Remember those users you created ? The developer user need permissions to view and add new content to the `image-uploader`
+project. To accomplish that first make sure you are working in the context of the `image-uploader` project by running the
+following command `oc project image-uploader` In the project namespace you need to add the edit role to your developer
+user. This role gives user permission to add. Adding a role to a new user for a project or even the entire OpenShift
+cluster is called binding a role to a user.
+
+```sh
+# make sure that your are first logged in the cluster node, do not execute this form the host machine, rather it has to
+# be done directly from the node / master cluster server
+$ oadm policy add-role-to-user edit developer
+```
+
+To confirm that your new role is applied log in again through the web UI or the command line as the developer user. You
+should now have access to the `image-uploader` project, and the deployed application there. That takes care of the
+developer user. Let us give your admin user a little more access in the next section you will give the admin user
+administrator level access to your entire OpenShift cluster
+
+### Creating administrators user
+
+So far the OpenShift cluster has a single project, as an OpenShift cluster grows it typically has dozens or even
+hundreds of projects at any given time. To manage this effectively you need users who can administer a project or even
+hundreds of projects at any given time.
+
+Creating the project admin - for the `image-uploader` project you will make the project admin user an administrator for
+the project only. You can do so much the same way you have the developer user the ability to edit, instead of binding
+the edit role to the project admin user, however you need to bind the admin role. This role will give the project admin
+user full administrative privileges in the `image-uploder` namespace project. Run the following command as root on your
+master server
+
+```sh
+# this gives the
+$ oadm policy add-role-to-user admin project-admin
+```
+
+You now have developer user who can work in the `image-uploader` project and a project-admin who can administer the
+project. The next user role you need is one who can manage the entire OpenShift cluster.
+
+Creating the cluster admin - the cluster admin role is important. A cluster admin can not only administer projects but
+also manage all OpenShift internal configuration and state, To create a cluster admin run the following command as root
+on your master node:
+
+```sh
+# note the difference here, we are giving a cluster-role, not just a role to the user, and the cluster role name is -
+# cluster-admin, that should be enough for you to tell the difference between this command and the one we did for the other
+# two users above.
+$ oadm policy add-cluster-role-to-user cluster-admin admin
+```
+
+This command binds the admin role to the admin user we already created in our htpasswd database file, instead of binding
+that role for a single project, it binds it for every project or namespace in OpenShift. Everything you have donein this
+section until now will hep you edit existing users and make sure they have the correct privileges to access what their
+job requires. But what happens when you add new users ? In the next section we will configure OpenShift bind the edit
+role to new users by default when they are created
+
+### Setting default roles
+
+OpenShift has three default groups. These groups are configured during OpenShift installation and define whether a user
+is authenticated. You can use these groups to target users for additional actions, but the groups themselves can not be
+modified.
+
+- system:authenticated - any user who has successfully authenticated through the web UI or command line, or via the API
+- system:authenticated:oauth - any user who has been authenticated by OpenShift internal OAuth2 server. This excludes
+  system accounts
+- system:unauthenticated - users who have failed authentication or not attempted to do one.
+
+In your cluster it will be helpful to allow any authenticated user to access the `image-uploader` project. You can
+accomplish this by running the following `oadm` policy command which binds the edit role for the `image-uploader` project
+specified by the -n option to the system:authenticated group
+
+```sh
+# now any user who has successfully authenticated and logged in will now have direct access to this project.
+$ oadm policy add-role-to-group edit -n image-uploader system:authenticated
+```
+
+When do we use other default groups - this example uses the system:authenticated group, depending on what you need to
+accomplish the other groups can be used in a similar fashion. The `system:authenticated:oauth` groups excludes the system
+accounts that are used to build and deploy applications in OpenShift. We will cover those in future sections, in short
+this group consists of all the humans and external services accessing OpenShift. System:unauthenticated can be used if you
+want to provide a level of anonymous access in your cluster. Its most common use however is to route any user currently
+in that group to the OpenShift login page
+
+To confirm that your new default user role has taken effect add an additional user named `user1` to your htpasswd database
+file with the following command - `echo user1 | htpasswd --stdin /etc/origin/master/openshift/htpasswd user1`
+
+Log into your cluster with that user and confirm that your new user can use the `image-uploader` project by default, that
+user should have the ability to work in the `image-uploader` project from the first login
+
+Any time you have a shared environment you need processes in place to ensure that one user or project does not take up
+too many resources, or privileges in your cluster- either accidentally or on purpose. Limit ranges and resource quotas
+are the processes that manage this potential problem. In OpenShift these resources constraints are different for each
+deployment depending on whether explicit resources quotas are requested.
+
+For previous applications that we deployed we did not specify any resources, either processor or memory to be allocated
+for either deployment these best-effort deployments do not request such specific resources and are assigned a
+best-effort quality of service can govern default values at the project level in OpenShift by using limit ranges. In the
+next section, we will discuss limit ranges in more depth and you will create your own and apply them to the
+`image-uploader` project.
+
+## Limit ranges
+
+For each project in OpenShift a limit range defined as a `LimitRange` when working with the OpenShift API provides resources constraints

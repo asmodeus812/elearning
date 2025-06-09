@@ -2,8 +2,10 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: pvc-app-cli
+  name: pvc01
 spec:
+  volumeName: pv01
+  storageClassName: ""
   accessModes:
     - ReadWriteMany
   resources:

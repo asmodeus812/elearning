@@ -5,10 +5,10 @@ metadata:
   name: pv01
 spec:
   capacity:
-    storage: 2Gi
+    storage: 4Gi
   accessModes:
     - ReadWriteMany
   nfs:
-    server: 192.168.122.100
-    path: /var/nfs-data/pv01
+    server: 192.168.42.124
+    path: /var/nfs-share/app-cli-pv01
   persistentVolumeReclaimPolicy: Recycle
