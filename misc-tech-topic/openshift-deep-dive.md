@@ -390,6 +390,39 @@ to configure the cluster in more direct and manual way by directly editing these
 behavior of the cluster, directly. The files stored under /etc in the cluster provide more flexibility but should not be
 messed with too much unless you are aware of the changes you are going to be doing.
 
+## Cluster debugging
+
+In case you would like to ever access the OpenShift cluster API, form the node itself, using the system user, you can do
+the following as shown below.
+
+```sh
+# this variable is used by the oc tool, to look for a config file to use, what this file contains is the certificate
+# material that can be used to login into the cluster, without providing any credentials, the idea is that we will be
+# logging in wit ha special user called system:node:crc
+export KUBECONFIG=/var/lib/kubelet/kubeconfig
+
+# now running any oc command will actually run using the config above, meaning that we will be executing command in the
+# context of the system user, for crc that user is system:node:crc
+$ oc <command>
+```
+
+The same can be used when working with `minikube`, however the configuration does not live in a virtual machine just like
+for `crc`, but rather the local host `$HOME/.kube` config folder is used, therefore the file in question is under -
+`$HOME/.kube/config`. Again run the export expression in your shell, on the host, and you can use `oc to login` as a
+system user. If your host is Windows, you can use SET instead, while the general approach remains the same
+
+To allow you to login as admin and have access to the default password of the cluster root user, one can also take
+advantage of the enable emergency login config, this is not always needed, but good to know. By default you can
+always assume sudo rights in the host by doing `sudo -i` in the shell. That would not require password by default
+
+```sh
+# make sure to configure the cluster first to enable emergency login, this will generate a passwd file in the .crc
+# directory on your host machine, this file will contain the password to the core user in the crc cluster node, which is
+# quite useful when you wish to run some sudo enabled commands in the node, after you run this config, restart the cluster
+# after the cluster is started search for the file - $HOME/.crc/machines/crc/passwd, and fetch the password for the core user
+crc config set enable-emergency-login true
+```
+
 ## Cluster software
 
 There are ways to install software on our cluster, using the dnf or yum binaries, which are the package manages for
@@ -398,10 +431,22 @@ the underlying linux distribution that the OpenShift cluster node is using which
 ```sh
 $ ssh crc # here are few preliminary steps, first login into the cluster node
 $ sudo -s # login as root user, this will make subsequent commands easier to execute directly
-$ subscription-manager register # will prompt you to enter your credentials to register this node against RedHat
-$ subscription-manager refresh # this will refresh the indexes and allow us to interact with the RedHat registries
-$ dnf clean all && dnf repolist -C # clean any left over artifacts
-$ dnf -y install httpd-tools ansible python3 pip --nogpgcheck # start installing utility applications to the cluster node
+$ mount -o remount,rw /usr # remount the /usr file system as read/write, it is read-only by default
+
+# modify the dnf config file to look like this, this will remove some hard guard set rules, which might interfere with
+# installing software on the cluster
+$ vi /etc/dnf/dnf.conf
+> [main]
+> gpgcheck=0
+> diskspacecheck=0
+> clean_requirements_on_remove=True
+> best=True
+> skip_if_unavailable=True
+
+$ subscription-manager register # will prompt you to enter your RedHat credentials to register this node with RedHat
+$ subscription-manager refresh # refresh the indexes and allow us to interact with the RedHat registries from the node
+$ dnf clean all && dnf repolist -C # clean any left over artifacts, and also update the repository list of dnf manager
+$ dnf -y install httpd-tools iptables-services nfs-utils go gcc python3 python-pip --nogpgcheck # install utility applications to the cluster node
 ```
 
 ## First project
@@ -416,11 +461,6 @@ general permission control over these contexts, by restricting which namespace o
 ```sh
 # to create a new project just run the following, that would immediately change the context to that project, as well
 $ oc new-project image-uploader --display-name='Image Uploader Project'
-
-Now using project "image-uploader" on server "https://192.168.42.124:8443".
-You can add applications to this project with the 'new-app' command. For example, try:
-    oc new-app centos/ruby-22-centos7~https://github.com/openshift/ruby-ex.git
-to build a new example application in Ruby.
 ```
 
 ## Application Components
@@ -524,37 +564,9 @@ Apps are deployed using the `oc new-app` command. When you run this command to d
 - The location of your app source code - OpenShift will take the source code and combine it with the PHP builder image
   to create a custom container image for your app deployment
 
-    Here is a new app deployment
-
 ```sh
+# here is a new app deployment from a github hosting
 $ oc new-app --image-stream=php --code=https://github.com/OpenShiftInAction/image-uploader.git --name=app-cli
-
-    Apache 2.4 with PHP 7.1
-    -----------------------
-    PHP 7.1 available as container is a base platform for building and running various PHP 7.1 applications and frameworks. PHP is an HTML-embedded scripting language. PHP attempts to make it easy for developers to write dynamically ge
-nerated web pages. PHP also offers built-in database integration for several commercial and non-commercial database management systems, so writing a database-enabled webpage with PHP is fairly simple. The most common use of PHP coding
-is probably as a replacement for CGI scripts.
-
-    Tags: builder, php, php71, rh-php71
-
-    * The source repository appears to match: php
-    * A source build using source code from https://github.com/OpenShiftInAction/image-uploader.git will be created
-      * The resulting image will be pushed to image stream "app-cli:latest"
-      * Use 'start-build' to trigger a new build
-    * This image will be deployed in deployment config "app-cli"
-    * Ports 8080/tcp, 8443/tcp will be load balanced by service "app-cli"
-      * Other containers can access this service through the hostname "app-cli"
-
---> Creating resources ...
-    imagestream "app-cli" created
-    buildconfig "app-cli" created
-    deploymentconfig "app-cli" created
-    service "app-cli" created
---> Success
-    Build scheduled, use 'oc logs -f bc/app-cli' to track its progress.
-    Application is not exposed. You can expose services to the outside world by executing one or more of the commands below:
-     'oc expose svc/app-cli'
-    Run 'oc status' to view your app.
 ```
 
 After you run the `oc new-app` command you will see a long list of output, as shown above. This is OpenShift building
@@ -821,7 +833,7 @@ cluster's ssh agent
 
 ```sh
 # this will allow you to login into the crc virtual machine, which represents the actual single cluster node that is
-# being simulated locally
+# being simulated locally, refer to the beginning of this document to setup permanent ssh host config for crc
 $ ssh -i ~/.crc/machines/crc/id_ed25519 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 2222 core@127.0.0.1
 ```
 
@@ -854,7 +866,7 @@ it, the command below will show the details of the container, we would like to f
 $ sudo crictl inspect 7c2083341d04d
 
 # here is the output of the inspect, the output is again abridged, it is quite big, but we care about the first few
-# rows, most notably, the PID property, which we can see here, is 1074347
+# rows, most notably, the PID property, which we can see here, is 7825
 {
   "info": {
     "checkpointedAt": "0001-01-01T00:00:00Z",
@@ -893,20 +905,20 @@ above in detail, but in summary it has to be done by first logging into the clus
 ```sh
 # here we can directly list the namespaces for the target process id, in our case we can see that this process id was
 # extracted from the cluster, using the crictl command above, where we inspected the spec of the container
-$ sudo lsns -p 1074347
+$ sudo lsns -p 7825
 NS         TYPE   NPROCS     PID USER       COMMAND
 4026531834 time      424       1 root       /usr/lib/systemd/systemd --switched-root --system --deserialize 28
 4026531837 user      424       1 root       /usr/lib/systemd/systemd --switched-root --system --deserialize 28
-4026534705 uts        13 1074347 1000660000 httpd -D FOREGROUND
-4026534706 ipc        13 1074347 1000660000 httpd -D FOREGROUND
-4026535152 net        13 1074347 1000660000 httpd -D FOREGROUND
-4026535628 mnt        13 1074347 1000660000 httpd -D FOREGROUND
-4026535698 pid        13 1074347 1000660000 httpd -D FOREGROUND
-4026535703 cgroup     13 1074347 1000660000 httpd -D FOREGROUND
+4026534705 uts        13    7825 1000660000 httpd -D FOREGROUND
+4026534706 ipc        13    7825 1000660000 httpd -D FOREGROUND
+4026535152 net        13    7825 1000660000 httpd -D FOREGROUND
+4026535628 mnt        13    7825 1000660000 httpd -D FOREGROUND
+4026535698 pid        13    7825 1000660000 httpd -D FOREGROUND
+4026535703 cgroup     13    7825 1000660000 httpd -D FOREGROUND
 ```
 
 And from the output above, we can clearly see that the process id which we extracted for the pod and by proxy the
-container app-cli, which was `1074347` that there are multiple namespaces attached to this process, the type column
+container app-cli, which was `7825` that there are multiple namespaces attached to this process, the type column
 signifies that there are mount, cgroup and net, along with `UTS`, and other namespaces created for the process. The five
 namespaces that OpenShift uses to isolate the apps are as follows:
 
@@ -945,26 +957,123 @@ logical volumes created by docker on your host, run the `lsblk` command. This co
 host, as well as any logical volumes. It confirms that docker has been creating logical volumes for containers
 
 ```sh
-$ sudo lsblk
+# enter sudo mode, with the core user, to give us more access and command execution permissions
+$ sudo -i
 
+# list block devices, that lists information about all available or the specified block devices on the system, the
+# command reads the sysfs file system and udev database to gather this information, by default print all block devices
+# except any RAM disks, in a tree list format.
+$ lsblk
 NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
 vda    252:0    0   31G  0 disk
 ├─vda1 252:1    0    1M  0 part
 ├─vda2 252:2    0  127M  0 part
 ├─vda3 252:3    0  384M  0 part /boot
-└─vda4 252:4    0 30.5G  0 part /var/lib/kubelet/pods/22534047-9293-4e30-a3c2-6d1d1244b417/volumes/kubernetes.io~csi/pvc-3849f616-7f27-47d4-b0f8-7c98897aa529/mount
-                                /var/lib/kubelet/pods/14c7b420-5ed8-49d6-829f-af7f14474200/volume-subpaths/nginx-conf/networking-console-plugin/1
-                                /var
-                                /sysroot/ostree/deploy/rhcos/var
-                                /usr
-                                /etc
-                                /
-                                /sysroot
+
+# to list all the active pods, the output is abridged, but we can see what we care interested in, this is the app-cli
+# pods, which are visible and list-able from the command below, we can see that the ps command shows the id of the
+# container, along with the pod it is connected to, this way we can inspect the container, by id
+$ crictl ps
+CONTAINER     IMAGE                                                                    CREATED              STATE   NAME            ATTEMPT ID            POD
+3b014dbd532c3 quay.io/openshift-release-dev/ocp-v4.0-art-dev@                          11      minutes ago  Running registry-server 0       e5017350a2c71 redhat-operators-dtxxg
+1ea26899fa493 image-registry.openshift-image-registry.svc:5000/image-uploader/app-cli@ 15      minutes ago  Running app-cli         0       d4c372b145163 app-cli-5fdd99b58d-dplv6
+
+# after we can inspect the container, we can see from the inspect output, that there are a few mount targets, a few are
+# generic ones such as the /etc/hosts, however we can see that there is one which is specific
+$ crictl inspect -f '{{ .GraphDriver.Data.DeviceName }}' 1ea26899fa493
+
+# here we can see two important things, first is the process id of the container, the PID 1, which we have already seen
+# once before, we can use this process id to inspect the state of the process from the host, it is a unique process which
+# directly ties all information on the host to the container, the host does not see pod id, or container id, it sees the
+# process id
+  "info": {
+    "checkpointedAt": "0001-01-01T00:00:00Z",
+    "pid": 33398,
+    "privileged": false,
+    "restored": false,
+
+# this section shows us how and where part of the root file system is mounted, the root file system of a container is
+# built on the basis of layers, but, certain parts of it may be mounted to completely different parts outside of the
+# container, in a way these are very similar to shared directories, on a network. These mount points refer to hostPath and
+# containerPath, which are very much self explanatory
+....
+    "mounts": [
+      {
+        "containerPath": "/etc/hosts",
+        "gidMappings": [],
+        "hostPath": "/var/lib/kubelet/pods/85c76562-91f8-4857-a075-42f7089b23e6/etc-hosts",
+        "propagation": "PROPAGATION_PRIVATE",
+        "readonly": false,
+        "recursiveReadOnly": false,
+        "selinuxRelabel": true,
+        "uidMappings": []
+      },
+      {
+        "containerPath": "/dev/termination-log",
+        "gidMappings": [],
+        "hostPath": "/var/lib/kubelet/pods/85c76562-91f8-4857-a075-42f7089b23e6/containers/app-cli/7e8ccd6b",
+        "propagation": "PROPAGATION_PRIVATE",
+        "readonly": false,
+        "recursiveReadOnly": false,
+        "selinuxRelabel": true,
+        "uidMappings": []
+      },
+      {
+        "containerPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+        "gidMappings": [],
+        "hostPath": "/var/lib/kubelet/pods/85c76562-91f8-4857-a075-42f7089b23e6/volumes/kubernetes.io~projected/kube-api-access-f7lcd",
+        "propagation": "PROPAGATION_PRIVATE",
+        "readonly": true,
+        "recursiveReadOnly": false,
+        "selinuxRelabel": true,
+        "uidMappings": []
+      }
+    ],
+...
+
+# here having the PID we can list the namespaces of the container process for our application, and we can also see the
+# multitude of different namespaces that it has, we want to see and inspect the mount namespace
+$ lsns -p 33398
+        NS TYPE   NPROCS   PID USER       COMMAND
+4026531834 time      524     1 root       /usr/lib/systemd/systemd --switched-root --system --deserialize 28
+4026531837 user      523     1 root       /usr/lib/systemd/systemd --switched-root --system --deserialize 28
+4026535352 mnt        13 33398 1000660000 httpd -D FOREGROUND
+4026535353 pid        13 33398 1000660000 httpd -D FOREGROUND
+4026535354 cgroup     13 33398 1000660000 httpd -D FOREGROUND
+4026535522 uts        13 33398 1000660000 httpd -D FOREGROUND
+4026535523 ipc        13 33398 1000660000 httpd -D FOREGROUND
+4026535524 net        13 33398 1000660000 httpd -D FOREGROUND
+
+# we can now enter the mount namespace of the container, note that if you now execute ls / you will directly see the
+# contents of the container itself, be able to access the root file system of the container
+$ nsenter --mount --target 33398 /bin/sh
+
+# to exit the mount namespace, simply use exit
+$ exit
+
+# now let us see where this is mounted on the host, we can use the process id we have obtained from above, to see
+# where the root file system is mounted, on the host, or in this case the host is the cluster node itself, take a note
+# of the output and the overlay paths, these reference paths on the host root file system, placed in the /var directory
+grep -w "/" /proc/33398/mountinfo
+25787 13562 0:853 / / rw,relatime - overlay overlay rw,context="system_u:object_r:container_file_t:s0:c5,c26",lowerdir=/var/lib/containers/storage/overlay/l/K565QXNBE4UPBQO2PDIBJBW5U5:/var/lib/containers/storage/overlay/l/QXL4VNC6IZOL
+VYH23JQKKXAMIE:/var/lib/containers/storage/overlay/l/57MMERXGQHPVYCAGGCVVRXUE7F:/var/lib/containers/storage/overlay/l/HITMXQH3G2NMN7M5U4GT2XIYE5:/var/lib/containers/storage/overlay/l/4H26VNEWY45JGAAVUESP7J4CKD,upperdir=/var/lib/contai
+ners/storage/overlay/f2d783dad2cc2779ef613259e008670c46fa1252439afff3fa10ee8cbde00567/diff,workdir=/var/lib/containers/storage/overlay/f2d783dad2cc2779ef613259e008670c46fa1252439afff3fa10ee8cbde00567/work,volatile
 ```
 
-The LC device that the app-cli container uses for storage is recorded in the information from docker inspect. To get `LV`
-for your app-cli container run the following command, `docker inspect -f '{{ .GraphDriver.Data.DeviceName }}'
-<container-id>`
+What are these layers, above, referring to. The file system in a container runtime, is made up of layers, meaning that it is
+not one big chunk of data, but rather, it is layered, for example the base image itself is one layer, but any subsequent
+changes to the file system in the container will generate a new layer which will stack on top of the previous parent
+layer. For example adding a new file, creating directories, copying or removing data from the container, will add layers
+on top of each other. This is similar to how source control systems work, where we have commits, which are based on
+other commits, and if you follow the commits you can go between different states of the repository, here the idea is
+very much the same, the container's file system is layered in a very similar fashion, you can think of layers being like
+commits in a source control system
+
+Above we have shown how we can actually enter the mount namespace, detect where the root file system of a container is
+mounted on the host, and even explore and operate within the mount namespace, effectively allowing us to modify or work
+with the root file system with the container, all things that are usually hidden behind commands such as `exec`. Under
+the hood, exec does the same thing, it enters the namespace of the process allowing you to execute processes in the
+context of the container's namespace
 
 ### UTS namespace
 
@@ -1142,7 +1251,7 @@ securely. But in the app-cli container you have a container specific loopback in
 interface with a unique MAC IP address:
 
 ```sh
-# running the following on the host/cluster node can yield a big output similar to the output beelow
+# running the following on the host/cluster node can yield a big output similar to the output below
 $ ip a
 
 # the output below is the abridged version of the actual output, suffice to say that the cluster node has many many more
@@ -2073,12 +2182,10 @@ time it took us to list the pods again, and in between that time OpenShift alrea
 one we deleted
 
 ```sh
+# here is a short snippet that demonstrates the steps from above.
 $ oc login <cluster-ip> -u <kubeadmin> -p <adminpassword>
-
 $ oc get pods
-
 $ oc delete pod
-
 $ oc get pods
 ```
 
@@ -2135,7 +2242,7 @@ untrusted Pod, the containers in that pod may be able to subvert the read-write 
 
 In the next chapter we will configure a persistent volume in OpenShift using the network file system - HostPath
 
-## Creating volumes
+## Creating resources
 
 In OpenShift they rely on the listed types of network storage to make the storage available across all nodes in a
 cluster. For the examples in the next few sections you will use a persistent volume built with NFS storage. First we
@@ -2147,7 +2254,118 @@ make a cluster wide changes like attaching a persistent volume. We will take a m
 in OpenShift in future sections, but to create a persistent volume we need an admin level access user in the OpenShift
 cluster, luckily we can get that.
 
-### Logging in as the admin user
+```sh
+# just to ensure we do not run into issues with some commands
+$ sudo -i
+
+# list the available disks, this is just for information purposes, we can see that we have one main partition, which
+# is vda4, the rest is system storage, for the virtual machine, such as /boot
+$ lsblk
+├─vda1 252:1    0    1M  0 part
+├─vda2 252:2    0  127M  0 part
+├─vda3 252:3    0  384M  0 part /boot
+└─vda4 252:4    0 99.5G  0 part /var/lib/kubelet/pods/6994529f-6383-4141-8f1c-48cd7189ee3c/volumes/kubernetes.io~csi/pvc-3849f616-7f27-47d4-b0f8-7c98897aa529/mount
+                                /var/lib/kubelet/pods/14c7b420-5ed8-49d6-829f-af7f14474200/volume-subpaths/nginx-conf/networking-console-plugin/1
+                                /var
+                                /sysroot/ostree/deploy/rhcos/var
+                                /usr
+                                /etc
+                                /
+                                /sysroot
+
+# make the directory where we will store the network file system data, also remount /var to be extra sure
+$ mount -o remount,rw /var
+$ mkdir /var/nfs-share
+
+# we care about the block identifier for our storage, in this case as already mentioned that would be vda4
+$ blkid | grep -i vda4
+/dev/vda4: LABEL="root" UUID="3ee0fdbd-7a71-4158-a0f8-db54b07fa6af" TYPE="xfs" PARTLABEL="root" PARTUUID="a8432eef-31a4-7b42-a1fd-768a79c7c61d"
+
+# check the firewall rules from iptable, if you do not get any output, the second command, that will expose the NFS
+# server port in the firewall rules
+$ iptables -L -v -n | grep 2049
+$ iptables -I INPUT -p tcp --dport 2049 -j ACCEPT
+
+# NFS is actually a collection of four services that you need to enable and start:
+# - rpcbind—NFS uses the RPC protocol to transfer data.
+# - nfs-server—The NFS server service.
+# - nfs-lock—Handles file locking for NFS volumes.
+# - nfs-idmap—Handles user and group mapping for NFS volumes.
+systemctl enable rpcbind nfs-server nfs-lock nfs-idmap;
+systemctl start rpcbind nfs-server nfs-lock nfs-idmap;
+```
+
+### Creating storage
+
+Now that we have created the persistent volumes it is time to take advantage of them in OpenShift application consume
+persistent storage using persistent volume claims. A persistent volume claim - PVC - can bedded into an application as
+volume using the command line or through the web interface, let us create one PVC first, on the command line and add it
+to the application
+
+The way the persistent volume claims match up with persistent volumes, first you need to know how persistent volumes
+and persistent volume claims match up to each other. In OpenShift PV represent the available storage, while the PVC,
+represent an application need for that storage - the claim for the storage. When you create a PVC, OpenShift look for
+the best fit among the available PV and reserves it for use by the PVC. In the example environment matches are based on
+two criteria :
+
+- Persistent Volume Size - OpenShift tries to take best advantage of available resources, when a PVC is created it
+  reserves the smallest PV available that satisfies its needs.
+
+- Data Access Mode - when a PVC is created OpenShift look for an available PV with at least the level of access required if
+  an exact match is not available it reserves a PV with more privileges that still satisfies the requirements for example
+  if a PVC is looking for a PV with a RWO (read/write) access mode it will use a PV with a RWX (read/write many) access
+  mode if one is available.
+
+Because all the persistent volumes in your environment are the same size matching them to a PVC will be straightforward,
+next you will create a PVC for your application to use.
+
+First have to enable the NFS capabilities on the server, meaning that we have to create, and then enable the mount
+paths, that we are going to be using in the persistent volume. The script below does just that, you will notice that it
+creates 5 directories which can be used by 5 different PVC, they are simply named starting from `pv01` to `pv05`, and are
+under the directory - `/var/nfs-share`.
+
+```sh
+#!/bin/sh
+
+# create a file with the following contents, on the crc node itself, name it nfs.sh, and execute it, make the file
+# executable with chmod # +x nfs.sh, run this script as sudo, like so sudo ./nfs.sh. This will make the needed
+# directories and export them as nfs volumes which can later on be mounted and used by our persistent volume and the
+# persistent claims
+NUM_PVS=5
+PREFIX="app-cli"
+
+# go over the predefined number of persistent volumes to create, make a new directory for each one of them, under the
+# specified path, note that this path is matched exactly in the creation of persistent volume object above
+for i in $(seq -f "%02g" 1 ${NUM_PVS})
+do
+    mkdir -p "/var/nfs-share/${PREFIX}-pv${i}"
+    echo "/var/nfs-share/${PREFIX}-pv${i} *(rw,sync,no_root_squash)" >> /etc/exports
+done
+
+# make sure that the permissions for the directories are lax, to ensure that the directories can be written to and read
+# from, otherwise the container might not be able to save or read any data at all
+chmod -R 777 /var/nfs-share
+chown -R nfsnobody:nfsnobody /var/nfs-share
+# show what was exported at the end, you should see all the directories that we exported above, note that these are
+# also going to be used later on in the manifest files for storage
+exportfs
+```
+
+```sh
+# make sure to make the script executable after which use sudo to execute the script as shown below
+$ chmod +x nfs.sh
+$ sudo ./nfs.sh
+
+# to checkout what was exported, you can cat out the file exports, and see all the volumes in there
+$ cat /etc/exports
+/var/nfs-share/app-cli-pv01 *(rw,sync,no_root_squash)
+/var/nfs-share/app-cli-pv02 *(rw,sync,no_root_squash)
+/var/nfs-share/app-cli-pv03 *(rw,sync,no_root_squash)
+/var/nfs-share/app-cli-pv04 *(rw,sync,no_root_squash)
+/var/nfs-share/app-cli-pv05 *(rw,sync,no_root_squash)
+```
+
+### Logging in as `kubeadmin`
 
 When an OpenShift cluster is installed it creates a config file for a special user names kubeadmin or system:admin,
 depending on which OpenShift distribution we are using. The admin user is authenticated using an SSL certificate
@@ -2183,74 +2401,6 @@ checkout your home directory for folders named `.crc` and `.minishift`, therein 
 about the credentials stored in files. These are usually located in the following locations on your host machine -
 `$HOME/.crc/machines/crc/kubeadmin-password` or `$HOME/.minishift/machines/minishift/TODO`
 
-### Creating resources
-
-OpenShift makes extensive use of the configuration files written in YAML. These files are a human readable language that
-is often used for configuration files and to serialize data in a way that is easy for both humans and computers to
-consume. YAML is the default way to push data into and get data into Kubernetes and by proxy into OpenShift. In previous
-sections we have talked about OpenShift resources that are created when an application is built and deployed. These
-resources have documented YAML formatted templates so you can create and manage the resources easily. In later sections
-you will use several of these templates to create or change resources in OpenShift. For the application deployments you
-created in earlier sections, these templates were automatically generated and stored by OpenShift, when we created the
-new application or in other words when we run the `new-app` command.
-
-In this section you will use the template to create a persistent volume, this template is more like a specification,
-that even provides a version, that version tells Kubernetes which version of the specification revision we are using to
-create the given resource object, different revision versions might have some differences in the general layout and
-structure of the YAML specification file.
-
-```yml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-    name: pv01
-spec:
-    capacity:
-        storage: 2Gi
-    accessModes:
-        - ReadWriteMany
-    nfs:
-        # The IP address here refers to the IP address of the NFS server
-        # In our case we can use the address of the cluster node we have
-        # which runs on our local machine we can find the IP of that one in the
-        # .kube directory, under the .kube/config file, look for the ip address
-        # example of a cluster ip address -> server: 192.168.42.124
-        server: <cluster-ip-address>
-        path: /var/nfs-share/app-cli-pv01
-        # path: <path-inside-cluster-node>
-    persistentVolumeReclaimPolicy: Recycle
-```
-
-```sh
-$ oc get pv
-
-NAME  CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS
-pv01  2Gi        RWX            Recycle          Available
-```
-
-So what type of information does this file or template contain really:
-
-- At the very start as we already mentioned, is the version of the object, in this case it is under revision `v1`.
-
-- First it is the type of resource the template will create different resources have different templates configurations
-  in this case you are creating a persistent volume
-
-- A name for the resource to be created, this is simply `pv01`, this is mandatory from a Kubernetes point of view, each
-  object of a given type/kind needs a unique name
-
-- Storage capacity for the persistent volume, that will be created measured in GB, in this example, each of the
-  persistent volumes is 2GB
-
-- Next is the access mode of the volume, we will dig into deeper later on
-
-- NFS path for this persistent volume
-
-- NFS server for this persistent volume , if you used another IP address for your master or used another server, you
-  will need to edit this value,
-
-- Recycle policy for the persistent volume that will be created. These policies dictate what and how data will be
-  disposed of once it is no longer being used by an application, we will dig deeper into those in the next sections
-
 ### Physical volume
 
 To create a resources from a YAML template use the `oc create` or `oc apply` command along with the `-f parameter`,
@@ -2283,78 +2433,74 @@ longer required. Two options are available:
 - Recycle - this reclaim policy automatically removed data when the claim is deleted, this one is the one we will be
   using for the persistent volume created for this section
 
-### Using storage
+### Creating volumes
 
-Now that we have created the persistent volumes it is time to take advantage of them in OpenShift application consume
-persistent storage using persistent volume claims. A persistent volume claim - PVC - can bedded into an application as
-volume using the command line or through the web interface, let us create one PVC first, on the command line and add it
-to the application
+OpenShift makes extensive use of the configuration files written in YAML. These files are a human readable language that
+is often used for configuration files and to serialize data in a way that is easy for both humans and computers to
+consume. YAML is the default way to push data into and get data into Kubernetes and by proxy into OpenShift. In previous
+sections we have talked about OpenShift resources that are created when an application is built and deployed. These
+resources have documented YAML formatted templates so you can create and manage the resources easily. In later sections
+you will use several of these templates to create or change resources in OpenShift. For the application deployments you
+created in earlier sections, these templates were automatically generated and stored by OpenShift, when we created the
+new application or in other words when we run the `new-app` command.
 
-The way the persistent volume claims match up with persistent volumes, first you need to know how persistent volumes
-and persistent volume claims match up to each other. In OpenShift PV represent the available storage, while the PVC,
-represent an application need for that storage - the claim for the storage. When you create a PVC, OpenShift look for
-the best fit among the available PV and reserves it for use by the PVC. In the example environment matches are based on
-two criteria :
+In this section you will use the template to create a persistent volume, this template is more like a specification,
+that even provides a version, that version tells Kubernetes which version of the specification revision we are using to
+create the given resource object, different revision versions might have some differences in the general layout and
+structure of the YAML specification file.
 
-- Persistent Volume Size - OpenShift tries to take best advantage of available resources, when a PVC is created it
-  reserves the smallest PV available that satisfies its needs.
-
-- Data Access Mode - when a PVC is created OpenShift look for an available PV with at least the level of access required if
-  an exact match is not available it reserves a PV with more privileges that still satisfies the requirements for example
-  if a PVC is looking for a PV with a RWO (read/write) access mode it will use a PV with a RWX (read/write many) access
-  mode if one is available.
-
-Because all the persistent volumes in your environment are the same size matching them to a PVC will be straightforward,
-next you will create a PVC for your application to use.
-
-First have to enable the NFS capabilities on the server, meaning that we have to create, and then enable the mount
-paths, that we are going to be using in the persistent volume. The script below does just that, you will notice that it
-creates 5 directories which can be used by 5 different PVC, they are simply named starting from `pv01` to `pv05`, and are
-under the directory - `/var/nfs-share/app-cil/{}`.
-
-```sh
-# make sure to configure the cluster first to enable emergency login, this will generate a passwd file in the .crc
-# directory on your host machine, this file will contain the password to the core user in the crc cluster node, which is
-# quite useful when you wish to run some sudo enabled commands in the node, after you run this config, restart the cluster
-# after the cluster is started search for the file - $HOME/.crc/machines/crc/passwd, and fetch the password for the core user
-crc config set enable-emergency-login true
+```yml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: pv01
+spec:
+    capacity:
+        storage: 2Gi
+    accessModes:
+        - ReadWriteMany
+    nfs:
+        # The IP address here refers to the IP address of the NFS server
+        # In our case we can use the address of the cluster node we
+        # can try nslookup from the node - nslookup api.crc.testing
+        # server: <cluster-ip-address>
+        # path: <path-inside-cluster-node>
+        server: 192.168.127.2
+        path: /var/nfs-share/app-cli-pv01
+    persistentVolumeReclaimPolicy: Recycle
 ```
 
 ```sh
-#!/bin/sh
+# we can now see the newly created persistent volume which points to the nfs-directory which would be setup in the
+# next section, make sure that these directories indeed exist after completing the next section where they are setup
+$ oc get pv
 
-# create a file with the following contents, on the crc node itself, name it nfs.sh, and execute it, make the file
-# executable with chmod # +x nfs.sh, run this script as sudo, like so sudo ./nfs.sh. This will make the needed
-# directories and export them as nfs volumes which can later on be mounted and used by our persistent volume and the
-# persistent claims
-NUM_PVS=5
-PREFIX="app-cli"
-
-# go over the predefined number of persistent volumes to create, make a new directory for each one of them, under the
-# specified path, note that this path is matched exactly in the creation of persistent volume object above
-for i in $(seq -f "%02g" 1 ${NUM_PVS})
-do
-    mkdir -p "/var/nfs-share/${PREFIX}-pv${i}"
-    echo "/var/nfs-share/${PREFIX}-pv${i} *(rw,sync,no_root_squash)" >> /etc/exports
-done
-
-# make sure that the permissions for the directories are lax, to ensure that the directories can be written to and read
-# from, otherwise the container might not be able to save or read any data at all
-chmod -R 777 /var/nfs-share
-chown -R nfsnobody:nfsnobody /var/nfs-share
-exportfs -a
+NAME  CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS
+pv01  2Gi        RWX            Recycle          Available
 ```
 
-```sh
-# to checkout what was exported, you can cat out the file exports, and see all the volumes in there
-$ cat /etc/exports
+So what type of information does this file or template contain really:
 
-/var/nfs-share/app-cli-pv01 *(rw,sync,no_root_squash)
-/var/nfs-share/app-cli-pv02 *(rw,sync,no_root_squash)
-/var/nfs-share/app-cli-pv03 *(rw,sync,no_root_squash)
-/var/nfs-share/app-cli-pv04 *(rw,sync,no_root_squash)
-/var/nfs-share/app-cli-pv05 *(rw,sync,no_root_squash)
-```
+- At the very start as we already mentioned, is the version of the object, in this case it is under revision `v1`.
+
+- First it is the type of resource the template will create different resources have different templates configurations
+  in this case you are creating a persistent volume
+
+- A name for the resource to be created, this is simply `pv01`, this is mandatory from a Kubernetes point of view, each
+  object of a given type/kind needs a unique name
+
+- Storage capacity for the persistent volume, that will be created measured in GB, in this example, each of the
+  persistent volumes is 2GB
+
+- Next is the access mode of the volume, we will dig into deeper later on
+
+- NFS path for this persistent volume
+
+- NFS server for this persistent volume , if you used another IP address for your master or used another server, you
+  will need to edit this value,
+
+- Recycle policy for the persistent volume that will be created. These policies dictate what and how data will be
+  disposed of once it is no longer being used by an application, we will dig deeper into those in the next sections
 
 ### Creating claims
 
@@ -2426,7 +2572,7 @@ pvc-app-cli   crc-csi-hostpath-provisioner   <unset>                 27s
 A PVC represents reserved storage available to the applications in your project. But it is not yet mounted into an
 active application. To accomplish that you need to mount your newly created PVC into an application as a volume.
 
-### Adding claims
+### Modifying deployment
 
 In OpenShift a volume is any filesystem file or data mounted into an application pod to provide persistent data. In this
 section we are concerned with persistent storage volumes. Volumes also are used to provide encrypted data, application
@@ -2459,7 +2605,7 @@ By applying the volume to the deployment, for app-cli you can trigger a redeploy
 incorporate the new persistent volume, the following parameters specified above are required and mandatory, as mentioned
 in the comment, they define the minimal number of known arguments that need to be specified for the volume to be created
 for our application.
-o
+
 Optionally you can also specify a name of the volume itself, with the --name parameter. If it is not set, OpenShift
 creates on dynamically, typically simply as a sequence of letters and numbers
 
@@ -2494,19 +2640,30 @@ access mode, when this application scale horizontally each new pod will mount th
 from and write data to it. To sum up you just modified your containerized application to provide horizontally scalable
 persistent storage.
 
+`Finally go into the application through your browser, visit the following web page for our image upload application -
+http://app-cli-image-uploader.apps-crc.testing/, upload a new image in there, and follow up with the next sections,
+remember up the name of the file you upload we will use that as reference to validate that indeed the file was correctly
+uploaded to the host / node, under the correct directory we specified in the persistent claim`
+
 ## Volume mounts
 
 Because we are using NFS server, exports as the source for the persistent volume, it stands to reason that somewhere on
 the OpenShift nodes, those NFS volumes are mounted and created. You can see that this is the case by looking at the
 following example. SSH into the OpenShift node, locally where the containers are running, run the mount command and
 search for the mounted volumes from the IP address of the NFS server. The IP address of the OpenShift cluster should be
-format of 192.168.XXX.XXX
+format of `192.168.XXX.XXX`
 
 ```sh
 # after having ssh access to the node, we can run the mount command, replace the cluster-node-ipaddress with the ip
-# address of the cluster node
-$ mount | grep <cluster-node-ipaddress>
+# address of the cluster node, we can obtain the cluster node ip address as shown above, using nslookup against
+# the api.crc.testing host, since the /etc/resolv.conf is configured with the cluster dns service, therefore the
+# host will be resolved to a correct host
+$ mount | grep 192.168.127.2
 
+192.168.127.2:/var/nfs-share/app-cli-pv01 on /var/lib/kubelet/pods/952b5bd5-c8f2-4da5-9b62-5b58d355f6e5/volumes/kubernetes.io~nfs/pv01 type nfs4 (rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,ret
+rans=2,sec=sys,clientaddr=192.168.127.2,local_lock=none,addr=192.168.127.2)
+192.168.127.2:/var/nfs-share/app-cli-pv01 on /var/lib/kubelet/pods/861fcda4-d641-4f8b-9bdf-8c012f5199f2/volumes/kubernetes.io~nfs/pv01 type nfs4 (rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,ret
+rans=2,sec=sys,clientaddr=192.168.127.2,local_lock=none,addr=192.168.127.2)
 ```
 
 You will get multiple results, each of those will be for each pod that is running for the application, earlier in this
@@ -2532,6 +2689,18 @@ Second this approach separates concerns for persistent storage, using bind mount
 have to include specific information about the remote volume. The container only needs to define the name of the volume
 to mount. OpenShift abstract how to access the remote volume and make it available in the containers. The separation of
 concerns between administration and usage of a cluster is consistent OpenShift design feature.
+
+```sh
+# finally to show the magic in play, from the cluster node, you can navigate to the directory /var/nfs-share/app-cli-pv01,
+# there you will find the uploaded file / image, now  we have successfully mounted a persistent volume claim from the
+# host through the use of a persistent volume object
+$ cd /var/nfs-share/app-cli-pv01 && ls -la
+
+total 3972
+drwxrwxrwx. 2 nfsnobody  nfsnobody      48 Jun 11 14:23 .
+drwxrwxrwx. 7 nfsnobody  nfsnobody     106 Jun 11 13:40 ..
+-rw-r--r--. 1 1000660000 root      4063862 Jun 11 14:23 image.jpg
+```
 
 The goal of this section was to walk you through configuring the components that make a persistent storage available to
 a container in OpenShift. In the following sections, we will use persistent storage to create more scalable and
@@ -3233,7 +3402,7 @@ applications that rely on hard coded IP addresses, and other legacy applications
 This section focuses on cluster wide concepts and knowledge you will need to effectively manage an OpenShift cluster at
 scale. These are some of the skills required for any operations teams managing an OpenShift cluster. In previous chapter
 is all about working with OpenShift integrated role based access control, you will change the authentication provider
-for your cluster, users and work with the system accounts buil into OpenShift along with the default roles for different
+for your cluster, users and work with the system accounts build into OpenShift along with the default roles for different
 user types. Other sections focus on the software define network that deployed as part of OpenShift this is how
 containers communicate with each other and how service discovery works in an OpenShift cluster. The we will bring
 everything together and look at OpenShift from security perspective. We will discuss how SELinux is used in OpenShift
@@ -3241,7 +3410,7 @@ and how you can work with security policies to provide the most effective level 
 
 ## Permissions vs Wild-West
 
-Aa platforms like OpenShift are not effective for mulitple users without robust access and permissions management for
+A platforms like OpenShift are not effective for multiple users without robust access and permissions management for
 various applications in OpenShift components. If every user had a full access to all your OpenShift resources it would
 truly be the wild west. Conversely if it was difficult to access resources, OpenShift would not be a good for much
 either. OpenShift has a robust authentication and access control system, that provides a good balance of self-service
@@ -3264,7 +3433,7 @@ few users to use with that authentication source You will create the following u
 Please go through that now, and then continue with this section. After configuring OpenShift in that way, if you attempt
 to log in with your original dev or other user that user can not be authenticated because it is not in your htpasswd
 database, but if you log into using the new developer or any of the new users, you will no longer have access to the
-previous projects we have created - like the image-uploader and so forth, that is due to the fact that the old dev user
+previous projects we have created - like the `image-uploader` and so forth, that is due to the fact that the old dev user
 would still own that namespace or project
 
 ### Setting up authentication
@@ -3278,7 +3447,7 @@ follows
 - deny all - does not allow any usernames and passwords to log in
 - htpasswd - authenticates with Apache htpasswd database files
 - keystone - user OpenStack Keystone as the authentication source
-- LDAP - authenticates using an LDAP provider like openLDAP
+- LDAP - authenticates using an LDAP provider like OpenLDAP
 - Basic - uses the Apache Basic authentication on a remote server to authenticate users
 - Request Header - uses custom http header for user authentication
 - GitHub - authenticates with github, using OAuth2
@@ -3308,7 +3477,7 @@ developer:$apr1$oKuOUw1t$CEJSFcVXDH5Jcq7VDF5pU/
 ```
 
 You create htpasswd files using the htpasswd command line tool, by default the htpasswd tool uses a custom encryption
-algorithms base on the md5 hashing.
+algorithms base on the `md5` hashing.
 
 ### Creating htpasswd files
 
@@ -3318,22 +3487,83 @@ file called `openshift.htpasswd` with three users - developer, project-admin, an
 htpasswd provider to interact with
 
 You need to run the htpasswd command to add each user, the first time you run the command be sure to include the -c
-option to create the new htpasswd file. First make sure that the htpasswd utility is installed, if not, take a look at
-the section which does that at the beginning of this document
+option to create the new htpasswd file. First make sure that the htpasswd utility is installed, you can do these
+operations on your host machine, since it is the file we are interested in, the file that will be produced by the
+commands below
 
 ```sh
-# execute the following command to add the different users, and also create the htpasswd database file, make sure to use
-# the -c option only once, this will ensure that the file is created once, and any subsequent actions will append to the
-# database file instead of overriding it
-$ echo developer | htpasswd -i -c /etc/origin/master/openshift.htpasswd
-$ echo project-admin | htpasswd -i /etc/origin/master/openshift.htpasswd
-$ echo admin | htpasswd -i /etc/origin/master/openshift.htpasswd
+# execute the following command to add the different users, and also create the htpasswd database file, you see that we
+# still keep the kubeadmin here, just change the password of that user, this is because that user is the only
+# cluster-admin, until we have another one we can not remove it from the htpasswd file, otherwise we will not be able to
+# execute any cluster level operations which we need to still, to add roles to the other users and the new admin, which is
+# going to be named just - admin, after that we can safely delete the kubeadmin user.
+$ mkdir -p /etc/origin/master && touch openshift.htpasswd
+$ htpasswd -b -c -B /etc/origin/master/openshift.htpasswd kubeadmin admin
+$ htpasswd -b -B /etc/origin/master/openshift.htpasswd admin admin
+$ htpasswd -b -B /etc/origin/master/openshift.htpasswd developer developer
+$ htpasswd -b -B /etc/origin/master/openshift.htpasswd project-admin project-admin
 ```
 
 ### Changing the provider
 
-The configuration file for your OpenShift cluster master node is located in /etc/origin/master/master-config.yaml. When
-you configured OpenShift initially that file was created automatically, and remains unchanged so far.
+Before we add the new database with username and password, we can actually take a look at how the `crc` does it by
+default, it is using the htpasswd file database, too and we can actually see how with this command
+
+```sh
+# by default we can see that there is an object called htpass-secret, that is the default one which actually contains
+# the two users, and their username and password, with the command below we can extract the contents of the secret to the
+# standard output the secret is an opaque object that contains the htpasswd file encoded in base64, meaning it is by no
+# means encrypted and we can see the content of the file
+$ oc extract secret/htpass-secret --to=- --confirm -n openshift-config
+
+developer:$2a$10$QVaaReC08iHwTJ5fUv2Kj.YdVbjtuNKgf89X/0uwsmQN17cUyR.vW
+kubeadmin:$2a$10$GskveI9lKitkLXj.yoB46ueCoHp50ytLofjhQN5/LSy7bFs.UW8ta
+```
+
+First we need to define a new secret, we can use the contents of the htpasswd file after which we can apply that to the
+cluster like so, we will use a new secret name to avoid having to delete the old one, but the process will follow the
+same configuration steps
+
+```sh
+# note that we are creating a new secret in the openshift-config namespace, this is where all the openshift config
+# lives, we will use the database file we created above, the secret command will base64 encode the file and create the
+# secret from it, we use the new file we generated with the new users and passwords
+$ oc create secret generic htpass-secret-custom --from-file=htpasswd=openshift/htpasswd-new-users -n openshift-config
+
+secret/htpass-secret-custom created
+```
+
+Here is the document we have to actually update, by default there is already a cluster level OAuth provider, if we run
+an --apply with this new provider content, what will happen is that it will get updated and the name of the `fileData`
+field will be replace with the new secret that we created, which is the `htpass-secret-custom`
+
+```yml
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+    name: cluster
+spec:
+    identityProviders:
+        - name: htpasswd_custom_provider
+          mappingMethod: claim
+          type: HTPasswd
+          htpasswd:
+              fileData:
+                  name: htpass-secret-custom
+```
+
+```sh
+# run the following command with the content of the OAuth object above, to update the cluster config, then logout of
+# existing sessions and try to login again, with some of the users, we have set the passwords to be the same as the
+# usernames, by default all users will be developers, and will have access to no projects, we will fix this in next
+# section where we give them permissions from the cluster node itself
+$ oc apply -f misc-tech-topic/openshift/oauth-cluster-htpass.yml
+
+oauth.config.openshift.io/cluster configured
+```
+
+Make sure to log-out and log back in after the changes, use the new password for the `kubeadmin` user which is
+simply `admin`
 
 ## Working with roles
 
@@ -3453,4 +3683,478 @@ next section, we will discuss limit ranges in more depth and you will create you
 
 ## Limit ranges
 
-For each project in OpenShift a limit range defined as a `LimitRange` when working with the OpenShift API provides resources constraints
+For each project in OpenShift a limit range defined as a `LimitRange` when working with the OpenShift API provides
+resources constraints, for most objects that exist in a project. The objects are the types of OpenShift components that
+users deploy to serve applications and data. Limit ranges apply to the maximum processing and memory resources and total
+object count for each components. The limits for each component are outlined here
+
+| Project component | Limits                                                                                                                        |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Pod               | CPU and memory per pod, and total pods per project                                                                            |
+| Container         | CPU and memory per container, default memory and CPU, maximum burstable ratio per container, and total containers per project |
+| `ImagesMaximum`   | image size for the internal registry                                                                                          |
+| Image             | `streamMaximum` image tag references and image references per image stream                                                    |
+| Persistent        | volume `claimsMinimum` and maximum storage request size per PVC                                                               |
+
+Before an application is deployed or scaled up the project limit ranges are analyzed to confirm that the request is
+within the limit range. If a project limit range does not allow the desired action then it does not happen.
+
+For example if a project limit range defines the memory per pod as being between 50 MB and 1,000 MB a request for a new
+application deployment with a defined quota of 1,500 MB will fail because it is outside the pod memory limit range for
+that project. Limit ranges have the additional benefit of being able to define default compute resource values for a
+project. When you deployed `app-gui` and `app-cli` you had not yet defined a limit range for the `image-uploader`
+project and did not specify the resources for each deployment so each application pod was deployed with no resource
+constraints. In OpenShift a deployment with no defined resources quota.
+
+If users start accessing the gui heavily it can consume resources to the point that the performance of the app-cli
+deployment is affected for a busy cluster with multiple users and running application that is a major problem, with
+limit ranges you can define the default compute resources for a project that does not specify a quota to prevent this
+from happening in your cluster.
+
+### Define resource limit ranges
+
+Limit ranges define the minimum and maximum RAM and CPU an application can be allocated when its deployed. In addition to
+the top and bottom of the range you can specify default request value and limits. The difference between an application
+requested value, and its maximum value limit is called the burstable range
+
+Let us create a limit range for the `image-uploader` project using the template, create the file containing that content
+and apply it to the
+
+```yml
+apiVersion: "v1"
+kind: "LimitRange"
+metadata:
+    name: "core-resource-limits"
+spec:
+    limits:
+        - type: "Pod"
+          max:
+              cpu: "2"
+              memory: "1Gi"
+          min:
+              cpu: "100m"
+              memory: "4Mi"
+        - type: "Container"
+          max:
+              cpu: "2"
+              memory: "1Gi"
+          min:
+              cpu: "100m"
+              memory: "4Mi"
+          default:
+              cpu: "300m"
+              memory: "200Mi"
+          defaultRequest:
+              cpu: "200m"
+              memory: "100Mi"
+          maxLimitRequestRatio:
+              cpu: "10"
+```
+
+To define a limit range a user need to have the cluster admin role. To log in as the admin user run the following
+command, since we have already setup a user like that, we can use the following command to do so
+
+```sh
+# first make sure that we are logged in with a user that has a cluster-admin role
+$ oc login -u kubeadmin -p <kubeadmin-password> <cluster-host-address>
+
+# set the resource limits for the project or namespace alone
+$ oc apply -f openshift/limit-ranges.yml -n image-uploader
+
+# we can then list them and optionally describe the object for more details
+$ oc get limitranges -n image-uploader
+
+NAME                   CREATED AT
+core-resource-limits   2025-06-11T16:54:34Z
+```
+
+After which we can simply run the apply to create the new resource limit range for the project or namespace, in this case
+we are using the `image-uploader` project, other project can be used instead just change the value of the -n argument in
+the command.
+
+Throughout this section and the rest of the document we will need to create YAML template files that are referenced in
+the `oc` commands .We use relative file name paths to keep the examples easy to read, but if you are not running `oc` from
+the directory where those files are created, be sure to reference the full path when you run the command
+
+You can use the command line to confirm that the `image-uploader` project limit range was created and to confirm that
+the settings you specified in the template were accurately read. As with every other resource in the OpenShift cluster
+we can do this by using the get command - `oc get limitrange`. Those can be combined with a describe command to list the
+details for each of these resource limits
+
+You can also use the web interface to confirm that the limit range you just set. Using the Resources > Quotas. Limit
+ranges act on a components in a project. They also provide default resource limits for deployments that do not provide
+any specific values themselves But they do not provide project wide limits to specify maximum resource mounts. For that
+you will need to define a resource quota for `image-uploader` project. In the next section that is exactly what will be
+done
+
+## Resource quotas
+
+Nobody likes noise neighbor, and OpenShift users are no different. If one project users were able to consume more than
+their fair share of the resources in an OpenShift cluster all manner of resource availability issues wold occur, for
+example a resource hungry development project could stop applications in a production level project in the same cluster
+from scaling up when their traffic is increased. To solve this problem OpenShift uses project quotas to provide resource
+caps and limits at the project level. Whereas limit ranges provide maximum resource limits for an entire project, quotas
+on the other hand fall into three primary categories:
+
+- compute & storage resources - memory, processing (CPU) etc
+- object counts - services, storage claims, config maps, secrets, replication controllers etc
+
+In one of the very first sections, we discussed the pod life-cycles, project quotas apply only to pods that are not in a
+terminal phase. Quotas apply to any pod in a pending running or unknown state. Before an application deployment is
+started or a deployed application is changed OpenShift evaluates the project quotas.
+
+In the next section you will create a compute resource quota for the `image-uploader` project
+
+### Creating compute quotas
+
+Compute resource quotas apply to CPU and memory allocation, They are related to limit ranges because they represent
+quotas against totals for requests and limits for all application in a project. You can set the following six values with
+compute resource quotas.
+
+- cpu, request.cpu - total of all CPU requests in a project typically measured in cores or millicores CPU and
+  requests.cpu are synonyms and can be used interchangeable.
+- memory, request.memory - total of all memory requests in a project typically expressed in mega or gigabytes or memory
+  and requests.memory are synonyms and can be used interchangeable
+- limits.cpu - total for all CPU limits in a project
+- limits.memory - total for all memory limits in a project
+
+In addition to the quotas you can also specify the scope the quota applies to. There are four quotas scopes in OpenShift.
+
+`- Terminating` - Pods that have a defined life cycle. Typically these are builder and deployment pods.
+
+- `NotTerminating` - Pods that do not have a defined life cycles. This scopes include application pods like the app-gui
+  and app-cli and most other applications you will deploy in OpenShift.
+- `BestEffort` - Pods that have a best-effort quality of service, for processing and memory. Best-effort deployment are
+  those that did not specify a request or limit when they were created.
+- `NotBestEffort` - Pods that do not have a best effort quality of service, for processing and memory, that is the inverse
+  of `BestEffort` this scope is useful when you have a mixture of low priority transient workloads that have been deployed
+  with best effort quality of service and higher priority workloads with dedicated resources
+
+To create an new quota for a project cluster admin privileges are required. That means you need to be logged in as the
+admin user to run this command, because the developer user has only the edit role bound to it, for the
+`image-uploader` project and has no privileges for the rest of the cluster. To log in as the admin user follow the
+previous section, where we already did that for the range limits
+
+```yml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+    name: compute-resources
+spec:
+    hard:
+        pods: "10"
+        requests.cpu: "2"
+        requests.memory: 2Gi
+        limits.cpu: "3"
+        limits.memory: 3Gi
+    scopes:
+        - NotTerminating
+```
+
+Save the template to a file, and execute the commands below to apply the resource quota object, this will ensure that
+the `image-uploader` project is now properly restricted by both limit ranges, and now by the resource quotas. Which will
+prevent us from:
+
+- due to the limit ranges - we will never be able to deploy something that might hog or request too many resources in
+  the `image-uploader` project
+
+- due to the resource quotas - during the active execution of our containers inside the `image-uploader` project they
+  will never be able to take more runtime resources than allowed
+
+```sh
+# first make sure that we are logged in with a user that has a cluster-admin role
+$ oc login -u kubeadmin -p <kubeadmin-password> <cluster-host-address>
+
+# first create the resource quota from the template
+$ oc apply -f openshift/resource-quotas.yml -n image-uploader
+
+# we can then list them and optionally describe the object for more details
+$ oc get resourcequotas -n image-uploader
+
+NAME                AGE    REQUEST                                                 LIMIT
+compute-resources   106s   pods: 2/10, requests.cpu: 0/2, requests.memory: 0/2Gi   limits.cpu: 0/3, limits.memory: 0/3Gi
+```
+
+### Creating resource quotas
+
+Resource quotas track all resources in a project that are deployed by Kubernetes. Core components in OpenShift like
+deployment configs and build configurations are not covered by quotas, that is because these components are created on
+demand for each deployment and controller by OpenShift.
+
+The components that are managed by resource quotas are the primary resources in an OpenShift cluster that consume
+storage and compute resources, keeping track of a project's resources is important when you need to plan how to grow and
+manage your OpenShift cluster to accommodate your application. The following components are tracked by resource quotas
+
+- config maps - we discussed config maps in previous sections, they provide a way to configure and define data for
+  containers
+- persistent volume claims - applications requests for persistent storage
+- resource quotas - the total number of quotas per project
+- replication controller - the number of controllers in a project. This is typically equal to the number of deployed
+  applications but you can also manually deploy applications using different workloads that could make this number change.
+- secrets - we discussed them in previous section, they are a variation of the config maps
+- services - the total number of services in a project
+- image streams - the total number of image streams in a project
+
+Most of the items in this list should look familiar, we have been discussing them for several sections at this point.
+The following listing shows the resource quotas template that you need to apply to the `image-uploader` project to do
+this apply the following file
+
+```yml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+    name: object-counts
+spec:
+    hard:
+        configmaps: "10"
+        persistentvolumeclaims: "5"
+        resourcequotas: "5"
+        replicationcontrollers: "20"
+        secrets: "50"
+        services: "10"
+        openshift.io/Image streams: "10"
+```
+
+Save the template to a file, and execute the commands below to apply the resource quota object, this will ensure that
+the `image-uploader` project is now properly restricted by OpenShift object or resource counts as well
+
+```sh
+# first create the resource quota from the template
+$ oc apply -f openshift/storage-resource-quotas.yml -n image-uploader
+
+# we can then list them and optionally describe the object for more details
+$ oc get resourcequotas -n image-uploader
+```
+
+## Working with quotas & limits
+
+Now that the `image-uploader` project has limit ranges and quotas it is time to put them through their paces. The
+compute quota for the app is not being reflected yet and your first task is to fix that
+
+### Quotas to existing applications
+
+When you deployed the apps in previous sections no quotas or limits were defined for the `image-uploader` project. As we
+mentioned when you were creating limit ranges back then you cluster was essentially the wild west and any deployed
+application could consume any amount of resources in the cluster. If an application is created and there are no limit
+ranges to reference an no resources were requested as when you deployed the metrics pod. The linux kernel components
+that define the resource constraints for each container are created with unlimited values for the resources limits. This
+is what happened when you deployed the app-cli and the app-gui and why their CPU and memory quotas are not reflected in
+OpenShift.
+
+Now that you have applied limit ranges and quotas to the `image-uploader` project you have OpenShift to re-create the
+containers for these applications to include these constraints, The easiest way to to do this is to delete the current
+pods for each application. When you run the following `oc delete command` OpenShift will automatically deploy new pods
+that contain the default limit ranges, that you defined in the previous section.
+
+```sh
+# this will delete all pod resources related to those labels, note that  we are only deleting the pods, nothing else,
+# the deployment and in particular the replication set will ensure that the pods are re-created with the correct limits
+$ oc delete pod -l deployment=app-cli
+$ oc delete pod -l deployment=app-gui
+```
+
+Because you did not specify specific resource values your new app-gui and app-cli pods inherit the default request
+values defined in the core-resource-limits limit range object. Each pod was assigned 200 millicores and 100 MIB of RAM.
+You can see that in the previous output that the consumed CPU and memory quotas for the `image-uploader` project are
+twice the default request.
+
+It is definitely not a best practice to start using projects without having set limits and resources first, but we had
+to start somewhere, and if the very first few sections was all about quotas you would never have gotten to this section,
+so for teaching purposes, we began using OpenShift without discussing proper configuration rules
+
+### Changing quotas for deployed applications
+
+When you deploy a new application you can specify limits and quotas as part of its definition. You can also edit the
+YAML definition for an existing deployment config directly from the command line. To edit the resource limits for your
+deployment run the following `oc edit command` which lets you edit the current YAML definition for the application.
+
+```sh
+# this will open your default system editor,  and allow you to edit the contents of the manifest as if it was being done
+# directly and interactively
+oc edit deployment/app-cli
+```
+
+To edit the resource limits you need to find the `spec.containers.resources` section of the configuration. This section is
+currently empty, because nothing was defined for the application when it was initially deployed, we will change that.
+
+```yml
+resources:
+    requests:
+        cpu: "750m"
+        memory: "500Mi"
+    limits:
+        cpu: "1"
+        memory: "1000Mi"
+```
+
+This defines our pod as burstable, because the maximum limits that are defined are higher than the request, meaning that
+the pod can burst up to 1 CPU or that would mean 1000 millicores, as we have only requested 3/4 of that - 750
+millicores, and the memory limit is twice as much as requested
+
+Savings the new configuration will trigger a new deployment for the app-cli this new deployment will incorporate
+your new resource requests and limits. Once the build completes your deployment will be available with more
+guaranteed resources, you can also verify this with the regular describe command, or through the web UI console.
+
+You can edit a deployment config to make complex changes to deployed applications but it is manual process. For new
+applications deployments your project should use the default limit ranges whenever possible to inherit default values
+
+While your resource requests and limit ranges are new and fresh in your mind let us dig a little deeper and discuss how
+these constraints are enforced in OpenShift by the Linux kernel and the container runtime - like docker or containerd,
+using cgroups
+
+## Cgroups for managing resources
+
+Cgroups are Linux kernel components, that provide per process limits for CPU, memory and network bandwidth and block
+storage bandwidth. In an OpenShift cluster they enforce the main limits and quotas configured for applications and
+projects.
+
+### Overview of the cgroups
+
+Cgroups are defined in a hierarchy in the `/sys/fs/cgroup/` directory on the application node. Within this directory is
+a directory for each type of cgroup controller that is available. A controller represents a specific system resource
+that can be controller by cgroups. In this section we are focusing on the cpu and memory cgroups controllers. In the
+directories for the cpu and memory controllers is a directory named `kubepod.slice.` Cgroups slices are used to create
+subdivisions within the cgroups controller. Slices are used as logical dividers in a controller and define resource
+limits for groups of resources below them in the cgroup hierarchy.
+
+```sh
+# login into the node, and navigate to the directory, then we can actually see the structure of this directory
+$ ls /sys/fs/cgroup
+
+-r--r--r--.  1 root root 0 Jun 11 16:03 cgroup.controllers
+-rw-r--r--.  1 root root 0 Jun 11 17:24 cgroup.max.depth
+-rw-r--r--.  1 root root 0 Jun 11 17:24 cgroup.max.descendants
+-rw-r--r--.  1 root root 0 Jun 11 16:03 cgroup.procs
+-r--r--r--.  1 root root 0 Jun 11 17:24 cgroup.stat
+-rw-r--r--.  1 root root 0 Jun 11 17:22 cgroup.subtree_control
+-rw-r--r--.  1 root root 0 Jun 11 17:24 cgroup.threads
+-r--r--r--.  1 root root 0 Jun 11 16:03 cpu.stat
+-r--r--r--.  1 root root 0 Jun 11 16:03 cpuset.cpus.effective
+-r--r--r--.  1 root root 0 Jun 11 17:24 cpuset.cpus.isolated
+-r--r--r--.  1 root root 0 Jun 11 17:24 cpuset.mems.effective
+drwxr-xr-x.  2 root root 0 Jun 11 16:03 dev-hugepages.mount
+drwxr-xr-x.  2 root root 0 Jun 11 16:03 dev-mqueue.mount
+drwxr-xr-x.  2 root root 0 Jun 11 16:03 init.scope
+-r--r--r--.  1 root root 0 Jun 11 16:03 io.stat
+drwxr-xr-x.  4 root root 0 Jun 11 16:04 kubepods.slice <- here is the kubepods directory we care about
+drwxr-xr-x.  3 root root 0 Jun 11 16:03 machine.slice
+-r--r--r--.  1 root root 0 Jun 11 17:24 memory.numa_stat
+--w-------.  1 root root 0 Jun 11 17:24 memory.reclaim
+-r--r--r--.  1 root root 0 Jun 11 16:03 memory.stat
+-r--r--r--.  1 root root 0 Jun 11 17:24 misc.capacity
+-r--r--r--.  1 root root 0 Jun 11 17:24 misc.current
+drwxr-xr-x.  2 root root 0 Jun 11 16:40 proc-fs-nfsd.mount
+drwxr-xr-x.  2 root root 0 Jun 11 16:03 sys-fs-fuse-connections.mount
+drwxr-xr-x.  2 root root 0 Jun 11 16:03 sys-kernel-config.mount
+drwxr-xr-x.  2 root root 0 Jun 11 16:03 sys-kernel-debug.mount
+drwxr-xr-x.  2 root root 0 Jun 11 16:03 sys-kernel-tracing.mount
+drwxr-xr-x. 34 root root 0 Jun 11 17:02 system.slice
+drwxr-xr-x.  3 root root 0 Jun 11 16:19 user.slice
+
+# if we navigate to that directory we will see that, indeed it has two directories, which we need to look at
+$ ls kubepod.slice | grep kube
+
+kubepods-besteffort.slice
+kubepods-burstable.slice
+```
+
+The `kubepods` slice is where the configuration to enforce OpenShift requests and limits are located. Within the
+`kubepod.slice` are two slices `kubepods-besteffort.slice` and `kubepods-burstable.slice.` These two slices are how
+resource limits for best-effort and burstable quality of service levels that we have discussed in this section are
+enforced. Because you defined resource requests for app-cli and app-gui they both will be defined in
+`kubepods-burstable.slice.` Within the `kubepod-besteffort.slice` and the `kubepods-burstable.slice` are multiple
+additional slices. There is not an immediate identifier to tell you which slice contains the resource information for a
+give container, but you can get that information directly from docker on your application node.
+
+### Identifying container cgroups
+
+To determine which cgroup slice controls the resources for your deployment, we need to get the cgroup information from
+the container runtime. The cgroup slice that each container belongs to is listed in the information from the inspect
+command. To obtain filter on the `cgroupsPath` element accessor. This limits the output to only the cgroup slice
+information. In your example the cgroup slice for the app-cli is the following long id, which signifies the type is
+burstable as well, we can see that from the value for the `cgroupsPath` key in the inspect command -
+
+```sh
+# here you will notice that we get two outputs that is because we have two different replicas for our deployment, but
+# that will vary depending on your current state of the deployment
+$ crictl ps | grep app-cli | awk '{print $1'} | xargs -I'{}' crictl inspect {} | grep cgroupsPath
+
+"cgroupsPath": "kubepods-burstable-pod70aff84f_0aa8_47ed_9b8c_cd3d6a185708.slice:crio:7f4ec5610c6a8f4110f43ac2d415d6d20449ff916bc8eb81407bfbde3438680a"
+"cgroupsPath": "kubepods-burstable-pod58448c42_a7bd_4996_9012_849df2cffa5c.slice:crio:2f1a0714812de8170f791ddf3dc008b39c9a020028f1b42418ed47133092859e"
+```
+
+As we mentioned, we are in the burstable slice still. The slice defined in the app-cli inspect output that is. Slices
+do not define resource constraints for individual containers but they can set default values for multiple containers.
+That is why the hierarchy of slices look a little excessive here. You have one more layer to go to get to the resource
+constraints for the app-cli container. In the lowest slice is a scope directory. Each scope is named after the full
+hash that a container's short IO is based on. In our example app-cli resource constraints are defined in the scope named
+
+```sh
+# navigate to the burstable slice sub directory, and check out the output of the following ls command, we can see that
+# for the two pods that we have with the respective IDs that start with 80aff and 58448, there are two slices
+$ cd /sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice
+
+# grep the directory content for the two pods, based on the pod id, we can see
+$ ls | grep "pod\(70aff\|58448\)"
+kubepods-burstable-pod58448c42_a7bd_4996_9012_849df2cffa5c.slice
+kubepods-burstable-pod70aff84f_0aa8_47ed_9b8c_cd3d6a185708.slice
+```
+
+Cgroups configurations are created on an OpenShift application nodes using this process. It is a little complex and
+because cgroups are listed according to the cgroup controller and not the PID they manage, troubleshooting them can be a
+challenge on a busy system. When you need to see the cgroup configuration for a single container, the process is more
+straightforward. In the next section we will look at how the cgroup information from the host is mounted in each
+container that is created
+
+### Confirming cgroups limits
+
+When a container runtime creates a container, it mounts the cgroup scope that applies to it in the container, in the
+`/sys/fs/cgroup` directory, it truncates the slices and scope so the container appears to have only a single cgroup
+controller. We are going to focus on the limits that enforce CPU and memory constraints for the app-cli container. Let
+us begin with the limits for the CPU consumption. To start an interactive shell prompt in your running container, run
+the following command edited to reference your container short ID
+
+```sh
+# first make sure to select one of the containers that are currently being active for the deployment, that could be
+# either one of those, or you can scale down your deployment to one replica in case this is confusing
+$ crictl ps | grep app-cli | awk '{print $1'}
+7f4ec5610c6a8
+2f1a0714812de
+
+# we use the crictl, or the containerd runtime to log into the container through the interactive use of /bin/bash
+$ crictl exec -it 7f4ec5610c6a8 /bin/bash
+```
+
+As we discussed earlier in this chapter CPU resources in OpenShift are allocated in millicores or one-thousands of the
+CPU resources available on the server. For example if your application node has two processors, a total of 2,000
+millicores is available for the containers on the node. The ration expressed here is what is represented in the cpu
+cgroup. The actual number is not expressed in the same units, but the ratios are always the same. The app-cli container
+has request of 750 millicores, with the limit of 1,000 millicores or one CPU. You need the following two values form
+`/sys/fs/cgroup/cpu.max` to build a ratio that confirms that the limit for the app-cli container is correct configured.
+The file is one line, which defines two values, divided by space, the meaning of the two values is described below:
+
+- `cat cpu.max | awk '{print $1}'` - the time period in microseconds during which the cgroup quota for the processor
+  access is measured and reallocated, this can be manipulated to create different processing quota ratios for different
+  applications.
+
+- `cat cpu.max | awk '{print $2}'` - the time in microseconds that the cgroup is allowed to access the processor during
+  the defined period, the period of time is adjustable. For example if that `value` value is 100, the cgroup will be
+  allowed to access the processor 100 microseconds during the set period, if that period is also 100 , that means the
+  cgroup ha unlimited access to the processor, on the system. If the period were set to 1000, the process would have
+  access to the processor for 100 microseconds out of every 1,000.
+
+For the app-cli this cgroup limits the container access to 1 CPU during 100,000 out of every 100,000 microseconds. If
+you convert these values to a ratio app-cli is allocated a maximum of 1,000 millicores of 1 CPU. That is the limit we
+have set for app-cli. This is how CPU time limits are managed for each container in an application deployment Next let
+us look at how the request values are controller by cgroups.
+
+The request limit for app-cli is managed by the value in `/sys/fs/cgroup/cpu/cpu.weight`. This value is a ratio of CPU
+resources relative to all the cores on the system. The CPU request for app-cli is 750 millicores. Because the
+application node has two processors, it should be allocated
+
+| OpenShift Value       | cgroup File | Kernel Value  | Explanation                               |
+| --------------------- | ----------- | ------------- | ----------------------------------------- |
+| cpu: 1000m limit      | cpu.max     | 100000 100000 | 100000µs quota / 100000µs period = 1 core |
+| cpu: 750m request     | cpu.weight  | 7500          | (750 \* 10000) / 1000 = 7500              |
+| memory: 500Mi request | N/A         | Not enforced  | Soft limit for scheduling only            |
+| memory: 1000Mi limit  | memory.max  | 1048576000    | 1000Mi in bytes (hard limit)              |
