@@ -57,8 +57,8 @@ Foundation. Kubernetes employs a master/node architecture, Kubernetes master ser
 server cluster and nodes run the actual application workloads. It is a great open source project. The community around
 it is quickly growing and incredibly active. It is consistently one of the most active projects on github. But to
 realize the full power of a container platform, it needs a few additional components. This is where OpenShift comes in,
-it uses docker and Kubernetes, as a starting point for its design. But to be a truly effective container platform it
-adds a few more tools to provide a better experience for users.
+it uses docker/containerd and Kubernetes, as a starting point for its design. But to be a truly effective container
+platform it adds a few more tools to provide a better experience for users.
 
 ## Examining the architecture
 
@@ -283,7 +283,7 @@ To install a OpenShift cluster we have really two major options - `minishift` an
 modern one which we will be using, this is a distribution provided by RedHat directly, and `crc` supports more modern
 versions of OpenShift, those would be any version =>4.xx.
 
-The runtime first needs a container runtime on your host machine, that is usually docker or podman or containerd,
+The runtime first needs a container runtime on your host machine, that is usually docker, podman or containerd,
 one of those need to be installed in order for you to be able to install `minishift`. However for the `crc` runtime the
 process is a bit different, while the `minishift` uses native container technologies to mimic the OpenShift cluster
 runtime, the `crc` product uses virtualization, meaning that you need to have the virtualization on your host enabled.
@@ -446,7 +446,8 @@ $ vi /etc/dnf/dnf.conf
 $ subscription-manager register # will prompt you to enter your RedHat credentials to register this node with RedHat
 $ subscription-manager refresh # refresh the indexes and allow us to interact with the RedHat registries from the node
 $ dnf clean all && dnf repolist -C # clean any left over artifacts, and also update the repository list of dnf manager
-$ dnf -y install httpd-tools iptables-services nfs-utils go gcc python3 python-pip --nogpgcheck # install utility applications to the cluster node
+$ dnf -y install httpd httpd-tools iptables-services \
+        nfs-utils go gcc python3 python-pip --nogpgcheck # install some utility applications to the master cluster node
 ```
 
 ## First project
@@ -946,7 +947,7 @@ the app in the container to access only the content in the custom app-cli contai
 the persistent volume associated with the persistent volume claim (PVC) for the app-cli.
 
 `Apps always need persistent storage, persistent storage allows data to persist when a pod is removed from the cluster,
-it also allows data to be shraed between multiple pods when needed, you will learn how to configure and use persistent
+it also allows data to be shared between multiple pods when needed, you will learn how to configure and use persistent
 storage on an NFS server with OpenShift in future section`
 
 The root file system based on the app-cli container image is a little more difficult to uncover, but we will do that
@@ -1074,6 +1075,40 @@ mounted on the host, and even explore and operate within the mount namespace, ef
 with the root file system with the container, all things that are usually hidden behind commands such as `exec`. Under
 the hood, exec does the same thing, it enters the namespace of the process allowing you to execute processes in the
 context of the container's namespace
+
+Each image is build from read-only layers, or also called Copy on Write. And it is working similarly to source control
+systems as Git. Here is how it works, each image is built from read only layers, if you take the following Dockerfile
+
+```Dockerfile
+FROM ubuntu:22.04         # Base layer (Layer A)
+RUN apt-get update        # Layer B
+COPY app.py /opt          # Layer C
+CMD ["python", "/opt/app.py"]
+```
+
+Each command creates a new read only layer, layers are stacked on top each other, what does that mean we have the
+following layers in the given Dockerfile above - Layer C -> Layer B -> Layer A, meaning that similarly to commits in a
+source control system each layer is based on the previous one, in this case Layer C is based off off Layer B and so on.
+When you run a container read only layers from the image are mounted as `lowerdir` - `OverlayFS`, a new writeable layer
+`upperdir` is added on top, container specific changes, the merged view what the container sees is the `upperdir` +
+`lowerdir`. How are changes handled in this case, modifying a file from the read only layer - the file is copied from
+the `lowerdir` to the `upperdir`, changes are applied to the copy in `upperdir`. New files on the other hands are
+directly written on the `upperdir`. Deleting a file, or a whiteout file, is created in `upperdir` to hide the file in
+lower layers, the file is actually obscured or occluded in the lower layers, not deleted from those layers.
+
+The read only layers are shared between many different images and by proxy containers, however the writeable layers, are
+only unique to the container in question, these layers are ephemeral, when the container is deleted so are they, the
+merged view is what the container sees between the read-only layers and its own writeable layers. As we said each
+modification or change in the container file system will generate a new writeable layer. The read-only layers are only
+created during the creation of the container image.
+
+The key implications of this is that this is quite efficient model - multiple containers share the same read only base
+layers, saves disk space, and since a lot of images are based on the same base layers, such as base images like CentOS,
+Alpine etc, these layers are shared. Performance is also good since we have copy on write, only the modified filed are
+copied into new layers. The changes in the container is isolated well by the existence of the `upperdir` layer, the
+writeable layer is ephemeral by default, deleted when the container is deleted, use the volume to persist data across
+the containers, note that volumes live outside of the file system layers, they are simply mount point in the container,
+meaning that they are not part of the file system layers at all
 
 ### UTS namespace
 
@@ -3397,6 +3432,13 @@ engineering a reverse workflow in which images are created form running containe
 rigid. Other examples that have worked with some engineering include - applications that open a large number of ports
 applications that rely on hard coded IP addresses, and other legacy applications that rely on older Linux technologies
 
+### Cleanup resource limits & quotas
+
+After you are done with this chapter, make sure to either delete the resource quota and limit ranges objects we have
+created or edit them to be more lenient, in case you wish to up-scale your replicas for the app-cli project, this
+will vastly restrict your capabilities to do so since the limits are not enough for more than 2 replicas for this
+project. Be wary of this !
+
 # Operations & Security
 
 This section focuses on cluster wide concepts and knowledge you will need to effectively manage an OpenShift cluster at
@@ -3969,9 +4011,9 @@ YAML definition for an existing deployment config directly from the command line
 deployment run the following `oc edit command` which lets you edit the current YAML definition for the application.
 
 ```sh
-# this will open your default system editor,  and allow you to edit the contents of the manifest as if it was being done
+# this will open your default system editor, and allow you to edit the contents of the manifest as if it was being done
 # directly and interactively
-oc edit deployment/app-cli
+$ oc edit deployment/app-cli
 ```
 
 To edit the resource limits you need to find the `spec.containers.resources` section of the configuration. This section is
@@ -4149,12 +4191,1048 @@ have set for app-cli. This is how CPU time limits are managed for each container
 us look at how the request values are controller by cgroups.
 
 The request limit for app-cli is managed by the value in `/sys/fs/cgroup/cpu/cpu.weight`. This value is a ratio of CPU
-resources relative to all the cores on the system. The CPU request for app-cli is 750 millicores. Because the
-application node has two processors, it should be allocated
+resources relative to all the cores on the system.
 
-| OpenShift Value       | cgroup File | Kernel Value  | Explanation                               |
-| --------------------- | ----------- | ------------- | ----------------------------------------- |
-| cpu: 1000m limit      | cpu.max     | 100000 100000 | 100000µs quota / 100000µs period = 1 core |
-| cpu: 750m request     | cpu.weight  | 7500          | (750 \* 10000) / 1000 = 7500              |
-| memory: 500Mi request | N/A         | Not enforced  | Soft limit for scheduling only            |
-| memory: 1000Mi limit  | memory.max  | 1048576000    | 1000Mi in bytes (hard limit)              |
+The memory limit for the app-cli is controlled by the value in /sys/fs/cgroup/memory/memory.current, there are some
+other files like memory.max memory.min and memory.peak, which are mostly self explanatory, the one that is more
+interesting is the memory.max, which defines the maximum amount of allowed memory that the container can take up which
+in this case matches perfectly with the limits configuration, meaning that it has a value of - `1048576000` - which is
+as configured a maximum amount of 1GB, The memory.current, varies and depends on the app that is running for app-cli
+that value is at 350MB - `34635776`
+
+Resource limits for OpenShift containers are enforced with kernel cgroups. The only exception is hte memory request
+value. There is no cgroup to control the minimum amount of RAM available to a process this value is primarily used to
+determine which node a pod is assigned to in your OpenShift cluster.
+
+This section covered a lot of what is required to create and maintain a healthy OpenShift cluster. We have gone far down
+into the Linux kernel to confirm how container resources limits are enforced. Although limits requests and quotas are
+not the most exciting things to work through they are absolutely critical and essential component of OpenShift ready to
+handle production workloads effectively.
+
+You cluster is now connected with an authentication database and the project you have been working on has effective
+resource limits and quotas. In the following sections we will keep building on that momentum
+
+To summarize this is how the values are distributed, note that this table is using cgroup v1 values as reference, the
+formula for cgroup v2 is a bit different. It is worth noting that during the last couple of years the container runtimes
+have moved to the cgroups v2, which change a few things among which are the default values for different limits, such
+as the cpu.weight, which in the older cgroups v1 were called cpu.shares. The shares value and weight have different
+scaling and they are calculate very differently, most container runtimes still use the old cgroups v1 as reference, and
+they adjust and scale the value to match cgroups v2 specification when creating the containers. The reason being that
+the OCI - Open container reference spec, was written with cgroups v1 in mind
+
+| OpenShift Value       | cgroup v1 File                      | cgroup v2 File |
+| --------------------- | ----------------------------------- | -------------- |
+| cpu: 1000m limit      | cpu.max                             | cpu.max        |
+| cpu: 750m request     | cpu.cfs_quota_us, cpu.cfs_period_us | cpu.weight     |
+| memory: 500Mi request | N/A                                 | N/A            |
+| memory: 1000Mi limit  | memory.max                          | memory.max     |
+
+# Networking
+
+The importance of the network design configuration in an OpenShift cluster can not be overstated, it is the fabric of
+what binds you cluster together. With that perspective in mind OpenShift does a lot of work to make sure its networking
+configuration is stable performs well and is highly configurable and available. Those principles are what we will cover
+in this section. Let us start with an overview of how the network stack in OpenShift is designed
+
+## Managing the SDN
+
+`OVS` is an enterprise grade scalable high performance software defined network - in OpenShift its the default SDN used to
+create the pod network in your cluster, it is installed by default when you deploy OpenShift. `OVS` runs as a service on
+each node in the cluster, you can check the status of the service by running the following `systemctl` command on any
+node
+
+```sh
+# firs login into the cluster node, and then query systemd for the status of the service on the node
+$ sudo -i
+$ systemctl status ovs-vswitchd
+
+# you will see something like this, which shows that the service is running and enabled out of the box
+● ovs-vswitchd.service - Open vSwitch Forwarding Unit
+     Loaded: loaded (/usr/lib/systemd/system/ovs-vswitchd.service; static)
+    Drop-In: /etc/systemd/system/ovs-vswitchd.service.d
+             └─10-ovs-vswitchd-restart.conf
+     Active: active (running) since Wed 2025-06-11 16:03:15 UTC; 2h 51min ago
+   Main PID: 1204 (ovs-vswitchd)
+      Tasks: 15 (limit: 152745)
+     Memory: 57.1M
+        CPU: 1min 32.243s
+     CGroup: /system.slice/ovs-vswitchd.service
+             └─1204 ovs-vswitchd unix:/var/run/openvswitch/db.sock -vconsole:emer -vsyslog:err -vfile:info --mlockall --user openvswitch:hugetlbfs --no-chdir --log-file=/var/log/openvswitch/ovs-vswitchd.log --pidfile=/var/run/openvswi>
+```
+
+`The service is automatically enabled on cluster nodes as part of the OpenShift deployment. The configuration file for the
+OVS service is located at /etc/systconfig/opensvwitch and each node's local OVS database is located in the
+/etc/openswitch directory For  day-to-day operations. OVS should be transparent. Its configuration and updates are
+controller by OpenShift. Using OVS provides several advantages to OpenShift. jthis transparent operation is possible
+because OpenShift uses the Kubernetes container network interface - the container network interface provide a plugin
+architecture to integrate different solutions to create and mange the pod network. OpenShift uses OVS as its default but
+it can function with other network providers as well.`
+
+The `OVS` used in your OpenShift cluster is the communication backbone for all your deployed pods, traffic in an out of
+ever pod is affected by it, in the OpenShift cluster. For that reason you need to know how it works and how to
+effectively use it for your needs. Let us start with the network configuration of your OpenShift application node.
+
+### Configure application node network
+
+When a node is added to an OpenShift cluster several network interfaces are created in addition to the standard loopback
+interface and `eth0` physical interface. For our purposes we will call `eth0` the physical interface even though you are
+using a virtual machine for your cluster. That is because OpenShift creates the following additional virtual interface.
+
+- `br0` - An `OVS` bridge all OpenShift interfaces are associated with. `OVS` creates this interface when the node is added
+  to the OpenShift cluster.
+
+- `tun0` attached to `br0`. Acts as the default gateway for each node. Traffic in and out of your OpenShift cluster is routed
+  through this interface.
+
+- `vxlan_sys_4789` - also attached to `br0` this virtual extensible local area network is encrypted and used to route
+  traffic to containers on other nodes in your cluster. It connects the nodes in your OpenShift cluster to create your pod
+  network.
+
+Additionally each pod has a corresponding virtual Ethernet interface that is linked to the `eth0` interface in the pod
+by the Linux kernel. Any network traffic that is sent either interface in this relationship is automatically presented
+to the other. All of these relationships are
+
+`What are Linux bridges, TUN interfaces, and VXLAN - a Linux bridge is a virtual interface that is used to connect other
+interfaces together, If two interfaces on a host are attached to abridge they can communicate with each other without
+routes needing to be created. This help with communication speed as well as keeping networking configuration simple on
+the host and in the container. A VXLAN is a protocol that acts as an overlay network between teh nodes in your OpenShift
+cluster, an overlay network is a software defined networks that is deployed on top of another network. The VXLAN used in
+OpenShift are deployed on top of the networking configuration of the host
+To communicate securely between pods, the VXLAN encapsulates pod network traffic in an additional layer of network
+information so it can be delivered to the proper pod on the proper sever by IP address. The overlay network is the pod
+network in your OpenShift cluster. The VXLAN interface on each node provide access to and from that network. You can
+find the full definition and specification for VXLAN and at its RFC doc.`
+
+You can see these interfaces on your application nodes by running the IP command. The following sample output has been
+trimmed with a little command line magic for brevity and clarity:
+
+```sh
+$ ip a | egrep '^[0-9].*:' | awk '{print $1 $2}'
+
+1:lo:
+2:ovs-system:
+3:ovn-k8s-mp0:
+4:br-int:
+5:eth10:
+6:tap0:
+8:br-ex:
+9:cf3abd918c8e682@if2:
+10:9943d81586b22a8@if2:
+12:363ff29e19ebff4@if2:
+14:b2cf78b2daa4f7b@if2:
+...
+```
+
+The networking configuration for the master node is essentially the same as an application node. The master node uses
+the pod network to communicate with pods on the application nodes as they are deployed deliver their application and are
+eventually deleted. In the next section we will look at more deeply at how the interface in the container is linked to a
+corresponding `veth` interface on the cluster node.
+
+### Linking containers to host interfaces
+
+In previous sections we talked about the network namespace and how each container contains a unique loopback and `eth0`
+interface for network communication. Form the perspective of application in a container these two interface are the only
+networks on the host, to get network traffic in an out of the container the `eth0` interface in the container is linked in
+the Linux kernel to a corresponding `veth` interface in the host's default network namespace
+
+The ability to link two interfaces is a feature of the linux kernel. To determine which `veth` interface a container is
+linked to you need to log into the application node where the container is running you can figure this out in just a few
+steps let us use the app-cli as an example
+
+```sh
+
+```
+
+Any virtual interface on a Linux system can be linked by the kernel to another virtual or physical interface. When an
+interface is linked to another the kernel makes them essentially the same interface. If something happens to one
+interface it automatically happens to its linked interface in an interface `iflink` file a file created and maintained
+by the running Linux kernel at `/sys/class/net/<interface-name>/iflink` is the index number for its linked interface. To
+find the linked interface number for the app-cli container run the following `oc` exec command making sure to use the
+pod ID for you app-cli deployment. This command uses the cat command line tool to echo the contents of the `iflink`
+file.
+
+```sh
+# the file contains only a single number which in this case represents the number of the linked interface
+$ oc exec app-cli-7976b4c888-rdbv7 -- cat /sys/class/net/eth0/iflink
+115
+```
+
+The eth0 interface in the app-cli pod is linked to interface 115, on the application node. But which veth interface is
+number 115 ? That information is available in the output form the IP command. The link ID also called the `ifindex` for
+each interface is the number at the beginning of each interface listed in the command. For each eth0 interface in a
+container its `iflink` value is the `ifindex` value of its corresponding veth interface.
+
+```sh
+# first make sure you have entered the cluster node in the first place
+$ ssh crc
+
+# grep for the virtual interface, that exactly contains and starts with the number we extracted from the iflink file
+# above, that would be 115 in our example, but you result and interface link number will be different
+$ ip a | grep -A 3 '^115.*:'
+115: 8a4aad65b71dfe8@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1400 qdisc noqueue master ovs-system state UP group default
+    link/ether 5a:2a:70:d2:bc:92 brd ff:ff:ff:ff:ff:ff link-netns fc30e1db-0655-46e5-bfac-157def87be33
+    inet6 fe80::582a:70ff:fed2:bc92/64 scope link
+       valid_lft forever preferred_lft forever
+```
+
+We have now confirmed that the app-cli pod is linked by the Linux kernel to the virtual interface [8a4aad65b71dfe8] - on
+the cluster node. This is how network traffic enters and exist containers in general. Next let us confirm that this veth
+on the node is connected to the cluster's pod network so network traffic can get in and out of the OpenShift cluster
+
+### Working with OVS
+
+The command line tool to work with `OVS` directly is `ovs-vsctl`. To use this tool you need to be logged in on to the
+host cluster you are looking for information about. In these examples we are logged in the cluster node already.
+
+We mentioned earlier that all OpenShift SDN interfaces are attached to an `OVS` ridge named `br0`. We make this
+distinctions of calling it an `OVS` bridge because it is a bridge interface that is created and controller by `OVS`
+itself. You can also create a bridge interface with the Linux kernel. A linux bridge is created and managed using the
+`brctl` command. You can confirm that the `bridge` interfaces are being controller by `OVS` by running the following
+`ovs-vsctl` command to list active `OVS` bridges
+
+```sh
+$ ssh crc
+$ sudo - i
+$ ovs-vsctl list-br
+
+# we have two interfaces, from the names we can deduce that one is internal and the other is called external.
+ovs-vsctl list-br
+br-ex
+br-int
+
+# let us see what the internal one contains first, the output is abridged but these are the identities of the veth
+# interface for each pod that is running in the cluster node, cluster has a lot of operator and utility pods that
+# run besides our own app pods
+$ ovs-vsctl list-ifaces br-int
+
+0549f003ca15713
+07ef7817039d9ff
+0dde308ad503bef
+...............
+1fd82e5f2d18b18
+2427839e331de3f
+252a3d9203d2239
+363ff29e19ebff4
+388c3b826f0b846
+3d2158eb7ef5b90
+46022cd19537541
+496573f934b3956
+4dc687e9870a5ac
+50023d8075b388c
+503b86107070900
+51386e7bf3410e9
+5859aa3a89d522d
+646690890e9b6d1
+76f5605e245b613
+7c5e9807644e8cb
+80c6c6f7b10f830
+...............
+8b4e358d3c1e190
+8c88cf893b34724
+8f2491e5cd6475b
+ovn-k8s-mp0
+patch-br-int-to-br-ex_crc <- take a good note of this interface
+
+$ ovs-vsctl list-ifaces br-ex
+
+patch-br-ex_crc-to-br-int <- take a good note of this interface
+tap0
+```
+
+If you have not used Linux bridges before it can seem confusing when you know a bridge should be present bu none appears
+when you run `brctl`, because they are being managed by `OVS` The node has a single `OVS` bridges named `br-ex and
+br-int`
+
+The output of the command above, lists all interfaces connected to this bridge br-int. This is how OpenShift SDN
+function, when a new pod is deployed a new veth interface is created and attached to br-int. At that point the pod can
+send and receive network traffic on the pod network. It can communicate outside the cluster through the br-int and br-ex
+
+In the next section we will put the bridge interfaces and the SDN to work by digging deeper into the how application
+traffic is routed and how application communicate in your cluster. Let us start at the beginning with a request for the
+app-cli deployment
+
+## Routing application requests
+
+When you browse to the route of app-cli at - http://app-cli-image-uploader.apps-crc.testing/ your request goes to the
+node, first on port 80, the default HTTP port. Log in to the cluster node and run the following netstat command to
+determine which service is listening to port 80
+
+```sh
+$ netstat -tpl --numeric-ports | grep 80
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      73357/haproxy
+```
+
+There is an HAProxy service running on the port in the node, that is interesting. HAProxy is the front door to your
+application in OpenShift. HAProxy is an open source software defined load balancer and proxy application. In OpenShift
+it takes the URL route associated with an application and proxies those requests into the proper pod to get the
+requested data back to the requesting user. Those requests into the proper pod to get the requested data back to the
+requesting user. We wont dig too much into all that HAProxy can do we are focusing on how OpenShift uses HAProxy.
+
+## Using the HAProxy service
+
+The routed pod runs in the project named openshift-ingress in OpenShift. The router pod handles incoming user requests
+for your OpenShift cluster application and proxies them to the proper pod to be served to the user. The router pod
+listens directly on the host interface for the node its deployed on and uses the pod network to proxy requests for
+different applications to the proper pod. This session then returns to the user from the pod host through the TUN
+interface.
+
+1. The user requests information for app-cli by the route's URL which connect to the OpenShift cluster node
+2. The HAProxy pod takes the request URL and maps it to its corresponding pod
+3. HAProxy uses the pod network to proxy the connection to a node where an app-cli pod is deployed
+4. The request goes through the pod network and is passed into the app-cli pod
+5. The TUN interface attached to the bridge routes traffic to the host network interface
+6. The app-cli processes the request and sends the response through its host TUN interface back to the user
+
+Because the router listens directly on the host interface its configured differently than a typical pod in OpenShift. In
+the next section we will investigate the HAProxy in more detail
+
+How does HAProxy always deploy to the same node, in OpenShift it is possible to tag an entire cluster application node
+with a label, then when deploying specific pods you can tell them on which cluster node to be deployed based on this
+label, similarly to how the names of the namespaces can be used to deploy applications in different project namespaces
+
+This is done using the `nodeSelector` value in the manifest file, in the deployment configuration component. The default
+OpenShift router has a node selector that specifies the node with the matching region=infra label, you can see this node
+selector in the router deployment config like so
+
+```sh
+$ oc get deployment -n openshift-ingress
+
+NAME                READY   UP-TO-DATE   AVAILABLE   AGE
+router-default      1/1     1            1           87d
+routes-controller   1/1     1            1           20h
+
+# the node selector for the deployment router-default might look something like this
+nodeSelector:
+    region: infra
+    kubernetes.io/os: linux
+    node-role.kubernetes.io/master: ""
+```
+
+### Investigating the HAProxy service
+
+The `lsns` tool you used in previous sections displays the namespaces associated with the HAProxy process listening on
+port 80. The following `lsns` command woks in your example cluster. First we have to find the PID of your app pod
+
+```sh
+$ sudo -i
+# here is what we can do to extract the pid of the router-default pod, this will inspect the pod, and fetch the pid
+$ crictl ps | grep router-default | awk '{print $1'} | head -n1 | xargs -I'{}' crictl inspect {} | grep "\"pid\":"
+
+# we might get a result like that, which points to the PID of that container, we can then use it to list the namespaces
+# bound to this process
+> "pid": 7702,
+
+# here we list all namespaces which this process has ownership of, take a good look at the first 3 namespaces, and note
+# that they are different than the others, that is because these reference namespaces directly on the host, you can see
+# that they are owned by PID 1, on the host, that is. Another giveaway is that the number of processes NPROCS is quite
+# large for the very first 3 namespaces, which kind of should also ring some alarm bells, while the other namespaces owned
+# by our process 7702, has just a couple of NPROCS running inside that namespace
+$ lsns -p 7702
+
+        NS TYPE   NPROCS   PID USER       COMMAND
+4026531834 time      560     1 root       /usr/lib/systemd/systemd --system --deserialize 41
+4026531837 user      560     1 root       /usr/lib/systemd/systemd --system --deserialize 41
+4026531840 net       435     1 root       /usr/lib/systemd/systemd --system --deserialize 41
+4026533678 uts         2  7702 1000560000 /usr/bin/openshift-router --v=2
+4026533679 ipc         2  7702 1000560000 /usr/bin/openshift-router --v=2
+4026533715 mnt         2  7702 1000560000 /usr/bin/openshift-router --v=2
+4026533716 pid         2  7702 1000560000 /usr/bin/openshift-router --v=2
+4026533722 cgroup      2  7702 1000560000 /usr/bin/openshift-router --v=2
+```
+
+Note something strange in the output, we can see that the PID for the time, user and net namespaces are 1, which means
+that they are using the namespaces from the host, the PID column shows who owns this namespace, PID 1 is always always
+the very first process that is started on the host, that is not not the router pod PID which is 7702. Using the host
+network namespace lets HAProxy listen directly on the host interfaces for incoming requests. Listening on the host
+interface means HAProxy receives application requests directly acting as OpenShift front door for application traffic.
+The router pod has its own mount namespace, which means that config files for HAProxy are isolated in the container. To
+enter the router pod, run the following `oc rsh` command, substitute the name of your router pod, this will initialize
+an `ssh` like session into the pod
+
+```sh
+# change the context namespace first and then get the list of pods that are of interest to us
+$ oc project openshift-ingress
+$ oc get pods
+NAME                                 READY   STATUS    RESTARTS   AGE
+router-default-6fcb8bbdff-p9sqk      1/1     Running   0          20h
+routes-controller-75bcb6d4c4-dbhjh   1/1     Running   0          20h
+
+# this will establish an ssh like session into the pod
+$ oc rsh router-default-6fcb8bbdff-p9sqk
+
+# now after the remote session into the pod is established run the following from the pod
+$ ip a
+
+# this is an abridged output, but take a good look at the very first interface, that is the interface 115, we already
+# saw in the host, for the app-cli pod, now the same interface is also visible from the router pod, not only that one but
+# actually all of them, why ? Well the ip command is executed in the namespace of the host, not the pod, that is, why we
+# can access interfaces on the host
+......
+115: 8a4aad65b71dfe8@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1400 qdisc noqueue master ovs-system state UP group default
+    link/ether 5a:2a:70:d2:bc:92 brd ff:ff:ff:ff:ff:ff link-netnsid 63
+    inet6 fe80::582a:70ff:fed2:bc92/64 scope link
+       valid_lft forever preferred_lft forever
+500: f595c598b9740a2@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1400 qdisc noqueue master ovs-system state UP group default
+    link/ether f6:f0:4d:04:bd:b9 brd ff:ff:ff:ff:ff:ff link-netnsid 44
+    inet6 fe80::f4f0:4dff:fe04:bdb9/64 scope link
+       valid_lft forever preferred_lft forever
+511: d3138ecde33decd@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1400 qdisc noqueue master ovs-system state UP group default
+    link/ether 42:7f:38:ab:b8:07 brd ff:ff:ff:ff:ff:ff link-netnsid 40
+    inet6 fe80::407f:38ff:feab:b807/64 scope link
+       valid_lft forever preferred_lft forever
+.....
+```
+
+### HAProxy and request routing
+
+The config file for HAProxy is in the pod at `/var/lib/haproxy/conf/haproxy.config`. This config file is maintained by
+OpenShift cluster and operator / controllers. Any time an application is deployed, updated or deleted, OpenShift updates
+this config file and has the HAProxy process reload it. Let us see this in action
+
+```sh
+# while still in the router pod, we can cat this file out
+$ cat /var/lib/haproxy/conf/haproxy.config | grep app-cli
+
+# here is the magic, you can actually see the config for both pods, that we have running for this app at the moment
+backend be_http:image-uploader:app-cli
+  server pod:app-cli-7976b4c888-zqx5l:app-cli:8080-tcp:10.217.0.86:8080 10.217.0.86:8080 cookie 24406d64b9747a68dacf13f017996cea weight 1 check inter 5000ms
+  server pod:app-cli-7976b4c888-rdbv7:app-cli:8080-tcp:10.217.0.87:8080 10.217.0.87:8080 cookie a4765a9ead710ffdc2e669795c0ea2b4 weight 1 check inter 5000ms
+
+# from your host machine, run the following command to make the pod replicas less
+$ oc scale deployment/app-cli --replicas=1 -n image-uploader
+
+# from the router pod now do execute the command again, we can see that only one entry is now present, which matches
+# the 1 replica we have for this project after the scaling was performed above
+$ cat /var/lib/haproxy/conf/haproxy.config | grep app-cli
+backend be_http:image-uploader:app-cli
+  server pod:app-cli-7976b4c888-rdbv7:app-cli:8080-tcp:10.217.0.87:8080 10.217.0.87:8080 cookie a4765a9ead710ffdc2e669795c0ea2b4 weight 1
+```
+
+We will not go into depth on what all of these fields mean, however you can clearly see that there are the ip
+addresses of the pods, as well as the names and ids of these pods. HAProxy takes the request from the user maps the
+requested URL to a defined route in the cluster and proxies the request to the IP address for a pod in the service
+associated with that route. All this traverses the pod network created by OpenShift SDN.. This process works in concert
+with iptables on each host. OpenShift uses a complex dynamic iptables configurable to make sure requests on the pod
+network are routed to the proper application pod. IPtables are a complex topic that we do not have the space to cover
+here.
+
+The method for routing requests in OpenShift works well. But it poses a problem when you deploying applications that
+depend on each other to function, if a new pod is added to an application or a pod is replaced and it receives a new IP
+address the change would require all applications that reference it to be updated and redeployed. This is not a
+serviceable solution. Luckily OpenShift incorporates a DNS service on the pod network. Let us examine that next
+
+## Locating services with internal DNS
+
+Applications depend on each other to deliver information to users. Middleware apps depend on databases. Web presentation
+layers depend on middleware. In tan application spanning multiple independently scalable pods these relationships are
+complex to manage to make this easier OpenShift deployed `SkyDNS` - when the cluster is deployed, and makes it available
+on the pod network, is a DNS service that uses etcd, the primary Kubernetes database to store DNS records. Also known as
+zone files, are config files where DNS records are recorded for a domain controller by a DNS server, in OpenShift `SkyDNS`
+controls the zone files for several domains that exist only on the pod network. `cluster.local` - top level domain for
+everything in your OpenShift cluster, `svc.cluster.local` - domain for all services running in your cluster.
+
+Domain for each project are also created. For example `image-uploader.svc.cluster.local` - used to access all the services
+created in the `image-uploader project`. A DNS A record is created in `SkyDNS` for each service in OpenShift when an
+application is deployed a service represents all the deployed pods for an application. To view the services for the
+`image-uploader project` run the following `oc` command
+
+```sh
+#
+$ oc get services -n image-uploader
+
+NAME      TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)             AGE
+app-cli   ClusterIP   10.217.5.54   <none>        8080/TCP,8443/TCP   21h
+```
+
+### DNS resolution in pod network
+
+When a pod is deployed the `/etc/resolv.conf` file from the application node is mounted in the container in the same
+location. In linux `/etc/resolv.conf` configures the servers and is used for DNS service name resolution. By default
+`/etc/resolv.conf` on the application node is configured with the IP address for the node itself. DNS requests on each
+application node are forwarded to the `SkyDNS` running on the master server node.
+
+The search parameter in `/etc/resolv.conf` is also updated when its mounted in the container it is updated to include
+`cluster.local` `svc.cluster.local` and all other domains manged by the `SkyDNS` service. Any domain defined in the
+search parameter in `resolv.conf` are used when a fully qualified domain name is not used for a hostname. FQDN are
+defined with an RFC document, but the general gist of what they are is that they are a complete address on a network.
+The domain `server.domain.com` is fully qualified where `server` only is not a complete domain name. The search
+parameter provides one or more domains that are automatically appended to the non FQDN to use for DNS queries
+
+When a request comes in from your cluster those requests are automatically forwarded to the master server where `SkyDNS`
+handles requests. Let us test this in action. The format is `service_name.project_name.svc-cluster.local:port`. The
+following example is run from the node, you can run the same command from within a pod without specifying the FQDN
+because `/etc/resolv.conf` has the `SkyDNS` search domains added. Using the `oc rsh` you can enter the namespace for the
+app-cli pod and use curl to download the index page from app-cli and the default page for the router service
+
+```sh
+TODO
+```
+
+## Configure OpenShift SDN
+
+When you deploy OpenShift the default configuration for the pod network topology is a single flat network. Every pod in
+every project is able to communicate without restrictions. OpenShift SDN uses a plugin architecture that provides
+different network topologies in OpenShift. There are currently three OpenShift plugins that can be enabled in the
+OpenShift config without making large changes to your cluster.
+
+- `ovs-subnet` - enabled by default, creates a flat pod network allowing all pods in all projects to communicate with each
+  other.
+- `ovs-multitenant` - separates the pod by project the application deployed in a proEct can only communicate with pods
+  deployed in the same project, you will enable this one layer on in this section
+- `OVS-networkpolicy` - provides fine grained ingress and egress rules for application. This plugin provides a lot of
+  config power, but the rules can be complex. This plugin is out of scope
+
+The Kubernetes container network interface accepts different networking plugins. OpenShift SDN is the default CNI plugin
+in OpenShift it configures and manages the pod network for your cluster, let us review the available OpenShift SDN
+plugins
+
+### Using the ovs-subnet
+
+Earlier you were able to communicate directly with an application from the stateful-apps project from a pod in the
+`image-uploader` project you could do so because of how the `ovs-subsnet` plugins configured in the pod network. A flat
+network topology for all pods in all projects lets communication happen between any deployed applications
+
+With this setup, an OpenShift cluster is deployed like a single tenant, with all resources available to one another. If
+you need to separate network traffic for multiple tenants you can use the multitenant plugin.
+
+### Using the ovs-multitenant
+
+The `ovs-multitenant` network plugins isolated pod communications at the project level. Each pod for each application
+deployment can communicate only with pods and services in the same project on the pod network. For example the app-gui
+and app-cli pods can communicate directly because they are both in the same `image-uploader` project namespace. But they
+are isolated from the `wildfly-app` application in the `stateful-apps` project in your cluster. This isolation relies on
+two primary tools in `Open vSwitch`
+
+- `VXLAN` - network identifier - acts like in a fashion similar to a `VLAN` in a traditional network. It is a unique
+  identifier that can be associated with an interface and used to isolate communication to interfaces with the same `VNID`.
+
+- `OpenFlow` - is a communication protocol that can be used to map network traffic across a network infrastructure.
+  `OpenFlow` is used in OpenShift to help define which interfaces can communicate and when to route traffic through the
+  `vxlan0` and `tun0` interfaces on each node.
+
+When the `ovs-multitenant` plugin is enabled each project is assigned a `VNID`. The `VNID` for each project is
+maintained in the etcd database on the OpenShift master node. When a pod is created its linked veth interface is
+associated with the project's `VNID` and `OpenFlow` rules are created to make sure it can communicate only with pods in
+the same project. The router and registry pods in the default project are assigned `VNID-0` this is a special `VNID` that
+can communicate with tall other `VNID` on a system. If a pod needs to communicate with a pod on another host, the `VNID`
+is attached to each packet
+
+With the `ovs-multitenant` plugin enabled if a pod needs to communicate with a pod in another project the request must be
+routed off the pod network and connect to the desired application through its external route like any other external
+request this is not always the most efficient architecture. The OpenShift SDN `ovs-networkpolicy` plugin provides more
+fine grained control over how applications communicate across projects.
+
+### Creating advanced network designs
+
+The `ovs-networkpolicy` plugin provides fine grained access control for individual applications regardless of the
+project they are in these rules can become complex very quickly we do not have the space to cover this here, but you can
+learn more about them on the official documentation site of OpenShift
+
+### Enabling multi tenant plugin
+
+To enable the multi tenant plugin you need to ssh into your master node and application nodes (if you have more than one
+node cluster configured) and edit a cluster network config
+
+```sh
+# on the master server, login with a correct user that has cluster-admin roles, first lets see what is in there
+$ oc describe network/cluster
+
+# this describes the network cluster object that is currently deployed on the master server, you can see some of the
+# details we had already mentioned below in the output
+Name:         cluster
+Namespace:
+Labels:       <none>
+Annotations:  <none>
+API Version:  config.openshift.io/v1
+Kind:         Network
+Metadata:
+  Creation Timestamp:  2025-03-16T14:44:34Z
+  Generation:          6
+  Resource Version:    26060
+  UID:                 bc505ed9-75c3-4f2a-bc0f-db8a0769e5cd
+Spec:
+  Cluster Network:
+    Cidr:         10.217.0.0/22
+    Host Prefix:  23
+  External IP:
+    Policy:
+  Network Diagnostics:
+    Mode:
+    Source Placement:
+    Target Placement:
+  Network Type:  OVNKubernetes
+  Service Network:
+    10.217.4.0/23
+Status:
+  Cluster Network:
+    Cidr:               10.217.0.0/22
+    Host Prefix:        23
+  Cluster Network MTU:  1400
+  Conditions:
+    Last Transition Time:  2025-06-11T16:04:13Z
+    Message:
+    Observed Generation:   0
+    Reason:                AsExpected
+    Status:                True
+    Type:                  NetworkDiagnosticsAvailable
+  Network Type:            OVNKubernetes
+  Service Network:
+    10.217.4.0/23
+Events:  <none>
+
+# first make sure to apply the following network policies, these are a prerequisite, to allow us to continue with
+# the creation and setup of the multitenant plugin
+$ oc apply -f openshift/network-policy-multitenant.yml
+networkpolicy.networking.k8s.io/allow-from-openshift-ingress created
+
+# here after applying the configuration from above you should be able to see the effects of the net network policies
+# in effect, created on the master cluster node
+$ oc describe networkpolic
+Name:         allow-from-openshift-ingress
+Namespace:    openshift-ingress
+Created on:   2025-06-13 16:25:57 +0300 EEST
+Labels:       <none>
+Annotations:  <none>
+Spec:
+  PodSelector:     <none> (Allowing the specific traffic to all pods in this namespace)
+  Allowing ingress traffic:
+    To Port: <any> (traffic allowed to all ports)
+    From:
+      NamespaceSelector: policy-group.network.openshift.io/ingress=
+  Not affecting egress traffic
+  Policy Types: Ingress
+
+Name:         allow-from-openshift-monitoring
+Namespace:    openshift-ingress
+Created on:   2025-06-13 16:27:28 +0300 EEST
+Labels:       <none>
+Annotations:  <none>
+Spec:
+  PodSelector:     <none> (Allowing the specific traffic to all pods in this namespace)
+  Allowing ingress traffic:
+    To Port: <any> (traffic allowed to all ports)
+    From:
+      NamespaceSelector: network.openshift.io/policy-group=monitoring
+  Not affecting egress traffic
+  Policy Types: Ingress
+
+Name:         allow-same-namespace
+Namespace:    openshift-ingress
+Created on:   2025-06-13 16:27:28 +0300 EEST
+Labels:       <none>
+Annotations:  <none>
+Spec:
+  PodSelector:     <none> (Allowing the specific traffic to all pods in this namespace)
+  Allowing ingress traffic:
+    To Port: <any> (traffic allowed to all ports)
+    From:
+      PodSelector: <none>
+  Not affecting egress traffic
+  Policy Types: Ingress
+
+```
+
+After these changes are committed and done you have to make sure to restart the master node server, you can do this
+with the command line on your host machine like so `crc stop` and then followed by `crc stop`, the changes will take
+effect after the server is restarted
+
+```sh
+
+```
+
+### Testing the multi-tenant plugin
+
+Previously in the section you logged in to the app-cli pod using the `oc rsh` and downloaded the web index pages for
+the other applications, now we are going to try to do the same. We will connect to the pods again, and try to
+download the index pages for both applications again, from the two different projects, one of the apps will be from
+the current project `image-uploader` project and the other from the `wildfly-app` project, but it does not really
+matter which one you choose as long as its a different one than the `image-uploader` project
+
+# Security
+
+Each topic in this chapter is specific to security and to making OpenShift a secure platform for your application. This
+chapter is not a comprehensive summary of OpenShift security features that would take many lines of words or and is a
+great idea for a standalone document. What we will do in this section is walkthrough the fundamentals of OpenShift we
+want to give you examples of what we think are the most crucial concepts and we will do our best to point you in the
+right direction, for the topics we do not have room to cover
+
+We begin discussing important security concepts and making OpenShift secure not long after the very first section,
+
+- Understanding OpenShift role in your environment
+- Deploying applications with specific users
+- Diving deep into how container processes are isolated
+- Confirming application health and status
+- Autoscaling applications to automate resilience
+- CI/CD pipeline so humans do not have to be involved
+- Working with persistent storage
+- Controlling access to pods and handling interactions between pods
+- Using identity providers and working with roles, limits and quotas
+- Creating a secure stable networking
+
+We may be using a broad definition of security her but every section in this documentation, contributes to your
+understanding of OpenShift and how to deploy it in an automated and secure fashion. Automation and security go hand
+in hand, because humans are not good at repetitive task. The more you can automate task for your application the
+more secure you can make those applications Even though we have already covered a lot of ground regarding security
+we will still need to devote this entire section to security specific topics
+
+OpenShift has layers of security form the Linux kernel on each application node through the routing layer that delivers
+applications to end user, we will begin this discussion with the linux kernel and work our way up through the
+application stack. For containers and OpenShift, security begins in the Linux kernel with SELinux
+
+## SELinux core concepts
+
+SELinux is a linux kernel module, that is used to enforce mandatory access control - MAC. This is a set of access levels
+that are assigned to users by the system. Only users with root-level permissions privileges can alter them. For typical
+users including the automated user accounts in OpenShift that deploy applications, the SELinux config specified for a
+deployment is an immutable fact. MAC is a contrast to discretionary access control - in linux. `DAC` is the system of
+users and file ownership access modes that we all use every day on Linux hosts. If only `DAC` were tin effect in your
+OpenShift cluster users could allow full access to their container resources by changing the ownership or the access
+mode for the container process or storage resources. One of the key security features of OpenShift is that SELinux
+automatically enforces MAC policies that can not be changed by unprivileged users for pods and other resources even if
+they deployed the application
+
+We need to take a few lines to discuss some of the fundamental information that we will use throughout the section. As
+with security in general this will not be a full SELinux introduction, Entire books have been written on that topic
+including the SELinux coloring book. But the following information, will help you understand how OpenShift uses SELinux
+to create a secure platform. We will focus on the following SELinux concepts
+
+- Labels - SELinux labels are applied to all objects on a linux server
+- Context - SELinux contexts apply labels to object based on file system location
+- Policies - SELinux policies are rules that control interactions between objects with different SELinux labels
+
+## Working with SELinux labels
+
+SELinux labels are applied to all objects on your OpenShift servers as they are created. An SELinux label dictates how
+an object on a linux sever interacts with the SELinux kernel module. We are defining an object in this context as
+anything a user or process can create or interact with on a server, such as the following.
+
+- files
+- directories
+- TCP ports
+- unix sockets
+- shared memory resources
+
+Each object in SELinux label has four section separated by colons:
+
+- User which SELinux user has access to the object with the SELinux label,
+- Role the SELinux role that can access the objects with the matching SELinux
+- Type SELinux type for each label. This is the section where most common SELinux rules are written
+- multi category security - often called the `MCS` bit, Unique for each container what we will spend the most time on
+
+`Open vSwitch` for communication on your OpenShift cluster nodes. `/var/run/open-vswitch/db.sock`. To view this label run
+the following ls command using the -Z option flag to include the SELinux information in its output.
+
+```sh
+# besides the regular file permission, group and user owner, we can also see the labels for the sock object are also
+# displayed
+$ ls -alZ /var/run/openvswitch/db.sock
+srwxr-x---. 1 openvswitch hugetlbfs system_u:object_r:openvswitch_var_run_t:s0 0 Jun 11 16:03 /var/run/openvswitch/db.sock
+
+# The SELinux label for the open v-switch socket object, the format looks something like this, we can see from above,
+# that we have multiple targets in the label
+system_u:object_r:openvswitch_var_run_t:s0
+
+system_u - the SELinux user is used for the `MCS` inmplementation
+object_r - the SELinux role is used primarily for `MCS` implementation
+openvswitch_var_run_t - the SELinux type is used in type enformcement policies to define interactions between objects on a Linux host
+s0 - objects are assigned an `MCS` value to distinguish between different category levels on the Linux system.
+```
+
+In addition to the standard POSIX attributes of mode, owner and group ownership, the output also includes the SELinux
+label for `/var/run/openvswitch/db.sock.`. Next lets examine how SELinux labels are applied to files and other objects,
+when they are created.
+
+```sh
+# Most commands have the -Z option that will include the commands in SELinux labels common command line tools like
+# ls,ps,netstat and others accept the -Z option, to include the SELinux information in their output, because objects are
+# presented in the linux operating system as files their SELinux labels are stored in their filesystem extended
+# attributes. You can view these attributes directly for the Open vSwitch socket using the following getfattr command:
+
+$ getfattr -d -m - /var/run/openvswitch/db.sock
+# file: var/run/openvswitch/db.sock
+security.selinux="system_u:object_r:openvswitch_var_run_t:s0"
+
+# if you are looking for a full SELinux documentation a great place to start is the Red Hat enterprise linux 7 SELinux
+# guide, that you can find on the official site of RedHat
+```
+
+### Applying labels with SELinux context
+
+Labels are applied to files using SELinux contexts rules that are used to apply labels, to object on a linux system,
+contexts use regular expression to apply labels depending on where the object exists in the file system. One of the
+worst things a system admin can hear is a developer telling the that the SELinux breaks their application. In reality
+application is almost certainly creating objects on the linux server that do not have a defined SELinux context. If
+SELinux does not know how to apply the correct label it does not know how to treat the application objects. This often
+results in SELinux policy denials that lead to frantic calls and requests to disable SELinux because its breaking an
+application.
+
+To query the context for a system use the `semanage` command, and filter it using grep. You can use `semanage`to search
+for context that apply to any label related to any file or directly, including the Open`vSwitch`socket. A search
+for`openvswitch`in the`semanage`output shows that the context`system_u:obejct_r:poenvswitch_var_run_t:s0`, is applied to
+any object created in the `/var/run/openvswitch` directory
+
+```sh
+$ semanage fcontext -l | grep openvswitch
+
+/etc/openvswitch(/.*)?                             all files          system_u:object_r:openvswitch_rw_t:s0
+/run/ovn(/.*)?                                     all files          system_u:object_r:openvswitch_var_run_t:s0
+/usr/bin/neutron-openvswitch-agent                 regular file       system_u:object_r:neutron_exec_t:s0
+/usr/bin/ovs-appctl                                regular file       system_u:object_r:openvswitch_exec_t:s0
+/usr/bin/ovs-vsctl                                 regular file       system_u:object_r:openvswitch_exec_t:s0
+/usr/bin/quantum-openvswitch-agent                 regular file       system_u:object_r:neutron_exec_t:s0
+/usr/lib/systemd/system/openvswitch.service        regular file       system_u:object_r:openvswitch_unit_file_t:s0
+/usr/sbin/ovs-vswitchd                             regular file       system_u:object_r:openvswitch_exec_t:s0
+/usr/sbin/ovsdb-ctl                                regular file       system_u:object_r:openvswitch_exec_t:s0
+/usr/sbin/ovsdb-server                             regular file       system_u:object_r:openvswitch_exec_t:s0
+/usr/share/openvswitch/scripts/ovs-ctl             regular file       system_u:object_r:openvswitch_exec_t:s0
+/usr/share/openvswitch/scripts/ovs-kmod-ctl        regular file       system_u:object_r:openvswitch_load_module_exec_t:s0
+/var/lib/openvswitch(/.*)?                         all files          system_u:object_r:openvswitch_var_lib_t:s0
+/var/log/openvswitch(/.*)?                         all files          system_u:object_r:openvswitch_log_t:s0
+/var/run/openvswitch(/.*)?                         all files          system_u:object_r:openvswitch_var_run_t:s0
+```
+
+Properly applied SELinux labels create policies that control how objects with different labels can interact with each
+other. Let us discuss those next
+
+### Enforcing SELinux with policies
+
+SELinux policies are a complex thing. They are heavily optimized and compiled so they can be interpreted quickly by the
+linux kernel. Creating one or looking at the code that creates one is outside the scope here, but lets look at the basic
+example of what an SELinux policy would do. For this we will use an example that most people are familiar with, the
+Apache web server. Apache is a common everywhere and has long established SELinux policies that we can use as an example
+
+```sh
+# if you have followed the install setup steps from above, you will be able to see the httpd binary in /sbin/httpd,
+# which is the Apache web server binary, use dnf -y install httpd on your master cluster node if you have not
+$ ls -zlZ /sbin/httpd
+-rwxr-xr-x. 1 root root system_u:object_r:httpd_exec_t:s0 589576 Jan 29 17:56 /sbin/httpd
+```
+
+The executable file for the Apache web server is `/usr/sbin/htpd`. This httpd executable has an SELinux labels of
+`system_u:object_r:httpd_exec_t:s0`. On CentOS and Red Hat systems the default Apache web content directory is
+`/var/www/html`. This directory has an SELinux label of `system_u:object_r:httpd_sys_content_t:s0`, The default
+`cgi-script` directory for Apache is `/var/www/cgi-bin`, and it has the SELinux label of
+`system_u:object_r:httpd_sys_script_exec_t:s0`. There is also the httpd_port_t label for the following TCP port numbers
+
+- 80, 8008, 8009, 8433, 9000, 81, 443, 488.an SELinux policy enforces the following rules using these labels for the
+  httpd_exec_t object type
+
+```sh
+$ ls -alZ /var/www/cgi-bin
+drwxr-xr-x. 2 root root system_u:object_r:httpd_sys_script_exec_t:s0  6 Jan 29 17:56 .
+drwxr-xr-x. 4 root root system_u:object_r:httpd_sys_content_t:s0     33 Jun 15 12:40 ..
+
+$ ls -alZ /var/www/html
+drwxr-xr-x. 2 root root system_u:object_r:httpd_sys_content_t:s0  6 Jan 29 17:56 .
+drwxr-xr-x. 4 root root system_u:object_r:httpd_sys_content_t:s0 33 Jun 15 12:40 ..
+```
+
+An SELinux policy enforces the following rules using these labels for the httpd_exec_t object type:
+
+- `httpd_exec_t` - can write only to objects with an `httpd_sys_content_t` type
+- `httpd_exec_t` - can execute scripts only with the `httpd_sys_script_exec_t`
+- `httpd_exec_t` - can read from directories with `httpd_sys_script_exec_t`
+- `httpd_exec_t` - can open and bind only to ports with the `httpd_port_t`
+
+This means even if Apache is somehow compromised by a remote user it can read content from `/var/www/html` and run
+scripts from `/var/www/cgi-bin`. It also can not write to `/var/www/cgi-win`. All of this is enforced by the Linux
+kernel, regardless of the ownership or permission of the binary or these directories, and which user owns the httpd
+process. The default SELinux loaded on a Linux system is the targeted type.
+
+The rules in the targeted SELinux type are applied only to objects that have matching context. Every object on a server
+is assigned a labels based on the SELinux context it matches. If an object does not match the context it is assigned an
+unconfined_t type in its SELinux labels. The unconfined_t type ha no contexts or policies associated with it.
+Interactions between objects that are not covered by a policy in targeted SELinux are allowed to run with no
+interference.
+
+To summarize - the httpd executable can only find to specific ports as listed above, with the matching `httpd_port_t`
+type. Then the binary can only execute scripts with the `httpd_sys_script_exec_t` type, and also the binary can only
+read from directories with the `httpd_sys_script_exec_t`, and can server content from and write to directories tagged
+with the `httpd_sys_content_t` type.
+
+For CentOS and Red Hat Enterprise Linux the default policies use type enforcement. Type enforcement uses the type value
+from SELinux labels to enforce the interaction between objects. Let us review what we have talked about so far up until
+this point
+
+- SELinux is used to enforce the MAC in your OpenShift cluster. MAC provides access controls at the deeper level than a
+  traditional user/group ownership and access mode. It also applies to objects on the operating system that are not
+  traditional files and directories.
+- Every object on an OpenShift node is assigned an SELinux label including a type.
+
+- Labels are assigned according to a SELinux context as objects are created,
+
+- With labels applied SELinux policies enforce interaction between objects. SELinux uses type enforcement policies on
+  your OpenShift cluster to ensure proper interactions between objects
+
+This SELinux configuration is standard for any CentOS or RedHat system running with SELinux in enforcing mode. Just as
+in the Apache web server process we have been running discussing you know what container is essentially a process.
+Each container process is assigned an SELinux label when its created and that label dictates the policies that affect
+the container. To confirm the SELinux label that is used for containers in OpenShift get the container PID, form the
+container runtime, and use the `ps` command with the -Z command parameter searching for that PID with grep
+
+```sh
+$ crictl ps | grep router-default | awk '{print $1'} | head -n1 | xargs -I'{}' crictl inspect {} | grep "\"pid\":"
+"pid": 7702,
+
+$ ps -axZ | grep 7702
+system_u:system_r:spc_t:s0         7702 ?        Ssl    2:03 /usr/bin/openshift-router --v=2
+```
+
+OpenShift hosts operate with SELinux enforcing mode. Enforcing mode means that the policy engine that controls how
+objects can interact is full activated, if an object attempts to do something that is against the SELinux policies
+present on the system, that action is not allowed, and the attempt is logged by the kernel, to confirm that the SELinux
+is in enforcing mode run the following command `getenforce` command
+
+```sh
+# you will get the following minimal output from this command, which basically confirms that we are indeed in enforcing
+# mode running in the master node
+$ getenforce
+> Enforcing
+```
+
+In other servers, tools like virus scanners can cause issues with SELinux. A virus scanner is designed to analyze files
+on a server that are created and managed by other services. That makes writing an effective SELinux policy for a virus
+scanner a significant challenge, another typical issue is that when application and their data are placed in location
+on the file system that do not match their corresponding SELinux context. If the Apache web server is trying to access
+content from /data on server, it will be denied by SELinux because /data does not match any SELinux context associated
+with Apache. These sorts of issues lead to some people deciding to disable SELinux.
+
+The user and role portions of the label are not used for type enforcement policies. The `svirt_lxc_net_t` type is used in
+SELinux policies that control which resources on the system container can interact with. We have not discussed the
+fourth part of the SELinux label - the ``MCS`` level, which isolates pods in OpenShift lets examine how that works next
+
+### Isolating pods with levels
+
+The original purpose of the `MCS` bit was to implement the `MCS` security standards on linux servers. These standards
+control data access for different security levels on the same servers. For example secret and top secret data could
+exist on the same server. A top secret level process should be able to to access secret level data, a concept called
+data dominance. But secret processes should never be able to access the top secret level data, because that data has
+higher `MCS` level. This is the security feature you can use to prevent a pod from accessing data its not authorized to
+access on the host.
+
+OpenShift uses the `MCS` level for each container process to enforce security as part of the pod security context. A pod
+security context is all the information that describes how its secured on its application node. Let us look at the
+security context for the app-cli pod
+
+### Investigating pod security context
+
+Each pod security context contains information about its security posture. You can find full documentation on the
+possible fields that can be defined at the official documentation in OpenShift. In OpenShift the following parameters
+are configured by default.
+
+- Capabilities - defines an application ability to perform various tasks on the host. Capabilities can be added to or
+  dropped from each pod. We will look at these in depth in this section
+
+- Privileged - specifies whether the container is running with any of the host namespaces
+
+- RunAsUser - UID with which to run the container process. This can be configured which we will also checkout in this
+  section, it is often used in Dockerfile images.
+
+- SELinuxOptions - SELinux options for the pod, Normally the only needed option is to st the SELinux level.
+
+You can view the security context for a pod in the GUI by choosing the Pods, and then selecting the pod you want the
+information about, and then choosing Actions -> Edit -> YAML. From the command line that might look like that
+
+```sh
+# make sure to specify the correct pod id, based on the output from the oc get pods, the output is abridged of course,
+# but the detailed output for a pod would always include the `securityContext` field, which you can see below, it contains
+# the `seLinuxOptions` levels
+$ oc get -n image-uploader -o yaml pod/app-cli-7976b4c888-rdbv7
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+  creationTimestamp: "2025-06-11T17:02:47Z"
+  labels:
+    deployment: app-cli
+    pod-template-hash: 7976b4c888
+  name: app-cli-7976b4c888-rdbv7
+  namespace: image-uploader
+spec:
+  securityContext:
+    fsGroup: 1000650000
+    seLinuxOptions:
+      level: s0:c26,c0
+    seccompProfile:
+      type: RuntimeDefault
+  serviceAccount: default
+  serviceAccountName: default
+```
+
+### Examining the MCS levels
+
+The structure of the `MCS` level consists of sensitivity level s0 and two categories c8 and c7 as shown in the following
+output from the previous command. You may have noticed that the order of the categories is reversed in the oc output
+compared with the pc command. This makes no difference in how the Linux kernel reads and acts on the `MCS` level.
+
+A detailed discussion of how different `MCS` levels can interact is out of scope. OpenShift assumes that application
+deployed in the same project will need to interact with each other. With that in  the pods in a project have the
+same `MCS` level. Sharing an `MCS` level lets applications share resources easily and simplifies the security configuration
+you need to make for your cluster.
+
+Let us examine the SELinux configuration for pod in different project. You already know the `MCS` level for app-cli.
+Because the app-cli and app-gui are in the same project, they should have the same `MCS` level. T get the `MCS` level of the
+app-gui pod use the same `oc` get command
+
+```sh
+# first make sure to extract the pods for the project, and then we will pull the manifest, grepping on the relevant
+# field, to verify that the levels are indeed the same, in both pods in the same project, just as described above
+$ oc get pods -n image-uploader
+app-cli-7976b4c888-rdbv7   1/1     Running     0          3d20h
+app-gui-5d5dc97869-8r2wl   1/1     Running     0          96s
+
+$ oc get -o yaml pod/app-gui-5d5dc97869-8r2wl | grep "level:"
+      level: s0:c26,c0
+
+$ oc get -o yaml pod/app-gui-5d5dc97869-8r2wl | grep "level:"
+      level: s0:c26,c0
+```
+
+This confirms what we have sated earlier the levels for the app-gui and app-cli are the same because they are deployed
+in the same project. Use the `wildfly-app` you deployed in the earlier chapter, to get the name of the deployed pod
+running run the following `oc` command, get the pods of that project and compare the security options of the SELinux labels
+
+```sh
+# we can also display the abridged output for the manifest for the `stateful-apps`, `wildfly-app` as well, we can see
+# that here the levels are completely different
+$ oc get pods -n stateful-apps
+NAME                   READY   STATUS      RESTARTS   AGE
+wildfly-app-1-snffs    1/1     Running     0          108s
+
+# inspect the manifest file for the pod, and note that `securityContext` section, and see that the levels in this case are
+# different for this project compared to the `image`-uploader
+$ oc get -n stateful-apps -o yaml pod/wildfly-app-1-snffs
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    openshift.io/deployment-config.latest-version: "1"
+    openshift.io/deployment-config.name: wildfly-app
+    openshift.io/deployment.name: wildfly-app-1
+    openshift.io/generated-by: OpenShiftNewApp
+    openshift.io/scc: restricted-v2
+    seccomp.security.alpha.kubernetes.io/pod: runtime/default
+  creationTimestamp: "2025-06-15T13:31:05Z"
+  generateName: wildfly-app-1-
+  labels:
+    application: wildfly-app
+    deployment: wildfly-app-1
+    deploymentConfig: wildfly-app
+    deploymentconfig: wildfly-app
+  name: wildfly-app-1-snffs
+spec:
+  securityContext:
+    fsGroup: 1000670000
+    seLinuxOptions:
+      level: s0:c26,c10
+    seccompProfile:
+      type: RuntimeDefault
+  serviceAccount: default
+  serviceAccountName: default
+```
+
+Each project uses a unique `MCS` level for deployed applications this `MCS` level permits each project applications
+to communicate only with resources in the same project. Let us continue looking at pod security context components
+with pod capabilities
+
+### Managing pods Linux capabilities
