@@ -251,13 +251,13 @@ bring the current state closer to the desired state. Some core controller compon
 server, for new changes, in the desired state, and then make sure to match that in the actual state in the kubernetes
 environment`
 
--   **Node Controller**: Manages node lifecycle.
+- **Node Controller**: Manages node lifecycle.
 
--   **Service Controller**: Ensures that traffic is routed to the correct pods on the fly.
+- **Service Controller**: Ensures that traffic is routed to the correct pods on the fly.
 
--   **Deployment Controller**: Manages updates to Pods and `ReplicaSets` objects
+- **Deployment Controller**: Manages updates to Pods and `ReplicaSets` objects
 
--   **Ingress Controller** is a special type of controller that handles Ingress resources. It is not part of the control
+- **Ingress Controller** is a special type of controller that handles Ingress resources. It is not part of the control
   plane itself but is instead a user-deployed component that runs as a Pod in the cluster. It watches for Ingress
   resources and configures external load balancers or proxies (e.g., `NGINX`, `Traefik`) to route traffic to the appropriate
   services.
@@ -456,9 +456,9 @@ have Pods. The simplest model is to run a single container in every Pod. This is
 container interchangeably. However there are advanced use cases that run multiple containers in a single Pod, Powerful
 examples of multi container Pods include:
 
--   Service meshes
--   Containers with a tightly coupled log scraper
--   Web containers supported by a helper container pulling updated content
+- Service meshes
+- Containers with a tightly coupled log scraper
+- Web containers supported by a helper container pulling updated content
 
 `The point is that a Kubernetes Pod is a construct for running one or more containers. A pod is an object, defined
 declaratively in the k8s state, they are not physical entities that run on the Nodes, they are used by the kubelet
@@ -539,8 +539,8 @@ configuration. When we have talked about updating Pods, we have really meant del
 new one having the new configuration The immutable nature of Pods is a key aspect of cloud native microservices, design
 and patterns and forces the following:
 
--   When updates are needed replace all old pods with new ones that have the updates
--   When failures occur replace failed Pods with new identical ones
+- When updates are needed replace all old pods with new ones that have the updates
+- When failures occur replace failed Pods with new identical ones
 
 To be clear you never update the running pod, you always replace it with a new pod containing the updates, you also
 never log onto failed pods and attempt fixes you build fixes into an updated pod and replace failed ones with the update
@@ -948,10 +948,10 @@ You design apps which each discrete microservice as its own Pod. For convenience
 and more - you wrap the pod in their own higher level controller such a Deployment. Each Deployment describes all the
 following
 
--   How many Pods replicas
--   What image to use for the Pods container
--   What network ports to expose
--   Details about how to perform rolling updates
+- How many Pods replicas
+- What image to use for the Pods container
+- What network ports to expose
+- Details about how to perform rolling updates
 
 In the case of Deployments when you post the YAML file to the API server, the Pods get scheduled to healthy nodes and a
 deployment and `ReplicaSets` work together to make the magic happen. The `ReplicaSet` controller sits in a watch loop making
@@ -1144,34 +1144,34 @@ spec:
                           cpu: 0.1
 ```
 
--   `apiVersion`: At the top the API version is specified that is to be used.
+- `apiVersion`: At the top the API version is specified that is to be used.
 
--   `kind`: that is the type of the object that is being defined, in this case the Deployment
+- `kind`: that is the type of the object that is being defined, in this case the Deployment
 
--   `metadata`: gives the Deployment a name, this should be a valid DNS name, so, that means alphanumeric the dot and the
+- `metadata`: gives the Deployment a name, this should be a valid DNS name, so, that means alphanumeric the dot and the
   dash are valid, avoid exotic characters.
 
--   `spec`: this section is where most of the action is, anything directly below spec relates to the Deployment, anything
+- `spec`: this section is where most of the action is, anything directly below spec relates to the Deployment, anything
   nested below refers to the actual behavior of the deployment object
 
--   `spec.template` is the Pod template the Deployment uses to stamp out the Pod replicas, in this example the
+- `spec.template` is the Pod template the Deployment uses to stamp out the Pod replicas, in this example the
   Pod template defines a single container Pod.
 
--   `spec.replicas` is how many pod replicas the deployment should create and manage.
+- `spec.replicas` is how many pod replicas the deployment should create and manage.
 
--   `spec.selector` is a list of labels that pods must have in order for the deployment to manage them, notice how
+- `spec.selector` is a list of labels that pods must have in order for the deployment to manage them, notice how
   the Deployment selector matches the labels assigned to the pod.
 
--   `spec.revisionHistoryLimit` tells Kubernetes how may older version of `ReplicaSet` to keep, keeping more gives you
+- `spec.revisionHistoryLimit` tells Kubernetes how may older version of `ReplicaSet` to keep, keeping more gives you
   more rollback options but keeping too many can bloat the object, this can be a problem on large cluster with lots of
   software releases.
 
--   `spec.progressDeadlineSeconds` tells kubernetes how long to wait during a rollout for each new replica to come
+- `spec.progressDeadlineSeconds` tells kubernetes how long to wait during a rollout for each new replica to come
   online, the example sets a 5 minute deadline, meaning that each new replica has 5 minutes to complete up before
   kubernetes considers the rollout stalled, to be clear the clock is reset after each new replica comes up meaning each
   step in the rollout gets its own 5 minute window.
 
--   `spec.strategy` tells the deployment controller how to update the pods when a rollout occurs. There are some more
+- `spec.strategy` tells the deployment controller how to update the pods when a rollout occurs. There are some more
   details to take a look at here, first the `maxUnavailable` - which tells that no more than one Pod below the desired
   state should considered valid state, meaning that somehow two pods failed, getting us at 8, the kubelet will try to
   scale up to 10. The `maxSurge` - which means that we should not have more than one pod above the desired state, i.e if
@@ -1207,13 +1207,13 @@ scaling down removes Pods. Rolling updates also replace existing Pods with compl
 a massive IP churn, and demonstrates why you should never connect directly to any particular pod. You also need to know
 3 fundamental things about Kubernetes Services
 
--   First when talking about Services, we are talking about Service object in the Kubernetes world that provides a stable
+- First when talking about Services, we are talking about Service object in the Kubernetes world that provides a stable
   networking for Pods. Just like a `Pod`, `ReplicaSet` and `Deployment`, `Services` are defined through a manifest YAML
   file, posted to the API server.
 
--   Second every Service gets its own stable IP address, its own stable DNS name and its own stable port.
+- Second every Service gets its own stable IP address, its own stable DNS name and its own stable port.
 
--   Third, Services use labels and selectors to dynamically select the Pods to send traffic to.
+- Third, Services use labels and selectors to dynamically select the Pods to send traffic to.
 
 ### Theory
 
@@ -1374,12 +1374,12 @@ curl http://two.default.svc.cluster.local
 
 What are the exact elements of this FQDN specified in the curl request:
 
--   `two`: The name of the Service to call.
+- `two`: The name of the Service to call.
 
--   `default`: The namespace where the Service `two` is deployed. If the Service is in a different namespace, replace
+- `default`: The namespace where the Service `two` is deployed. If the Service is in a different namespace, replace
   default with that namespace name.
 
--   `svc.cluster.local`: The default domain for Services in Kubernetes, The `svc.cluster.local` domain is the default DNS
+- `svc.cluster.local`: The default domain for Services in Kubernetes, The `svc.cluster.local` domain is the default DNS
   suffix for Services in Kubernetes. It is defined in the `CoreDNS` or `kube-dns` configuration. The configuration is
   typically stored in a **`ConfigMap`** named `coredns` (or `kube-dns` in older clusters) in the `kube-system` namespace.
 
@@ -1391,7 +1391,7 @@ responsible for and matches based on the selector labels`
 Accessing Services from outside the cluster, Kubernetes has two types of Services for requests originating from outside
 the cluster - `NodePort` and `LoadBalancer`
 
--   `NodePort` Services build on top of the `ClusterIP` type and enable external access via a dedicated port on every cluster
+- `NodePort` Services build on top of the `ClusterIP` type and enable external access via a dedicated port on every cluster
   node, we call this port the `NodePort`. Since the default service type is `ClusterIP` and it registers a DNS name virtual IP
   and port with the cluster's DNS. `NodePort` Services build on this by adding a `NodePort` that can be used to reach the
   service from outside the cluster. Below is a type of `NodePort` service
@@ -1420,7 +1420,7 @@ spec:
 Pods on the cluster can access this service by the name magic-sandbox, on port 8080. Clients connecting from outside the
 cluster can send traffic to any cluster node on port 30081.
 
--   `LoadBalancer` service types make external access even easier by integrating with an internet facing load balancer, on
+- `LoadBalancer` service types make external access even easier by integrating with an internet facing load balancer, on
   your underlying cloud platform, You get a high performance highly available public IP or DNS name that you can access
   the service from, you can even register friendly DNS names to make access even simpler, you do not need to know the
   cluster node names or IP. `LoadBalancer` services are tightly coupled with cloud providers. They may not work in
@@ -1466,11 +1466,11 @@ based on a DNS technology called `CoreDNS`, and runs as a k8s native app.
 
 The actual registration is divided in two parts - we can call them front and back end, briefly this is what is going on:
 
--   `The front end` - that is the actual API server receiving the request to deploy the service on the cluster, there are
+- `The front end` - that is the actual API server receiving the request to deploy the service on the cluster, there are
   certain steps (see below) that happen here, like registering the service IP in the cluster DNS creating the Service
   object, and other auxiliary objects
 
--   `The back end` - this is all work that needs to be done on the actual Node that runs the Pods through the selector
+- `The back end` - this is all work that needs to be done on the actual Node that runs the Pods through the selector
   metadata. This is for example configuring `iptables or IPVS rules` on the actual nodes
 
 ```sh
@@ -1553,8 +1553,8 @@ being assigned `ClusterIP`, which are registered with the cluster DNS service, a
 
 For service discovery to work apps need to know both of the following:
 
--   The name of the other app they want to connect to - that is the name of service fronting the pods
--   How to convert the name of the Service to an IP address that corresponds to a Pod managed by the Service
+- The name of the other app they want to connect to - that is the name of service fronting the pods
+- How to convert the name of the Service to an IP address that corresponds to a Pod managed by the Service
 
 Apps developers are responsible for point 1, which is normal, They need to code apps with the names of other apps they
 want to consume, Actually they need to code the names of Services fronting the remote apps, or in other words the pods
@@ -1585,11 +1585,11 @@ means the DNS resolver will treat it as a complete domain name and **will not ap
 **Unqualified Hostname:** A hostname without a trailing dot (e.g., `host`) is considered unqualified. In this case, the
 DNS resolver will append search domains (if configured) to attempt resolution.
 
--   `nameserver` - well that is pretty self explanatory, this is pointing at the IP address of the cluster DNS service, this
+- `nameserver` - well that is pretty self explanatory, this is pointing at the IP address of the cluster DNS service, this
   is a must have in order to resolve the Service names, otherwise there is no way for us to map the Service name to an
   actual `ClusterIP`, and eventually to an actual `EndpointSlices` and to a physical Pod IP address
 
--   `search` - this one is a bit more complex, first we have to understand what an FQDN is, those are domain names that end
+- `search` - this one is a bit more complex, first we have to understand what an FQDN is, those are domain names that end
   with a dot `.`, usually the dot is omitted in most cases but according to the spec a fully qualified domain name is only
   the one that ends with a dot, if it does not it is not FQDN by omission, meaning that if we use the following hostname
   in our app configuration `ent` to refer to the enterprise service, this would be seen as non FQDN, therefore according
@@ -1600,7 +1600,7 @@ ent.default.svc.cluster.local`, in that order it will try each and every one of 
   as it will consider this a FQDN and directly try to resolve `ent.` ip address from the cluster DNS service, which will
   fail.
 
--   `options` - directive allows you to configure additional resolver behavior. In our example, `options ndots:5` specifies
+- `options` - directive allows you to configure additional resolver behavior. In our example, `options ndots:5` specifies
   a threshold for the number of dots (`.`) in a hostname before the resolver treats it as a fully qualified domain name
   (FQDN).
 
@@ -1628,10 +1628,10 @@ The way this works, is that as we know each device on a network has a local rout
 how to route outgoing traffic, i.e to which gateway to send the traffic, when the destination network is remote, when it
 is local the traffic sent directly. So here is a brief overview of the communication process
 
--   **Your device**: `192.168.1.10`
--   **Local network**: `192.168.0.0`
--   **Default gateway**: `192.168.1.1`
--   **Destination**: `www.google.com` (let’s say its IP is `142.250.190.78`)
+- **Your device**: `192.168.1.10`
+- **Local network**: `192.168.0.0`
+- **Default gateway**: `192.168.1.1`
+- **Destination**: `www.google.com` (let’s say its IP is `142.250.190.78`)
 
 | Destination Network | Subnet Mask   | Gateway       | Interface | Type              |
 | ------------------- | ------------- | ------------- | --------- | ----------------- |
@@ -1738,8 +1738,8 @@ format is `<object-name>.<namespace>.svc.cluster.local`.
 Namespaces let you partition the address space below the cluster domain level. For example creating a couple of
 Namespaces called `dev` and `acc`, will give you two new address spaces.
 
--   `dev`: `<object-name>.dev.svc.cluster.local`
--   `acc`:`<object-name>.acc.svc.cluster.local`
+- `dev`: `<object-name>.dev.svc.cluster.local`
+- `acc`:`<object-name>.acc.svc.cluster.local`
 
 Object names have to be unique within a Namespace, but not across Namespaces, For example you can not have two Services
 named the same in the same Namespace, but you can if they were to be in different namespaces. This is useful for
@@ -1762,9 +1762,9 @@ We can still use the short names of these services, `svc1` and `svc2`, without p
 `resolv.conf` file will do the heavy lifting, it will take the search config, and start attempting to send the host
 names to the DNS cluster server, in order starting from i
 
--   `svc1.svc.cluster.local` - no hit, there is no such service in the system/unnamed namespace
--   `svc1.svc.default.svc.cluster.local` - no hit, there is no such service in the default namespace
--   `svc1.dev.svc.cluster.local` - we have a hit, since it is deployed on the dev namespace that is its actual FQDN
+- `svc1.svc.cluster.local` - no hit, there is no such service in the system/unnamed namespace
+- `svc1.svc.default.svc.cluster.local` - no hit, there is no such service in the default namespace
+- `svc1.dev.svc.cluster.local` - we have a hit, since it is deployed on the dev namespace that is its actual FQDN
 
 The DNS will resolve for the - `svc1.dev.svc.cluster.local` - will return the IP address and the rest will be handled by
 the `IPVS` rules and the kernel, as we have already seen above.
@@ -1801,25 +1801,25 @@ spec:
         chapter: services
 ```
 
--   `apiVersion`: At the top the API version is specified that is to be used.
+- `apiVersion`: At the top the API version is specified that is to be used.
 
--   `kind`: that is the type of the object that is being defined, in this case the Service
+- `kind`: that is the type of the object that is being defined, in this case the Service
 
--   `metadata`: gives the Service a name, this should be a valid DNS name, so, that means alphanumeric the dot and the
+- `metadata`: gives the Service a name, this should be a valid DNS name, so, that means alphanumeric the dot and the
   dash are valid, avoid exotic characters.
 
--   `spec`: this section is where most of the action is, anything directly below spec relates to the Service, anything
+- `spec`: this section is where most of the action is, anything directly below spec relates to the Service, anything
   nested below refers to the actual behavior of the service object
 
--   `spec.type`: In this case it is configured as `NodePort` not a default `ClusterIP`, for the sake of this example
+- `spec.type`: In this case it is configured as `NodePort` not a default `ClusterIP`, for the sake of this example
 
--   `spec.port`: this is the port on which the service listens to
+- `spec.port`: this is the port on which the service listens to
 
--   `spec.targetPort`: this is the port on which the app inside the container listens to
+- `spec.targetPort`: this is the port on which the app inside the container listens to
 
--   `spec.nodePort`: this is the cluster wide port on which the service can be accessed from the outside
+- `spec.nodePort`: this is the cluster wide port on which the service can be accessed from the outside
 
--   `spec.protocol`: by default, using TCP, but UDP for example is also a probable option, based on the type of app
+- `spec.protocol`: by default, using TCP, but UDP for example is also a probable option, based on the type of app
 
 ```sh
 # to just deploy the service manifest file
@@ -1916,8 +1916,8 @@ for over 15 releases. During the 3+ years it was in alpha and beta, service mesh
 some overlap in functionality, as a result if you plan to run a service mesh you may not need ingress. Ingress is
 defined in the `networking.io` API sub group as a `v1` object and is based on the usual two constructs:
 
--   A controller - running in a reconciliation loop, to handle the state
--   An object spec - a well defined and versioned manifest specification
+- A controller - running in a reconciliation loop, to handle the state
+- An object spec - a well defined and versioned manifest specification
 
 The object spec defined rules that govern traffic routing and the controller implements the rules. However a lot of
 Kubernetes clusters do not ship with a built in ingress controller you have to install your own. This is the opposite of
@@ -1956,41 +1956,41 @@ NGINX image under the hood, which actually does the active on demand routing whi
 
 Common Ingress Controllers include different implementations, but amongst the most popular options are:
 
--   **NGINX**
--   **HAProxy**
--   **AWS ALB**
--   **Traefik**
+- **NGINX**
+- **HAProxy**
+- **AWS ALB**
+- **Traefik**
 
--   The Ingress Controller is typically deployed as a **Kubernetes Deployment** or **DaemonSet** and runs as a pod in the
+- The Ingress Controller is typically deployed as a **Kubernetes Deployment** or **DaemonSet** and runs as a pod in the
   cluster.
 
     1.  **Ingress Controller Deployment:**
 
-        -   The Ingress Controller is deployed as a pod (or multiple pods) in the cluster.
-        -   It listens for incoming traffic and routes it based on the Ingress rules.
+        - The Ingress Controller is deployed as a pod (or multiple pods) in the cluster.
+        - It listens for incoming traffic and routes it based on the Ingress rules.
 
     2.  **Service for the Ingress Controller:**
 
-        -   A **Service** is created to expose the Ingress Controller to external traffic.
-        -   The type of this Service can be:
-            -   **LoadBalancer** (for cloud providers that support external load balancers).
-            -   **NodePort** (for exposing the Ingress Controller on specific ports of the cluster nodes).
-            -   **ClusterIP** (for internal-only access, though this is less common for Ingress Controllers).
+        - A **Service** is created to expose the Ingress Controller to external traffic.
+        - The type of this Service can be:
+            - **LoadBalancer** (for cloud providers that support external load balancers).
+            - **NodePort** (for exposing the Ingress Controller on specific ports of the cluster nodes).
+            - **ClusterIP** (for internal-only access, though this is less common for Ingress Controllers).
 
     3.  **Ingress Rules:**
-        -   The Ingress resource defines rules for routing traffic to backend services.
-        -   The Ingress Controller reads these rules and configures itself, its running Pods (e.g., NGINX, Traefik) to route traffic accordingly.
+        - The Ingress resource defines rules for routing traffic to backend services.
+        - The Ingress Controller reads these rules and configures itself, its running Pods (e.g., NGINX, Traefik) to route traffic accordingly.
 
--   What Makes the Ingress Controller Unique, from other controllers ?
+- What Makes the Ingress Controller Unique, from other controllers ?
 
--   **Backed by an Image:** The Ingress Controller is implemented as a custom application (e.g., NGINX, Traefik) running
+- **Backed by an Image:** The Ingress Controller is implemented as a custom application (e.g., NGINX, Traefik) running
   in a container. This is different from most other Kubernetes controllers, which are part of the Kubernetes control plane
   and are not exposed to external traffic.
 
--   **Exposed to the Internet:** The Ingress Controller is typically exposed via a **Service** (e.g., `LoadBalancer` or
+- **Exposed to the Internet:** The Ingress Controller is typically exposed via a **Service** (e.g., `LoadBalancer` or
   `NodePort`) to handle external HTTP/HTTPS traffic. This means it is directly accessible from outside the cluster.
 
--   **Interfaces with External Traffic:** Unlike other k8s controllers, the Ingress Controller interacts directly with
+- **Interfaces with External Traffic:** Unlike other k8s controllers, the Ingress Controller interacts directly with
   external clients (e.g., web browsers, APIs) to route traffic to backend services.
 
 ```txt
@@ -2082,22 +2082,22 @@ Namespaces provide a logical boundary for resources, ensuring that objects creat
 interfere with those created by another. Let’s dive into how namespaces work and how they are used to separate
 objects between users.
 
--   User A:
+- User A:
 
--   Creates a Kubernetes cluster and deploys an Ingress controller.
--   The Ingress controller is exposed with an external IP 203.0.113.10.
--   Configures DNS to point `myapp.com` to 203.0.113.10.
+- Creates a Kubernetes cluster and deploys an Ingress controller.
+- The Ingress controller is exposed with an external IP 203.0.113.10.
+- Configures DNS to point `myapp.com` to 203.0.113.10.
 
--   User B:
+- User B:
 
--   Creates a separate Kubernetes cluster and deploys an Ingress controller.
--   The Ingress controller is exposed with an external IP 203.0.113.20.
--   Configures DNS to point `myapi.com` to 203.0.113.20.
+- Creates a separate Kubernetes cluster and deploys an Ingress controller.
+- The Ingress controller is exposed with an external IP 203.0.113.20.
+- Configures DNS to point `myapi.com` to 203.0.113.20.
 
--   Traffic Flow:
+- Traffic Flow:
 
--   When a client accesses `myapp.com`, DNS resolves it to 203.0.113.10, and the request is routed to User A’s cluster.
--   When a client accesses `myapi.com`, DNS resolves it to 203.0.113.20, and the request is routed to User B’s cluster.
+- When a client accesses `myapp.com`, DNS resolves it to 203.0.113.10, and the request is routed to User A’s cluster.
+- When a client accesses `myapi.com`, DNS resolves it to 203.0.113.20, and the request is routed to User B’s cluster.
 
 ### Skeleton
 
@@ -2524,27 +2524,27 @@ Kubernetes supports three access modes for volumes - `READWRITEONCE (RWO), READW
 
 The access mode type specifies that and by what a given storage class can be accessed,
 
--   `ReadWriteOnce(RWO)` - defines a persistent volume, that can only be bound as R/W by a single Node, and by proxy a Pod,
+- `ReadWriteOnce(RWO)` - defines a persistent volume, that can only be bound as R/W by a single Node, and by proxy a Pod,
   attempts to write or read data from another Pod, will fail, this is idea for stateful aps like databases where only one
   app can access the data at a time, to retain atomicity.
 
--   `ReadWriteMany(RWX)` - defines a persistent volume, that can be bound as a R/W by multiple Nodes, and by proxy Pods,
+- `ReadWriteMany(RWX)` - defines a persistent volume, that can be bound as a R/W by multiple Nodes, and by proxy Pods,
   this behavior is strictly dependent on the underlying apps, since such concurrent reads and writes are unpredictable,
   and the underlying apps have to be able to handle this gracefully. A good use case is apps that need shared data, and
   that can publish that shared data in real time like content management systems, but the data they publish does not
   necessarily interfere with each other, and can be published without concurrent conflicts.
 
--   `ReadOnlyMany(ROX)` - defines a persistent volume that can be bound as a R/O by multiple Nodes, and by proxy Pods, these
+- `ReadOnlyMany(ROX)` - defines a persistent volume that can be bound as a R/O by multiple Nodes, and by proxy Pods, these
   are meant for read only, access and are mostly useful for app configurations, stateful read only configurations, which
   are used to bootstrap the apps and Pods and are also used during the runtime of these apps and services.
 
 What are the general guidelines on which type of access mode is used where:
 
--   Use `ReadWriteOnce (RWO)` for stateful applications like databases.
+- Use `ReadWriteOnce (RWO)` for stateful applications like databases.
 
--   Use `ReadOnlyMany (ROX)` for sharing static immutable data across multiple apps.
+- Use `ReadOnlyMany (ROX)` for sharing static immutable data across multiple apps.
 
--   Use `ReadWriteMany (RWX)` for applications that need shared read-write access, like file/ftp servers.
+- Use `ReadWriteMany (RWX)` for applications that need shared read-write access, like file/ftp servers.
 
 ##### Reclaim policy
 
@@ -2751,9 +2751,9 @@ $ kubectl delete pod prempod
 What about creating a custom `StorageClass` object, that is then used to create a new volume just as the examples above.
 The storage class that we will create is defined in the following manifest file, and is of the following properties
 
--   Fast SSD device, `pd-ssd`
--   Replicated - `regional-pd`
--   Create on demand - `volumeBindingMode: WaitForFirstConsumer`
+- Fast SSD device, `pd-ssd`
+- Replicated - `regional-pd`
+- Create on demand - `volumeBindingMode: WaitForFirstConsumer`
 
 ```yml
 apiVersion: storage.k8s.io/v1
@@ -2881,9 +2881,9 @@ and security policies different sets of credentials and certificates and more. Y
 microservice with its configuration backed into the container. With this in mind you have to perform all of the
 following on every business app
 
--   Build three distinct images, for each env, each of which will have backed in the different configurations for each env
--   Store the images in three distinct repositories, (dev, test and prod)
--   Run each version of the image in a specific environment
+- Build three distinct images, for each env, each of which will have backed in the different configurations for each env
+- Store the images in three distinct repositories, (dev, test and prod)
+- Run each version of the image in a specific environment
 
 Every time you change the config of an app, even the smallest change like fixing a typo, you will need to build and
 package and entirely new image and perform some type of update to the entire app.
@@ -2926,9 +2926,9 @@ data stored in secrets. It makes no such efforts to obscure data stored in `Conf
 
 The way `ConfigMaps` are defined is as a map of key value pairs and we call each key value pair and entry.
 
--   Keys are an arbitrary name that can be created from alphanumeric, dashes, dots and underscores
--   Values can contain anything really, including multiple lines with carriage returns
--   Keys and values are separated by a colon - `key: value`
+- Keys are an arbitrary name that can be created from alphanumeric, dashes, dots and underscores
+- Values can contain anything really, including multiple lines with carriage returns
+- Keys and values are separated by a colon - `key: value`
 
 More complex examples can store entire configuration files like that, below is the actual value that the `ConfigMap` stores:
 
@@ -2953,9 +2953,9 @@ value:
 
 Once the data is stored in a `ConfigMap` it can be injected into containers at run time via any of the following methods
 
--   Environment variables
--   Arguments to the container's startup command
--   Files and volumes
+- Environment variables
+- Arguments to the container's startup command
+- Files and volumes
 
 All of the methods work seamlessly with existing app, in fact all an app sees is its configuration data in either - env
 variable, an argument or a file on the filesystem. The app is unaware the data originally came from a `ConfigMap` or a
@@ -3326,16 +3326,16 @@ app that saves data about client sessions and uses it for future sessions. Other
 data stores. `StatefulSet` are the logical equivalent of Deployments in the K8s world. While the spec structure is
 similar, there are some differences:
 
--   `StatefulSet`:
+- `StatefulSet`:
 
--   Includes fields like `serviceName` (to associate with a headless service).
--   Supports `volumeClaimTemplates` for creating `PersistentVolumeClaims` (PVCs) for each pod.
--   Does not support the strategy field for updates (it always uses a rolling update strategy).
+- Includes fields like `serviceName` (to associate with a headless service).
+- Supports `volumeClaimTemplates` for creating `PersistentVolumeClaims` (PVCs) for each pod.
+- Does not support the strategy field for updates (it always uses a rolling update strategy).
 
--   `Deployment`:
+- `Deployment`:
 
--   Includes a strategy field to define update strategies (e.g., RollingUpdate or Recreate).
--   Does not have `serviceName` or `volumeClaimTemplates`.
+- Includes a strategy field to define update strategies (e.g., RollingUpdate or Recreate).
+- Does not have `serviceName` or `volumeClaimTemplates`.
 
 ### Theory
 
@@ -3345,9 +3345,9 @@ watching the state of the cluster, via the API server and moving the observed st
 Deployments and `StatefulSets` also support self healing scaling updates and more. However there are some vital
 differences between `StatefulSets` and Deployments. `StatefulSets` guarantee:
 
--   Predictable and persistent Pod names
--   Predictable and persistent DNS hostnames
--   Predictable and persistent volume bindings
+- Predictable and persistent Pod names
+- Predictable and persistent DNS hostnames
+- Predictable and persistent volume bindings
 
 These three properties form the sate of Pod, sometimes referred to as its sticky ID. `StatefulSets` ensure this state/id
 is persisted across failures scaling and other scheduling operations making them ideal for apps that require unique pods
@@ -3696,8 +3696,8 @@ integrate with their native identity management systems.
 Cluster Cluster details and credentials are stored in a `kubeconfig` file. Tools like `kubectl` read this file to know
 which cluster to send commands to as well as which credentials use, it is usually stored in the following locations:
 
--   Windows: `C: \Users\<user>\.kube\config`
--   Unix: `/home/<user>/.kube/config`
+- Windows: `C: \Users\<user>\.kube\config`
+- Unix: `/home/<user>/.kube/config`
 
 Many Kubernetes installations can automatically merge cluster endpoint details and credentials into your existing
 `kubeconfig`, for example every `GKE` cluster provides a `gcloud` command that will merge the necessary cluster details
@@ -4063,9 +4063,9 @@ the `AlwaysPUllImage` controller is a great example. It is a mutating controller
 `spec.containers.imagePullPolicy` of all new Pods to always. This means that images for all containers in all Pods will
 always be pulled form the registry. This accomplishes quite a few things, including the following
 
--   Preventing the use of locally cached images that could be malicious
--   Preventing other Pods and processes using locally cached images
--   Forcing the container runtime to present valid credentials to the registry to get the image
+- Preventing the use of locally cached images that could be malicious
+- Preventing other Pods and processes using locally cached images
+- Forcing the container runtime to present valid credentials to the registry to get the image
 
 If any admission controller rejects a request the request is immediately rejected without checking other admission
 controllers. However if all admission controllers approve the request it gets persisted to the cluster store, As
@@ -4131,9 +4131,9 @@ application/json` in the HTTP header of the request. Kubernetes will honour this
 The API server exposes the API over a secure RESTful, interface using HTTPS. It acts as the front end to the API and is
 a bit like Grand Central for Kubernetes everything talks to everything else via the REST API calls to the API server.
 
--   ALL `kubectl` commands go to the API server (creating, retrieving, updating deleting objects)
--   ALL node `kubelets` watch the API server for new tasks and report status to the API server
--   ALL control lane services communicate via the API server, NOT directly to each other
+- ALL `kubectl` commands go to the API server (creating, retrieving, updating deleting objects)
+- ALL node `kubelets` watch the API server for new tasks and report status to the API server
+- ALL control lane services communicate via the API server, NOT directly to each other
 
 The API server is a Kubernetes control plane service. This usually means that it runs as a set of Pods in the
 kube-system Namespace on the control plane nodes of your cluster. If you build and manage your own Kubernetes clusters
@@ -4368,12 +4368,12 @@ Thread modeling is the process of identifying vulnerabilities so you can put mea
 them. This section will introduce the popular `STRIDE` model and shows how it can applied to Kubernetes. `STRIDE` defines
 the six categories of potential thread. The word `STRIDE` is an abbreviation which stands for the following:
 
--   `S`poofing
--   `T`ampering
--   `R`epudiation
--   `I`nformation disclosure
--   `D`enial of service
--   `E`levation of privilege
+- `S`poofing
+- `T`ampering
+- `R`epudiation
+- `I`nformation disclosure
+- `D`enial of service
+- `E`levation of privilege
 
 While the model is good it is important to keep in mind that it is just a model, and models do not guarantee to cover
 all possible threats possible. However they are a good at providing a structured way to look at things, for the rest of
@@ -4410,8 +4410,8 @@ As mentioned in previous sections all internal and external requests to the API 
 authorization checks, as a result in API server needs a way to authenticate internal and external sources, a good way to
 do this is having two trusted key pairs:
 
--   one for authenticating internal systems
--   the other for authenticating external systems
+- one for authenticating internal systems
+- the other for authenticating external systems
 
 In this model you would use the cluster's self signed CA to issue keys to internal systems, you would also configure
 Kubernetes to trust one or more trusted 3rd party CAs to issue keys to external systems.
@@ -4488,9 +4488,9 @@ also help prevent tampering with data when it is at rest in Kubernetes
 
 . Restrict access to the servers that are running Kubernetes components i.e the control plane.
 
--   Restrict access to repositories that store Kubernetes configuration files
--   Only perform remote bootstrapping over SSH
--   Restrict access to your image repository and associated repositories
+- Restrict access to repositories that store Kubernetes configuration files
+- Only perform remote bootstrapping over SSH
+- Restrict access to your image repository and associated repositories
 
 This is not and exhaustive list, but if you implement it you will greatly reduce the changes of having your data
 tampered with while at rest. As well as the items listed it is goog production hygiene to configure auditing and
@@ -4545,12 +4545,12 @@ At a very high level Repudiation is creating doubt about something. Non Repudiat
 In the context of information security non Repudiation is proving certain actions were carried out by certain
 individuals. Digging a little deeper non-repudiation includes the ability to provide
 
--   `What` happened
--   `When` it happened
--   `Who` made it happen
--   `Where` is happened
--   `Why` is happened
--   `How` it happened
+- `What` happened
+- `When` it happened
+- `Who` made it happen
+- `Where` is happened
+- `Why` is happened
+- `How` it happened
 
 Answering the last two usually requires the correlation of several events over a period of time fortunately auditing of
 Kubernetes API server events can usually help answer these questions the Following is an example of an API server audit
@@ -4665,10 +4665,10 @@ applies to worker nodes. Having multiple worker nodes not only allows the schedu
 nodes and availability zones, it may also render DOS attacks on a single node or zone ineffective (or less effective).
 You should also configure appropriate limits for the following:
 
--   Memory
--   Processor
--   Storage
--   Kubernetes objects
+- Memory
+- Processor
+- Storage
+- Kubernetes objects
 
 Placing limits on things can help prevent important systems resources from being starved therefore preventing potential
 denial of service attacks. Limiting Kubernetes objects includes things like limiting the number of `ReplicaSets`, Pods,
@@ -4696,12 +4696,12 @@ confine the impact of the attack to the Pod. Once the `podPidsLimit` is exhauste
 The API server exposes a RESTful interface over a TCP socket making it susceptible to botnet based denial of service
 attacks, the following may be helpful in either preventing or mitigating such attacks.
 
--   Highly available masters. Having multiple API server replicas running on multiple nodes across multiple availability
-    zones
+- Highly available masters. Having multiple API server replicas running on multiple nodes across multiple availability
+  zones
 
--   Monitoring and alerting API server requests based on sane thresholds
+- Monitoring and alerting API server requests based on sane thresholds
 
--   Using things like firewalls to limit API server exposure to the internet.
+- Using things like firewalls to limit API server exposure to the internet.
 
 As well as botnet DOS attacks an attacker may also attempt to spoof a user or other control plane service in an attempt
 to cause an overload. Fortunately, Kubernetes has robust authentication and authorization controls to prevent
@@ -4712,11 +4712,11 @@ spoofing. However even with a robust RBAC model, it is vital that you safeguard 
 Cluster configuration is stored in etcd, making it vital that etcd be available and secure. The following
 recommendations help accomplish this:
 
--   Configure an HA etcd cluster with either 3 or 5 nodes
+- Configure an HA etcd cluster with either 3 or 5 nodes
 
--   Configure monitoring and alerting of requests to etcd
+- Configure monitoring and alerting of requests to etcd
 
--   Isolate etcd at the network level so that only members of the control plane can interact with it
+- Isolate etcd at the network level so that only members of the control plane can interact with it
 
 A default installation of Kubernetes installs etcd on the same servers as the rest of the control plane. This is usually
 fine for development and testing however large production clusters should seriously consider a dedicated etcd, cluster.
@@ -4733,10 +4733,10 @@ Most Pods expose their main service on the network and without additional contro
 network can perform a DOS attack on the POD. Fortunately, Kubernetes provides Pod resource requests limits to prevent
 such attacks from exhausting Pod and Node resources, As well as these the following will be helpful.
 
--   Define Kubernetes Network Policies to restrict Pod to Pod and Pod to external communications
+- Define Kubernetes Network Policies to restrict Pod to Pod and Pod to external communications
 
--   Utilize mutual TLS and API token based authentication for application level authentication reject any
-    unauthenticated requests
+- Utilize mutual TLS and API token based authentication for application level authentication reject any
+  unauthenticated requests
 
 ### Elevation of privilege
 
@@ -4870,11 +4870,11 @@ metadata:
     name: capability-test
 spec:
     containers:
-    - name: demo
-      image: example.io/simple:1.0
-      securityContext:
-        capabilities:
-        add: ["NET_ADMIN", "CHOWN"]
+        - name: demo
+          image: example.io/simple:1.0
+          securityContext:
+              capabilities:
+              add: ["NET_ADMIN", "CHOWN"]
 ```
 
 #### Filter syscalls
@@ -4912,7 +4912,7 @@ called process forking).
 
 By default Linux allows a child process to claim more privileges than its parent. This is usually a bad idea. In fact
 you will often want a child process to have the same or less privileges than its parent. This is especially true for
-containers as their security configurations are defined  against their initial configuration and not against potentially
+containers as their security configurations are defined against their initial configuration and not against potentially
 escalated privileges.
 
 Fortunately it is possible to prevent privilege escalation through a `PodSecurityPolicy` or the `securityContext`
@@ -4945,10 +4945,10 @@ apply to most Kubernetes deployments large and small. Now then we are not offeri
 will be looking at things from the kind of high level view a security architect has. The section is split into the
 following sub-sections
 
--   CI/CD pipeline
--   Infrastructure and networking
--   Identity and access management
--   Security monitoring and auditing
+- CI/CD pipeline
+- Infrastructure and networking
+- Identity and access management
+- Security monitoring and auditing
 
 ### CI/CD pipeline
 
@@ -4961,5 +4961,3 @@ However containers make running dangerous code easier than ever before, With thi
 can secure the flow of app code from a developer laptop to production servers.
 
 #### Image Repositories
-
-

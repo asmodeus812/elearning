@@ -675,14 +675,14 @@ $ oc describe route/app-cli
 
 Name:                   app-cli
 Namespace:              image-uploader
-Created:                13 seconds ago
+Created:                <time> ago
 Labels:                 app=app-cli
                         app.kubernetes.io/component=app-cli
                         app.kubernetes.io/instance=app-cli
                         app.kubernetes.io/name=php
 Annotations:            openshift.io/host.generated=true
 Requested Host:         app-cli-image-uploader.apps-crc.testing
-                           exposed on router default (host router-default.apps-crc.testing) 13 seconds ago
+                           exposed on router default (host router-default.apps-crc.testing) <time> ago
 Path:                   <none>
 TLS Termination:        <none>
 Insecure Policy:        <none>
@@ -975,9 +975,9 @@ vda    252:0    0   31G  0 disk
 # pods, which are visible and list-able from the command below, we can see that the ps command shows the id of the
 # container, along with the pod it is connected to, this way we can inspect the container, by id
 $ crictl ps
-CONTAINER     IMAGE                                                                    CREATED              STATE   NAME            ATTEMPT ID            POD
-3b014dbd532c3 quay.io/openshift-release-dev/ocp-v4.0-art-dev@                          11      minutes ago  Running registry-server 0       e5017350a2c71 redhat-operators-dtxxg
-1ea26899fa493 image-registry.openshift-image-registry.svc:5000/image-uploader/app-cli@ 15      minutes ago  Running app-cli         0       d4c372b145163 app-cli-5fdd99b58d-dplv6
+CONTAINER     IMAGE                                                                    CREATED         STATE   NAME            ATTEMPT ID            POD
+3b014dbd532c3 quay.io/openshift-release-dev/ocp-v4.0-art-dev@                          11 minutes ago  Running registry-server 0       e5017350a2c71 redhat-operators-dtxxg
+1ea26899fa493 image-registry.openshift-image-registry.svc:5000/image-uploader/app-cli@ 15 minutes ago  Running app-cli         0       d4c372b145163 app-cli-5fdd99b58d-dplv6
 
 # after we can inspect the container, we can see from the inspect output, that there are a few mount targets, a few are
 # generic ones such as the /etc/hosts, however we can see that there is one which is specific
@@ -1437,8 +1437,8 @@ Namespace:    image-uploader
 Selector:     app=app-cli,deployment=app-cli-1,deploymentconfig=app-cli
 Labels:       app=app-cli
               openshift.io/deployment-config.name=app-cli
-Annotations:  openshift.io/deployer-pod.completed-at=2025-05-22 17:07:31 +0000 UTC
-              openshift.io/deployer-pod.created-at=2025-05-22 17:07:29 +0000 UTC
+Annotations:  openshift.io/deployer-pod.completed-at=<date>
+              openshift.io/deployer-pod.created-at=<date>
               openshift.io/deployer-pod.name=app-cli-1-deploy
               openshift.io/deployment-config.latest-version=1
               openshift.io/deployment-config.name=app-cli
@@ -1501,7 +1501,7 @@ will create and monitor apps pods with the following labels:
 # defined one which is app=app-cli
 Name:                   app-cli
 Namespace:              image-uploader
-CreationTimestamp:      Mon, 26 May 2025 15:10:39 +0300
+CreationTimestamp:      <date>
 Labels:                 app=app-cli
                         app.kubernetes.io/component=app-cli
                         app.kubernetes.io/instance=app-cli
@@ -1644,7 +1644,6 @@ the container
 # here is the command which will inspect and show the liveness probe, that was recently configured, most of the data for
 # the deployment was omitted, just to show the probe info from the otherwise big deployment describe command dump
 $ oc describe deployment -l app=app-cli
-
 Name:                   app-cli
 Pod Template:
   Labels:       deployment=app-cli
@@ -1892,7 +1891,7 @@ Name:                                                  app-cli
 Namespace:                                             image-uploader
 Labels:                                                <none>
 Annotations:                                           <none>
-CreationTimestamp:                                     Tue, 20 May 2025 15:38:53 +0300
+CreationTimestamp:                                     <date>
 Reference:                                             Deployment/app-cli
 Metrics:                                               ( current / target )
   resource cpu on pods  (as a percentage of request):  <unknown> / 75%
@@ -3276,17 +3275,17 @@ mongodb-1 1/1   Running 0        37s
 $ oc logs mongodb-0
 Successfully added user: { "user" : "oiauser", "roles" : [ "readWrite" ] }
 bye
-2025-06-09T12:08:35.000+0000 I REPL     [conn12] replSetReconfig admin command received from client
-2025-06-09T12:08:35.006+0000 I REPL     [conn12] replSetReconfig config object with 2 members parses ok
-2025-06-09T12:08:35.006+0000 I ASIO     [NetworkInterfaceASIO-Replication-0] Connecting to mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017
-2025-06-09T12:08:35.010+0000 I ASIO     [NetworkInterfaceASIO-Replication-0] Successfully connected to mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017
-2025-06-09T12:08:35.011+0000 I REPL     [ReplicationExecutor] New replica set config in use: { _id: "rs0", version: 2, protocolVersion: 1, members: [ { _id: 0, host: "mongodb-0.mongodb-internal.statefulset.svc.cluster.local:27017", arbi
+<event-date> I REPL     [conn12] replSetReconfig admin command received from client
+<event-date> I REPL     [conn12] replSetReconfig config object with 2 members parses ok
+<event-date> I ASIO     [NetworkInterfaceASIO-Replication-0] Connecting to mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017
+<event-date> I ASIO     [NetworkInterfaceASIO-Replication-0] Successfully connected to mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017
+<event-date> I REPL     [ReplicationExecutor] New replica set config in use: { _id: "rs0", version: 2, protocolVersion: 1, members: [ { _id: 0, host: "mongodb-0.mongodb-internal.statefulset.svc.cluster.local:27017", arbi
 terOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 1, host: "mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017", arbiterOnly: false, buildIndexes: true, hidden: fal
 se, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 } ], settings: { chainingAllowed: true, heartbeatIntervalMillis: 2000, heartbeatTimeoutSecs: 10, electionTimeoutMillis: 10000, getLastErrorModes: {}, getLastErrorDefaults: { w: 1, wti
 meout: 0 }, replicaSetId: ObjectId('6846cec0fa37b01dd820333d') } }
-2025-06-09T12:08:35.011+0000 I REPL     [ReplicationExecutor] This node is mongodb-0.mongodb-internal.statefulset.svc.cluster.local:27017 in the config
-2025-06-09T12:08:35.011+0000 I REPL     [ReplicationExecutor] Member mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017 is now in state STARTUP
-2025-06-09T12:08:37.012+0000 I REPL     [ReplicationExecutor] Member mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017 is now in state SECONDARY
+<event-date> I REPL     [ReplicationExecutor] This node is mongodb-0.mongodb-internal.statefulset.svc.cluster.local:27017 in the config
+<event-date> I REPL     [ReplicationExecutor] Member mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017 is now in state STARTUP
+<event-date> I REPL     [ReplicationExecutor] Member mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017 is now in state SECONDARY
 
 # start scaling to 3 replicas, which will simply add one more, to the list above, notice that our pods are in the
 # ready state, which means that we will be able to scale them up, had the mongodb-1 pod been in a non ready 0/1 state,
@@ -3300,18 +3299,18 @@ mongodb-2 1/1   Running 0        4s
 
 # now we can also look up the logs of the mongodb-0, we can see that now the newest pod which was the mongodb-2, is detected by the mongodb-0 pod, which then replicates its data to the mongodb-2 pod, using the same process as it did for the pod with ordinal index 1 above.
 $ oc logs mongodb-0
-2025-06-09T12:12:44.067+0000 I ASIO     [NetworkInterfaceASIO-Replication-0] Connecting to mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017
-2025-06-09T12:12:44.068+0000 I REPL     [ReplicationExecutor] New replica set config in use: { _id: "rs0", version: 3, protocolVersion: 1, members: [ { _id: 0, host: "mongodb-0.mongodb-internal.statefulset.svc.cluster.local:27017", arbi
+<event-date> I ASIO     [NetworkInterfaceASIO-Replication-0] Connecting to mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017
+<event-date> I REPL     [ReplicationExecutor] New replica set config in use: { _id: "rs0", version: 3, protocolVersion: 1, members: [ { _id: 0, host: "mongodb-0.mongodb-internal.statefulset.svc.cluster.local:27017", arbi
 terOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 1, host: "mongodb-1.mongodb-internal.statefulset.svc.cluster.local:27017", arbiterOnly: false, buildIndexes: true, hidden: fal
 se, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 2, host: "mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, vot
 es: 1 } ], settings: { chainingAllowed: true, heartbeatIntervalMillis: 2000, heartbeatTimeoutSecs: 10, electionTimeoutMillis: 10000, getLastErrorModes: {}, getLastErrorDefaults: { w: 1, wtimeout: 0 }, replicaSetId: ObjectId('6846cec0fa3
 7b01dd820333d') } }
-2025-06-09T12:12:44.068+0000 I REPL     [ReplicationExecutor] This node is mongodb-0.mongodb-internal.statefulset.svc.cluster.local:27017 in the config
-2025-06-09T12:12:44.068+0000 I ASIO     [NetworkInterfaceASIO-Replication-0] Connecting to mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017
-2025-06-09T12:12:44.076+0000 I ASIO     [NetworkInterfaceASIO-Replication-0] Successfully connected to mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017
-2025-06-09T12:12:44.076+0000 I ASIO     [NetworkInterfaceASIO-Replication-0] Successfully connected to mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017
-2025-06-09T12:12:44.076+0000 I REPL     [ReplicationExecutor] Member mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017 is now in state STARTUP
-2025-06-09T12:12:46.077+0000 I REPL     [ReplicationExecutor] Member mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017 is now in state SECONDARY
+<event-date> I REPL     [ReplicationExecutor] This node is mongodb-0.mongodb-internal.statefulset.svc.cluster.local:27017 in the config
+<event-date> I ASIO     [NetworkInterfaceASIO-Replication-0] Connecting to mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017
+<event-date> I ASIO     [NetworkInterfaceASIO-Replication-0] Successfully connected to mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017
+<event-date> I ASIO     [NetworkInterfaceASIO-Replication-0] Successfully connected to mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017
+<event-date> I REPL     [ReplicationExecutor] Member mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017 is now in state STARTUP
+<event-date> I REPL     [ReplicationExecutor] Member mongodb-2.mongodb-internal.statefulset.svc.cluster.local:27017 is now in state SECONDARY
 ```
 
 Unlike previous use of the scale command this time you need to explicitly state that you are scaling a stateful set. In
@@ -3807,7 +3806,7 @@ $ oc apply -f openshift/limit-ranges.yml -n image-uploader
 $ oc get limitranges -n image-uploader
 
 NAME                   CREATED AT
-core-resource-limits   2025-06-11T16:54:34Z
+core-resource-limits   <date>
 ```
 
 After which we can simply run the apply to create the new resource limit range for the project or namespace, in this case
@@ -4251,7 +4250,7 @@ $ systemctl status ovs-vswitchd
      Loaded: loaded (/usr/lib/systemd/system/ovs-vswitchd.service; static)
     Drop-In: /etc/systemd/system/ovs-vswitchd.service.d
              └─10-ovs-vswitchd-restart.conf
-     Active: active (running) since Wed 2025-06-11 16:03:15 UTC; 2h 51min ago
+     Active: active (running) since <date>; <time> ago
    Main PID: 1204 (ovs-vswitchd)
       Tasks: 15 (limit: 152745)
      Memory: 57.1M
@@ -4631,18 +4630,45 @@ zone files, are config files where DNS records are recorded for a domain control
 controls the zone files for several domains that exist only on the pod network. `cluster.local` - top level domain for
 everything in your OpenShift cluster, `svc.cluster.local` - domain for all services running in your cluster.
 
-Domain for each project are also created. For example `image-uploader.svc.cluster.local` - used to access all the services
+Domains for each project are also created. For example `image-uploader.svc.cluster.local` - used to access all the services
 created in the `image-uploader project`. A DNS A record is created in `SkyDNS` for each service in OpenShift when an
 application is deployed a service represents all the deployed pods for an application. To view the services for the
 `image-uploader project` run the following `oc` command
 
 ```sh
-#
+# we can see the services here, however what is more interesting is the route, which was created earlier by the expose command,
+# and is directly linked to the service, the router object is told which service to serve on a given path, port and so on
 $ oc get services -n image-uploader
-
 NAME      TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)             AGE
 app-cli   ClusterIP   10.217.5.54   <none>        8080/TCP,8443/TCP   21h
+
+# here we can see in the route manifest that the route is linked to the service, here is also some more interesting
+# parts of the spec, like the `targetPort`, and the `host`, which points to the <app-name>-<project-name>-<cluster-host>
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: app-cli
+    app.kubernetes.io/component: app-cli
+    app.kubernetes.io/instance: app-cli
+    app.kubernetes.io/name: php
+  name: app-cli
+spec:
+  host: app-cli-image-uploader.apps-crc.testing
+  port:
+    targetPort: 8080-tcp
+  to:
+    # the name of the service is part of the route manifest, this is what links the service with the route, and the
+    # route is what links our service to the outside world, the pods are linked through the service, and our app/container is
+    # linked through the pod
+    kind: Service
+    name: app-cli
+    weight: 100
+  wildcardPolicy: None
 ```
+
+We can see that the following relationship is established between the app and the outside world/traffic -
+ingress/traffic -> route -> service -> pod -> container -> application
 
 ### DNS resolution in pod network
 
@@ -4746,7 +4772,7 @@ Annotations:  <none>
 API Version:  config.openshift.io/v1
 Kind:         Network
 Metadata:
-  Creation Timestamp:  2025-03-16T14:44:34Z
+  Creation Timestamp:  <date>
   Generation:          6
   Resource Version:    26060
   UID:                 bc505ed9-75c3-4f2a-bc0f-db8a0769e5cd
@@ -4769,7 +4795,7 @@ Status:
     Host Prefix:        23
   Cluster Network MTU:  1400
   Conditions:
-    Last Transition Time:  2025-06-11T16:04:13Z
+    Last Transition Time:  <date>
     Message:
     Observed Generation:   0
     Reason:                AsExpected
@@ -4790,7 +4816,7 @@ networkpolicy.networking.k8s.io/allow-from-openshift-ingress created
 $ oc describe networkpolic
 Name:         allow-from-openshift-ingress
 Namespace:    openshift-ingress
-Created on:   2025-06-13 16:25:57 +0300 EEST
+Created on:   <date>
 Labels:       <none>
 Annotations:  <none>
 Spec:
@@ -4804,7 +4830,7 @@ Spec:
 
 Name:         allow-from-openshift-monitoring
 Namespace:    openshift-ingress
-Created on:   2025-06-13 16:27:28 +0300 EEST
+Created on:   <date>
 Labels:       <none>
 Annotations:  <none>
 Spec:
@@ -4818,7 +4844,7 @@ Spec:
 
 Name:         allow-same-namespace
 Namespace:    openshift-ingress
-Created on:   2025-06-13 16:27:28 +0300 EEST
+Created on:   <date>
 Labels:       <none>
 Annotations:  <none>
 Spec:
@@ -4829,7 +4855,6 @@ Spec:
       PodSelector: <none>
   Not affecting egress traffic
   Policy Types: Ingress
-
 ```
 
 After these changes are committed and done you have to make sure to restart the master node server, you can do this
@@ -4837,7 +4862,7 @@ with the command line on your host machine like so `crc stop` and then followed 
 effect after the server is restarted
 
 ```sh
-
+TODO
 ```
 
 ### Testing the multi-tenant plugin
@@ -4917,7 +4942,7 @@ Each object in SELinux label has four section separated by colons:
 - User which SELinux user has access to the object with the SELinux label,
 - Role the SELinux role that can access the objects with the matching SELinux
 - Type SELinux type for each label. This is the section where most common SELinux rules are written
-- multi category security - often called the `MCS` bit, Unique for each container what we will spend the most time on
+- multi category security - often called the ``MCS`` bit, Unique for each container what we will spend the most time on
 
 `Open vSwitch` for communication on your OpenShift cluster nodes. `/var/run/open-vswitch/db.sock`. To view this label run
 the following ls command using the -Z option flag to include the SELinux information in its output.
@@ -4932,10 +4957,10 @@ srwxr-x---. 1 openvswitch hugetlbfs system_u:object_r:openvswitch_var_run_t:s0 0
 # that we have multiple targets in the label
 system_u:object_r:openvswitch_var_run_t:s0
 
-system_u - the SELinux user is used for the `MCS` inmplementation
-object_r - the SELinux role is used primarily for `MCS` implementation
+system_u - the SELinux user is used for the ``MCS`` inmplementation
+object_r - the SELinux role is used primarily for ``MCS`` implementation
 openvswitch_var_run_t - the SELinux type is used in type enformcement policies to define interactions between objects on a Linux host
-s0 - objects are assigned an `MCS` value to distinguish between different category levels on the Linux system.
+s0 - objects are assigned an ``MCS`` value to distinguish between different category levels on the Linux system.
 ```
 
 In addition to the standard POSIX attributes of mode, owner and group ownership, the output also includes the SELinux
@@ -4973,7 +4998,6 @@ any object created in the `/var/run/openvswitch` directory
 
 ```sh
 $ semanage fcontext -l | grep openvswitch
-
 /etc/openvswitch(/.*)?                             all files          system_u:object_r:openvswitch_rw_t:s0
 /run/ovn(/.*)?                                     all files          system_u:object_r:openvswitch_var_run_t:s0
 /usr/bin/neutron-openvswitch-agent                 regular file       system_u:object_r:neutron_exec_t:s0
@@ -5002,8 +5026,12 @@ example of what an SELinux policy would do. For this we will use an example that
 Apache web server. Apache is a common everywhere and has long established SELinux policies that we can use as an example
 
 ```sh
-# if you have followed the install setup steps from above, you will be able to see the httpd binary in /sbin/httpd,
-# which is the Apache web server binary, use dnf -y install httpd on your master cluster node if you have not
+# if you have followed the install setup steps from above, you will be able to see/install the httpd binary in /sbin/httpd,
+# which is the Apache web server binary, if not installed, use dnf -y install httpd on your master cluster node
+$ which httpd
+/sbin/httpd
+
+# run the following ls command to inspect the SELinux policies on the executable, use the -Z flag, to do so
 $ ls -zlZ /sbin/httpd
 -rwxr-xr-x. 1 root root system_u:object_r:httpd_exec_t:s0 589576 Jan 29 17:56 /sbin/httpd
 ```
@@ -5013,9 +5041,8 @@ The executable file for the Apache web server is `/usr/sbin/htpd`. This httpd ex
 `/var/www/html`. This directory has an SELinux label of `system_u:object_r:httpd_sys_content_t:s0`, The default
 `cgi-script` directory for Apache is `/var/www/cgi-bin`, and it has the SELinux label of
 `system_u:object_r:httpd_sys_script_exec_t:s0`. There is also the httpd_port_t label for the following TCP port numbers
-
 - 80, 8008, 8009, 8433, 9000, 81, 443, 488.an SELinux policy enforces the following rules using these labels for the
-  httpd_exec_t object type
+`httpd_exec_t` object type
 
 ```sh
 $ ls -alZ /var/www/cgi-bin
@@ -5099,18 +5126,18 @@ with Apache. These sorts of issues lead to some people deciding to disable SELin
 
 The user and role portions of the label are not used for type enforcement policies. The `svirt_lxc_net_t` type is used in
 SELinux policies that control which resources on the system container can interact with. We have not discussed the
-fourth part of the SELinux label - the ``MCS`` level, which isolates pods in OpenShift lets examine how that works next
+fourth part of the SELinux label - the ```MCS``` level, which isolates pods in OpenShift lets examine how that works next
 
 ### Isolating pods with levels
 
-The original purpose of the `MCS` bit was to implement the `MCS` security standards on linux servers. These standards
+The original purpose of the ``MCS`` bit was to implement the ``MCS`` security standards on linux servers. These standards
 control data access for different security levels on the same servers. For example secret and top secret data could
 exist on the same server. A top secret level process should be able to to access secret level data, a concept called
 data dominance. But secret processes should never be able to access the top secret level data, because that data has
-higher `MCS` level. This is the security feature you can use to prevent a pod from accessing data its not authorized to
+higher ``MCS`` level. This is the security feature you can use to prevent a pod from accessing data its not authorized to
 access on the host.
 
-OpenShift uses the `MCS` level for each container process to enforce security as part of the pod security context. A pod
+OpenShift uses the ``MCS`` level for each container process to enforce security as part of the pod security context. A pod
 security context is all the information that describes how its secured on its application node. Let us look at the
 security context for the app-cli pod
 
@@ -5142,7 +5169,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   annotations:
-  creationTimestamp: "2025-06-11T17:02:47Z"
+  creationTimestamp: "<date>"
   labels:
     deployment: app-cli
     pod-template-hash: 7976b4c888
@@ -5152,26 +5179,26 @@ spec:
   securityContext:
     fsGroup: 1000650000
     seLinuxOptions:
-      level: s0:c26,c0
+      level: s0:c26,c0 # <- take a note the following c0 `MCS` level rule
     seccompProfile:
       type: RuntimeDefault
   serviceAccount: default
   serviceAccountName: default
 ```
 
-### Examining the MCS levels
+### Examining the `MCS` levels
 
-The structure of the `MCS` level consists of sensitivity level s0 and two categories c8 and c7 as shown in the following
+The structure of the ``MCS`` level consists of sensitivity level s0 and two categories c8 and c7 as shown in the following
 output from the previous command. You may have noticed that the order of the categories is reversed in the oc output
-compared with the pc command. This makes no difference in how the Linux kernel reads and acts on the `MCS` level.
+compared with the pc command. This makes no difference in how the Linux kernel reads and acts on the ``MCS`` level.
 
-A detailed discussion of how different `MCS` levels can interact is out of scope. OpenShift assumes that application
+A detailed discussion of how different ``MCS`` levels can interact is out of scope. OpenShift assumes that application
 deployed in the same project will need to interact with each other. With that in  the pods in a project have the
-same `MCS` level. Sharing an `MCS` level lets applications share resources easily and simplifies the security configuration
+same ``MCS`` level. Sharing an ``MCS`` level lets applications share resources easily and simplifies the security configuration
 you need to make for your cluster.
 
-Let us examine the SELinux configuration for pod in different project. You already know the `MCS` level for app-cli.
-Because the app-cli and app-gui are in the same project, they should have the same `MCS` level. T get the `MCS` level of the
+Let us examine the SELinux configuration for pod in different project. You already know the ``MCS`` level for app-cli.
+Because the app-cli and app-gui are in the same project, they should have the same ``MCS`` level. T get the ``MCS`` level of the
 app-gui pod use the same `oc` get command
 
 ```sh
@@ -5181,7 +5208,7 @@ $ oc get pods -n image-uploader
 app-cli-7976b4c888-rdbv7   1/1     Running     0          3d20h
 app-gui-5d5dc97869-8r2wl   1/1     Running     0          96s
 
-$ oc get -o yaml pod/app-gui-5d5dc97869-8r2wl | grep "level:"
+$ oc get -o yaml pod/app-cli-7976b4c888-rdbv7 | grep "level:"
       level: s0:c26,c0
 
 $ oc get -o yaml pod/app-gui-5d5dc97869-8r2wl | grep "level:"
@@ -5212,7 +5239,7 @@ metadata:
     openshift.io/generated-by: OpenShiftNewApp
     openshift.io/scc: restricted-v2
     seccomp.security.alpha.kubernetes.io/pod: runtime/default
-  creationTimestamp: "2025-06-15T13:31:05Z"
+  creationTimestamp: "<date>"
   generateName: wildfly-app-1-
   labels:
     application: wildfly-app
@@ -5224,15 +5251,118 @@ spec:
   securityContext:
     fsGroup: 1000670000
     seLinuxOptions:
-      level: s0:c26,c10
+      level: s0:c26,c10 # <- take a note the following c10 `MCS` level rule
     seccompProfile:
       type: RuntimeDefault
   serviceAccount: default
   serviceAccountName: default
 ```
 
-Each project uses a unique `MCS` level for deployed applications this `MCS` level permits each project applications
+Each project uses a unique ``MCS`` level for deployed applications this ``MCS`` level permits each project applications
 to communicate only with resources in the same project. Let us continue looking at pod security context components
 with pod capabilities
 
-### Managing pods Linux capabilities
+### Managing Linux capabilities
+
+The capabilities listed in the app-cli security context are Linux capabilities that have been removed from the container
+process. Linux capabilities are permissions assigned to, or removed from processes by the Linux kernel:
+
+```txt
+securityContext:
+    capabilities:
+        drop:
+        - KILL
+        - MKNOD
+        - STGID
+        - SETUID
+        - SYS-CHROOT
+```
+
+Capabilities allow a process to perform administrative task on the system. The root user on a Linux server can run
+commands with all Linux capabilities by default. That is why the root user can perform task like opening TCP ports below
+1024 which is provided by the `CAP_NET_BIND_SERVICE` capability, and loading modules into the Linux kernel, which is
+provided by the `CAP_SYS_MODULE` capability.
+
+You can add capabilities to a pod if it needs to be able to perform a specific type of task. Add them to the
+capabilities .add list in the pod's security context. To remove default capabilities from pods, add the capabilities you
+want to remove, add them to the drop list. This is the default action in OpenShift. The goal is to assign the fewest
+possible capabilities for a pod to fully function. This least privileged model ensures that pods can not perform tasks
+on the system that are not related, to their application proper function. The default value for the privileged option is
+False; setting the privileged option to True is the same as giving the pod the capabilities of the root user on the
+system. Although doing so should not be common practice privileged pods can exist and be useful under certain
+circumstances. A great example is the HAProxy pod we already talked about. It runs a s a privileged container so it can
+bind to port 80 on its node to handle incoming application requests. When an application needs access to host resources
+that can not be easily provided to the pod, running a privileged container may help.
+
+The last value in the security context that we need to look at is what controls the user ID that the pod is run with -
+`runAsUser` parameter
+
+### Controlling the user ID
+
+In OpenShift by default each project deploys pods using a random UID. Just like the `MCS` level the UID is common for all
+pods in a project to allow easier interactions between pods when needed. The UID for each pod is listed in the security
+context in the `runAsUser` parameter. By default OpenShift does not allow application to be deployed using UID 0, which
+is the default UID for the system's root user. There are not any known ways for UID 0 to break out of a container, but
+being UID 0 in a container means you must be incredibly careful about taking away capabilities and ensuring proper file
+ownership on the system. In an ounce of prevention that can prevent the need for a pound of a cure down the road
+
+The components in a pod or a container security context are controller by the security context constraints `SCC` -
+assigned to the pod when its deployed. An `SCC` is a configuration applied to pods that outlines the security context
+components it will operate with. We will discuss the `SCC` in more depth in the next section when you deploy an
+application in your cluster that needs a more privileged security context than the default one. This application is a
+container image scanning utility that looks for security issues in container images in your OpenShift registry.
+
+## Scanning container images
+
+OpenShift is only as secure as the containers it deploys. Even if your container images are built using proven vetted
+base images supplied by vendors or created using your own secure workflows, you will need a process to ensure that the
+image you are using do not have any security issues as they age in your cluster. The most straightforward solution for
+this challenge is to scan you container images. We are going to scan a single container image on demand in this section
+in a production environment image scanning should be an integral component in your application deployment workflow.
+Companies like Black Duck Software and `Twistlock` have image scanning and compliance tools that integrate with OpenShift.
+You must be able to trust what is running in your containers and quickly fix issues when they are found. An entire
+industry has sprung up in the past few years that provides container image scanning products to help make this an every
+day reality. These scanning utilities have the capabilities to annotate or tag images with metadata, that metadata, is
+then used to determine if the image is deemed a security risk or not, in the next section we will see how we can manually
+annotate images ourselves. The process is the same that an automated tool image scanner would take.
+
+## Annotating images with security information
+
+OpenShift is configured with image policies that control which images are allowed to run on your cluster. The full
+documentation can be found at the official RedHat OpenShift documentation page. Annotations in the image metadata
+enforce image policies you can add these annotation manually. The deny-execution policy prevents an image from running
+on the cluster under any condition. To apply this policy to the image you can use the annotate command on the `oc`
+command line tool for OpenShift
+
+```sh
+# this will annotate the image with the sha-id with the deny execution
+$ oc annotate image <image-sha-id> images.openshift.io/deny-execution=true
+```
+
+Image policies do not affect running pods, but they prevent an image with the deny execution annotation from being used
+for deployments. To see this in action, delete the active pods for the annotated image. Normally the replication
+controller for the deployment will automatically deploy a new version of the pod based on the correct base image. But no
+new pod will be deployed in this case, the replication controller will be stopped in its tracks , when it checks and
+sees that the image is annotated therefore it will not be allowed to execute the container runtime and start a new
+container for the target image. Looking at the events for the app project you can see that the image policies in
+OpenShift are reading the annotation that was added to the image and preventing a new pod from being deployed.
+
+```sh
+# see the events for the given namespace or project, you might notice something like that in the output of the events
+$ oc events -n <namespace-project>
+
+# the following output is abridged, but that is what one would expect from the events list for the namespaces / project
+> Warning FailedCreate
+> Error creating: Pod "" is invalid: spec.containers[0].image: Forbidden:
+> this image is prohibited by policy
+```
+
+This process manually scans a container image and adds an annotation to it if security issues are found. The annotation
+is read by the OpenShift image-policy engine and prevents any new pods from being deployed using that image. Automated
+solutions like Black Duck and `Twistlock` handle this dynamically, including annotations about the security findings and
+information about the scan. These annotations can be used for security reporting and to 3ensure that the most secure
+application are deployed in OpenShift at all times. We started this section with SELinux and worked our way up to the
+security context that define how pods are assigned security permissions in OpenShift. As we said at the start of this
+section this is not a comprehensive list or a complete security workflow. Our goal has been to introduce you to what are
+the most important security concepts in OpenShift and give you enough information to begin to use and customize them as
+you gain experience with OpenShift
