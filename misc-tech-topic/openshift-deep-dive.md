@@ -19,7 +19,7 @@ A container runtime works on a Linux server to create and manage containers. For
 how containers function when they are running on a Linux system. In subsequent sections we will dig deeply into how
 containers isolate applications in OpenShift. To start, you can think of containers as discrete, portable scalable units
 for applications. Containers hold everything required for the application inside them to function. Each time a container
-is deployed it holds all the libraries and code needed to its application to function properly. Apps running inside a
+is deployed it holds all the libraries and code needed to its application to function properly. Apps running inside a,
 container can only access the resources in the container. The applications in the container are isolated from anything
 running in other containers or on the host. Five types of resources are isolated with containers.
 

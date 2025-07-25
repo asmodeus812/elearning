@@ -22,12 +22,12 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1730376495008</id>
+			<id>1753014351265</id>
 			<name></name>
 			<type>30</type>
 			<matcher>
 				<id>org.eclipse.core.resources.regexFilterMatcher</id>
-				<arguments>build|node_modules|\.vim|\.svn|\.git|\.idea|\.cache|\.vscode|\.settings|__CREATED_BY_JAVA_LANGUAGE_SERVER__</arguments>
+				<arguments>\.angular|\.cache|\.cargo|\.circleci|\.dart_tool|\.flutter_tools|\.git|\.github|\.hg|\.husky|\.idea|\.jekyll-cache|\.netlify|\.next|\.nuxt|\.parcel-cache|\.pytest_cache|\.rustup|\.serverless|\.svelte-kit|\.svn|\.terraform|\.vercel|\.vscode|\.yarn|__pycache__|node_modules|__CREATED_BY_JAVA_LANGUAGE_SERVER__</arguments>
 			</matcher>
 		</filter>
 	</filteredResources>
