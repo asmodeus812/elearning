@@ -1,0 +1,615 @@
+Introduction
+
+Trees are a fundamental recursive data structure in computer science. At their core, a tree consists of nodes, where each node can have zero or more child nodes. This relationship is recursive—each child node can itself have children, and so on. Sometimes, nodes may also have a reference to their parent, but this is an implementation detail and not a requirement for the structure to be considered a tree.
+
+There are several important properties to keep in mind about trees. First, trees do not contain loops; if they did, they would be classified as graphs instead. Every tree has a single root node, which has no ancestors. Each node in the tree, including the root, can have any number of children, including zero. When a tree is limited to a maximum of n children per node, it is called an n-ary tree. For example, a node with two children forms a binary tree, while a node with ten children forms a ten-ary tree. A node without any children is called a leaf node. Interestingly, the root node can also be a leaf if it has no children. When traversing a tree, referencing a node’s parent is often handled using recursion.
+
+A typical way to represent a tree node in code is to define a class for the node itself. A separate tree class is rarely necessary, since passing around the root node is usually sufficient to represent the entire tree. However, a tree class can be useful if you want to attach an interface or specific actions to the tree as a whole.
+
+For example, an n-ary tree node might be represented by a class with a value and an array of child nodes. In contrast, a binary tree node would have a value, a left child, and a right child.
+
+Types
+
+There are several common types of trees, each with distinct properties and use cases. It is important to identify the type of tree you are working with before attempting to solve a problem, as each type comes with its own assumptions and characteristics.
+
+One common type is the trie, which is a kind of n-ary tree often used for storing word prefixes. Tries are sometimes used to store entire dictionaries, such as the English language, where each node can have up to twenty-six children—one for each letter of the alphabet. Each path through the trie that forms a valid word is terminated with a special node to indicate the end of the word.
+
+Another type is the binary tree, where each node has at most two children. The arrangement of nodes in a binary tree is not ordered in any particular way.
+
+A binary search tree is a special kind of binary tree where the nodes are ordered. For each node, all nodes in the left subtree are less than or equal to the parent, and all nodes in the right subtree are strictly greater. This ordering must hold recursively for all descendants, not just immediate children.
+
+Balanced binary search trees are those in which the heights of the left and right subtrees of any node differ by no more than one level. Examples include red-black trees and AVL trees. While balanced trees are often binary, the concept can apply to n-ary trees as well.
+
+Binary heaps are another special type of binary tree. In a min-heap, the smallest element is always at the root, and all children are greater than their parent. In a max-heap, the largest element is at the root, and all children are smaller. This property holds recursively for every node in the tree.
+
+A complete binary tree is one in which every level is fully filled, except possibly the last level.
+
+A full binary tree is a tree where every node has either zero or two children—never just one.
+
+A perfect binary tree is one where all interior nodes have exactly two children, and all leaf nodes are at the same level.
+
+Creating
+
+A fast way to create a binary tree from a list of items is to use a heap-like approach. Starting from the first index in the list, you calculate the indices of the left and right children for each node, retrieve the corresponding elements, and recursively build the child subtrees. The left child is found at index two times the current index plus one, and the right child is at two times the current index plus two. The process continues recursively, with a base case to ensure the index does not exceed the size of the list.
+
+In code, this is typically implemented as a recursive function that creates a node for each element, assigns its value, and then recursively creates its left and right children using the calculated indices. If the index is out of bounds or the value is null, the function returns null, indicating no node should be created at that position.
+
+Traversal
+
+There are several ways to traverse a binary or n-ary tree, each involving different orders of visiting the nodes. For a binary tree, there are six possible permutations for visiting the root, left, and right nodes.
+
+Some of these traversal orders have specific names and are commonly used. For binary search trees, the most important are in-order, pre-order, and post-order traversals.
+
+In-order traversal visits the left subtree, then the root, then the right subtree. This order is significant because it visits the nodes in ascending order for a binary search tree.
+
+Pre-order traversal visits the root first, then the left and right subtrees. This is useful for tasks like copying the tree or generating a prefix expression.
+
+Post-order traversal visits the left and right subtrees first, then the root. This is often used for deleting the tree or evaluating postfix expressions.
+
+In code, each of these traversals is typically implemented as a recursive function. For in-order traversal, the function first recurses on the left child, then processes the root, then recurses on the right child. For pre-order, it processes the root first, then recurses on the left and right children. For post-order, it recurses on the left and right children first, then processes the root.
+
+Height
+
+To determine the height of a binary tree, you use a recursive function. If the node is null, the height is zero. If the node is a leaf, the height is one. Otherwise, the height is one plus the maximum height of the left and right subtrees. This approach ensures that the height reflects the longest path from the root to a leaf.
+
+Containment
+
+To check if a given node reference is contained within a tree, you must traverse the entire tree and compare each node to the target reference. The process is straightforward: for each node, check if it matches the target. If it does, return true. If not, recursively check the left and right subtrees. If both return false, the node is not present in the tree. If either returns true, the node has been found. This approach ensures that the search is based on reference equality, not just value equality.
+
+
+Ancestor
+
+This is a tricky, but very useful problem to solve: finding the first common ancestor of two nodes in a tree, given that the nodes can be at any depth. To approach this, we need to recognize that there are only two possible states for the nodes. Either both nodes are on the left or right subtree of a given node, or one node is on the right and the other is on the left.
+
+If one node is on the right and the other is on the left of a given parent node, then this parent node is the common ancestor. Otherwise, if both nodes are on the same side, we need to go down that side until they split and are no longer on the same side.
+
+Consider the following example tree:
+
+Ten at the root, with three and fifteen as its children. Three has one and four as its children, and one has zero as its child.
+
+If we look at nodes zero and four, their immediate common ancestor is node three. This is the first node where both zero and four are on different sides. In contrast, if we look at node ten, both zero and four are on the same side—the left subtree.
+
+The key is to verify that the given nodes do not lie in the same subtree at the same time for a given node. When this is the case, that node is the common ancestor. For example, if we had nodes three and zero, the common ancestor would be ten, not three.
+
+The following code defines a function called ancestor that finds the first common ancestor of two nodes in a binary tree. It checks whether each node is on the left or right of the current root, and recursively moves down the tree until it finds the split point where the nodes are on different sides. If both nodes are on the same side, it continues down that side. If they are on different sides, it returns the current root as the common ancestor.
+
+Comparison
+
+Another common problem is comparing two subtrees to check if they are equal or the same. To do this, we traverse both trees at the same time, going from the root to the subtrees, either depth-first or breadth-first. The important part is to go through both at the same rate and keep comparing the nodes. If all nodes match exactly and are at the same position in both trees, we can conclude they are equal.
+
+The following code defines a function called compare that checks if two subtrees are equal. It does this by recursively comparing the nodes at each position. If both nodes are null, they are considered equal. If one is null and the other is not, they are not equal. If the values of the current nodes match, it continues to compare their left and right children. If any value does not match, it returns false.
+
+Subtrees
+
+Another common problem is to find if a subtree exists within a given tree. Usually, the subtree is much smaller than the main tree. This is done by leveraging the compare function. The check function first drills down to the bottom of the main tree, and then starts to run compare while unwinding the recursion. The approach can be either bottom-up or top-down; what matters is that we traverse the entire tree and check for the subtree in both the left and right branches.
+
+The following code defines a function called check that determines if a subtree exists within a main tree. If the subtree is null, it is always considered part of the main tree. If the main tree is null, the comparison is invalid. The function recursively checks the left and right branches, and uses the compare function to see if the subtree matches at any point.
+
+Size
+
+To dynamically calculate the size, or the number of nodes in a given tree, without storing that information in the node itself, we can use a simple recursive approach.
+
+The following code defines a function called size that calculates the number of nodes in a binary tree. If the node is null, it returns zero. Otherwise, it returns one plus the size of the left and right subtrees.
+
+Random
+
+A common problem is selecting a random node from a binary tree, where each node has an equal chance of being selected. The challenge is to proportionally select a random element from a tree that might be imbalanced. To do this, we need to know how many nodes each subtree of the current root has.
+
+Consider the following example tree:
+
+Ten at the root, with three and fifteen as its children. Three has one and four as its children, and one has zero and two as its children.
+
+This tree has a total of seven elements. The left subtree is much heavier than the right one. To select a random node with equal probability, we must take this into account.
+
+We start by picking a random number, say one, which corresponds to index one. The elements are indexed from zero to six, for a total of seven elements. We check the size of the left subtree of the root, which is five, and the right subtree, which is one. If the index we picked is less than the size of the left subtree, we go to the left. For root ten, the element indices span from left zero to four, root five, and right six.
+
+Next, at root three, its left size is four and its right size is one. The index is still less, so we continue to the left. For root three, the indices span from left zero to two, root three, and right four.
+
+This process continues, always using the sizes of the subtrees to guide the random selection, ensuring that each node has an equal chance of being chosen, regardless of the tree's balance.
+
+
+Let’s walk through the logic of selecting a random node from a binary search tree, and then move on to how binary search trees are created and validated.
+
+We start by considering a scenario where we traverse down the tree, always moving to the left, until we reach a node where both the left and right subtrees have a size of one. At this point, the indices of the elements for the root node span from left, which is index zero, to root, which is index one, and right, which is index two. Here, if our input random index matches the index of the root, we have reached our base case.
+
+The function that performs this selection ensures that the random index is always within the valid range of the tree, specifically, it is never greater than the total number of elements minus one. If this condition is met, the function will eventually reach the base case where the index is equal to the root index.
+
+Now, let’s describe the core logic of the random node selection function. This function, named random, takes a root node and an index as input. If the root is null, it simply returns null, indicating an invalid case. There is an assertion to ensure that the index is always within the valid boundaries, meaning it is greater than or equal to zero and less than the size of the current subtree. This is a sanity check, but if we always provide a valid index, this condition will always be true.
+
+The function then calculates the number of elements in the left subtree. Knowing the size of the left subtree allows us to determine which direction to traverse. If the index is less than the left size, we move down the left subtree, passing the same index. If the index is exactly equal to the left size, we have found the root node, and we return it. This is the base case that will always be reached eventually.
+
+If the index is greater than the left size, we know the target node is in the right subtree. Before moving to the right, we adjust the index by subtracting the left size plus one, which accounts for all nodes in the left subtree and the root itself. This normalization ensures the index is valid for the right subtree. For example, if the tree has ten elements, the left size is six, and the target index is nine, the new index for the right subtree becomes two.
+
+The initial invocation of this function involves creating the tree from a list of elements and then calling the random function with a random index between zero and the size of the list minus one.
+
+Next, let’s discuss binary search trees.
+
+A binary search tree, or BST, is a simple data structure that maintains the property where, for any given node, all elements in the left subtree are smaller, and all elements in the right subtree are larger. The most basic implementation does not attempt to keep the tree balanced. This can lead to poor performance, as the tree may degrade into a linked list if elements are inserted in sorted order. For example, if we insert ten, then five, then three, and continue adding smaller and smaller elements, the tree becomes a single-sided list. This structure results in linear search time complexity, or O of n, instead of the desired logarithmic time, or O of log n, which is achieved when the tree is balanced.
+
+To illustrate, imagine inserting ten, then five, then three. If we keep adding two, one, zero, and so on, the tree forms a linked list of nodes, all on one side. Balancing the tree restructures it to maintain efficient search times.
+
+Now, let’s talk about creating a binary search tree from a sorted array.
+
+One efficient way to create a balanced binary search tree from a sorted array is to use binary partitioning. We partition the array in half, selecting the midpoint as the root. The left subtree is created from the left half of the array, from the start index up to, but not including, the root’s index. The right subtree is created from the right half, from the root’s index plus one to the end.
+
+The function for creating the tree calculates the difference between the start and end indices. If the difference is zero or negative, it returns null, indicating there are no more elements to process. Otherwise, it calculates the midpoint index, creates a new node with the value at that index, and recursively creates the left and right subtrees using the appropriate subarrays. The function then returns the newly created node.
+
+To summarize, this approach ensures that the tree is as balanced as possible, resulting in efficient search times.
+
+Finally, let’s discuss how to validate that a tree is a binary search tree.
+
+To validate a binary search tree, we use a recursive approach that narrows down the minimum and maximum allowed values as we traverse the tree. Initially, both the minimum and maximum are undefined at the root. When moving to the left, we set the maximum to the current root’s value, since all left children must be smaller. When moving to the right, we set the minimum to the current root’s value, since all right children must be larger.
+
+As we traverse down the tree, the minimum and maximum values represent the constraints imposed by the path we have taken. If, for every node, the value is greater than the minimum and less than the maximum, the binary search tree property is satisfied. This check is performed for all nodes in both the left and right subtrees, all the way down to the leaves.
+
+In summary, by maintaining and updating these constraints as we traverse, we can confirm whether the tree maintains the binary search tree property.
+
+
+Checking if a Binary Tree is a Binary Search Tree
+
+The first section describes a function that checks whether a given binary tree satisfies the properties of a binary search tree, or BST. The function is called check, and it takes a node, along with minimum and maximum allowed values for that node. If the current node is null, meaning we've reached the end of a branch, the function returns true, indicating that the BST property has held up to this point.
+
+If the current node's value is less than the minimum or greater than the maximum, the function returns false, because this violates the BST property. As the function recurses down the tree, it narrows the allowed range for each subtree. For the left subtree, the maximum allowed value becomes the current node's value. For the right subtree, the minimum allowed value becomes the current node's value. Both subtrees must satisfy the BST property for the entire tree to be considered a BST.
+
+Finally, the function is called on the root node, with no initial minimum or maximum constraints.
+
+Finding the Maximum Value in a Binary Search Tree
+
+To find the maximum value in a binary search tree, you simply follow the right child pointers from the root node, moving to the rightmost node in the tree. The function for this starts at the root and keeps moving to the right child until there are no more right children. The node it ends on contains the maximum value in the tree.
+
+Finding the Minimum Value in a Binary Search Tree
+
+Similarly, to find the minimum value in a binary search tree, you follow the left child pointers from the root node, moving to the leftmost node. The function for this starts at the root and keeps moving to the left child until there are no more left children. The node it ends on contains the minimum value in the tree.
+
+Insertion in a Binary Search Tree
+
+Inserting a value into a binary search tree is similar to searching for a value. You compare the value to be inserted with the current node's value. If the value is greater, you move to the right child. If it is smaller, you move to the left child. If it is equal, you terminate the process, as duplicates are not allowed.
+
+If you reach a null node, it means you've found the correct spot for the new value. At this point, you create a new node with the value and return it. This return is important because it ensures the new node is correctly attached to its parent as the recursion unwinds. The function always returns the current node, ensuring the tree structure is maintained.
+
+Deletion in a Binary Search Tree
+
+Deleting a node from a binary search tree is more complex and involves several cases. First, you must locate the node to be deleted. If the node has no children, you simply return null, effectively removing it. If the node has only a left subtree, you return the left subtree. If it has only a right subtree, you return the right subtree.
+
+If the node has both left and right subtrees, you have two options. You can either find the maximum value in the left subtree or the minimum value in the right subtree. The chosen node will either be the rightmost node in the left subtree or the leftmost node in the right subtree. You then swap the value of this node with the node to be deleted. After swapping, you remove the chosen node, which will have at most one child, making its removal straightforward.
+
+For example, consider deleting the node with value five from a tree. If the node has two children, you might choose to find the maximum node in its left subtree, which could be the node with value three. You detach this node from its parent and replace the value of the node to be deleted with the value three. The binary search tree property is maintained throughout this process.
+
+The code for deletion starts by checking if the current node is null. If so, the function returns null, indicating the value to be deleted was not found in the tree. The recursion then unwinds, returning the unmodified nodes.
+
+
+Let’s walk through the logic for deleting a node from a binary search tree.
+
+The code first checks if the value to be deleted is greater than the current root’s value. If so, it recursively drills down the right subtree, updating the right child reference as it goes. This approach allows the function to propagate changes up the tree, so that any modifications to child nodes are correctly linked back to their parent, without needing to explicitly track parent nodes.
+
+If the value is less than the root’s value, the function does the same process, but on the left subtree.
+
+If neither of those cases is true, it means the current root node’s value matches the value we want to delete. At this point, there are several scenarios to handle:
+
+If the node has no children, the function returns null. This effectively removes the node from the tree, as the parent’s reference to this node will be set to null.
+
+If the node has only a left child, the function returns the left child. This links the parent directly to the left subtree, bypassing the node being deleted.
+
+If the node has only a right child, the function returns the right child, linking the parent directly to the right subtree.
+
+If the node has both left and right children, the function needs to find a replacement value to maintain the binary search tree property. There are two common strategies: either find the minimum value in the right subtree, or the maximum value in the left subtree. In this implementation, it chooses the maximum value from the left subtree. It does this by traversing to the rightmost node in the left subtree. Once found, it copies that node’s value into the current root, and then detaches the replacement node from its original position, ensuring all child links are preserved.
+
+After handling the appropriate case, the function returns the updated root node, ensuring the tree remains correctly linked after the deletion.
+
+Now, let’s move on to searching in a binary search tree.
+
+Searching
+
+Searching in a binary search tree is straightforward and is already covered as a sub-case in both the insert and delete operations. When searching, if the target value is found, the function simply returns the node. If not, it continues down the tree according to the binary search tree rules.
+
+The search function uses an iterative approach for simplicity. It starts at the root and drills down a single path, moving left if the target value is greater than the current node, or right if it is smaller. If it finds a node with the target value, it returns that node. If it reaches a null reference, it means the value is not present in the tree, and the function returns null.
+
+Balancing
+
+Next, let’s discuss balancing in binary search trees.
+
+A binary search tree can become imbalanced if elements are inserted in a particular order, resulting in a structure that resembles a linked list rather than a balanced tree. To address this, balancing techniques are used. One such technique is subtree rotation, which is commonly used in AVL trees. AVL trees are a type of self-balancing binary search tree that ensures the height difference between the left and right subtrees of any node is no more than one.
+
+There are two primary types of rotations:
+
+A left rotation is performed when a branch is heavy on the right side. In other words, when the right subtree is taller than the left, a left rotation helps restore balance.
+
+A right rotation is performed when a branch is heavy on the left side. This means the left subtree is taller, and a right rotation brings the tree back into balance.
+
+Additionally, there are two compound rotations that combine the basic ones:
+
+A left-right rotation is a combination where a left rotation is performed on the left child, followed by a right rotation on the root. This is used when the tree is left-heavy, but the left child is right-heavy.
+
+A right-left rotation is the opposite: a right rotation on the right child, followed by a left rotation on the root. This is used when the tree is right-heavy, but the right child is left-heavy.
+
+These rotations help maintain the balanced structure of the tree, ensuring efficient search, insert, and delete operations.
+
+
+Right-Right Rotation
+
+Let’s start with the right-right rotation. At the level of node ten, the left subtree has a height of three, while the right subtree has a height of one. This gives a balance factor of two, which is calculated as three minus one. Since the imbalance is found at node ten, we perform a right rotation around this node.
+
+After the rotation, node three becomes the new root. The old right child of node three becomes the new left child of node ten. The new right child of node three is now the old root, which is node ten.
+
+In summary, this rotation shifts the left-heavy subtree to the right, balancing the tree by making the left child the new root and adjusting the subtrees accordingly.
+
+Left-Left Rotation
+
+Next, let’s look at the left-left rotation. Here, at node ten, the left subtree has a height of one, and the right subtree has a height of three. The balance factor is negative two, calculated as one minus three. The imbalance is again at node ten, so we rotate around this node.
+
+After the rotation, node fifteen becomes the new root. The old left child of node fifteen becomes the new right child of node ten. The new left child of node fifteen is now the old root, which is node ten.
+
+This rotation shifts the right-heavy subtree to the left, balancing the tree by making the right child the new root and adjusting the subtrees as needed.
+
+Left-Right Rotation
+
+Now, let’s discuss the left-right rotation. In this case, we first perform a left rotation around node three, followed by a right rotation around the main node ten, where the actual imbalance occurs. The balance factor is again two, calculated as three minus one.
+
+First, a left rotation is performed around node three. Node four becomes the new root of this subtree. The old left child of node four becomes the new right child of node three, and the new left child of node four is the old root, which is node three.
+
+Second, a right rotation is performed around node ten. Node four becomes the new root. The old right child of node four becomes the new left child of node ten, and the new right child of node four is the old root, which is node ten.
+
+This double rotation is used when a left-heavy subtree has a right-heavy child, requiring two steps to restore balance.
+
+Right-Left Rotation
+
+Finally, let’s cover the right-left rotation. Here, we first perform a right rotation around node fifteen, then a left rotation around the main node ten, where the actual imbalance is found. The balance factor is negative two, calculated as one minus three.
+
+First, a right rotation is performed around node thirteen. Node thirteen becomes the new root of this subtree. The old right child of node thirteen becomes the new left child of node fifteen, and the new right child of node thirteen is the old root, which is node fifteen.
+
+Second, a left rotation is performed around node ten. Node thirteen becomes the new root. The old left child of node thirteen becomes the new right child of node ten, and the new left child of node thirteen is the old root, which is node ten.
+
+This double rotation is used when a right-heavy subtree has a left-heavy child, requiring two steps to restore balance.
+
+General Interface for Balancing a Tree
+
+Now, let’s look at the general interface used to balance a tree. This includes the rotation methods, the height calculation, the balance calculation, and the rebalance action itself.
+
+The height function determines the height of a given node. If the node does not exist, it returns zero. Otherwise, it returns the stored height for that node.
+
+The right rotation function is used to offset left-heavy tree branches. In a right rotation, the left subtree moves to the right. The left child of the current root becomes the new root, and the old root becomes the right child of this new root. The subtrees are adjusted accordingly, and the heights of the affected nodes are recalculated. The function then returns the new root after the rotation.
+
+The left rotation function is used to offset right-heavy tree branches. In a left rotation, the right subtree moves to the left. The right child of the current root becomes the new root, and the old root becomes the left child of this new root. Again, the subtrees are adjusted, heights are recalculated, and the new root is returned.
+
+Balance Calculation
+
+The balance function calculates the balance factor as a signed integer from left to right. When a tree is imbalanced, it tends to form a structure similar to a linked list. For example, if there is a chain of left links with no right links, the tree is left-heavy and the balance value is positive. If there is a chain of right links with no left links, the tree is right-heavy and the balance value is negative. The function returns the difference between the heights of the left and right subtrees.
+
+Rebalance Action
+
+The rebalance function is responsible for restoring balance to the tree after an insertion or deletion. If the root is null, it simply returns. Otherwise, it updates the height of the current root, since the height may have changed during a tree operation.
+
+After updating the height, the function checks the current balance between the left and right subtrees. If the absolute value of the balance is greater than one, the tree needs to be rebalanced at the current root.
+
+A positive balance means the left side is heavier, while a negative balance means the right side is heavier. The function then determines which of the four rotations to apply based on the direction of the imbalance and the value being inserted.
+
+For example, if the balance is positive and the value to insert is less than the value of the left child, this indicates a left-left imbalance. In this case, a right rotation is performed to restore balance.
+
+
+Let’s walk through the logic for balancing an AVL tree after insertion or deletion.
+
+First, the code checks if the tree is right heavy and the inserted value is greater than the value in the right child of the root. In this case, the imbalance is in the right subtree, and the new node was added to the right of the right child. This is called a right-right heavy situation. To fix it, a left rotation is performed on the root.
+
+Next, if the tree is left heavy and the inserted value is greater than the value in the left child of the root, the imbalance is in the left subtree, but the new node was added to the right of the left child. This is a left-right heavy case. The solution is to first perform a left rotation on the left child, which transforms the situation into a left-left case, and then perform a right rotation on the root.
+
+Similarly, if the tree is right heavy and the inserted value is less than the value in the right child of the root, the imbalance is in the right subtree, but the new node was added to the left of the right child. This is a right-left heavy case. The fix is to first perform a right rotation on the right child, turning it into a right-right case, and then perform a left rotation on the root.
+
+If none of these cases apply, the root is returned as is.
+
+Now, let’s discuss how insertion and deletion are modified to include rebalancing.
+
+For insertion, the function first follows the standard binary search tree logic to find the correct spot for the new value. If the root is null, a new node is created and returned. If the value is greater than the root’s value, the function recurses into the right subtree. If it’s less, it recurses into the left subtree. After inserting, the tree is rebalanced by calling the rebalance function, which may return the same root or a new one if rotations were performed.
+
+For deletion, the function also follows the standard binary search tree logic. If the root is null, it returns null. If the value to delete is greater than the root’s value, it recurses into the right subtree. If it’s less, it recurses into the left subtree. If the value matches the root, there are several cases to handle: if the node is a leaf, it is set to null; if it has only a left child, it is replaced by its left child; if it has only a right child, it is replaced by its right child; if it has two children, the function finds the rightmost node in the left subtree, replaces the root’s value with this node’s value, and then deletes that node. After deletion, the tree is rebalanced by calling the rebalance function, ensuring that all ancestors up to the root are checked and their heights updated.
+
+Binary Heaps
+
+A binary heap is a special kind of binary tree that can be either a max heap or a min heap. In a max heap, the largest element is always at the top, and all elements below it are strictly smaller. In a min heap, the smallest element is at the top, and all elements below it are strictly larger. Binary heaps are usually represented as dynamic arrays, which makes insert and delete operations efficient, since the last element can be accessed quickly.
+
+For example, a min heap might look like this: the root node is ten, with children fifteen and twenty. Fifteen has children thirty-three and seventeen.
+
+A max heap might look like this: the root node is ten, with children five and two. Five has children three and one.
+
+The heap type is defined as an enumeration, either min or max. The heap itself is represented as a dynamic array, which allows for fast insertions and lookups at specific indices, such as for parent or child elements.
+
+Indexing in a Heap
+
+There are three main types of indexing in a heap: finding the parent, the left child, or the right child of a given node.
+
+The left child of a node at index i is always at index two times i plus one.
+
+The right child is at index two times i plus two.
+
+To find the parent of a node, you reverse these equations. If the child index is even, subtract two; if it’s odd, subtract one. Then divide by two to get the parent’s index.
+
+The root of the heap is always at index zero, and this is where you’ll find the maximum or minimum element, depending on the heap type.
+
+For example, the peek function returns the element at the top of the heap, which is always at index zero. If the heap is empty, it returns null.
+
+The parent function calculates the parent index by checking if the child index is even or odd, subtracting accordingly, and then dividing by two.
+
+The left and right functions calculate the indices of the left and right children by multiplying the parent index by two and adding one or two, respectively.
+
+Swapping Elements
+
+Swapping is a common operation in heaps. The swap function exchanges the elements at two given indices in the heap array. This is useful during heap operations like insert and delete, where elements need to be moved to maintain the heap property.
+
+Inserting into a Binary Heap
+
+To insert a new element into a binary heap, two main steps are followed. First, the new element is added to the end of the heap. Then, the element is bubbled up to its correct position. Bubbling up involves comparing the new element with its parent and swapping them if necessary. For a min heap, if the new element is smaller than its parent, they are swapped. For a max heap, if the new element is larger than its parent, they are swapped. This process continues until the heap property is restored.
+
+
+Let’s begin by discussing the insert method for a heap.
+
+This method is responsible for adding a new value to the heap. It starts by placing the new item at the end of the heap, which is typically represented as an array or list. The method then determines the index of this newly inserted element.
+
+Next, the method enters a loop. The purpose of this loop is to move, or bubble up, the new element until it finds its correct position in the heap. The loop continues as long as the current element is not at the root, which is index zero.
+
+Inside the loop, the method calculates the parent index of the current element and retrieves the parent’s value. It then compares the new value with its parent. If the values are equal, the loop breaks, as duplicates are not swapped for simplicity.
+
+If the heap is a min heap and the new value is smaller than its parent, the method swaps the new element with its parent. This is because, in a min heap, smaller elements should be closer to the top. The process is similar for a max heap, but in this case, the swap occurs if the new value is larger than its parent, since larger elements should be near the top in a max heap.
+
+After each swap, the current index is updated to the parent’s index, and the loop continues. The process stops when the element is in the correct position, either because it has reached the root or because no further swaps are needed. Finally, the method returns the inserted value.
+
+Now, let’s move on to deleting an element from the heap.
+
+Deleting an element from a heap is a bit more involved. The general approach is to take the last element in the heap and move it to the root position. The original root element can be remembered and returned if needed.
+
+After moving the last element to the root, the method attempts to move this element down the heap until it finds the correct spot. At each step, the method compares the current element with its left and right children.
+
+For a min heap, the method looks for the smallest value among the root, left child, and right child. If the root is already the smallest, it is in the correct position. Otherwise, the root is swapped with the smaller of its two children, and the process continues from the new position.
+
+For a max heap, the process is similar, but the method looks for the largest value among the root and its children. If the root is the largest, it stays in place. Otherwise, it is swapped with the larger child, and the process repeats.
+
+This continues until the element is in the correct position, meaning it is either smaller than both children in a min heap, or larger than both children in a max heap. The method then returns the original root element that was removed.
+
+Now, let’s discuss tries, also known as prefix trees.
+
+A trie is a specialized tree used to store words and efficiently check if a word is present. The name “trie” comes from the word “retrieval.” Unlike regular trees, where each node might store an entire word, tries are more efficient because they represent words using their prefixes.
+
+Tries are a type of n-ary tree, where n is the number of possible characters in the alphabet. For English, this means each node can have up to twenty-six children, one for each letter. However, not all children will exist at the same time.
+
+Each node in a trie, except for the root, represents a character. To indicate whether a path through the trie forms a complete word, nodes typically have a boolean flag. This flag is set to true if the path from the root to that node spells out a word that has been explicitly added to the trie.
+
+For example, if the word “bigger” is added to the trie, but the word “big” is not, the path for “big” will exist as part of “bigger,” but the flag for “big” will not be set to true unless “big” is explicitly inserted.
+
+This structure allows tries to efficiently store and retrieve words, making them useful for applications like autocomplete and spell checking. The time complexity for searching a word in a trie is proportional to the length of the word, which is often much faster than searching in other types of trees.
+
+
+A trie that represents a few words might look like this. Notice how the root contains many nodes, but the children might only have a handful. It is not required that each level is fully filled with all twenty-six nodes for the English alphabet.
+
+In this example, the trie structure is visualized as a tree, where each branch represents a character in a word. The root node branches out to nodes for letters like 'a', 'b', 'c', and 'q'. Each subsequent level represents the next character in a word, and not every possible letter is present at each level.
+
+This trie could contain words such as "an", "ant", "anton", "big", "bigger", "bigfoot", "cat", "car", "quote", and "qtie". Remember, for a word to be considered part of the trie, the node representing the last character of the word must have its terminating flag set to true. For example, for the word "big", the node for the letter 'g' would have this flag set.
+
+The basic structure of a trie node is defined in a class called TriePrefixNode. Each node contains an array of children, and a boolean flag called terminating, which indicates whether this node marks the end of a valid word.
+
+Now, let's talk about inserting words into a trie.
+
+Inserting
+
+To insert a word into a trie, you follow the existing path for each character. If a path does not exist, you create new nodes along the way using the characters from the input word or string. At the end, you mark the final node as terminating, indicating that the unique path you followed or created now represents a complete word in the trie.
+
+The insertion function starts by validating the input. It checks that the string and value are not null. For simplicity, all strings are normalized to lower case, which is not strictly necessary for a trie, but it makes the implementation easier to understand.
+
+If the root node is not provided, a new one is created. Then, for each character in the input string, the function calculates the index corresponding to that character. If the current node has no children, it initializes an array of twenty-six children, one for each letter of the English alphabet.
+
+For each character, the function checks if a child node exists at the calculated index. If not, it creates a new node and assigns it to that position. The process continues until all characters in the string have been processed.
+
+After processing the entire string, the function marks the last node as terminating, meaning it represents the end of a word. Additionally, it sets a value for this node, demonstrating how a value can be mapped to a word in a trie, similar to a hash map. Finally, the function returns the root node.
+
+In summary, the insert function creates or follows a path for each character in the word, creates new nodes as needed, and marks the end node as terminating to indicate a complete word.
+
+Searching
+
+Searching in a trie is very similar to inserting, but instead of creating missing nodes, you only follow existing paths. If a path does not exist, or if the last node in the path is not marked as terminating, then the word being searched for is not part of the trie. The path might exist as part of a longer word, but not as a standalone word.
+
+The search function begins by validating the input, ensuring that the string and root node are not null. It normalizes the string to lower case for consistency.
+
+For each character in the input string, the function calculates the corresponding index. If the current node is null or has no children, there is no path in the trie that matches the word, so the function returns false.
+
+The function then moves to the child node at the calculated index and continues this process for each character. If it reaches the end of the string, it checks whether the final node is marked as terminating. If so, the word exists in the trie; otherwise, it does not.
+
+In summary, the search function follows the path for each character in the word and returns true only if the final node is marked as terminating, indicating a complete word in the trie.
+
+Deleting
+
+The section on deleting is not yet finalized and will be completed later.
+
+B-Trees
+
+Now, let's move on to B-Trees.
+
+Worker and Iterator Approach
+
+Solving tree problems often involves a common technique known as the worker and iterator approach. This approach is important to understand, as it appears frequently in tree-related problems.
+
+Typically, you develop two recursive solutions. One is the main worker function, which performs the actual work on a node-by-node basis. The other is the iterator function, which traverses the nodes and collects information for the worker function to process.
+
+The worker function is recursive and is responsible for producing results and using those results in the iterator function. The iterator function, on the other hand, goes through the nodes, collects information, and calls the worker function as needed. The worker function might be called before or after recursive calls, or even multiple times within the iterator function, but it is the main solver.
+
+For example, the worker function might process a node, and the iterator function would call the worker on the current node, then recursively call itself on the left and right children.
+
+This worker and iterator approach is observed in many solutions, such as the Ancestor problem, which uses a contains function to determine how to proceed further down the tree or stop. Another example is the Subtrees problem, which uses a compare function to validate subtree equality, while the iterator function traverses both left and right directions.
+
+Graphs
+
+Now, let's discuss graphs.
+
+Graphs are collections of nodes with edges between some of them. It is important to note that all trees are graphs, but not all graphs are trees. A graph that contains cycles cannot be called a tree. Trees are only valid when there are no cycles between nodes.
+
+A graph can contain multiple sub-graphs, where there are no connections between different sub-graphs. If there are connections between all nodes in a graph, we call this a connected graph.
+
+
+Let’s begin with an example of a graph that contains two separate sub-graphs. There are no connections between these two sub-graphs. Imagine the following structure:
+
+The first sub-graph contains nodes labeled k, o, m, j, and w. The second sub-graph contains nodes a, c, f, y, b, and d. The connections between these nodes form two distinct clusters, with no links bridging from one group to the other.
+
+In practice, the most common type of graph you will encounter is a directed graph. In a directed graph, the edges or connections have a direction. This means that a connection from node a to node b does not automatically imply that there is a connection from node b back to node a.
+
+Representations
+
+Depending on the task at hand, some graph representations may be better suited than others. What’s important is that the representation contains as much information as possible, such as incoming edges and parent nodes.
+
+Class and Nodes
+
+There are several ways to represent a graph. The most common approach is to use a graph node class and a graph class. This setup is sufficient to implement nearly all graph features you might need.
+
+The reason for having a graph class on top of the node class is that, in a graph, it is possible not to have a path from a single root node to all other nodes. In fact, this is usually the case. A graph might have many root nodes—these are nodes with no incoming edges—or it might have no roots at all. If all nodes have incoming edges, the graph contains cycles, and there is no obvious root node.
+
+In the provided structure, the Node class includes an incoming property, which indicates how many incoming edges link to the current node. The children property lists all outbound connections from the current node. The Graph class simply holds an array of nodes.
+
+Adjacency Matrices
+
+Another popular way to represent a graph is by using a hash map. In this approach, the keys are the values of the nodes, and each value is a list of the nodes it connects to. Instead of a standard hash map, you could also use a multi-map, which makes it easier to add new node connections.
+
+In the example, each key represents a unique node value, and the associated list represents the nodes it connects to. This representation is particularly useful for directed graphs.
+
+Two-Dimensional Flags Array
+
+A variant of the adjacency matrix is a simple two-dimensional array. In this array, each position where a connection exists is marked with a one, and positions with no connection are marked with a zero. In this representation, either the rows or the columns represent the source and destination nodes, but they are not interchangeable.
+
+In the example, columns represent the destination, or “to,” and rows represent the source, or “from.” You can read the matrix as follows: the column-to-row relationship tells you the outgoing edges for a node, while the row-to-column relationship tells you the incoming edges.
+
+For instance, column node two in the matrix has one incoming edge from node three. Row node two has two outgoing edges, to nodes one and three. This tells us that nodes two and three are bidirectionally connected, while nodes two and one are connected only from node two to node one, making it a singly directed edge.
+
+Creation
+
+Let’s look at a simple example that creates a graph from a list of edges. Each edge represents a “from” and “to” relationship between nodes.
+
+There are two main functions in this example. The first function, called edges, creates a list of edges from a simple list of values. Each pair of values represents a unique graph node and the links it forms to other nodes. For example, the list a, b, a, c, a, d, c, b, c, d means that node a has outgoing connections to nodes b, c, and d, while node c has outgoing connections to nodes b and d.
+
+The second function, called create, builds the graph node representation from the list of edges. In this case, it creates a list of nodes representing the graph. The “from” property of each edge must be present, while the “to” property might be null. This signals that a node has no outgoing connection.
+
+The Node class in this example includes a value, an incoming count initialized to zero, and a list of children. The Edge class contains the from and to properties.
+
+The edges function takes a list of elements and returns a list of Edge objects. It processes the input list in pairs, each representing a connection from one node to another. If the list has an odd number of elements, it returns an empty list.
+
+The create function constructs the graph from the list of edges. It uses a cache to store each unique node by its value. For each edge, it ensures that both the “from” and “to” nodes exist in the cache, creating them if necessary. It then links the “from” node to the “to” node by adding the child to the children list and increments the incoming count for the child node. Finally, it returns the collection of all nodes in the graph.
+
+Traversing
+
+Graphs have two major traversal approaches, similar to trees. You can use either breadth-first or depth-first traversal.
+
+Breadth-first traversal visits each level of the graph before moving to the next. It is based on storing nodes in a queue.
+
+Depth-first traversal visits each branch of the graph as deeply as possible before considering neighboring branches. It is based on storing nodes in a stack.
+
+In the examples, the input list of graph nodes represents the starting points for traversal. This list could be the entire set of nodes in the graph or a subset, such as nodes without incoming edges.
+
+Breadth-First Search, or BFS
+
+Similar to trees, but even more essential for graphs, breadth-first search is a cornerstone traversal approach. This method inspects each immediate neighbor of a node before moving down to their children, exploring one level of depth at a time.
+
+
+The importance of when a node is marked as visited
+
+It is quite important to pay attention to when a node is marked as visited during graph traversals, such as Breadth-First Search, or BFS, and Depth-First Search, or DFS. This detail is crucial because it directly affects how the traversal works. In recursive approaches, there is more flexibility in when to mark a node as visited. However, in the iterative BFS approach, the node must be marked as visited at the moment its child is added to the queue. This timing ensures that nodes are not added to the queue multiple times, especially in graphs with cycles.
+
+This detail about when to mark a node as visited becomes even more significant when discussing Dijkstra’s algorithm. In Dijkstra’s algorithm, the visited mark is applied at a different point in the iterative process. It is essential to note this distinction, because marking a node as visited too early or too late can drastically change the behavior of the algorithm, the nature of the problem, and the correctness of the solution.
+
+Breadth-First Search, or BFS
+
+Let’s look at how BFS is typically implemented. The core idea is to use a queue to manage the order in which nodes are visited. When a node is removed from the queue, its value is added to the path. For each child of the current node, the algorithm checks if the child has already been visited. If not, it marks the child as visited and adds it to the queue. This approach ensures that each node is visited only once, even if there are cycles or multiple paths to the same node.
+
+The main function for BFS initializes the queue with the starting nodes, sets up a structure to track visited nodes, and maintains a list to record the order in which nodes are visited. It repeatedly processes nodes from the queue until all reachable nodes have been visited. The result is a list of node values in the order they were traversed.
+
+Depth-First Search, or DFS
+
+DFS works similarly to how it does in trees, but with the added complexity that each node can have any number of children, not just two. In DFS, each node is fully explored down to its last descendant before moving on to the next node. The algorithm checks if a node is null as a guard, then adds the node’s value to the path. For each child, it checks if the child has already been visited. If not, it marks the child as visited and recursively explores it in depth. This approach prevents infinite recursion in graphs with cycles.
+
+The main DFS function iterates over all starting nodes, diving depth-first for each one, and returns the list of node values in the order they were visited.
+
+Dijkstra’s Algorithm
+
+Dijkstra’s algorithm is used to find the shortest path between two points in a weighted, directed graph where all edge weights are positive. A key side effect of Dijkstra’s algorithm is that it finds the shortest paths from the starting node to every other node that can be reached from it, not just the target node.
+
+Dijkstra’s algorithm maintains four main structures. First, a priority queue or min-heap, which is the core of the algorithm. Nodes, along with their absolute cost or path weight, are pushed into this min-heap. The node with the lowest cost is always at the top, so pulling from the heap always gives the best cost node.
+
+Second, a distances map, which associates each node with the minimum path cost found so far. By the end of the algorithm, this map contains the shortest paths from the starting node to all reachable nodes.
+
+Third, a previous map, which mirrors the distances map. For each node, it stores the previous node from which the minimum distance was achieved. This allows backtracking to reconstruct the shortest path from any node to the starting node.
+
+Fourth, a visited set, which tracks nodes that have been pulled from the priority queue. This prevents revisiting nodes. The first time a node is visited is when it is extracted from the min-heap, ensuring that the best cost for that node has been found.
+
+A crucial point is that the min-heap can contain the same node multiple times, each with different weights. This happens because a node can be reached from many places. Each time a better cost is found for a node, it is pushed into the heap. Because the heap is a min-heap, the best cost for a node will be near the top. When a node is pulled from the heap for the first time, it is guaranteed to be the best cost for that node. At this point, the node is marked as visited.
+
+Unlike BFS and DFS, in Dijkstra’s algorithm, nodes are not marked as visited when first encountered as children. Instead, they are marked as visited only when pulled from the queue. This ensures that by the time a node is processed, all possible paths to it have been considered, and the best cost has been found.
+
+After pulling a node from the heap, the algorithm checks if it has already been visited. If it has, this means the best cost for that node has already been processed, so the algorithm simply continues to the next iteration. This approach efficiently handles duplicate nodes with worse costs by removing them from the queue without further action.
+
+There are two main conditions for ending the main loop in Dijkstra’s algorithm. First, if all nodes have been visited, meaning the visited set contains as many nodes as the entire graph. This may not always happen if the graph has disconnected subgraphs. Second, if the min-heap is empty, which occurs when all possible nodes reachable from the starting node have been processed. At this point, it is not guaranteed that the target node has been reached, but all possible paths from the starting node have been explored.
+
+
+The final stage of the algorithm involves reconstructing the path from the end node back to the start node. Using the “previous” structure, we can check if there are mappings that follow the chain of predecessors. If we reach the start node, it means there is a valid link from the end node to the start node. Otherwise, no path exists between the two targets.
+
+Now, let’s discuss the core utility class and the main pathfinding logic.
+
+First, there is a class called WeightNode. This class extends a base graph node class and is used to keep track of the absolute weight, or cost, of each node while running Dijkstra’s algorithm. WeightNode is designed to work with a priority queue, allowing nodes with the smallest cost to be processed first. It includes a constructor that clones the properties of a base node and sets the weight, as well as methods for comparing nodes by weight and checking equality based on node value.
+
+The main function, computeShortestPath, takes a list of nodes, a start node, and an end node. It uses a priority queue, or min heap, to always process the node with the smallest accumulated cost first. It’s important to note that the same node can appear in the heap multiple times with different costs, since there may be multiple ways to reach it. However, the heap ensures that the node with the lowest cost is always processed first.
+
+A set called “visited” keeps track of which nodes have already been processed, identified by their value. This is crucial because the heap might contain the same node multiple times, but we only want to process it the first time we encounter it with the smallest cost.
+
+There are also two maps: “distances” and “previous.” The distances map keeps track of the minimum accumulated distance to each node, while the previous map records the predecessor node for each node along the shortest path. These two maps are always updated together, so that later we can backtrack from the end node to the start node to reconstruct the shortest path.
+
+At the beginning, the start node is initialized with a distance of zero and added to the heap as a WeightNode with zero weight. The previous map is set to null for the start node, indicating that it has no predecessor.
+
+The main loop continues until all nodes have been visited, or until the heap is empty. If the heap becomes empty before all nodes are visited, it means there are disconnected subgraphs in the main graph, and not all nodes are reachable.
+
+Inside the loop, the node with the smallest cost is removed from the heap. If it has already been visited, it is skipped. Otherwise, it is marked as visited. For each child of the current node, the algorithm calculates the current known distance to that child, or defaults to a large value if it hasn’t been reached yet. It then computes the possible new distance by adding the cost to reach the current node and the cost of the edge to the child. If this new distance is smaller than the previously recorded distance, the maps are updated, and the child is added to the heap with the new total cost.
+
+After the loop, the algorithm reconstructs the path from the end node back to the start node by following the previous map. Starting from the end node, it adds each node’s value to the path and moves backward to its predecessor, until it reaches the start node or there are no more predecessors. The resulting path is then returned.
+
+In summary, this code defines a WeightNode class for use in a priority queue, and implements Dijkstra’s algorithm to find the shortest path between two nodes in a weighted graph. It keeps track of distances and predecessors to allow for efficient path reconstruction.
+
+Now, let’s move on to the A-star algorithm.
+
+A-star
+
+A-star, or A-star, is very similar to Dijkstra’s algorithm. Both are used to find the shortest path between two nodes in a weighted graph. The key difference lies in how the cost is computed.
+
+In Dijkstra’s algorithm, the cost is simply the accumulated weight of the shortest path to a given node so far. In contrast, A-star introduces an additional function called “h,” which is a heuristic. This heuristic estimates how much cheaper the cost might be if we go through the current node to reach the end goal.
+
+The heuristic function is only computed when adding a node to the priority queue. It biases the order of the queue so that nodes with a lower estimated total cost, in relation to the target goal, are placed at the front. This means that, unlike Dijkstra’s algorithm, the distances array in A-star does not contain the shortest paths from the start to every other node. Instead, it only contains the shortest distance from the start to the end node, because the nodes selected from the heap are those with costs influenced by the heuristic.
+
+The heuristic function is strictly a function of the current node and the end node. In other words, h equals heuristic of node and end.
+
+In summary, A-star enhances Dijkstra’s algorithm by using a heuristic to guide the search toward the target, making it more efficient in many cases, especially when the heuristic is well-chosen.
+
+
+The value of the heuristic function can be positive, negative, or zero, depending on how it is defined. If the heuristic is negative, it suggests that the cost to reach the goal node is actually very low, since this value would be subtracted from the current weight cost. On the other hand, a very large positive heuristic value would indicate that the path to the goal node is quite expensive if we choose that route.
+
+A heuristic is defined differently based on the use case. For example, if our graph is a grid, the heuristic is usually calculated using the coordinates of the current node in relation to the end goal. There are several well-known heuristics for this purpose.
+
+First, the Manhattan distance is used on a grid where movement is allowed in four directions: up, down, right, and left. The distance is calculated as the sum of the absolute differences between the x and y coordinates of the current node and the goal node. This is the simplest heuristic, and it only allows movement in right angles.
+
+Next, the Euclidean distance is used on a grid where movement is allowed in eight directions, including the four cardinal directions plus the diagonals. This heuristic uses the Pythagorean theorem to calculate the straight-line distance between the current node and the goal node. Moving diagonally is treated as the length of the hypotenuse of a right triangle formed by the coordinate differences.
+
+Another option is the Chebyshev distance, which is also used on a grid with eight possible movement directions. Here, the distance is the maximum of the differences between the x and y coordinates. In this case, moving diagonally is considered just as expensive as moving in the costliest direction.
+
+In all these examples, you simply substitute the coordinates of the current node for x one and y one, and the coordinates of the target goal node for x two and y two. The resulting value is your heuristic function. Notice that a lower value—meaning a shorter distance and less cost—is better. A higher value means there is more distance between the child and the goal node, making it less desirable to take that path.
+
+The implementation of the algorithm closely follows the base Dijkstra algorithm, with the addition of a special function that calculates the heuristic cost for each node. Pay close attention to how the heuristic is used. It is calculated at the moment the node is added to the queue. By that time, we know that the distance from the parent is smaller than any current distance for that node. We then further adjust that node's cost based on the heuristic. If the heuristic is very large, the cost will be high, and the node will be pushed down the min heap. If the heuristic is low, or even negative, the cost will be low, and the node will be pushed to the front of the min heap.
+
+If you use A-star with a heuristic that always evaluates to zero, it essentially becomes the Dijkstra algorithm. In this case, no node is biased toward the end goal. In other words, there are no special nodes in the graph that can make the cost extra cheap. We only consider the cost of the weights, and there is no additional feature or property that could further reduce our costs.
+
+The next code block describes the main loop of the A-star algorithm. It iterates through the nodes, updating the minimum cost to reach each child node. When a better path is found, it updates the previous node and the distance for that child. The key point is that the heuristic is calculated when adding the child node to the queue, and the total cost used for ordering in the heap is the sum of the path cost so far and the heuristic estimate to the goal.
+
+Now, let's move on to sorting.
+
+Sorting
+
+Topological sort
+
+Topological sorting is a way to order nodes in a graph so that nodes with the fewest incoming edges come first. This type of sorting works only for directed graphs without cycles. There are many ways to detect cycles in a graph, but the implementation described here assumes the graph is valid.
+
+Topological sorting is useful for scenarios like build systems, where each module is a node and each dependency is an edge. We want to determine which modules need to be built first, second, third, and so on, and print the modules in the correct build order. Topological sort helps us achieve this.
+
+The process works as follows. First, select the modules with no incoming edges, meaning they have no dependencies. Then, perform a breadth-first traversal of their immediate children, decreasing each child's incoming edge count. If a child's incoming edge count becomes zero, add it to the result path and to the processing queue. Repeat this process until the queue is empty.
+
+The next code block provides an implementation of topological sort. It initializes a queue with all nodes that have no incoming edges. As it processes each node, it adds it to the result list and decrements the incoming edge count for each of its children. When a child's incoming edge count reaches zero, it is added to the queue. The final result is a list of nodes in topological order, starting with those that have no dependencies and progressing to those with the most.
+
+In summary, topological sort is a powerful tool for ordering tasks or modules based on their dependencies, ensuring that each task is performed only after all its prerequisites have been completed.
+
+

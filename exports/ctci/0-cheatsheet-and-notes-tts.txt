@@ -1,0 +1,86 @@
+General notes
+
+1. If the task seems completely illogical, do not read the problem and take it at face value, they are probably misusing the terms to confuse you.
+2. When solving an issue, start off by writing down the issue on paper, then ask questions and details, and write the answers too.
+3. When the task or problem is related to the topics below, write down everything you know about the topic, such as linked lists, stacks, queues, trees, graphs, arrays, strings, recursion, sorting, and so on.
+4. Write multiple implementations starting off with a very rough draft, using simple pseudo code. Go through it, test it, check if it makes sense, then refine it into actual code over multiple drafts.
+5. Do not write any boilerplate code. Just roughly draft it over, or even write it down in plain text, for example, "create class with the following fields," instead of actually writing down the class.
+6. Come up with the base case, or a very simple small test case which you can use to go through the algorithm to do rough validation. Then come up with a more convoluted, bigger test case to cover the edge cases.
+
+Big notation
+
+1. Big O is not about absolute values of time or space. It is about how the algorithm is scaling with respect to some input.
+
+The first code block demonstrates three different for-loops. The first two loops both scale linearly with N, so their complexity is big O of N, regardless of the multiplier. The third loop is nested, so it scales with N squared, which is quadratic complexity.
+
+2. Establish what the N is. Is it the count of elements in an array, the number of function calls, the depth of a tree? How is it related to the work being done in this algorithm? The unit of N is very important.
+
+The second code block shows two examples. The first is a for-loop where N is the size of the input, so the complexity is big O of N. The second is a recursive function where, for each N, two calls are made to the function, so the complexity is big O of two to the N, which is exponential. This often happens in recursive algorithms that solve a problem of size N by recursively solving two smaller problems of size N minus one.
+
+3. Drop non-dominant terms, constants, or other inputs if the complexity ends up being, know your inputs, and if there are multiple, do they have any relation. For example:
+- O of N squared plus N becomes O of N squared, since N is not dominant.
+- O of N cubed plus log base two of N becomes O of N cubed, since the log is non-dominant.
+- O of N squared plus ten times N becomes O of N squared, since the linear term is non-dominant.
+- O of two to the N plus one thousand times N becomes O of two to the N, since the linear term is non-dominant.
+- O of two to the N plus B, where B is much smaller than N, becomes O of two to the N.
+
+4. Amortized complexity occurs when there is a very small chance the algorithm would perform outside the tight boundaries. For example, inserting an element into a static array: at some point, we would fill it up and have to resize it, which is big O of N time, but for the most part, inserting in a static array is big O of one. The amortized complexity is big O of one.
+
+5. Log of base two is what we usually use in most algorithms. Remember that log base two of N equals K if and only if two to the K equals N. The result of the log is the power to which we have to raise the number two to get N as a result. Log runtimes come up most in binary search and in quick sort.
+
+6. Know your scales, in ascending order in relation to N, we have the six most used ones:
+- Constant, big O of one, such as linked list add, array add, or hash map get.
+- Logarithmic, big O of log N, such as binary search.
+- Linear, big O of N, such as array find.
+- N times log N, big O of N log N, such as quicksort.
+- Polynomial, N to the M, big O of N to the M, such as printing a two-dimensional array.
+- Exponential, two to the N, big O of two to the N, such as a function that calls itself twice for each N minus one.
+
+Best Conceivable Time, or BCR
+
+1. Some problems, which seem to be N squared, can actually be linear. Best Conceivable run-time tells us the lowest boundary of complexity a given algorithm can take, where no faster algorithm can be conceived. For example, take a look at if the problem to be solved is restricted in special ways.
+
+The next code block describes an algorithm for finding all common elements between two sorted arrays. The optimal solution is to go through both arrays at the same time, moving pointers forward as needed. This approach is O of N, rather than the naive N squared solution.
+
+2. Leverage additional data structures or algorithms, such as hash tables, quick sort, sets, or trees. This way, the time complexity will drop, but be careful with the space complexity. Try to find a balance and do not blow one for the other.
+
+The following code block describes an algorithm for finding pairs from a list of numbers that sum to thirteen. First, the array is sorted, which allows for a quick binary search over the entire array. For each entry, the code looks up the complement needed to reach the sum, and if it is present, adds the pair to the results.
+
+Arrays and Strings
+
+1. Static linear arrays are of fixed size, where inserting an element is constant time until the array is full. After it is full, insertion is not possible unless the array is resized. See amortized complexity.
+
+2. When constructing strings, keep in mind that most languages offer immutable string objects. Therefore, use an alternative which would allow you to append, cut, and prepend, such as StringBuilder.
+
+The next code block shows an example where, for each new word, a copy of the previous result is made and the new word is appended to it. This makes the complexity O of N squared, where N is the number of words to append from the list. Using a StringBuilder would be more efficient.
+
+3. Permutations of a string are a very common algorithm question. You may be asked how to generate all permutations of a string or how to check if a longer string contains a permutation of another shorter string within it.
+
+The final code block mentions taking an input string, such as "abcd," and finding all permutations of it. For "abcd," there are four factorial, or twenty-four, possible permutations.
+
+
+The first code block describes a function that generates all permutations of a given string. If the input string has only one character, it returns a list containing just that string. Otherwise, it removes the last character, recursively generates all permutations of the remaining substring, and then inserts the removed character into every possible position of each permutation. The result is a list of all possible arrangements of the original string.
+
+The next section explains how to remove and insert elements in an array. To remove an element, you shift all elements to the left from the removal position, effectively overwriting the removed element and reducing the array size by one. The code example shows how to shift elements to the left by iterating from the end of the array backwards, assigning each element to the previous one, and then setting the removed position to zero.
+
+For inserting an element, you shift elements to the right starting from the end of the array, making space for the new element. This assumes the array has enough space to accommodate the new element.
+
+Moving on to linked lists, the text highlights that linked lists allow fast insertion at the head or tail, and that elements can be inserted after a given node in singly linked lists, or before and after in doubly linked lists. Creating a linked list involves adding new nodes to the tail, and deleting a node requires detaching it and fixing the links of neighboring nodes. The code example demonstrates how to construct a linked list from an array of elements by creating new nodes and linking them together.
+
+Another code block shows how to delete a node from a linked list by iterating through the list, finding the node with the desired value, and updating the previous node's next pointer to skip over the deleted node.
+
+The runner approach, also known as the fast and slow pointer technique, uses two pointers that move at different speeds through the list. This is useful for tasks like rearranging the list or detecting cycles. The code example outlines how to set up two pointers, one starting at the head and the other advanced by a certain number of nodes, and then process the list.
+
+Detecting loops in a linked list can be done using the fast and slow pointer method, also called the hare and tortoise approach. If there is a loop, the two pointers will eventually meet at the same node. The code example shows how to move the slow pointer one step at a time and the fast pointer two steps at a time, checking if they meet.
+
+Recursion is often used with linked lists to iterate forward to the tail and then backward. The recursive function example demonstrates how to print the list in both forward and reverse order by using pre- and post-recursive calls.
+
+For stacks and queues, the interface is important. In Java, methods like peek and pop throw exceptions if the stack is empty, so you should check with isEmpty before using them. The typical way to iterate over a stack or queue is to pop or remove elements until it is empty. The code examples show how to do this for both a stack and a queue.
+
+Transferring all elements from one stack to another reverses their order, which can be used to insert elements in the middle or to simulate queue behavior. However, moving elements from one queue to another preserves the original order.
+
+Recursive algorithms can often be implemented iteratively using a stack, which is useful for tasks like depth-first graph traversal.
+
+Finally, both stacks and queues are usually implemented using linked lists, but they can also be implemented with static arrays. However, using arrays may not always provide constant time operations unless amortized.
+
+

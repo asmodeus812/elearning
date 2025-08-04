@@ -1,0 +1,359 @@
+Introduction
+
+Object-Oriented Programming, often called OOP, is a programming paradigm that organizes software design around objects and data, rather than focusing solely on actions and logic. The core idea is to emphasize the concept of objects, which are instances of classes. This approach allows for encapsulation, abstraction, inheritance, and polymorphism of both data and behavior. By modeling real-world entities as objects with properties, known as attributes, and behaviors, known as methods, OOP makes code more modular, reusable, and maintainable. This modeling enables easier understanding, design, and development of complex systems.
+
+Design principles
+
+SOLID principles and the theory
+
+Let’s begin with the SOLID principles, which are foundational guidelines for writing maintainable and scalable object-oriented code.
+
+The Single Responsibility Principle states that a class should have only one reason to change. For example, you should separate data access logic from business logic, ensuring each class has a focused purpose.
+
+The Open/Closed Principle means that objects should be open for extension but closed for modification. In practice, this is achieved by using interfaces and abstract classes, allowing you to extend functionality without altering existing code.
+
+The Liskov Substitution Principle requires that subtypes must be substitutable for their base types. This means that derived classes should be usable in place of their base class without affecting the program’s behavior.
+
+The Interface Segregation Principle suggests that clients should not be forced to depend on interfaces they do not use. To achieve this, break down large interfaces into smaller, more specific ones, so clients only depend on what they actually need.
+
+Finally, the Dependency Inversion Principle is about depending on abstractions, such as interfaces or abstract classes, rather than concrete implementations. This is often implemented using dependency injection, which decouples components and promotes loose coupling.
+
+SOLID principles in the real world
+
+Let’s look at how these principles apply in real-world scenarios.
+
+For the Single Responsibility Principle, imagine an application with a class that handles both logging user activities and processing user data. To follow SRP, you would separate the logging functionality into its own class, resulting in one class for processing user data and another for logging activities.
+
+With the Open/Closed Principle, consider a class responsible for calculating various types of discounts. If new discount types are frequently added, modifying the existing class each time is not ideal. Instead, you can create an abstract class or interface for discounts, and implement each specific discount type as a subclass. This way, you can add new discount types without changing the original class.
+
+For the Liskov Substitution Principle, suppose your application expects all shapes to have an area method. If the area method cannot be accurately represented for some shapes, like circles, you need to ensure that derived classes such as Circle and Square can be substituted for their base class, Shape, without altering the correctness of the program.
+
+The Interface Segregation Principle comes into play when an interface for a reporting service includes methods for generating multiple types of reports, but not all clients need every report type. To avoid unnecessary dependencies, split the large interface into smaller, more specific ones, such as Excel report generator and PDF report generator interfaces.
+
+Finally, for the Dependency Inversion Principle, if your application has tightly coupled components, it becomes difficult to replace or extend one component without affecting others. By using dependency injection, you invert the dependencies, allowing high-level modules to depend on abstractions rather than concrete implementations. This promotes loose coupling and easier maintenance.
+
+Other principles
+
+Encapsulation is the practice of bundling data with the methods that operate on that data, or restricting access to some of an object’s components.
+
+Abstraction involves representing essential features without including background details, allowing you to focus on what’s important.
+
+Inheritance is a mechanism where a new class is derived from an existing class. This promotes code reusability and establishes relationships between different classes.
+
+Polymorphism allows methods to perform different tasks based on the object that calls them. In other words, it’s the ability of an object to take on many forms.
+
+Composition is the principle of favoring composition over inheritance to achieve code reuse and flexibility in design. This means you should prefer creating classes that are composed of other classes or modules, rather than inheriting from them.
+
+More principles
+
+Clean Code Principles include concepts such as using meaningful names, keeping functions small, adhering to single responsibility, and minimizing comments. These practices contribute to writing high-quality code.
+
+Cohesion and Coupling are also important. Cohesion refers to how closely related the elements within a module or class are. High cohesion means the elements work together to achieve a single purpose. Coupling, on the other hand, refers to the degree of interdependence between modules or classes. Loose coupling means modules are relatively independent, which promotes modularity and easier maintenance.
+
+Inversion of Control, or IoC, is a design principle where the control of object creation and flow is inverted from the application code to a framework or container. This promotes loose coupling and allows for better testability and scalability.
+
+Test-Driven Development, or TDD, is a software development process where tests are written before the actual implementation code. The cycle involves writing a failing test, writing the code to make the test pass, and then refactoring the code while ensuring all tests still pass. TDD encourages an iterative and incremental approach, leading to code that is more robust, maintainable, and thoroughly tested.
+
+Domain-Driven Design, or DDD, is an approach that focuses on understanding and modeling the domain of the problem at hand. It emphasizes close collaboration between domain experts and developers to create a shared understanding. DDD promotes the use of a common language, known as ubiquitous language, to bridge the communication gap between technical and non-technical stakeholders, resulting in better software solutions.
+
+Design patterns
+
+Now, let’s move on to design patterns.
+
+
+Let’s begin with a list of common design patterns and their core purposes.
+
+The Singleton Pattern ensures that a class has only one instance, and provides a global point of access to that instance.
+
+The Factory Method Pattern defines an interface for creating an object, but lets subclasses decide which class to instantiate.
+
+The Observer Pattern establishes a one-to-many dependency between objects, so that when one object changes state, all its dependents are notified and updated automatically.
+
+The Builder Pattern separates the construction of a complex object from its representation, allowing the same construction process to create various representations.
+
+The Strategy Pattern defines a family of algorithms, encapsulates each one, and makes them interchangeable.
+
+The Decorator Pattern allows behavior to be added to an individual object, either statically or dynamically, without affecting the behavior of other objects from the same class.
+
+The Bridge Pattern separates the abstraction from its implementation, allowing them to vary independently.
+
+The Adapter Pattern enables incompatible interfaces to work together by converting the interface of a class into another interface.
+
+The Command Pattern encapsulates a request as an object, allowing for parameterization of clients with queues, requests, and operations.
+
+The Template Method Pattern defines the skeleton of an algorithm in the superclass, but lets subclasses override specific steps of the algorithm without changing its structure.
+
+The State Pattern allows an object to alter its behavior when its internal state changes, making it appear to change its class.
+
+The Proxy Pattern provides a surrogate or placeholder for another object to control access to it.
+
+The Composite Pattern composes objects into tree structures to represent part-whole hierarchies, treating individual objects and compositions of objects uniformly.
+
+The Iterator Pattern provides a way to access the elements of an aggregate object sequentially, without exposing its underlying representation.
+
+The Mediator Pattern defines an object that encapsulates how a set of objects interact, promoting loose coupling.
+
+The Memento Pattern captures and externalizes an object's internal state so that it can be restored to this state later.
+
+The Flyweight Pattern uses sharing to support a large number of fine-grained objects efficiently.
+
+The Chain of Responsibility Pattern allows an object to send a command without knowing which object will handle it, chaining the receiving objects.
+
+The Visitor Pattern represents an operation to be performed on the elements of an object structure, letting you define new operations without changing the classes of the elements.
+
+Now, let’s explore some of these patterns in more detail.
+
+Singleton Pattern
+
+The Singleton Pattern ensures that a class has only one instance and provides a global point of access to that instance.
+
+For example, consider a configuration manager in a web application. The Singleton pattern is used here to make sure there is only one configuration manager throughout the application. The class has a private static instance variable, a private constructor, and a public static method called getInstance. This method checks if the instance is null, and if so, creates a new ConfigurationManager. Otherwise, it returns the existing instance. This approach guarantees that only one instance of the configuration manager exists at any time.
+
+Builder Pattern
+
+The Builder Pattern separates the construction of a complex object from its representation, allowing the same construction process to create various representations.
+
+For instance, imagine building a pizza with various toppings. The Builder pattern is used to construct a Pizza object step by step. There is a nested Builder class inside the Pizza class, which has methods for setting the dough, sauce, and topping. Each method returns the builder itself, allowing for method chaining. Finally, the build method creates a new Pizza using the builder’s current state. This pattern makes it easy to create different types of pizzas using the same construction process.
+
+Factory Pattern
+
+The Factory Pattern provides an interface for creating families of related or dependent objects without specifying their concrete classes.
+
+As an example, consider a factory for creating different types of cars. There is a Car interface with a drive method, and two classes, Sedan and SUV, that implement this interface. The CarFactory class has a static method called createCar, which takes a string indicating the type of car. Depending on the input, it returns either a Sedan or an SUV. If the input is invalid, it throws an exception. This pattern allows you to create car objects without knowing their specific classes in advance.
+
+Strategy Pattern
+
+The Strategy Pattern defines a family of algorithms, encapsulates each one, and makes them interchangeable. This allows the algorithm to vary independently from clients that use it.
+
+For example, consider a sorting strategy interface with different implementations. There is a SortingStrategy interface with a sort method, and two classes, BubbleSort and QuickSort, that implement this interface. The Sorter class holds a reference to a SortingStrategy and delegates the sorting operation to it. You can change the sorting strategy at runtime by setting a new strategy. This pattern makes it easy to switch between different sorting algorithms without changing the client code.
+
+Decorator Pattern
+
+The Decorator Pattern allows behavior to be added to an individual object, either statically or dynamically, without affecting the behavior of other objects from the same class.
+
+For instance, imagine a simple coffee order system. There is a Coffee interface with methods for cost and description, and a SimpleCoffee class that implements this interface. The CoffeeDecorator is an abstract class that also implements Coffee and holds a reference to another Coffee object. Concrete decorators like Milk and Sugar extend CoffeeDecorator and add their own behavior to the cost and description methods. This pattern allows you to add milk, sugar, or other condiments to a coffee order dynamically, without modifying the original coffee class.
+
+These examples illustrate how design patterns can help structure code for flexibility, maintainability, and clarity. Each pattern addresses a specific problem and provides a proven solution that can be adapted to various scenarios in software development.
+
+
+Let’s begin by summarizing the first code block.
+
+This sequence creates a coffee object, then wraps it with milk and sugar decorators. Finally, it prints out the description and cost of the resulting beverage. The key idea is to show how decorators can be stacked to add features dynamically.
+
+Bridge Pattern
+
+Description:
+
+The Bridge pattern decouples an abstraction from its implementation, allowing both to vary independently.
+
+For example, imagine a drawing application where shapes can be rendered using different drawing tools. The Bridge pattern separates the concept of a shape from the drawing mechanism.
+
+In this example, there is a Shape interface representing the abstraction. The Circle class is a concrete shape that uses a DrawingAPI to perform the actual drawing. The DrawingAPI interface defines the drawing operations, and there are two implementations: DrawingAPI1 and DrawingAPI2, each providing a different way to draw a circle. In the main usage, two Circle objects are created, each using a different drawing API. When their draw methods are called, each outputs a message indicating which API is being used.
+
+Adapter Pattern
+
+Description:
+
+The Adapter pattern allows incompatible interfaces to work together by converting the interface of one class into another that a client expects.
+
+For instance, consider adapting a Fahrenheit temperature reading to a Celsius interface. In this example, there is a CelsiusTemperature interface with a method to get the temperature in Celsius. The FahrenheitTemperature class stores a temperature in Fahrenheit. The TemperatureAdapter class implements the CelsiusTemperature interface and wraps a FahrenheitTemperature object, converting its value to Celsius when requested. In use, a FahrenheitTemperature object is created, wrapped by a TemperatureAdapter, and the Celsius value is printed.
+
+Command Pattern
+
+Description:
+
+The Command pattern encapsulates a request as an object, allowing you to parameterize clients with queues, requests, and operations.
+
+As an example, imagine a simple remote control with buttons that execute commands. Here, the Command interface defines an execute method. The LightOnCommand class implements Command and turns on a Light object when executed. The Light class represents the receiver, with a method to turn on the light. The RemoteControl class acts as the invoker, holding a command and executing it when a button is pressed. In usage, a Light object is created, wrapped in a LightOnCommand, and assigned to a RemoteControl. Pressing the button on the remote executes the command, turning on the light.
+
+Template Pattern
+
+Description:
+
+The Template pattern defines the skeleton of an algorithm in a superclass, but lets subclasses override specific steps without changing the overall structure.
+
+For example, consider a template method for making tea or coffee. The Beverage abstract class defines a prepareRecipe method that outlines the steps: boiling water, brewing, pouring into a cup, and optionally adding condiments. The brew and addCondiments methods are abstract, to be implemented by subclasses. There is also a hook method, customerWantsCondiments, which can be overridden to control whether condiments are added. The Tea and Coffee classes provide their own implementations for brewing and adding condiments. In use, instances of Tea and Coffee are created and their prepareRecipe methods are called, following the defined steps.
+
+State Pattern
+
+Description:
+
+The State pattern allows an object to alter its behavior when its internal state changes, making it appear as if the object has changed its class.
+
+For example, consider a simple traffic light system. The State interface defines a handleRequest method. The TrafficLight class maintains a reference to its current state and delegates requests to it. The RedState class implements State and prints "Stop" when handling a request. Similar classes would be created for yellow and green states. In use, a TrafficLight object is created and its request method is called, resulting in the current state's behavior being executed.
+
+Proxy Pattern
+
+Description:
+
+The Proxy pattern provides a surrogate or placeholder for another object to control access to it.
+
+For instance, imagine a proxy controlling access to a sensitive bank account. The BankAccount interface defines deposit and withdraw methods. The RealBankAccount class implements these methods and manages the balance. The BankAccountProxy class also implements BankAccount, but adds authentication before delegating to the real account. If the password is incorrect, access is denied. In use, a BankAccountProxy is created with a password, and deposit and withdraw operations are performed, with authentication enforced.
+
+Composite Pattern
+
+Description:
+
+The Composite pattern composes objects into tree structures to represent part-whole hierarchies. It allows clients to treat individual objects and compositions of objects uniformly.
+
+For example, consider a simple file system representation using the composite pattern.
+
+
+Let’s begin with the Composite Pattern.
+
+This example demonstrates a simple file system structure using the composite pattern. There are two main types of components: files and directories. Both implement a common interface called FileSystemComponent, which defines a print method.
+
+The File class represents a single file with a name. Its print method outputs the file’s name.
+
+The Directory class represents a folder that can contain both files and other directories. It maintains a list of FileSystemComponent objects, allowing for a tree-like structure. The addComponent method lets you add files or directories to a directory. When the print method is called on a directory, it prints its own name and then recursively prints all its children.
+
+In the usage example, a root directory is created, along with subdirectories for documents and music. Files are added to these subdirectories, and then everything is added to the root. Finally, calling print on the root directory outputs the entire structure in a hierarchical fashion.
+
+Now, let’s move on to the Iterator Pattern.
+
+Iterator Pattern
+
+The iterator pattern provides a way to access elements of a collection sequentially, without exposing the underlying details of how the collection is implemented.
+
+In this example, there are two interfaces: Iterator and Aggregate. The Iterator interface defines methods to check if there are more elements and to get the next element. The Aggregate interface defines a method to get an iterator.
+
+The ListAggregate class implements the Aggregate interface for a list of items. It provides an iterator that returns a ListIterator. The ListIterator class keeps track of the current position and allows iteration over the elements in the list.
+
+In the usage example, a list of numbers is wrapped in a ListAggregate. An iterator is obtained, and a loop prints each number in sequence.
+
+Next, let’s discuss the Mediator Pattern.
+
+Mediator Pattern
+
+The mediator pattern defines an object that manages communication between a set of objects, promoting loose coupling by preventing objects from referring to each other directly.
+
+In this example, a chat room is implemented using the mediator pattern. The ChatMediator interface defines a method for sending messages. The ConcreteChatMediator class keeps a list of users and handles message delivery. When a user sends a message, the mediator delivers it to all other users.
+
+The User class represents a participant in the chat. Each user has a name and a reference to the mediator. When a user sends a message, it goes through the mediator, which then distributes it to the other users.
+
+In the usage example, three users are added to the chat room. When one user sends a message, the other users receive it through the mediator.
+
+Now, let’s look at the Memento Pattern.
+
+Memento Pattern
+
+The memento pattern captures and externalizes an object’s internal state so that it can be restored later, without violating encapsulation.
+
+In this example, an Editor class represents a simple text editor with content. The editor can save its current state by creating an EditorMemento object, which stores the content. The editor can also restore its state from a memento.
+
+The EditorMemento class simply holds the content string.
+
+In the usage example, the editor’s initial state is saved. The content is then updated, and the current content is printed. After restoring from the memento, the original content is printed again, demonstrating undo functionality.
+
+Next, let’s cover the Flyweight Pattern.
+
+Flyweight Pattern
+
+The flyweight pattern is used to minimize memory usage and improve performance by sharing common state among multiple objects.
+
+In this example, a graphical user interface application displays many icons. Instead of creating a separate object for each icon, the IconFactory class manages shared icon instances. The Icon interface defines a draw method. The ImageIcon class implements this interface and represents an icon loaded from a file.
+
+The IconFactory maintains a map of icons by filename. When an icon is requested, the factory returns an existing instance if available, or creates a new one if not.
+
+In the usage example, the same icon is requested twice. The factory reuses the existing icon object, demonstrating memory efficiency.
+
+Finally, let’s discuss the Chain of Responsibility Pattern.
+
+Chain of Responsibility Pattern
+
+The chain of responsibility pattern allows a request to be passed along a chain of handlers until one of them handles it.
+
+In this example, an ATM withdrawal process is modeled. The abstract WithdrawalHandler class defines a method to handle requests and a reference to the next handler in the chain.
+
+The FiftyDollarHandler class handles requests for fifty dollar bills. If the amount is at least fifty, it dispenses the appropriate number of fifty dollar notes and passes any remaining amount to the next handler. If the amount is less than fifty, it simply passes the request along the chain.
+
+This pattern allows for flexible and extensible handling of requests, as new handlers can be added or existing ones modified without changing the client code.
+
+
+This section begins with an example of a class called TwentyDollarHandler, which extends a WithdrawalHandler. The handleRequest method in this class checks if the requested amount is at least twenty. If so, it calculates how many twenty-dollar notes to dispense, prints out the number of notes, and then passes any remaining amount to the next handler in the chain. If the amount is less than twenty, it simply passes the request to the next handler if one exists.
+
+In the usage example, a chain of responsibility is set up by creating a FiftyDollarHandler and a TwentyDollarHandler. The fifty-dollar handler is set to pass requests it cannot fully handle to the twenty-dollar handler. When a withdrawal request for eighty dollars is made, the chain dispenses the appropriate number of fifty and twenty-dollar notes.
+
+Visitor Pattern
+
+The visitor pattern represents an operation to be performed on the elements of an object structure. This pattern allows you to define a new operation without changing the classes of the elements on which it operates.
+
+For example, consider a simple implementation for a list of shapes. There is a Shape interface with an accept method, and two concrete classes, Circle and Rectangle, each implementing the accept method to allow a visitor to process them. The Visitor interface defines visit methods for both Circle and Rectangle. An AreaCalculator class implements the Visitor interface, maintaining a running total of the area. When visiting a circle, it adds the area of a circle with a fixed radius of five. When visiting a rectangle, it adds the area of a rectangle with a width of ten and a height of twenty. In usage, a list of shapes is created, the area calculator visits each shape, and the total area is printed.
+
+Exception Handling
+
+Exception Types
+
+Checked Exceptions
+
+Checked exceptions are exceptions that the compiler forces you to handle. These exceptions are subclasses of Exception, but not subclasses of RuntimeException. Examples include input-output exceptions, SQL exceptions, and class not found exceptions.
+
+Unchecked Exceptions
+
+Unchecked exceptions are exceptions that do not need to be declared in a method’s throws clause. These are subclasses of RuntimeException. Examples include null pointer exceptions, array index out of bounds exceptions, and arithmetic exceptions.
+
+Errors
+
+Errors represent exceptional situations that are typically beyond the control of the programmer. They are not meant to be caught or handled by applications. Examples include out of memory errors, stack overflow errors, and assertion errors.
+
+Checked exceptions must be either caught using a try-catch block or declared in the throws clause of the method signature. Unchecked exceptions are not required to be handled explicitly. Checked exceptions are checked at compile time, meaning the compiler ensures they are either handled or declared. Unchecked exceptions are not checked at compile time.
+
+Checked exceptions are typically used for recoverable conditions where the caller is expected to handle the exception. Unchecked exceptions are often used for programming errors or conditions that cannot be reasonably handled, such as null pointer or array index out of bounds.
+
+Exception Handling
+
+Try-Catch and Finally
+
+Java provides the try-catch block for handling exceptions. Code that may throw an exception is enclosed within a try block, and any exceptions thrown are caught and handled in the catch block. Multiple catch blocks can be used to handle different types of exceptions. The catch blocks are executed sequentially, in the order they appear in the code. It is advised to catch exceptions from more specific to more generic.
+
+The finally block is used to execute code that should always run, regardless of whether an exception occurred or not. It is often used for cleanup tasks like closing resources.
+
+In summary, the try-catch-finally structure allows you to handle specific exceptions and ensure that cleanup code always runs.
+
+Try-With-Resources
+
+Introduced in Java seven, the try-with-resources statement ensures that a resource is closed at the end of the statement, regardless of whether an exception is thrown or not. Resources that implement the AutoCloseable interface can be used within the try-with-resources statement.
+
+For example, when reading from a file using a buffered reader, the try-with-resources statement ensures the reader is closed automatically, even if an exception occurs.
+
+Best Practices
+
+Use specific exceptions. Catch specific exceptions rather than catching the generic Exception whenever possible.
+
+Handle exceptions appropriately. Handle exceptions at an appropriate level of abstraction and provide meaningful error messages.
+
+Avoid swallowing exceptions. Do not catch exceptions without taking any action or logging them.
+
+Clean up resources. Ensure that resources are properly closed, either in a finally block or using try-with-resources.
+
+Do not catch Throwable. Avoid catching Throwable, which includes both Exception and Error subclasses, unless absolutely necessary.
+
+Streams and Transforms
+
+Filtering
+
+Filtering is a common operation that allows you to select elements from a stream based on a specified condition. For example, you can filter a list of numbers to select only the even numbers.
+
+Mapping
+
+Mapping transforms each element of a stream using a specified function. For instance, you can map a list of names to their lengths, resulting in a list of integers representing the length of each name.
+
+Sorting
+
+Sorting arranges the elements of a stream in a specified order. For example, you can sort a list of names alphabetically.
+
+Reducing
+
+Reducing performs a reduction operation on the elements of a stream and produces a single result. For example, you can sum a list of numbers to get their total.
+
+Grouping
+
+Grouping collects elements of a stream into groups based on a specified classifier function. For example, you can group a list of names by their length, resulting in a map from length to lists of names.
+
+Flattening
+
+Flattening is used to flatten nested collections produced by mapping operations. For example, you can flatten a list of lists of integers into a single list containing all the integers.
+
+This concludes the section on exception handling and stream transformations in Java.
+
+

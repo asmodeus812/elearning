@@ -1,0 +1,263 @@
+Streams
+
+Streams are one of the two most notable features introduced in Java 8. The other major feature is the lambda function. In fact, the lambda functional interface enables the existence of the Streams API.
+
+In Java, streams are special types of objects that are not designed to hold any data themselves. Instead, they operate on data structures such as lists and maps. Importantly, streams do not modify the underlying data structure in any way. If a stream operation needs to produce a result—such as an aggregate or a filtered version of the original data—it will create a completely new instance of the structure containing only the relevant elements. The source structure remains unchanged.
+
+Streams provide a wrapper API around common data structures. This allows for operations like filtering, searching, ordering, aggregation, combining, grouping, and many other data transformation utilities, all built on top of the standard Java collection utilities.
+
+BaseStream
+
+The BaseStream interface is the super interface for all other stream interfaces, including the Stream interface itself. It contains the core methods that every stream must support. Among these, the most important are the close and iterator methods.
+
+The BaseStream interface defines several key methods. The iterator method allows you to obtain an iterator for the stream, using the iterator of the underlying structure. The spliterator method provides a split-iterator for the stream, again based on the underlying structure. The sequential method returns a sequential stream representation of the source stream. If the stream is already sequential, it returns the same instance. The parallel method returns a parallel stream representation, or the same instance if the stream is already parallel. The unordered method returns an unordered stream representation, or the same instance if the stream is already unordered. Finally, the close method closes the stream, which means that no further terminal operations can be called on it.
+
+Stream
+
+The Stream interface extends BaseStream. It is designed to provide the most commonly used aggregation and transformation operations that can be performed on any data structure.
+
+
+Java Stream API Method Reference
+
+This section provides an overview of common methods available in the Java Stream API, along with a brief description of what each method does and why it is useful.
+
+The filter method takes a predicate and returns a stream containing only those elements that match the given condition.
+
+The map method transforms each element of the stream using a provided mapping function, returning a new stream of the mapped elements.
+
+The mapToInt method converts each element in the stream into an integer, producing an IntStream as the result.
+
+The mapToLong method transforms each element into a long value, returning a LongStream.
+
+The mapToDouble method converts each element into a double, resulting in a DoubleStream.
+
+The flatMap method replaces each element with the contents of a mapped stream, effectively flattening a stream of streams into a single stream.
+
+The flatMapToInt method flattens a stream of streams of integers into a single IntStream.
+
+The flatMapToLong method flattens a stream of streams of long values into a single LongStream.
+
+The flatMapToDouble method flattens a stream of streams of double values into a single DoubleStream.
+
+The mapMulti method applies a function to each element, producing zero or more results per input element, and returns a new stream containing all these results.
+
+The mapMultiToInt method is a multi-mapping function that produces an IntStream from each input element.
+
+The mapMultiToLong method is a multi-mapping function that produces a LongStream from each input element.
+
+The mapMultiToDouble method is a multi-mapping function that produces a DoubleStream from each input element.
+
+The distinct method returns a stream with only unique elements, removing any duplicates.
+
+The sorted method returns a stream where the elements are sorted in their natural order.
+
+The sorted method with a comparator returns a stream where the elements are sorted based on the provided comparator.
+
+The peek method allows you to perform an action on each element as it is consumed, which is mainly useful for debugging purposes.
+
+The limit method restricts the stream to a specified number of elements.
+
+The skip method skips over the first n elements in the stream and returns the remaining elements.
+
+The takeWhile method returns a stream consisting of the longest prefix of elements that match a given predicate.
+
+The dropWhile method drops the longest prefix of elements that match a predicate and returns the remaining elements.
+
+The forEach method performs a given action for each element of the stream.
+
+The forEachOrdered method performs a given action for each element, preserving the encounter order of the stream.
+
+The toArray method returns an array containing all elements of the stream.
+
+The toArray method with a generator function returns an array containing the elements of the stream, using the provided array generator.
+
+The reduce method with an identity and accumulator performs a reduction on the elements using an identity value and an accumulator function.
+
+The reduce method with only an accumulator performs a reduction on the elements using the accumulator function, but without an identity value.
+
+The reduce method with an identity, accumulator, and combiner performs a reduction suitable for parallel streams, using an identity value, an accumulator function, and a combiner.
+
+The collect method with a supplier, accumulator, and combiner performs a mutable reduction, such as collecting elements into a collection.
+
+The collect method with a collector performs a reduction using a Collector, which handles both accumulation and the production of the final result.
+
+The toList method collects the elements of the stream into a List.
+
+The min method finds the minimum element of the stream using the provided comparator.
+
+The max method finds the maximum element of the stream using the provided comparator.
+
+The count method returns the total number of elements in the stream.
+
+The anyMatch method returns true if any elements in the stream match the provided predicate.
+
+The allMatch method returns true if all elements in the stream match the provided predicate.
+
+This concludes the overview of the most commonly used methods in the Java Stream API. Each method serves a specific purpose in processing and transforming data streams in a functional style.
+
+
+Let’s walk through the key operations and concepts related to Java Streams.
+
+First, here are some important stream methods and what they do.
+
+The allMatch method returns true if all elements in the stream match the provided condition, known as the predicate.
+
+The noneMatch method returns true if no elements in the stream match the given predicate.
+
+The findFirst method returns the first element of the stream, if one is present.
+
+The findAny method returns any element from the stream, which is especially useful when working with parallel streams.
+
+The builder method returns a Stream Builder, which allows you to incrementally build a stream.
+
+The empty method returns an empty stream.
+
+The of method, when given a single value, returns a stream containing just that element.
+
+The ofNullable method returns a stream containing the provided element if it is not null. If the value is null, it returns an empty stream.
+
+The of method, when given multiple values, returns a stream containing all the provided elements.
+
+The iterate method, when given a seed value and a function, creates an infinite stream where each next element is generated by applying the function to the previous one, starting with the seed.
+
+A variant of iterate also accepts a predicate. It generates a stream where each element is produced by applying the function, as long as the predicate returns true.
+
+The generate method creates an infinite stream where each element is generated by the provided supplier.
+
+The concat method combines two streams into a single stream.
+
+Now, let’s discuss how these operations are classified.
+
+Stream operations fall into two major groups: intermediate and terminal.
+
+Intermediate operations do not close the stream. They do not produce output immediately, and you can chain more intermediate or terminal operations after them. Examples include map, filter, and sorted.
+
+Terminal operations, on the other hand, close the stream. Once a terminal operation is called, no further operations can be performed on that stream. The stream is considered consumed, and all intermediate operations attached to it are executed at this point. Terminal operations produce a result, or in some cases, like forEach, they perform an action without returning a value.
+
+Intermediate operations always produce another stream instance. Usually, they return the same stream instance, not a copy. Terminal operations, however, produce a result or perform an action.
+
+It’s important to note that intermediate operations are not executed immediately when they are called. Instead, they are executed only when a terminal operation is invoked on the stream.
+
+Another key point about intermediate operations is that most of them are stateless. This means they operate on each element of the stream independently. However, some operations, like sorted, do maintain state or relationships between elements, because sorting requires comparing elements to each other. This distinction becomes important when discussing parallel, sequential, or unordered stream types.
+
+Here is a summary of common stream methods and their classification.
+
+Methods like filter, map, mapToInt, mapToLong, mapToDouble, flatMap, flatMapToInt, flatMapToLong, flatMapToDouble, mapMulti, mapMultiToInt, mapMultiToLong, mapMultiToDouble, distinct, sorted, sorted with a comparator, peek, limit, skip, takeWhile, dropWhile, iterate, generate, concat, accept in Builder, and add in Builder are all intermediate operations.
+
+Methods such as forEach, forEachOrdered, toArray, toArray with an IntFunction, reduce, reduce with a BinaryOperator, collect, toList, min, max, count, anyMatch, allMatch, noneMatch, findFirst, findAny, and build in Builder are terminal operations.
+
+Obtaining a Stream
+
+To obtain a stream, the most common approach is to call the stream or parallelStream methods on a data structure that implements the Collection interface. If a parallel stream cannot be obtained, a regular sequential stream will be returned instead. The method will not throw an exception.
+
+A stream can be converted into a sequential or parallel stream at any time, depending on your needs. Each call to sequential or parallel creates a new stream instance using the source data of the original. The new stream will be either parallel or sequential, as specified.
+
+Mapping
+
+One of the most common operations is mapping, which transforms a stream of one type of element into another type. Mapping typically accepts a function that takes an element of the original type and returns an element of the new type. This function is applied to all elements in the stream.
+
+For example, consider a list of numbers. You can use the map operation to square each number in the list, and then collect the results into a new list. In this case, the map function takes each number and returns its square.
+
+Filtering
+
+Filtering is another common operation. It applies a condition to each element in the stream. The function receives an element and returns a boolean value. If the result is true, the element is retained in the stream. If the result is false, the element is filtered out.
+
+For example, you can filter a list of numbers to keep only the even numbers. The filter function checks if each number is divisible by two, and only those that are even are kept in the resulting stream.
+
+Collecting
+
+Collecting is the process of converting a stream into a collection, such as a List, Map, Set, or even a custom user-defined collection. There are no real restrictions on how the collection is performed, as long as the collection provides an implementation of the Collector interface.
+
+There is a utility class called Collectors, which contains common methods for collecting streams into lists, sets, maps, and more. Some of the most frequently used methods are toList, toSet, and toMap.
+
+ToList
+
+One of the most commonly used methods in the Collectors API is toList. It provides two main ways to create a list from the underlying stream.
+
+
+Let’s start by looking at the toList collector.
+
+The toList collector uses an ArrayList as its underlying implementation. It adds all elements from the stream to this list. Remember, the elements themselves are added by reference. The only thing that gets discarded is the original data structure that the stream wrapped around during its creation.
+
+Next, there is toUnmodifiableList. This works similarly to toList, still using an ArrayList to collect the elements. However, at the end, the elements are moved from the mutable ArrayList into an unmodifiable list. This is done using the List dot of API, which collects the elements of the source array into an unmodifiable list, using an internal Java Development Kit type called ImmutableCollections.
+
+Now, let’s talk about ToSet.
+
+ToSet works in a similar way to the toList interface from the collectors API. It provides two methods: one to produce a mutable set, and another to produce an immutable one. Internally, it stores elements in a HashSet. The immutable version uses Set dot of.
+
+Moving on to ToMap.
+
+The toMap method has many overloads, providing different ways to collect elements into a map. Most of these overloaded methods deal with key handling and collisions. The most basic usage of toMap takes a value from the source and passes it to two mapper functions. One function returns the key for the map, and the other returns the value for that key.
+
+In the first example, the name is mapped through the identity function, meaning the key is simply the entry from the list. The value for the mapping is the length of the entry from the list, which is the length of the name.
+
+In the second example, the mapping function remains the same, but a merging function is added. This tells the underlying collectors how to reconcile values that map to the same key.
+
+In the third example, the mapping and merging functions are the same as before, but a third argument is added: the supplier, or map constructor. This allows clients to pass in custom map implementations.
+
+It’s important to note that by default, if there are duplicate keys, the basic version of toMap that does not receive a merger function will use an internal one. This internal function will throw an exception if a duplicate key is inserted into the map.
+
+The code examples in this section show how to use the toMap collector to create different types of maps from a list of names. The first example creates a map where the key is the name and the value is the length of the name. The second example creates a map where the key is the name and the value is a count, using a merging function to sum counts for duplicates. The third example is similar, but it provides a custom map implementation.
+
+The toMap functions also have a version called toConcurrentMap. This version is meant to optimize performance when collecting elements by leveraging parallel streams. The interface for these methods is the same as for the basic toMap methods.
+
+Now, let’s discuss Grouping.
+
+Grouping is a special case of the mapping function. It produces a map where a merging function is designed to collect all values with the same keys into a bucket, usually an array or list. The idea is that a list of entries or values can be grouped by some common property, so that when they map to the same key, they are collected together.
+
+In the first example, names are grouped by the length of the name itself, using a simple classifier function. In the second and third examples, grouping factory methods are provided. One is for the top-level map result, which represents the grouping, and the second is for the value type, where the elements are accumulated.
+
+Similarly to the toMap methods, the grouping methods also support a concurrent version. This optimizes the grouping by using parallel streaming.
+
+The code examples in this section show how to use the groupingBy collector to group names by their length. The first example groups names by length using the default map and list implementations. The second example provides custom factories for the map and the grouped values.
+
+Next, let’s look at Reduction.
+
+One of the key features of streams is reduction operations. These are terminal operations that return a result based on the elements in the stream, and the result is not of the same type as the initial data structure wrapped in the stream.
+
+The code example here demonstrates how to use reduction operations on a list of integers. First, a stream is created from the list. Then, the min method is called to find the minimum value in the stream. This is a reduction operation that returns a single minimum value from the stream of integers. After calling min, the stream is terminated, meaning no more terminal or intermediate operations can be called on it. To perform another reduction, such as finding the maximum value, a new stream must be created from the list.
+
+The list of reduction operations that the stream API supports includes several special cases of the general reduce operation. These exist for convenience, since they are often used. Examples include min, max, sum, and count.
+
+The reduce operation is a general reduction that accepts an accumulator lambda. The count operation returns the number of elements in the stream. The min and max operations compute the minimum and maximum elements in the stream, respectively. The sum operation computes the sum of all elements, and the average operation computes the average of all elements. There are also operations like anyMatch, allMatch, and noneMatch, which check if any, all, or none of the elements match a given predicate. Finally, findFirst and findAny are used to find the first or any element that matches a predicate, with findAny being particularly relevant for parallel streams.
+
+There are some important restrictions for reduction operations. The reduction must be stateless, meaning the lambda or operation itself must not store any state about the iteration process or elements being visited. It must also be non-interfering, meaning the reduction operation must never interfere with or mutate the source structure while the reduction is being executed. Finally, the reduction must be associative. This means that no matter how the elements are traversed, the reduction must always produce the correct result without storing any state about the elements being traversed. For example, multiplication is associative, so the order of operations does not matter. However, an expression like ten times the sum of two and seven is not associative, so you cannot rely on the reduce operation to be correct in that case.
+
+Associativity is particularly important for reduction operations on parallel streams, which will be discussed in the next section.
+
+Now, let’s talk about Parallel streams.
+
+Parallel streams are especially important when processing large amounts of data. They can dramatically speed up the execution of certain operations. A parallel stream can be obtained either at the time of obtaining the stream, using the parallelStream method instead of stream from the Collections API, or by converting an existing stream to a parallel one using the API provided by the BaseStream interface.
+
+
+Parallel Streams and Reduce Operations
+
+Parallel streams in Java introduce a specific caveat when it comes to reducing operations. Because a parallel stream can split its workload, multiple reduce operations may run on separate chunks of the stream’s elements at the same time. To handle this, you must provide an additional function, known as the combiner. This combiner function tells the underlying implementation how to merge results that come from different parallel executions.
+
+For example, imagine you want to multiply the squares of all elements in a list. First, you create an ArrayList of integers and add several numbers to it. Then, you obtain a parallel stream from this list. When you call the reduce method on this parallel stream, you provide three arguments: an initial value, an accumulator function, and a combiner function. The accumulator function multiplies the current result by the square of each element. The combiner function multiplies two partial results together. This setup ensures that, even when the computation is split across multiple threads, the final result is correct.
+
+In contrast, when you use a sequential stream, you only need to provide the accumulator function. There is no need for a combiner, because the computation happens in a single thread, and there are no parallel partial results to merge.
+
+To summarize, the accumulator function tells the stream how to combine the current result with each element from the list. The combiner function tells the stream how to merge two partial results, which is essential for parallel processing.
+
+How Parallel Streams Work Internally
+
+Under the hood, Java’s parallel stream implementation uses the fork and join framework along with split iterators. Here’s the basic idea:
+
+First, the Spliterator divides the source data into smaller segments. Each segment can be processed independently by different threads.
+
+Next, the Fork and Join framework manages a pool of worker threads. Each worker thread takes one of the segments provided by the Spliterator and processes it.
+
+Finally, after processing, the results from each segment are combined using the combiner function. This step is crucial for operations like reduce, where partial results from different threads must be aggregated into a final result.
+
+Unordered Streams
+
+Another important property of streams is whether they are ordered or unordered. This characteristic affects how data is processed in certain situations. Generally, the ordered or unordered nature of a stream depends on the underlying data structure. For example, streams created from ArrayList, LinkedList, or TreeSet are considered ordered, while streams from HashMap or HashSet are considered unordered.
+
+The unordered property becomes especially relevant for parallel streams. If a parallel stream is ordered, processing still happens in parallel, but when it’s time to combine the results, the results are merged in the original order. This may require waiting for all parallel tasks to finish, sorting the results, and then combining them.
+
+On the other hand, if the stream is unordered, the combination can happen in any order. As soon as two results are ready, they can be combined, without waiting for the rest. This can lead to faster processing, since the system does not need to preserve any specific order.
+
+In summary, parallel streams will eagerly combine results as soon as chunks are finished and ready, especially when the stream is unordered. When order matters, the system may need to wait and sort before combining, which can affect performance.
+
+

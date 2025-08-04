@@ -1,0 +1,823 @@
+Introduction
+
+Applications run businesses. If applications break, businesses suffer—and sometimes even disappear. This statement becomes truer every day.
+
+Most applications run on servers. In the past, we could only run one application per server. The open systems world of Windows and Linux simply did not have the technologies to safely and securely run multiple applications on the same server.
+
+So, the story usually went like this: every time the business needed a new application, the IT department would go out and buy a new server. Most of the time, nobody really knew the performance requirements of the new application. This meant IT had to make educated guesses when choosing the model and size of servers to buy.
+
+As a result, IT did the only thing it could do—it bought big, fast servers with lots of resiliency. After all, the last thing anyone wanted, including the business, was underpowered servers. Underpowered servers might be unable to execute transactions, which could result in lost customers and lost revenue. So, IT usually bought bigger servers than were actually needed.
+
+This led to a situation where huge numbers of servers were operating at as little as five to ten percent of their potential capacity. It was a tragic waste of company capital and resources.
+
+VMware
+
+Amid all of this, VMware gave the world a gift: the virtual machine. Almost overnight, the world changed for the better. We finally had a technology that would let us safely and securely run multiple business applications on a single server. This was a game changer.
+
+IT no longer needed to procure a brand new, oversized server every time the business asked for a new application. More often than not, they could run new apps on existing servers that were sitting around with spare capacity. Suddenly, we could squeeze massive amounts of value out of existing corporate assets, such as servers, resulting in a lot more bang for the company’s buck.
+
+However, there is always a “but.” As great as virtual machines are, they are not perfect. The fact that every virtual machine requires its own dedicated operating system is a major flaw. Every operating system consumes CPU, RAM, and storage that could otherwise be used to power more applications. Every operating system needs patching and monitoring. In some cases, every operating system requires a license. All of this is a waste of operational and capital expenses.
+
+The virtual machine model has other challenges, too. Virtual machines are slow to boot, and portability is not great. Migrating and moving virtual machine workloads between hypervisors and cloud platforms is harder than it needs to be.
+
+Containers
+
+For a long time, the big web-scale players like Google have been using container technologies to address these shortcomings of the virtual machine model. In the container model, the container is roughly analogous to the virtual machine. The major difference, though, is that every container does not require a full-blown operating system. In fact, all containers on a single host share a single operating system.
+
+This frees up huge amounts of system resources, such as CPU, RAM, and storage. It also reduces potential licensing costs and reduces the overhead of operating system patching and other maintenance. This results in savings on both capital and operational expenses.
+
+Containers are also fast to start and ultra-portable. Moving container workloads from your laptop to the cloud, and then to virtual machines or bare metal in your data center, is a breeze.
+
+Linux containers
+
+Modern containers started in the Linux world and are the product of an immense amount of work from a wide variety of people over a long period of time. For example, Google has contributed many container-related technologies to the Linux kernel. Without these and other contributions, we would not have modern containers today.
+
+Some of the major technologies that enabled the massive growth of containers in recent years include kernel namespaces, control groups, and, of course, Docker.
+
+Despite all of this work, containers remained complex and outside the reach of most organizations. It was not until Docker came along that containers were effectively democratized and made accessible to the masses.
+
+Windows containers
+
+Over the past few years, Microsoft has worked extremely hard to bring Docker and container technologies to the Windows platform. The core Windows technologies required to implement containers are collectively referred to as Windows Containers. The user space tooling to work with these containers is Docker.
+
+Mac containers
+
+Currently, there is no such thing as native Mac containers. However, you can use Linux containers on a Mac using the Docker for Mac product. This works by seamlessly running your containers inside a lightweight Linux virtual machine running on the Mac.
+
+Windows vs Linux containers
+
+It is vital to understand that a running container uses the kernel of the host machine it is running on. This means that a container designed to run on a host with a Windows kernel will not run on a Linux host. In other words, Windows containers require a Windows host, and Linux containers require a Linux host.
+
+However, it is possible to run Linux containers on Windows machines using Docker for Windows or Windows Subsystem for Linux, also known as WSL. This is an area that is developing quickly.
+
+Docker
+
+What is Docker, really? The term can refer to three things.
+
+First, Docker, Incorporated, is the company behind the Docker project.
+
+Second, Docker refers to the container runtime and orchestration technology.
+
+Third, Docker is the open source project, also called Moby.
+
+Docker, Inc
+
+Docker is software that runs on Linux and Windows. It creates, manages, and orchestrates containers. The software is developed in the open as part of the Moby open-source project on GitHub.
+
+Docker, Incorporated, is a company based out of San Francisco and is the overall maintainer of the project. There is also a commercial version of Docker with more support and contracts. The company was founded by Solomon Hykes.
+
+Interestingly, Docker started its life as a platform-as-a-service provider called dotCloud. Behind the scenes, the dotCloud platform leveraged Linux containers. To help them create and manage these containers, they built an internal tool that they named Docker.
+
+In twenty thirteen, the dotCloud platform-as-a-service business was struggling, and the company needed a new lease on life. To help with this, they hired Ben Gloub as the new CEO, rebranded the company as Docker, Incorporated, got rid of the dotCloud platform, and started a new journey with a mission to bring Docker and containers to the world.
+
+Today, Docker, Incorporated, is widely recognized as an innovative technology company with a market valuation said to be in the billions. Since becoming Docker, Incorporated, they have made several small acquisitions for undisclosed fees to help grow their portfolio of products and services.
+
+Docker runtime and orchestration
+
+When most technologists talk about Docker, they are referring to the Docker engine. The Docker engine is the infrastructure plumbing software that runs and orchestrates containers.
+
+If you are a VMware administrator, you can think of it as being similar to ESXi. In the same way that ESXi is the core hypervisor technology that runs virtual machines, the Docker Engine is the core container runtime that runs containers. All other Docker, Incorporated, and third-party products plug into the Docker Engine and build around it.
+
+Docker project—Moby
+
+The term Docker is also used to refer to the open source Docker project. This is the set of tools that get combined into things like the Docker daemon and client, which you can download and install from the Docker website.
+
+However, the project was officially renamed as the Moby project at DockerCon in twenty seventeen. The goal of the Moby project is to break Docker down into more modular components and to do this in the open. It is hosted on GitHub, and you can see a list of the current sub-projects and tools included in the Moby repository.
+
+The core Docker Engine project is currently located at github dot com slash moby slash moby. As an open-source project, the source code is publicly available, and you are free to download it, contribute to it, tweak it, and use it, as long as you adhere to the license.
+
+Looking at the commit history, you will immediately notice that some of the contributors are companies such as Red Hat, Microsoft, IBM, Cisco, and Hewlett Packard Enterprise. Most of the project and its tools are written in Go, the relatively new system-level programming language from Google, also known as Golang.
+
+Container ecosystem
+
+One of the core philosophies at Docker is often referred to as “batteries included, but removable.” This means you can swap out a lot of the native Docker components and replace them with alternatives from third parties.
+
+A good example of this is the networking stack. The core Docker product ships with built-in networking, but the networking stack is pluggable. This means you can remove the native Docker networking and replace it with something else from a third party.
+
+
+In the early days of Docker, it was common for third-party plugins to outperform the native features that shipped with Docker itself. However, this created challenges for Docker’s business model. After all, for Docker to be a sustainable, long-term business, it eventually needed to generate profit. As a result, the built-in features—often referred to as “batteries included”—have steadily improved over time.
+
+Open Container Initiative
+
+The Open Container Initiative, or OCI, is a relatively new governance council. Its main responsibility is to standardize the most fundamental components of container infrastructure, such as the image format and the container runtime.
+
+No discussion of the OCI is complete without a bit of history. And, as with all historical accounts, the version you hear depends on who’s telling the story. From the very beginning, Docker’s usage grew rapidly. More and more people used it in increasingly diverse ways, so it was inevitable that someone would become frustrated with certain aspects. This is a normal part of any technology’s evolution.
+
+The short version of this history, according to Nigel, is that a company called CoreOS disagreed with how Docker handled some things. In response, CoreOS created a new open standard called AppC, which defined aspects like image format and container runtime. They also built an implementation of this specification called rkt, pronounced “rocket.”
+
+This development put the container ecosystem in an awkward position, with two competing standards. This threatened to fracture the ecosystem and presented users and customers with a dilemma. While competition is usually beneficial, competing standards can be problematic. The result was confusion and a slowdown in user adoption, which was not good for anyone.
+
+Recognizing this, the major players came together and formed the OCI—a lightweight, agile council to govern container standards. The OCI has published two key specifications: image-spec and runtime-spec.
+
+A common analogy for these two standards is rail tracks. Agreeing on the standard sizes and properties of rail tracks allows everyone else to build better train carriages, improved signaling systems, and more efficient stations, all with the confidence that they will work on the standardized tracks. Nobody wants two competing standards for rail track sizes.
+
+Kernel Control Groups and Namespaces
+
+Control groups and namespaces are foundational features in the Linux kernel that make containerization possible. They provide resource control and isolation. Together, they form the building blocks for container runtimes like Docker, Podman, and Kubernetes.
+
+To appreciate their role, it’s essential to understand each in depth and how they work together to create the container abstraction.
+
+Control Groups, or cgroups
+
+Control groups are a Linux kernel feature that provides mechanisms for limiting, prioritizing, and monitoring the usage of system resources such as CPU, memory, disk input and output, and network bandwidth. Introduced in two thousand seven, cgroups allow processes to be grouped hierarchically, with resource constraints or quotas applied at the group level.
+
+Cgroups work by organizing processes into control groups, which are hierarchical structures where resource limits and accounting are defined. This hierarchy is represented as a virtual filesystem, often mounted at slash sys slash fs slash cgroup, with directories corresponding to different cgroups. Each cgroup can enforce specific limits or priorities for a particular type of resource.
+
+For example, cgroups can limit the amount of CPU time a process or group of processes can use. If two containers are running on the same host, you can allocate more CPU time to one container over the other. Cgroups can also set memory constraints, ensuring that a process cannot exceed a specific memory threshold. This prevents memory exhaustion on the host system. Additionally, cgroups can throttle block input and output or network bandwidth, ensuring fair sharing among processes or prioritizing critical workloads.
+
+Because cgroups are hierarchical, resource limits propagate downward in the tree. This enables complex configurations, such as allocating a fixed percentage of CPU to a parent cgroup and then subdividing that allocation among child cgroups.
+
+Without cgroups, processes running on the same host would compete for resources without constraints, leading to potential resource starvation or overuse. In the context of containers, cgroups ensure that each container operates within its allocated resources, making them predictable and performant, even in multi-tenant environments.
+
+Namespaces
+
+Namespaces are another Linux kernel feature. They isolate global system resources for groups of processes. By scoping resources, namespaces provide the illusion that a process or group of processes is running on its own system, separate from others. This isolation is the backbone of containerization, ensuring that processes inside a container are unaware of and unaffected by processes and resources outside their namespace.
+
+There are several types of namespaces, each targeting a specific system resource or function.
+
+The PID namespace provides isolation for process IDs. Processes inside a PID namespace see a separate process tree, starting from process ID one, which is often the init system within the container. This ensures that processes in one container cannot see or signal processes in another container or on the host.
+
+The mount namespace isolates filesystem mount points. Each container can have its own root filesystem and mount points, separate from the host or other containers. This is critical for providing a private file system view for containers.
+
+The UTS namespace isolates system identifiers such as hostname and domain name. This allows containers to have their own hostname, decoupled from the host system’s identity.
+
+The network namespace isolates network resources, including IP addresses, routing tables, and sockets. Containers can have their own virtual network interfaces and IP addresses, managed independently of the host or other containers.
+
+The IPC namespace isolates inter-process communication resources, such as shared memory and semaphores. This ensures that containers cannot inadvertently interfere with one another’s IPC mechanisms.
+
+Finally, the user namespace provides user and group ID isolation. This allows processes inside a container to have different user IDs from the host.
+
+By leveraging namespaces, each container can function as if it is running on a standalone system with a private set of resources. However, the host kernel orchestrates and manages these namespaces, allowing containers to coexist on a shared kernel.
+
+Cgroups and Namespaces Together
+
+Cgroups and namespaces complement each other to create the container abstraction.
+
+Namespaces ensure that a container’s processes, network, filesystem, and other system resources are isolated from the host and from other containers. This isolation is crucial for security and for the lightweight virtualization illusion that containers offer.
+
+Control groups regulate how much of the resources, isolated by the namespaces, a container can consume. This combination prevents resource contention, ensuring fair and predictable usage.
+
+For example, a container running a web server might operate within its own network namespace, with its own virtual network interface card and IP address. It might also have its own mount namespace, providing a private filesystem view, and its own PID namespace, with a separate process tree. At the same time, cgroups ensure that the container cannot exceed five hundred twelve megabytes of RAM and fifty percent of the CPU usage.
+
+Containerization
+
+Containers are not independent operating systems like virtual machines. Instead, they are processes running on the host operating system, constrained and isolated by cgroups and namespaces. These technologies allow containers to share the host kernel while appearing isolated, enabling several key benefits.
+
+First, containers are lightweight. Since they share the host kernel, they require far fewer resources than virtual machines, which emulate hardware and run separate operating system instances.
+
+Second, containers start and shut down quickly. They do not need to boot an entire operating system. They are essentially just processes with extra isolation, running on the host like any other user-level process.
+
+Third, containers are highly scalable. With cgroups enforcing resource limits, many containers can run concurrently on the same host without over-provisioning.
+
+Modern container runtimes like Docker encapsulate these capabilities by automating the creation and management of namespaces and cgroups for each container. Tools like Kubernetes build on this foundation to orchestrate containers across distributed systems, ensuring high availability and scalability.
+
+
+In conclusion, cgroups and namespaces, by isolating and managing resources, transform the Linux kernel into a powerful platform for containerization. They encapsulate processes in a lightweight, portable, and secure manner. This paves the way for the cloud-native ecosystem that underpins much of today's software industry and infrastructure.
+
+More kernel components
+
+Beyond the already mentioned components, the Linux kernel contains many other features that facilitate the deployment and containerization of applications as we know them today. Here are some of them.
+
+OverlayFS
+
+OverlayFS is a union filesystem that allows multiple layers of filesystems to be stacked. It plays a key role in containerization by enabling the creation of lightweight, writable layers on top of read-only image layers. When a container is created, a writable layer is added on top of a read-only base image. Any modifications made by the container are written to this top layer, while the base image remains unchanged. This approach enables efficient sharing of base images between containers, minimal disk usage since only changes are stored, and fast container creation by simply stacking layers. In containers, OverlayFS underpins the storage driver mechanism in Docker and other container runtimes, making image building, sharing, and running highly efficient.
+
+Seccomp
+
+Seccomp is a Linux kernel security feature that restricts the system calls a process can make. Containers use seccomp to reduce the attack surface by preventing them from invoking potentially dangerous system calls. Seccomp operates as a syscall filter. A process or container is provided with a list of allowed system calls, and any call not on the list is blocked. This is typically configured using a seccomp profile. In containerization, seccomp plays a key role in protecting the host from container exploits by limiting access to sensitive system calls, and it enables fine-grained control over what containers can and cannot do.
+
+Capabilities
+
+Linux capabilities break down the all-powerful root privileges into discrete units of authority. Containers often run as root within their own namespaces, but they are stripped of unnecessary capabilities to mitigate risks. The kernel allows processes to drop or retain specific capabilities, such as the ability to manage network settings. For example, a container may have the ability to bind to privileged ports but not modify kernel parameters. In containerization, this enhances security by limiting what containers can do, even when running as root, and reduces the risk of privilege escalation.
+
+AppArmor and SELinux
+
+AppArmor and SELinux are two kernel frameworks for enforcing mandatory access control policies. These frameworks restrict how applications or containers interact with the system. AppArmor defines file and process-level access policies for containers and is path-based, meaning access is controlled based on file paths. SELinux uses labels to define granular access policies for processes, files, and other resources. In containerization, these frameworks ensure that containers can only access files, directories, and resources explicitly allowed by their profiles or labels, and they protect the host system from compromised or malicious containers.
+
+Capabilities and No New Privileges
+
+Beyond capabilities, the "No New Privileges" feature is a kernel flag that ensures a process cannot gain additional privileges through mechanisms like setuid binaries. When this flag is enabled, even if a containerized process runs a binary with setuid permissions, it cannot escalate its privileges. Setuid, which stands for set user identity, allows users to run an executable with the file system permissions of the executable's owner, often used to temporarily elevate privileges for specific tasks.
+
+Device control
+
+The Linux kernel provides mechanisms for controlling access to hardware devices through the device cgroup and the mknod system call. The device cgroup allows fine-grained control over which devices a container can access, such as block devices and character devices. Containers can also be restricted from creating new device nodes using mknod. In containerization, this prevents unauthorized access to host devices like storage or network interfaces and limits the potential for containers to interact directly with sensitive hardware.
+
+Network virtualization
+
+The Linux networking stack provides features that are critical for container networking, including virtual Ethernet pairs, network bridges, and tools like iptables. Containers are typically connected to the host network through virtual Ethernet pairs, where one end resides in the container's network namespace and the other in the host's namespace or bridge. Network bridges, such as the default Docker bridge or plugins from the Container Network Interface, create virtual networks to interconnect containers.
+
+Resource limits
+
+Resource limits, also known as rlimits, provide per-process controls over resources like file descriptors, stack size, and CPU time. While not as flexible as cgroups, rlimits play a complementary role in containerized environments. Rlimits are set using the setrlimit system call, which constrains individual process behavior. In containerization, rlimits are used to impose additional resource restrictions at the process level, preventing runaway resource consumption within a container by a rogue process.
+
+Components
+
+The idea of this chapter is to give you a quick big picture of what Docker is all about before we dive in deeper in later chapters.
+
+Images
+
+A good way to think of a Docker image is as an object that contains a filesystem and an application. If you work in operations, it is similar to a virtual machine template. Another analogy is that the image is like a class definition, while the container is like an instance of a class. Getting images onto your Docker host is called pulling.
+
+The first command example pulls the target image, such as Ubuntu, to your local system. The second command displays all the images that are currently stored locally.
+
+There are other interesting images, such as the Microsoft PowerShell image, which contains the Windows Nano Server with PowerShell. Or the Microsoft IIS image, which contains an image with Internet Information Services.
+
+Containers
+
+After an image has been pulled locally on the Docker host daemon, you can use the docker container run command to launch an instance of this container.
+
+The example command runs a Microsoft PowerShell container based on the Nano Server image and starts the PowerShell executable. When you run this command, you may notice that the shell prompt changes. This is because your shell is now attached to the shell of the new container. The interactive flag tells the daemon to make the container interactive and to attach your current terminal to the shell of the container. It also tells the container to start the PowerShell executable before attaching and after starting the container.
+
+To list the containers currently created and or running, you can use another command.
+
+This command lists all containers ever created, whether running or stopped, along with the container ID, container name, status, and the image the container was started with.
+
+Attaching
+
+Once a container is running, you can also attach to it with the docker exec command. For example, if the container from the previous steps is still running, you can attach to it by specifying the container ID or name and the command you want to run inside the container.
+
+This command attaches to a running container and starts a Bash shell inside it. The container ID can be obtained from the list of running containers. The command name tells the container which process to start within the container when attaching.
+
+Stopping
+
+To stop a container, you can use the docker container stop command followed by the container ID or name. This will stop the container, but it will still remain ready to be started again with the docker container start command. However, you can also remove the container using the docker container remove command instead.
+
+This command stops the specified container.
+
+Removing
+
+To remove a container and delete all resources associated with it, you should use the docker container remove command with the container ID or name. This will completely remove all container resources. However, the image the container was created with will not be removed, since it is not part of the container's resources.
+
+This command removes the specified container.
+
+Dockerfile
+
+Usually, some user applications have an additional file used to build on top of existing Docker images. These are called Dockerfiles. In fact, the base images themselves are also created from Dockerfiles. In essence, a Dockerfile is a set of instructions for building a custom image.
+
+
+This Dockerfile example describes how to build a custom Docker image for a Node.js application. It starts from the Alpine Linux base image, adds Node.js and npm, copies the application code into the image, sets the working directory, installs dependencies, exposes port 8080, and finally specifies that the application should be started with Node.js running the app.js file.
+
+To build this image, you would run a command in your terminal from the directory containing the Dockerfile. The command tags the resulting image as "test" with the version "latest." Tagging is simply a way to label and identify your image.
+
+Each instruction in the Dockerfile creates what is known as a layer. Docker uses these layers internally to build images efficiently. If you change one layer, only that layer and the ones above it need to be rebuilt, which speeds up the process of modifying images.
+
+Docker engine
+
+The Docker engine is the core software responsible for running and managing containers. It is often referred to simply as Docker or the Docker platform. If you are familiar with VMware, you can think of the Docker engine as being similar to ESXi in the VMware ecosystem.
+
+The Docker engine is modular, made up of several swappable components, many of which are based on open standards defined by the Open Container Initiative, or OCI. Like a car engine, the Docker engine is built from many specialized parts working together.
+
+The main components of the Docker engine are the Docker client, the Docker daemon, containerd, and runc. Together, these components create and run containers.
+
+When Docker was first released, the engine consisted of two main parts: the daemon and LXC. The daemon was a large, monolithic binary that included the client, the API, the container runtime, image building, and more. LXC provided the daemon with access to the core building blocks of containers, such as kernel namespaces and control groups. The daemon used LXC to interact with the host kernel.
+
+However, relying on LXC posed two problems. First, LXC was Linux-specific, which was an issue for a project aiming to be cross-platform. Second, depending on an external tool for such a core function was risky and could slow development. To address this, Docker, Incorporated developed their own tool called libcontainer to replace LXC. Libcontainer was designed to be platform-agnostic and to provide Docker with direct access to the operating system’s container features.
+
+To move away from the monolithic daemon, Docker began breaking out as much functionality as possible into smaller, specialized tools. These tools could be swapped out or used by third parties to build other solutions. This approach follows the UNIX philosophy of building small, focused tools that can be combined as needed.
+
+This process is ongoing, but much of the container execution and runtime code has already been moved out of the daemon and into specialized tools like runc and containerd.
+
+Runc is the reference implementation of the OCI container runtime specification. Docker, Incorporated played a major role in defining this specification and developing runc. Runc is a lightweight command-line tool that wraps around libcontainer. Its sole purpose is to create containers.
+
+Containerd acts as a bridge between the daemon and runc. It implements the execution logic that was previously part of the Docker daemon, but has been refactored and improved. Containerd is a container supervisor, responsible for managing the lifecycle of containers. This includes starting, stopping, pausing, unpausing, and destroying containers. Like runc, containerd is small, lightweight, and focused on a single task: managing container lifecycles.
+
+The most common way to start containers is by using the Docker command-line interface. For example, you can start a new container based on the Alpine Linux image by running a command that creates a container named "ctr1" and opens an interactive shell.
+
+When you run this command in the Docker CLI, the client translates it into an API request and sends it to the Docker daemon. The daemon implements a rich, versioned REST API that is widely accepted as the standard for container management.
+
+Once the daemon receives the request to create a new container, it calls containerd. The daemon communicates with containerd using a CRUD-style API over gRPC. Despite its name, containerd does not actually create containers itself. Instead, it uses runc to do so. Containerd converts the Docker image into an OCI bundle and instructs runc to create the new container.
+
+Runc interacts with the operating system kernel to assemble all the necessary components for a container. On Linux, this includes namespaces and control groups. The container process is started as a child of runc, and as soon as it starts, runc exits. This design allows you to update the Docker daemon or containerd without affecting running containers.
+
+There is a special component between containerd and runc called the shim. The shim is essential for running containers independently of the daemon, which is important for tasks like upgrading the daemon without stopping containers. When containerd uses runc to create a new container, it forks a new instance of runc for each container. Once the container is created, the parent runc process exits, and the associated shim process becomes the container’s parent. This means you can run hundreds of containers without needing hundreds of runc processes.
+
+The shim has several responsibilities. It keeps the standard input and output streams open so that containers do not terminate if the daemon is restarted. It also reports the container’s exit status back to the daemon.
+
+On a Linux system, these components are implemented as separate binaries. The main ones are dockerd, which is the daemon; docker-containerd, which is containerd; docker-containerd-shim, which is the shim; and docker-runc, which is runc. You can see these processes running on the host system using the process status command. Some of them, like the shim, are only present when containers are running, while others, like runc, appear when a container is starting.
+
+Deep-dive
+
+Images
+
+You can think of Docker images as being similar to virtual machine templates. A virtual machine template is like a stopped virtual machine, and a Docker image is like a stopped container. Images are usually pulled from a registry, with Docker Hub being the most popular, though others exist. Pulling an image downloads it to your host machine, where it can be used to start one or more containers.
+
+Images are made up of multiple layers stacked on top of each other, but they are presented as a single object. Inside an image, you will find a minimal operating system and all the files and dependencies needed to run an application. Because containers are designed to be fast and lightweight, images tend to be small.
+
+Definition
+
+As mentioned earlier, images are like stopped containers, or, for those with a programming background, like classes. In fact, you can stop a container and create a new image from it. With this in mind, images are considered build-time constructs, while containers are run-time constructs. You can think of an image as a snapshot of a container at a specific point in time.
+
+
+The whole purpose of a container is to run an application or service. This means that the image a container is created from must include all the operating system and application files required to run that service. However, containers are designed to be fast and lightweight. As a result, the images they are built from are usually small and stripped of all non-essential parts.
+
+For example, Docker images do not ship with multiple shells, and they do not contain a kernel. All containers running on a Docker host share access to the host's kernel. Because of this, we sometimes say that images contain “just enough operating system”—usually only the essential OS-related files and filesystem objects.
+
+The official Alpine Linux Docker image is a striking example of how small Docker images can be. It is about four megabytes in size. In comparison, the official Ubuntu Docker image is currently about one hundred and twenty megabytes. Windows-based images tend to be much larger than Linux ones, due to the way the Windows operating system works. For example, the latest Microsoft .NET image is over two gigabytes when pulled and uncompressed, and the Windows Server Nano image from twenty sixteen is slightly over one gigabyte.
+
+Pulling
+
+Pulling images is the process of getting images onto a Docker host. These images are usually pulled from what are called image registries. Docker images are stored in these registries, with the most common one being Docker Hub. Other registries exist as well, including third-party registries and secure on-premise registries. However, the Docker client is opinionated and defaults to Docker Hub.
+
+Image registries contain multiple image repositories, and each repository can contain multiple images. For example, the Ubuntu image is one of many repositories in the registry. The Ubuntu repository, in turn, has many versions of the Ubuntu image.
+
+Docker Hub has a concept of official repositories and unofficial ones. As the name suggests, official repositories contain images that have been vetted by Docker. These images should contain up-to-date, high-quality code that is secure, well-documented, and in line with best practices. Unofficial repositories, on the other hand, can be unpredictable. You should not expect them to be safe, well-documented, or even functional. That said, not everything in unofficial repositories is bad.
+
+Most popular operating systems and applications have their own official repositories. These are easy to spot, as they live at the top level of the Docker Hub namespace. Their URLs follow the format “hub dot docker dot com slash underscore slash image name.” For example, the official NGINX image is at “hub dot docker dot com slash underscore slash nginx.” Personal images, in contrast, are behind URLs such as “hub dot docker dot com slash r slash user slash image.”
+
+Some examples of official repositories include NGINX, BusyBox, Redis, and Mongo. Their URLs follow the pattern I just described.
+
+Names
+
+Addressing images from the official repositories is as simple as giving the repository name and tag, separated by a colon. The format for pulling an image from an official repository is “docker image pull repository colon tag.” For example, to pull a specific version of the Mongo image, you would use a command that pulls the image tagged as three point three point eleven from the official Mongo repository. Similarly, you can pull the image tagged as “latest” from the official Redis repository, or from the official Alpine repository.
+
+If you do not specify a version, as in the Alpine example, the latest one is assumed by default. However, it is important to note that the “latest” tag does not have any special meaning. Just because an image is tagged as “latest” does not guarantee it is the most recent image in the repository. For example, the most recent image in the Alpine repository is usually tagged as “edge.” In this context, “latest” refers to the latest stable version, but not necessarily the absolute newest version available.
+
+Pulling an image from an unofficial repository works essentially the same way. The only difference is that the name of the repository is prepended in front, using a forward slash as a separator between the repository name and the image name. For example, if the image name is “tu-demo” and the source repository is “nigelpoulton,” you would pull it using the combined name.
+
+Tags
+
+Another important concept is that images can have multiple tags. A single image can have as many tags as desired, because tags are arbitrary alphanumeric values stored as metadata alongside the image. To pull all images in a repository, you can add the “dash a” flag to the Docker image pull command. This will pull all images that are tagged in the specified repository.
+
+Since one image can have multiple tags, it is possible that the command pulls images where the latest image already exists with another tag. For example, if the “tu-demo” image has three versions—v1, v2, and latest—it is possible that the “latest” tag actually points to the same image as v2. In the end, the image pull command will simply pull two images: v1 and v2.
+
+Layers
+
+A Docker image is essentially a collection of loosely connected, read-only layers. Docker takes care of stacking these layers and representing them as a single unified object. There are a few ways to see and inspect the layers that make up an image.
+
+When you pull an image, the output shows each layer being pulled. Each line that ends with “Pull complete” represents a layer in the image. For example, if you pull the latest Ubuntu image, you might see five layers being pulled, indicating that the image has five layers.
+
+Another way to see the layers of an image is to inspect the image with the “docker image inspect” command. This command provides detailed information about the image, including the list of layers, which are shown using their SHA two fifty-six hashes. Both the pull output and the inspect command confirm the number of layers in the image.
+
+It is important to note that the “docker history” command shows the build history of an image, but it is not a strict list of layers. Some Dockerfile instructions used to build an image do not result in layers being created. These include instructions like MAINTAINER, ENV, EXPOSE, and ENTRYPOINT.
+
+All Docker images start with a base layer. As changes are made and new content is added, new layers are stacked on top. Furthermore, a newer layer can override or obscure an older layer. For example, if a layer adds a file in a certain system directory, and then another layer adds a file with the same name in the same location, the newer file will override the older one. This allows you to build upon base image layers without having to modify the actual base layer itself.
+
+When you pull multiple tags of the same image, you may notice that some layers are already present and do not need to be downloaded again. This is because Docker reuses layers that are already available on the host.
+
+Finally, when you list images with the “docker image ls” command, you will see the repository, tag, image ID, creation date, and size for each image. This helps you keep track of the images and their versions on your system.
+
+
+Sharing layers between different images
+
+Sharing layers between different images is possible in Docker, and this leads to significant efficiencies in both space and performance. For example, when you use the Docker image pull command to fetch images, Docker is smart enough to recognize if it already has a copy of a particular image layer. 
+
+Imagine you first pull the image tagged as “latest.” Later, when you pull the “v1” and “v2” images, Docker notices that it already has some of the layers that make up those images. This happens because the three images in the repository are almost identical, so they share many layers. This sharing reduces redundant downloads and saves disk space.
+
+Digest
+
+So far, we have discussed pulling images by tag, which is the most common method. However, tags have a limitation—they are mutable. This means it is possible to accidentally tag an image incorrectly, or even reuse a tag for a different image. This can cause confusion and problems.
+
+For example, imagine you have an image called “golftrack version one point five” that contains a known bug. You pull the image, apply a fix, and then push the updated image back to the repository using the same tag. Now, both the vulnerable and the patched images share the same tag. This makes it impossible to know which of your production systems are running the vulnerable image and which are running the patched one, since both have the same tag.
+
+This is where image digests come to the rescue. Docker introduced a content-addressable storage model, where every image gets a cryptographic content hash, known as the digest. Because the digest is a hash of the image’s contents, any change to the image will result in a different digest. This makes digests immutable, helping to avoid the problem of tag confusion.
+
+Every time you pull an image, the Docker image pull command will include the image’s digest in its output. You can also view the digests of images stored on your Docker host by adding the “--digests” flag to the “docker image ls” command.
+
+In the example provided, the user pulls the Alpine image, and Docker displays the digest of the image after the pull. Then, by listing images with the “--digests” flag, you can see the digest associated with each image on your system.
+
+Compression and distribution hashes
+
+There is more to digests. Since a digest represents the content of the image, which is essentially the stack of layers that make up the image, what happens when an image is uploaded? The layers are compressed to save bandwidth and storage space in the registry’s blob store. However, compressing a layer changes its content, which means its content hash will no longer match after push or pull operations.
+
+This creates a problem. For example, when you push an image layer to Docker Hub, Docker Hub tries to verify that the image arrived without being tampered with during transit. It does this by hashing the layer and checking if it matches the hash sent with the layer. Because the layer was compressed, the hash verification would fail.
+
+To solve this, each layer also gets a distribution hash, which is a hash of the compressed version of the layer. When a layer is pushed or pulled from the registry, its distribution hash is included and used to verify that the layer arrived intact and untampered. This content-addressable storage model greatly improves security by allowing verification of image and layer data after push and pull operations.
+
+Architecture
+
+Docker now supports multi-platform and multi-architecture images. This means a single image repository and tag can provide images for Linux, ARM, PowerPC, and other architectures.
+
+To enable this, the Registry API supports both a fat manifest and an image manifest. Fat manifests list the architectures supported by a particular image, while image manifests list the layers that make up a specific image.
+
+When you pull an image from Docker Hub, the Docker client makes the necessary API requests to the registry. If a fat manifest exists for that image, Docker parses it to see if there is an entry for the current host’s architecture. For example, if you are pulling the image on an x86-64 Linux machine, Docker checks for a matching entry. If it exists, Docker retrieves the image manifest for that architecture and parses it to find the actual layers that make up the image. The layers are identified by their cryptographic IDs and are pulled from the registry’s blob store.
+
+Deleting images
+
+When an image is no longer needed, you can delete it from your Docker host using the “docker image rm” command. “Rm” stands for remove. Images can be deleted by their ID or by the name and version of the image. If you do not specify a version, “latest” is assumed. If an image is in use by a running container, you will not be able to delete it.
+
+A handy trick to remove all downloaded images that are not currently used by containers is to combine the “docker image rm” command with the “docker image ls -q” command.
+
+In the example provided, the first command lists all image IDs, one per line. The second command removes all images that are not used by containers and are downloaded locally. The output shows images being untagged and deleted, along with their associated digests and IDs.
+
+Containers
+
+A container is the runtime instance of an image. Just as you can start a virtual machine from a template, you can start one or more containers from a single image. The key difference is that containers are faster and more lightweight. Instead of running a full operating system like a virtual machine, containers share the operating system kernel with the host they are running on.
+
+The simplest way to start a container is with the “docker container run” command. This command can take many arguments, but in its most basic form, you specify an image to use and a command to run. For example, you might run a Linux container with the bash shell, or a Windows container with PowerShell.
+
+Containers run until the program they are executing exits. In the examples above, the Linux container will exit when the bash shell exits, and the Windows container will exit when the PowerShell process terminates.
+
+A simple way to demonstrate this is to start a new container and tell it to run the sleep command for ten seconds. The container will start, run for ten seconds, and then exit.
+
+To manually stop a running container, you can use the “docker container stop” command, providing the container ID. You can then start the container again with the “docker container start” command, also using the container ID. To remove or delete a container, use the “docker container rm” command with the container ID. However, you cannot delete a container that is running—it must be stopped first.
+
+Definition
+
+Now, let’s consider an example. Assume you have a single physical server that needs to run four different applications. You can approach this using either the virtual machine model or the container model. 
+
+Let’s first look at the virtual machine model.
+
+
+In the virtual machine model, the process begins when the physical server is powered on and the hypervisor boots up. For the sake of this explanation, we are skipping over the BIOS and bootloader code. Once the hypervisor is running, it takes control of all the physical resources on the system, such as the CPU, RAM, storage, and network interface cards. The hypervisor then divides these hardware resources into virtual versions that are designed to look, feel, and behave just like the real hardware. These virtual resources are packaged into a software construct known as a virtual machine.
+
+After creating these virtual machines, we install an operating system and an application on each one. For example, if we have a single physical server and need to run four applications, we would create four virtual machines, install four separate operating systems, and then install the four applications—one per virtual machine.
+
+Container model
+
+Things work a bit differently in the container model. When the server is powered on, your chosen operating system boots up. In the Docker world, this could be Linux or a modern version of Windows that supports container primitives in its kernel. Just like in the virtual machine model, the operating system claims all the hardware resources. On top of the operating system, we install a container engine such as Docker.
+
+The container engine takes operating system resources—like the process tree, the filesystem, and the network stack—and divides them into secure, isolated constructs called containers. Each container is designed to look and feel like a real operating system. Inside each container, you can run an application. So, if you have a single physical server and need to run four applications, you would create four containers and run one application inside each.
+
+Comparison
+
+At a high level, hypervisors perform hardware virtualization. They divide up the physical hardware resources into virtual versions. In contrast, containers perform operating system virtualization—they divide up the operating system resources into virtual versions.
+
+In the virtual machine model, every operating system consumes a portion of the processor, memory, storage, and other resources. Most virtual machines require their own licenses, as well as people and infrastructure to patch and upgrade them. Each operating system also presents a sizable attack surface. This overhead is often referred to as the operating system tax, or the virtual machine tax, because every additional operating system you install consumes more resources.
+
+The container model, on the other hand, has a single kernel running in the host operating system. It is possible to run tens or even hundreds of containers on a single host, with every container sharing that single kernel. This means you have just one operating system consuming the processor, memory, storage, and other resources. You only need to license, upgrade, and patch a single operating system, and you only have one attack surface to manage. In other words, you have a single operating system tax bill.
+
+Lifecycle
+
+There is a common myth that containers cannot persist data, but they certainly can. Part of the reason people think containers are not good for persistent workloads or storing data is because they are so effective at handling non-persistent tasks. However, being good at one thing does not mean you cannot do the other well.
+
+Let’s walk through a typical workflow for running a container, adding persistent data, and managing its lifecycle.
+
+First, you start a container, give it a name—such as “percy”—and use the latest Ubuntu image. You then create a new file inside the container to demonstrate persistence. After that, you exit the container without killing it, stop the container, list all containers, and then start the container back up. You can start a new bash process and attach to the container, or attach to the process running in the container. Finally, you check that the file you created earlier is still there.
+
+In summary, this workflow demonstrates that when you create a container and start it with a specific command—such as running bash with a pseudo-terminal—the container will keep that process running. If you stop the container, Docker remembers the command it was started with, so when you start it again, the same process resumes. You can also start additional processes inside the container and attach to them. If you want to attach to a running process’s standard input, that process must have been started interactively.
+
+Cleaning up
+
+There is a quick and forceful way to remove all containers on the host system, which is useful for cleaning up resources. However, this method does not terminate containers safely, so it should be used with caution. The command in question will forcibly remove all containers, regardless of their state.
+
+Containerizing application
+
+The process of taking an application and configuring it to run as a container is called containerizing, or sometimes dockerizing. The steps are straightforward. You start with the application code, create a Dockerfile that describes your app, its dependencies, and how to run it, then feed this Dockerfile into the Docker image build command. Docker then builds your application into a Docker image. Once the image is created, your app is containerized and ready to be shipped and run as a container.
+
+Definition
+
+Let’s walk through the process of containerizing a Linux-based Node.js web application. The process is the same for Windows applications. The steps include getting the application code, inspecting the Dockerfile, containerizing the app, running the app, and testing the app.
+
+Getting the code
+
+Assume you already have the code, or you can clone a repository that contains it. This is a typical Node.js project, with all the source files inside a folder called “src,” located in the top-level project folder.
+
+Building the Dockerfile
+
+To build the Dockerfile for your application, note that this file does a few important things. One key step is copying the application code into the container during the image build phase. This means the code will be built into the image itself. It is common practice to keep the Dockerfile at the root of the project folder, making it easier to refer to resources like the “src” folder.
+
+The Dockerfile for this example starts with a base image, specifies a maintainer label, installs Node.js and npm, copies the application code into the image, sets the working directory, installs dependencies, exposes a port, and defines the entry point for the application.
+
+In plain English, this Dockerfile does the following: It starts from a lightweight Linux base image called Alpine. It adds a label to specify the maintainer’s contact information. It installs Node.js and npm using the package manager. It copies the entire project into a folder called “src” inside the image. It sets the working directory to this “src” folder. It runs npm install to install the application’s dependencies. It exposes port 8080 for the application to listen on. Finally, it sets the entry point to run the app using Node.js.
+
+The Dockerfile also serves as a bridge between development and operations. It documents how the application should be bundled, distributed, built, and tested, which is very important for collaboration and maintenance.
+
+The FROM instruction sets the base layer of the image, and the rest of the application is added on top as additional layers. For a Linux app, the FROM instruction should refer to a Linux-based image. For a Windows app, you would specify the appropriate Windows base image.
+
+The LABEL instruction adds metadata, such as the maintainer’s contact information. This is a best practice, as it provides a point of contact for users of the image.
+
+The RUN instruction installs Node.js and npm, creating a new image layer on top of the Alpine base image. This ensures that the application has the necessary runtime environment to execute.
+
+In summary, the Dockerfile is a crucial part of containerizing an application. It defines the environment, dependencies, and instructions needed to build and run the app as a container.
+
+
+The COPY instruction brings the application files from your build context into the Docker image. The RUN instruction then copies these files into the image as a new layer. At this point, the image has three layers.
+
+Next, the Dockerfile uses the WORKDIR instruction to set the working directory for all subsequent instructions. This directory is relative to the image itself. Importantly, this information is stored as metadata in the image configuration, not as a new layer.
+
+After setting the working directory, the RUN npm install instruction uses the Node package manager to install all application dependencies listed in the package.json file. This command runs within the context of the previously set working directory and adds another layer to the image. Now, the image consists of four layers: the RUN npm install layer, the COPY layer that brings in the application files, the RUN apk add npm layer, and the initial FROM alpine layer.
+
+Since the application exposes a web service on TCP port 8080, the Dockerfile documents this with the EXPOSE 8080 instruction. This is also stored as image metadata, not as a new layer.
+
+Finally, the ENTRYPOINT instruction specifies the main application that the container should run when started. Like EXPOSE and WORKDIR, ENTRYPOINT is added as metadata and does not create a new image layer.
+
+Containerize the app and build the image
+
+Now that both the application code and Dockerfile are ready, you can build the image. The following command builds a new image called web:latest. The period at the end of the command tells Docker to use the current working directory as the build context. In other words, it tells Docker where to find the Dockerfile and the application files. Since the command is run from the directory containing the Dockerfile, using the current working directory is appropriate.
+
+The command to build the image is as follows: it instructs Docker to build an image named web:latest using the current directory as the build context. As the build process runs, Docker pulls the base Alpine image, executes each instruction in the Dockerfile, and finally sets the ENTRYPOINT to run the application.
+
+After the build completes, you can verify that the image was created successfully by running a command that lists all Docker images. This will show the new web:latest image in your local registry.
+
+Running the app
+
+The example application is a simple web server that listens on TCP port 8080. To run it, you start a new container named c1 based on the web:latest image. The command maps port 80 on your Docker host to port 8080 inside the container. This means you can access the application by pointing your web browser to the host’s DNS name or IP address.
+
+The command to run the container does the following: it starts the container in the background, assigns it the name c1, and maps port 80 on the host to port 8080 in the container. After starting the container, you can check its status by listing all running containers.
+
+Test connectivity
+
+To confirm that everything is working, open a web browser and navigate to the DNS name or IP address of the host running the container. Typically, this will be localhost or the IP address 127.0.0.1.
+
+Closer look
+
+Now that the application is containerized, let’s take a closer look at how Dockerfiles work. In a Dockerfile, comment lines start with the hash character. All other lines are instructions, which follow the format: instruction name followed by its argument. Instruction names are not case sensitive, but it is standard practice to write them in uppercase for readability.
+
+The docker image build command processes the Dockerfile one line at a time, starting from the top. Some instructions create new layers, while others only add metadata to the image. Instructions like FROM, RUN, and COPY create new layers. Instructions such as EXPOSE, WORKDIR, ENV, and ENTRYPOINT add metadata.
+
+The basic rule is: if an instruction adds content—such as files or programs—it creates a new layer. If it only provides information on how to build or run the image, it creates metadata.
+
+You can view the instructions used to build an image by running a command that shows the image’s history. This command lists each instruction, the size of the resulting layer, and whether it added data or just metadata.
+
+From the output, you’ll notice that each line corresponds to a Dockerfile instruction. The “created by” column shows the exact instruction executed. Only four of the image layers actually contain data—these correspond to the FROM, RUN, and COPY instructions. The other instructions, while listed, only add metadata and do not increase the image size.
+
+To confirm the number of layers, you can inspect the image. The inspection output will show that only four layers were created, matching the data-adding instructions.
+
+It is considered best practice to use images from official repositories with the FROM instruction. Official images tend to follow best practices and are less likely to have known vulnerabilities. It is also wise to start with a small base image, as this reduces the potential attack surface.
+
+Moving to production
+
+When it comes to Docker images, smaller is better. Large images are slow, difficult to work with, and have a larger attack surface. The goal is to ship production images that contain only what is needed to run your application.
+
+However, keeping images small can be challenging. The way you write your Dockerfile has a significant impact on image size. For example, every RUN instruction adds a new layer. Therefore, it is best practice to combine multiple commands into a single RUN instruction, using double ampersands and backslashes for multi-line commands.
+
+Another common issue is failing to clean up after installing build-time tools. If you install tools during the build process and leave them in the final image, you increase its size unnecessarily. There are ways to address this, such as the builder pattern, but these approaches can add complexity.
+
+The builder pattern involves using at least two Dockerfiles: one for development and one for production. The development Dockerfile starts from a large base image, installs build tools, and builds the application. You then create a container from this image. The production Dockerfile starts from a smaller base image and copies the built application from the development container. While effective, this approach increases complexity.
+
+Multi-stage builds offer a simpler solution. With multi-stage builds, you use a single Dockerfile containing multiple FROM instructions. Each FROM instruction starts a new build stage, and you can easily copy artifacts from previous stages.
+
+For example, consider a Dockerfile that uses multi-stage builds. The first stage uses a Node image to build a React application. The second stage uses a Maven image to build a Java application. The final stage uses a small Java runtime image, creates a user, sets up working directories, and copies the built artifacts from the previous stages. The ENTRYPOINT and CMD instructions specify how to run the application.
+
+This approach allows you to optimize your builds and keep your production images small, without adding unnecessary complexity.
+
+
+Let’s start by looking at the Dockerfile described above. This file uses three FROM instructions, which means it defines three separate build stages. Internally, Docker numbers these stages from the top, starting at zero. However, in this example, each stage is also given a friendly name. The first stage, stage zero, is called “storefront.” Stage one is called “appserver,” and stage two is called “production.”
+
+The storefront stage pulls the node latest image, which is more than six hundred megabytes in size. It sets the working directory, copies in some application code, and uses two RUN instructions to perform some npm operations. These steps add three layers to the image and significantly increase its size. The result is an even larger image that contains a lot of build-related files, but not much actual application code.
+
+The appserver stage pulls the maven latest image, which is over seven hundred megabytes. It adds four layers by using two copy instructions and two run instructions. This also produces a very large image, filled mostly with build tools and very little production code.
+
+The production stage is different. It starts by pulling the java eight JDK image, which is about one hundred fifty megabytes—much smaller than the previous two stages. In this stage, a user is added, the working directory is set, and some application code is copied in from the image produced by the storefront stage. Then, it sets a different working directory and copies in more application code from the image produced by the appserver stage. Finally, it specifies the main application that should run when the image is started as a container.
+
+The key point here is that the COPY --from instructions only copy the production-related application binaries from the images built in the previous stages. They do not copy any of the auxiliary resources or build tools used to create the application, since those are not needed in production. Also, keep in mind that each FROM instruction creates an image, which you can list using the command to show all Docker images.
+
+Now, let’s move on to Swarm mode.
+
+At a high level, orchestration is about automating and simplifying the management of containerized applications at scale. This includes tasks like automatically rescheduling containers when nodes fail, scaling up when demand increases, and smoothly rolling out updates and fixes in production environments. For a long time, orchestration was difficult. Tools like Docker Swarm and Kubernetes existed, but they were complex. Then, with Docker version one point twelve, native swarm mode was introduced, making orchestration much easier and more accessible.
+
+Definition
+
+Swarm mode brought many changes and improvements to how we manage containers at scale. The most important change is the introduction of native clustering for Docker hosts, which is deeply integrated into the Docker platform. Unlike Kubernetes, which is a separate system that often requires a specialist to configure, Docker’s clustering is a first-class citizen in the Docker technology stack, and it is simple to use. By default, a standard Docker installation runs in single engine mode, ensuring full backward compatibility with previous versions. Switching Docker Engine into swarm mode enables all the latest orchestration features, though it may come at the cost of some backward compatibility.
+
+Swarm
+
+A swarm consists of one or more nodes. These nodes can be physical servers, virtual machines, or cloud instances. The only requirement is that all nodes in a swarm must be able to communicate with each other over reliable networks. Nodes are configured as either managers or workers. Managers are responsible for maintaining the state of the cluster and dispatching tasks or containers to workers. Workers accept tasks from managers and execute them.
+
+Swarm nodes rely heavily on TLS, or Transport Layer Security, to encrypt communications, authenticate nodes, and authorize roles. Automatic key rotation is also included. When running Docker Swarm locally, the behavior of standalone physical servers or virtual machines is simulated by the Docker engine. Therefore, when working locally, there is not much benefit to using Docker Swarm, since its real power comes from distributing workloads across many physical machines, each acting as a node. It’s also important to note that a single node can run many tasks or containers. Each node has its own Docker engine and Docker daemon.
+
+Tasks
+
+In the context of a swarm, the term “tasks” refers to containers. So, when we say that managers dispatch tasks to workers, we mean that they are dispatching container workloads. You might also hear these referred to as replicas. This can be confusing, but remember that tasks and replicas both refer to containers in this context.
+
+Enabling Swarm Mode
+
+To enable Docker Swarm, you need to run a command on the Docker host to initialize swarm mode. This command switches the Docker daemon from single-node mode to swarm mode and makes the node the first manager of the swarm. Additional nodes can then be joined to the swarm as either workers or managers using a join command.
+
+Initializing
+
+The command to switch the Docker daemon to swarm mode is “docker swarm init.” This puts the current host into swarm mode and initializes a new swarm. You can then join other nodes as workers or managers using the appropriate join commands. For example, you might initialize a node called “manager one” into swarm mode, then join nodes called “worker one,” “worker two,” and “worker three” as worker nodes. Finally, you could add “manager two” and “manager three” as additional managers. At the end of this process, all six nodes would be part of the same swarm and operating in swarm mode.
+
+The current single local host becomes the cluster’s manager and is responsible for maintaining the swarm state. Even if you only have one physical machine, Docker uses its own daemon and networking layers to simulate separate nodes.
+
+Here’s a breakdown of the initialization command. The “docker swarm init” command tells the Docker daemon to initialize a new swarm and make this node the first manager. It also enables swarm mode on the node. The “advertise address” option specifies the IP and port that other nodes should use to connect to this manager. This flag is optional, but it gives you control over which IP is used, especially on nodes with multiple IPs. It also allows you to specify an IP address that does not exist on the node, such as a load balancing IP. The “listen address” option lets you specify which IP and port to listen on for swarm traffic. This usually matches the advertise address, but can be useful if you want to restrict swarm to a particular IP.
+
+Extending the Swarm
+
+To add more nodes, you use join tokens. There are separate tokens for workers and managers. The commands to join a worker or a manager are identical, except for the join token. Whether a node joins as a worker or a manager depends entirely on which token you use. These tokens should be protected, as they are all that is required to join a node to a swarm.
+
+For example, to add a worker node, you would use the join command with the worker token. You can retrieve new tokens for workers or managers as needed, and each new token can be used to add a new node to the swarm.
+
+Listing Nodes
+
+To list the nodes in the swarm, you use a command that displays the node ID, hostname, status, availability, and manager status. This will show which nodes are managers and which are workers, depending on how many join commands you have run.
+
+In summary, Docker’s multi-stage builds and swarm mode provide powerful tools for building, managing, and orchestrating containerized applications at scale. Multi-stage builds help keep production images small and efficient by only including what is necessary, while swarm mode makes it much easier to manage clusters of Docker hosts and automate the deployment and scaling of containers.
+
+
+Looking at the manager status column in the list output, you will notice that only one manager can be the leader. The other managers are marked as reachable. Worker nodes do not have a manager status, which should be self-explanatory.
+
+High availability
+
+Swarm managers have built-in support for high availability, often referred to as H A. This means that if one or more managers fail, the remaining managers will keep the swarm running. Technically, swarm mode uses a form of active-passive multi-manager high availability. While you can and should have multiple managers, only one is ever considered active at any given time. This active manager is called the leader. The leader is the only manager that issues live commands against the swarm, such as changing the configuration or assigning tasks to workers. If a non-active manager receives commands, it will forward them to the leader.
+
+The swarm uses an implementation of the Raft consensus algorithm to provide high availability. There are two best practices to follow. First, deploy an odd number of managers to avoid consensus collisions. Second, do not deploy too many managers—three or five is recommended at most.
+
+Having an odd number of managers increases the chance of reaching quorum and helps avoid a split-brain scenario. For example, if you had four managers and the network split, you could end up with two managers on each side. This is known as a split brain. Each side knows there used to be four managers, but now can only see two. Neither side can determine if the other two are still alive or which side has the majority, also known as quorum. However, with three or five managers, a network partition cannot result in an even split. This makes it much easier for one side to determine if it has the majority and can achieve quorum.
+
+As with all consensus algorithms, more participants mean more time is required to reach consensus. It is similar to deciding where to eat—three people can decide much faster than thirty-three.
+
+A final word of caution about manager high availability. While it is good practice to spread your managers across different availability zones within your network, you must ensure that the networks connecting them are reliable. Network partitions can be problematic. Hosting your active production applications and infrastructure across multiple cloud providers, such as AWS or Azure, is more of a dream than a practical reality.
+
+Service
+
+At the highest level, services are the way to run tasks on a swarm. To run a task or container on a swarm, you wrap it in a service and deploy that service. Under the hood, services are a declarative way of setting the desired state on the cluster. For example, you can set the number of tasks or containers in the service, specify the image the containers will use, and define the procedure for updating to a newer version of the image.
+
+Services let you declare the desired state for an application and feed that to Docker. For instance, suppose you have an app with a web front end. You have an image for the web service, and testing has shown that you need five instances of the web service. You would create a service that declares the image to use and specifies that there should always be five running tasks.
+
+To create a service, you use the docker service create command. This command creates a service named web-fe, maps port eighty eighty on every node in the swarm to port eighty eighty inside each container, and specifies that there should always be five running replicas. It also tells Docker which image to use, in this case, a custom image representing the app.
+
+After running the command, the manager acting as leader instantiates five tasks across the swarm. Remember, managers can also act as workers. Each worker or manager pulls the image and starts a container from it, running on port eighty eighty. The swarm leader also ensures that a copy of the service’s desired state is replicated to every manager in the swarm.
+
+All services are constantly monitored by the swarm. The swarm runs a reconciliation loop that continuously compares the actual state of the service to the desired state. If the two states match, everything is fine and no action is needed. If they do not match, the swarm takes action to bring them back in line. In other words, the swarm is always making sure that the actual state matches the desired state.
+
+For example, if one of the workers hosting one of the five container tasks fails, the actual state for the web-fe service drops from five running tasks to four. This no longer matches the desired state of five, so Docker starts a new web-fe task to bring the actual state back in line with the desired state. This behavior is very powerful and allows the service to self-heal in the event of node failures and similar issues.
+
+You can list services with the docker service ls command. This command shows all services and their details. The output displays a single running service along with basic information about its state. For example, you can see the name of the service and that five out of five desired tasks are running. If you run the command soon after deploying the service, it might not show all tasks as running yet, because it takes time to pull the image on each node.
+
+To see a list of tasks in a service and their state, use the docker service ps command. This is similar to the ps command on Linux or Unix, which shows information about the current processes running on the system. The output lists each task, the node it is running on, and its current state.
+
+For more detailed information about a service, use the docker service inspect command. This command provides a concise summary of the service’s configuration, including its name, mode, number of replicas, update and rollback settings, container image, and port mappings. Using the --pretty flag limits the output to the most interesting items in an easy-to-read format. Leaving off the --pretty flag gives a more verbose output.
+
+Scaling
+
+Another powerful feature of services is the ability to easily scale them up or down. Suppose business is booming and you are seeing double the anticipated traffic hitting the web front end. Fortunately, scaling the service is as simple as running the docker service scale command. This command increases the number of replicas for the service from five to ten.
+
+After scaling, running the docker service ps command will show that the tasks in the service are balanced across all nodes in the swarm as evenly as possible. Since there are fewer worker and manager nodes than tasks, it is not possible to run one replica per node. Instead, the tasks are distributed across the workers and managers, so one node might have two or even three tasks running, depending on how Docker and the swarm distribute them. This is not something you generally control.
+
+Behind the scenes, swarm mode runs a scheduling algorithm that tries to balance tasks as evenly as possible across the nodes in the swarm. This means running an equal number of tasks on each node, without considering factors like CPU load.
+
+
+To reduce the number of replicas in a Docker service, you can simply run the scaling command again, specifying the new desired number. For example, scaling the service back down to five replicas will remove the extra running tasks from both worker and manager nodes. You do not have control over which specific instances are stopped, but this is generally acceptable since all replicas are identical.
+
+Removing a Service
+
+To remove or delete a service, the process is straightforward. You just run the command to remove the service by name. This action deletes the service you previously deployed. However, be cautious: using the remove command as-is will immediately delete all tasks in the service without asking for confirmation. This means that all running tasks will be stopped and removed from all nodes in the swarm, along with the service itself.
+
+Updating
+
+Pushing updates to a deployed application is a routine part of operations, though it has historically been a source of stress and downtime. Docker makes this process easier by providing built-in support for rolling updates, which can help minimize disruption.
+
+To demonstrate, let’s walk through a rolling update scenario. First, an overlay network is created. An overlay network establishes a new layer two network that allows containers to communicate with each other, even if the Docker hosts are on different underlying networks.
+
+Next, you can list the available networks on the Docker host. This will show familiar networks like bridge, host, and none, as well as indicate whether each network is local or part of the swarm.
+
+After setting up the network, a new service is created for demonstration purposes. This service is attached to the overlay network, exposes port eighty, and is started with twelve replicas using a specific application image.
+
+You can then list the currently active services, as well as all the tasks or containers that make up the service. This provides visibility into which nodes are running which replicas, and the current state of each.
+
+To update the service, you use the update command, specifying a new image version, the number of containers to update in parallel, and a delay between updates. For example, updating to version two of the image, with two tasks updated at a time and a twenty-second delay between each pair, allows for a controlled rollout.
+
+This update process works by changing the service’s desired state to use the new image. The update-parallelism and update-delay options ensure that only a few tasks are updated at a time, with a pause in between. As a result, some tasks will be running the new version while others are still on the old version, until the update completes.
+
+You can monitor the progress by listing the tasks for the service. You’ll see that some tasks have already switched to the new image, while others are still running the previous version.
+
+Strategies
+
+As demonstrated, rolling updates are just one of several deployment strategies available for updating services. Each strategy has its own advantages and trade-offs, depending on your requirements.
+
+The recreate strategy stops the old version entirely before deploying the new one. All instances are replaced at once. This approach is simple and ensures there is no overlap between old and new versions, but it does cause downtime during the deployment. It is best suited for non-critical applications where downtime is acceptable.
+
+The rolling update strategy gradually replaces old instances with new ones, updating one or a few at a time until all are updated. This minimizes downtime and allows you to monitor new instances as they come online, reducing deployment risk. However, old and new versions coexist during the process, which can lead to inconsistencies. Careful planning is needed to ensure compatibility between versions. This method is common for stateless or backward-compatible applications.
+
+The blue-green deployment strategy runs the new version alongside the current version. Once the new version is verified, traffic is switched over. The old version remains available as a fallback. This approach offers zero downtime and easy rollback, but it is resource-intensive since both versions are running simultaneously. It also requires complex traffic routing to make the transition seamless for users.
+
+The canary deployment strategy introduces the new version to a small subset of users or servers first, then gradually increases the percentage of traffic routed to the new version. Full rollout happens only after successful validation. This allows for controlled testing in production with minimal risk, and issues can be caught early. However, it requires dynamic traffic routing and monitoring, and the full deployment takes longer.
+
+Feature toggles involve deploying the new version with features disabled, then enabling features incrementally through configuration. This minimizes risk, allows for instant rollback of features, and supports gradual rollouts and A/B testing. The downside is increased code complexity and the risk of obsolete toggles cluttering the codebase.
+
+Finally, the shadow deployment strategy runs the new version alongside the old one, but does not expose it to users. The new version processes mirrored traffic for testing purposes. This allows real-world testing without impacting live users, but it is resource-intensive and does not test actual user interactions with the new version—only testers or quality assurance teams interact with it, which is not quite the same.
+
+Each of these strategies can be chosen based on the criticality of your application, your tolerance for downtime, and your infrastructure capabilities.
+
+
+A/B Testing
+
+A/B testing is a deployment strategy where you run multiple versions of your application at the same time—the old version and the new one. A subset of users is routed to the new version, while the rest continue using the old version. Metrics are collected to compare performance and user experience between the two versions. This approach provides direct insights into user preferences and the performance of different versions, allowing for controlled exposure to the new version. However, it requires robust traffic routing and user segmentation. There is also a risk of user confusion if the versions behave differently.
+
+Networking
+
+In real-world scenarios, containers need to communicate with each other reliably and securely, even when they are on different hosts or networks. Overlay networking addresses this need by creating a flat, secure layer two network that spans multiple hosts. Containers can connect to this network and communicate directly with each other.
+
+Behind the scenes, Docker’s networking stack is built on a component called libnetwork and a set of drivers. Libnetwork is the main implementation of the container network model, or CNM, and drivers are pluggable components that support different networking technologies and topologies.
+
+Definition
+
+In twenty twenty-five, Docker Incorporated acquired a container networking startup called Socket Plane. The acquisition aimed to bring real networking capabilities to Docker and to simplify container networking.
+
+Security
+
+Good security is all about layers, and Docker has many of them. It supports all the major Linux security technologies, as well as its own, and most are simple and easy to configure. On Linux, Docker leverages common security technologies such as namespaces, control groups, capabilities, mandatory access control, and seccomp. For each of these, Docker implements sensible defaults to provide a seamless and moderately secure experience out of the box. However, you can also customize each one to suit your needs.
+
+The Docker platform itself offers several excellent native security features, and one of the best things about them is how simple they are to use.
+
+For example, Docker Swarm mode is secure by default. With zero configuration, you get features like cryptographic node IDs, mutual authentication, automatic certificate authority configuration, automatic certificate rotation, encrypted cluster storage, and encrypted networks.
+
+Docker Content Trust allows you to sign your images and verify the integrity and publisher of images you pull.
+
+Docker Security Scanning analyzes Docker images, detects known vulnerabilities, and provides you with a detailed report.
+
+Docker Secrets makes secrets first-class citizens in the Docker ecosystem. Secrets are stored in the encrypted cluster store, encrypted in transit when delivered to containers, and stored in in-memory filesystems when in use.
+
+Definition
+
+Linux security technologies are essential for container platforms. All good container platforms should use namespaces and control groups to build containers. The best platforms also integrate with other Linux security technologies such as capabilities, mandatory access control systems, and seccomp.
+
+Namespaces
+
+Kernel namespaces are at the core of containers. They allow you to partition an operating system so that it appears as multiple isolated operating systems. This enables you to do things like run multiple web servers on the same OS without port conflicts, or run multiple applications without them interfering with each other’s configuration files or libraries.
+
+For example, you can run multiple web servers, each requiring port four forty-three, on a single operating system. You do this by running each web server inside its own network namespace. Each network namespace gets its own IP address and full range of ports.
+
+You can also run multiple applications, each needing its own version of a shared library or configuration file, by running each app inside its own mount namespace. Each mount namespace can have its own isolated copy of any directory on the system, such as etc, var, or dev.
+
+Docker on Linux currently uses several types of kernel namespaces. These include process ID, network, filesystem mount, inter-process communication, user, and UTS namespaces.
+
+A Docker container is essentially an organized collection of namespaces. Every container is made up of its own process ID, network, mount, inter-process communication, UTS, and potentially user namespaces. This organized collection is what we call a container.
+
+For example, the process ID namespace gives each container its own isolated process tree. Every container can have its own process ID one, and containers cannot see or access the process trees of other containers or the host.
+
+The network namespace provides each container with its own isolated network stack, including interfaces, IP addresses, port ranges, and routing tables. Each container gets its own eth zero interface with a unique IP and range of ports.
+
+The mount namespace gives every container its own unique, isolated root filesystem. This means each container can have its own etc, var, and dev directories. Processes inside a container cannot access the mount namespace of the host or other containers.
+
+The inter-process communication namespace is used for shared memory access within a container and isolates the container from shared memory outside of it.
+
+The user namespace allows you to map users inside a container to different users on the Linux host. For example, you can map the root user inside a container to a non-root user on the host. User namespaces are relatively new to Docker and are currently optional.
+
+The UTS namespace gives each container its own hostname.
+
+Control Groups
+
+While namespaces are about isolation, control groups are about setting limits. Think of containers as rooms in a hotel. Each room is isolated, but all rooms share common resources like water, electricity, and amenities. Control groups let you set limits on containers so that no single container can use all the resources on the host.
+
+In practice, containers are isolated from each other but share resources such as the host processor, memory, and disk. Control groups allow you to set limits on each of these, ensuring that a single container cannot monopolize the host system’s resources.
+
+Capabilities
+
+Running containers as root is dangerous because root has full power, but running as non-root can be too restrictive. Capabilities provide a way to pick and choose which root privileges a container needs.
+
+Under the hood, the Linux root account is made up of a long list of capabilities. Some examples include the ability to change file ownership, bind a socket to low-numbered network ports, elevate the privilege level of a process, or reboot the system.
+
+Docker works with capabilities so you can run containers as root but remove the root capabilities you do not need. For example, if your container only needs to bind to low-numbered network ports, you can start the container, drop all root capabilities, and then add back just the capability to bind to those ports. Docker also ensures that containers cannot re-add capabilities that have been removed.
+
+Mandatory Access Control Systems
+
+Docker integrates with major Linux mandatory access control technologies such as AppArmor and SELinux. Depending on your Linux distribution, Docker applies a default AppArmor profile to all new containers. According to Docker’s documentation, this default profile is moderately protective while providing broad application compatibility. Docker also lets you start containers without a policy applied, and you can customize policies to meet your specific requirements.
+
+Seccomp
+
+Now, let’s move on to seccomp.
+
+
+Docker uses seccomp, in filter mode, to limit the system calls a container can make to the host kernel. According to Docker’s security philosophy, all new containers are given a default seccomp profile with sensible defaults. This approach is intended to provide moderate security without impacting application compatibility. As always, you can customize seccomp profiles, and you can also pass a flag to Docker to start containers without a seccomp profile if needed.
+
+Conclusion
+
+Docker supports most of the important Linux security technologies and ships with sensible defaults that add security but are not too restrictive. Some of these technologies can be complicated to customize, as they may require deep knowledge of how they work and how the Linux kernel operates. Hopefully, these configurations will become simpler in the future. For now, the default configurations that come with Docker are a good place to start.
+
+Swarm Security
+
+Swarm mode is the future of Docker, as it allows you to cluster multiple Docker hosts—called nodes—and deploy your app in a declarative way. Every swarm is made up of managers and workers, which can be either Linux or Windows machines. Managers form the control plane of the cluster and are responsible for configuring the cluster and dispatching work. Workers are the nodes that run your application code as containers.
+
+As expected, swarm mode includes many security features that are enabled out of the box with sensible defaults. These features include cryptographic node IDs, mutual authentication using TLS, secure join tokens, certificate authority configuration with automatic certificate rotation, an encrypted cluster store for configuration data, and encrypted networks.
+
+The moment you run the docker swarm init command, these default security configurations are applied automatically. The swarm is assigned a cryptographic ID, and the first manager node issues itself a client certificate that identifies it as a manager in the swarm. Certificate rotation is set up with a default value of ninety days, and a cluster configuration database is created and encrypted. Secure tokens are also generated so that new managers and workers can join the swarm—all with a single command.
+
+Swarm Join Tokens
+
+To join managers and workers to an existing swarm, you only need the relevant join token. For this reason, it is vital to keep your tokens safe and never post them in public repositories. Every swarm maintains two distinct join tokens: one for adding new managers and one for adding new workers.
+
+It’s helpful to understand the format of a swarm join token. Each token consists of four distinct fields separated by dashes. The format is: prefix, version, swarm ID, and token. The prefix is always “SWMTKN.” The version field indicates the version of the swarm. The swarm ID field is a hash of the swarm’s certificate. The token portion determines whether the token can be used to join a node as a manager or a worker.
+
+If you suspect that either of your join tokens has been compromised, you can revoke them and issue new ones with a single command. For example, running the command to rotate the manager join token will revoke the existing token and issue a new one. The only difference between the old and new join tokens will be in the last field; the swarm ID remains the same. Join tokens are stored in the cluster configuration database, which is encrypted by default.
+
+TLS and Mutual Authentication
+
+Every manager and worker that joins a swarm is issued a client certificate. This certificate is used for mutual authentication. It identifies the node, the swarm the node belongs to, and the role the node performs—either manager or worker.
+
+On a Linux host, you can inspect a node’s client certificate by running a command that uses OpenSSL to display the certificate’s contents in a human-readable format. This command decrypts the certificate and shows details such as the version, serial number, signature algorithm, issuer, validity period, subject, and public key information.
+
+The subject data in the certificate output uses standard fields to specify the swarm ID, the node’s role, and the node’s cryptographic ID. The organization field stores the swarm ID. The organizational unit field stores the node’s role in the swarm. The canonical name field stores the node’s crypto ID.
+
+Some certificate properties can be configured. For example, you can set the certificate expiration period to thirty days instead of the default ninety by updating the swarm configuration. Swarm also allows nodes to renew certificates early, before they expire, so that not all nodes try to update their certificates at the same time.
+
+You can configure an external certificate authority when creating a swarm by passing the appropriate flag to the initialization command. There is also a dedicated sub-command for managing certificate authority configuration, which you can explore further by using the help option.
+
+Cluster Store
+
+The cluster store is the core of a swarm. It is where cluster configuration and state are stored. The store is currently based on an implementation of etcd and is automatically configured to replicate itself to all managers in the swarm. It is also encrypted by default.
+
+The cluster store is becoming a critical component of many Docker platform technologies. For example, Docker networking and Docker secrets both use the cluster store.
+
+Signing Images
+
+Docker Content Trust makes it simple and easy to verify the integrity and publisher of images that you download. This is especially important when pulling images over untrusted networks, such as the internet. At a high level, Docker Content Trust allows developers to sign their images when they are pushed to Docker Hub or Docker Trusted Registry. It will also automatically verify images when they are pulled.
+
+Docker Content Trust can also provide important context, such as whether an image has been superseded by a newer version and is therefore stale.
+
+Secrets
+
+Many applications need secrets—things like passwords, certificates, SSH keys, and more. Docker introduced a feature called Docker Secrets, effectively making secrets first-class citizens in the Docker ecosystem. There is a dedicated sub-command for managing secrets, and a page for creating and managing secrets in the Docker Universal Control Plane user interface.
+
+Behind the scenes, secrets are encrypted at rest, encrypted in transit, mounted in memory filesystems, and only available to services or containers that have been explicitly granted access. It is quite a comprehensive end-to-end solution.
+
+Here’s how the process works. Imagine you have three workers, each running two different images—red and blue. The red and blue services each have two replicas, meaning there are four tasks in total. Since there are three workers but four tasks, one worker will run two tasks—one red and one blue.
+
+The challenge is to distribute the secret to the workers without leaking information to containers that should not have access. The process is as follows:
+
+First, the secret is created and posted to the swarm. It is then stored in the encrypted cluster store. Next, the blue service is created and the secret is attached to it. The secret is encrypted in transit while it is delivered to the containers in the blue service. The secret is mounted into the containers of the blue service as an unencrypted file in the run secrets directory, which is an in-memory temporary filesystem. Once the container or service task completes, the in-memory filesystem is torn down. The red containers or services cannot access the secret.
+
+This approach ensures that secrets are handled securely and only made available to the containers that need them.
+
+

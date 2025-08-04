@@ -1,0 +1,137 @@
+Introduction
+
+Bit-wise operations are commonly used to optimize solutions, tightly pack data, or perform computations quickly. There are many clever techniques that rely on bit-wise operations. In this discussion, we’ll cover the most important and frequently used ones.
+
+Representation
+
+Understanding how binary numbers are represented is crucial. This knowledge extends to how we represent negative numbers, and even real or decimal numbers.
+
+Basics
+
+A binary number is a sequence of ones and zeros. This sequence is usually read from right to left, with the rightmost bit being the least significant, and the leftmost bit being the most significant. The bits are numbered starting from zero up to the total number of bits minus one.
+
+Let’s look at some common data types and their typical sizes. A byte is eight bits, which equals one byte. A short is sixteen bits, or two bytes. An integer is thirty-two bits, or four bytes. A long is sixty-four bits, or eight bytes. A double is also sixty-four bits, or eight bytes. A long double is eighty bits, or ten bytes.
+
+Keep in mind, these sizes can vary depending on the platform and implementation. For example, on some systems, long and int might both be four bytes, while on others, an integer could be sixteen bits. Older x86 systems often define long as thirty-two bits, while long long is sixty-four bits. On newer x64 systems, both are usually sixty-four bits wide. The key takeaway is to remember the general size and stride of each primitive type.
+
+In code, you might see unsigned and signed representations of binary numbers. For example, an unsigned binary number might look like a sequence of ones and zeros, while a signed version reserves the topmost bit for the sign.
+
+Negative Numbers
+
+To represent negative numbers, we use a method called two’s complement. In this system, the most significant bit is reserved for the sign. This means the range of values is split in half. For example, an eight-bit unsigned number can store values from zero to two hundred fifty-five. But an eight-bit signed number can store values from negative one hundred twenty-eight up to positive one hundred twenty-seven. The total number of representable values remains two hundred fifty-six, but the range is divided between positive and negative numbers.
+
+The trick with two’s complement is that negative numbers are represented as the complement of their positive counterparts. For example, in a four-bit system, the range is from negative eight to positive seven. If you look at the binary representations, you’ll notice that negative numbers mirror the positive ones, except for the sign bit.
+
+To calculate two’s complement, you subtract the number from the maximum stride. For a four-bit width, you can represent sixteen numbers in total, which is two to the power of four. To represent negative one, you take two to the power of three, which is eight, subtract one to get seven, and use that as the binary representation. The only difference is the sign bit.
+
+Notice how zero and negative eight are also mirrored, just like every other number in the range from seven to negative seven. The only difference is the sign bit. In total, you still have sixteen unique numbers.
+
+This system allows us to use negative numbers in bit-wise operations, such as creating masks. For example, a mask with no bits set is zero. A mask with only one bit set is one. A mask with all bits set is negative one.
+
+Real Numbers
+
+Floating point, or real number representation, allows the integer part of a number to have a variable width. This means you can represent fractions with more precision after the decimal point, or use less precision but have more bits for the integer part. For example, you might have a number with high precision, like one point two three nine four six seven nine two three eight seven four five six nine two three, or a number with less precision but a larger integer part, like twenty-three thousand nine hundred eighty-four point two eight seven four.
+
+Endianess
+
+Endianess refers to how memory is represented at the machine level. In little endian systems, the least significant byte is stored at the lowest address. For example, the value two hundred fifty-five would be stored as zero x zero zero F F. In big endian systems, the most significant byte is stored at the lowest address, so two hundred fifty-five would be stored as zero x F F zero zero.
+
+Historically, Intel processors have used little endian, while processors like the 6502 and Motorola have used big endian. This becomes important when software needs to run on platforms with different endianess. For example, something developed on an Intel platform must be carefully ported to another platform if it uses big endian byte order.
+
+Operations
+
+There are a few general operations that can be applied on a per-bit basis. These are often combined to build more complex operations that mutate or transform a set of bits.
+
+General Operations
+
+The basic bit-wise operations are AND, XOR, OR, NOT, left shift, and right shift.
+
+The AND operation results in one only when both bits are one. The XOR operation results in one when the bits are different. The OR operation results in one when at least one of the bits is one. The NOT operation inverts the bit, turning one into zero and zero into one. The left shift operation moves a bit to the left by a specified number of positions, effectively multiplying the number by a power of two. The right shift operation moves a bit to the right, effectively dividing the number by a power of two.
+
+Logical Shifts
+
+During left and right bit shifts, the bits are moved by a specified number of positions in each direction. For example, shifting the number one to the left by five positions moves the set bit from index zero to index five. In other words, you take the index of the first set bit and add the number of positions you want to shift.
+
+The same logic applies in the other direction for right shifts, but you subtract the number of positions from the bit’s index.
+
+To summarize, you move the set bit by adding or subtracting the shift amount to its current position.
+
+Arithmetic Shifts
+
+Arithmetic left and right shifts work a bit differently from logical shifts. In logical shifts, you simply move all bits left or right by the specified offset. In arithmetic shifts, the most significant bits that are freed up are filled with the sign bit. This has the effect of dividing a number by two and rounding down for odd numbers.
+
+For example, if you shift the binary representation of negative seventy-five to the right, the most significant bits are filled with ones, preserving the sign.
+
+Both logical and arithmetic shift operations can be used to divide or multiply a number by powers of two. Arithmetic shifting left by n bits multiplies the number by two to the power of n. Logical shifting has the same effect, but is only valid for unsigned integers.
+
+Get Bit
+
+To get the value of a specific bit, you move that bit to the least significant position and then check if it is zero or one using a bit-wise AND with one. The bit argument is an index, ranging from zero to thirty-one for a standard four-byte integer, giving you a total of thirty-two bits.
+
+
+Getting and manipulating bits in Java
+
+Let’s start by looking at how to get the value of a specific bit in an integer. The function getBit takes a value and a bit index. It shifts the value to the right by the number of positions specified by the bit index, so that the target bit moves to the least significant position. Then, it performs a bitwise AND with one, which isolates the value of that bit—either zero or one. For example, if you want the fourth bit of the number twenty-two, which is one zero one one zero in binary, you shift it right by three, then AND with one, and you get the value of that bit.
+
+Setting a bit
+
+To set a bit at a specific position, you create a mask where only that bit is set to one, and all other bits are zero. You do this by shifting one to the left by the bit index. Then, you perform a bitwise OR between the original value and the mask. This ensures that the bit at the specified position becomes one, while all other bits remain unchanged.
+
+Clearing a bit
+
+Clearing a bit means setting it to zero. To do this, you create a mask with all bits set to one except for the target bit, which is set to zero. You achieve this by shifting one to the left by the bit index, then applying a bitwise NOT to invert the mask. Finally, you perform a bitwise AND between the original value and this mask. This operation sets the target bit to zero and leaves all other bits unchanged.
+
+Toggling a bit
+
+Toggling a bit means flipping its value—if it was one, it becomes zero, and vice versa. To do this, you create a mask with only the target bit set to one. Then, you perform a bitwise XOR between the original value and the mask. This operation flips the bit at the specified position and leaves all other bits unchanged.
+
+Tricks with bits
+
+Checking if a number is a power of two
+
+A common trick is to check if a number is a power of two. In binary, a power of two has exactly one bit set to one. For example, thirty-two is two to the fifth power, and its binary representation is one followed by five zeros. If you subtract one from a power of two, you get a number with all lower bits set to one. Performing a bitwise AND between the number and one less than itself will always yield zero if the number is a power of two. Any other number will not produce zero.
+
+Finding the maximum and minimum of two numbers
+
+The code provides empty function definitions for finding the maximum and minimum of two numbers. These would typically compare the two values and return the larger or smaller one, respectively.
+
+Multiplying by a power of two
+
+You can multiply a number by two to the power of n by shifting it to the left by n positions. This is a fast and efficient way to perform multiplication when the multiplier is a power of two.
+
+Dividing by a power of two
+
+Similarly, you can divide a number by two to the power of n by shifting it to the right by n positions. This is a quick way to perform division when the divisor is a power of two.
+
+Checking if two numbers are equal
+
+To check if two numbers are equal, you can apply the XOR operation between them. If the result is zero, all bits are the same in both numbers. If any bit differs, the result will not be zero.
+
+Checking if a number is odd
+
+To determine if a number is odd, you can check its least significant bit. In binary, odd numbers always have a one in the least significant position. By performing a bitwise AND with one, you can extract this bit. If the result is one, the number is odd; if it is zero, the number is even.
+
+For example, the numbers zero through seven in binary show that odd numbers have a one in the least significant bit, while even numbers have a zero.
+
+Swapping two numbers without a temporary variable
+
+You can swap two numbers using the XOR operation without needing a temporary variable. The process involves three XOR operations. First, you XOR the two numbers and assign the result to the first variable. Then, you XOR the new value of the first variable with the second variable and assign the result to the second variable. Finally, you XOR the new values again to restore the original value to the first variable. This sequence effectively swaps the values.
+
+Checking the sign of two numbers
+
+To check if two numbers have the same sign, you can use the XOR operation. If the most significant bit is the same in both numbers, the XOR result will have a zero in that position, indicating the numbers have the same sign. If the most significant bit differs, the result will be negative, indicating the numbers have different signs.
+
+Flipping the sign of a number
+
+To flip the sign of a number, you need to obtain its negative representation. In two’s complement representation, you can do this by applying a bitwise NOT to the number and then adding one. For example, flipping the sign of six involves inverting its bits and adding one, resulting in negative six. The same logic applies for negative numbers, producing the positive equivalent. This is a fundamental operation in binary arithmetic and is widely used in low-level programming.
+
+
+Why is the number off by one when we do a flip?
+
+This happens because we can represent one more special type of number that is neither positive nor negative, and that is the number zero. In two's complement representation, for four-bit numbers, the range of values we can represent goes from negative eight, through zero, up to positive seven. That is, from negative two to the power of three, through zero, to positive two to the power of three minus one. This gives us eight negative numbers, seven positive numbers, and zero. In other words, the range is from negative eight to zero to positive seven. This totals sixteen numbers, which is exactly how many values four bits can represent, since two to the power of four equals sixteen.
+
+Now, let's look at the code example.
+
+This code defines a function called flip that takes an integer as input. It returns the bitwise complement of that integer, plus one. This operation effectively computes the two's complement, which is a standard way to represent negative numbers in binary.
+
+

@@ -1,1 +1,7 @@
 !*.pdf
+!*.txt
+*.mp3
+
+.resources
+.venv
+.vim

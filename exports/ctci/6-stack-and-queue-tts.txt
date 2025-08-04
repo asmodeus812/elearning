@@ -1,0 +1,89 @@
+Introduction
+
+The stack is one of the most widely used data structures in computer science. It is commonly used in various algorithms, such as graph or tree traversals, and can also be used to implement recursive algorithms in an iterative way.
+
+A typical stack provides a few core operations. The pop operation removes the element at the top of the stack. The push operation adds a new element to the top. The peek operation lets you look at the top element without removing it. Finally, the empty operation checks if the stack is empty, returning true or false.
+
+It’s important to note that in Java’s default stack implementation, using pop or peek on an empty stack will throw an exception, such as StackEmptyException.
+
+Now, let’s look at a simple stack implementation in Java. This code defines a generic Stack class. Internally, it uses a singly linked list, where each node holds a value and a reference to the next node. The stack keeps a reference to the head node, which always represents the top of the stack. When you push a new value, it becomes the new head. When you pop, the head moves to the next node. The peek operation returns the value at the head without removing it. The empty method checks if the head is null, indicating whether the stack is empty.
+
+Min Stack
+
+A common problem is how to keep track of the minimum element in a stack, so that you can always retrieve the minimum in constant time.
+
+The solution is to use two stacks. One stack holds all the elements, while the other stack, called the min stack, only holds the minimum elements as they are inserted. When you push a new value, you compare it to the current minimum. If it’s smaller, you also push it onto the min stack. When you pop, if the value being removed is the current minimum, you pop it from the min stack as well. This way, the min stack always has the current minimum at its top.
+
+In summary, this approach ensures that you can always retrieve the minimum element in constant time, by simply peeking at the top of the min stack.
+
+Stack of Stacks
+
+Another interesting problem involves storing a stack inside another stack, where each sub-stack has a maximum limit on the number of elements it can hold. When a sub-stack reaches its limit, a new sub-stack is created and pushed onto the main stack.
+
+This is implemented by maintaining a stack of stacks. Each sub-stack can hold up to a specified limit of elements. When you push a new value, you check if the current sub-stack is full. If it is, you create a new sub-stack and push it onto the main stack. When popping, if the current sub-stack becomes empty after the operation, you remove it from the main stack.
+
+This design allows you to manage large collections of elements by splitting them into manageable sub-stacks, each with a fixed capacity.
+
+Sorting Stack
+
+A classic challenge is how to keep a stack always sorted, so that its elements are in ascending or descending order.
+
+The solution is to use a temporary stack during insertion. When you want to insert a new value, you pop elements from the main stack and push them onto the temporary stack until you find the correct position for the new value. Once the new value is inserted, you move the elements back from the temporary stack to the main stack. This ensures that the main stack remains sorted after each insertion.
+
+In essence, this approach allows you to maintain a sorted stack by carefully managing the order of elements during each push operation.
+
+
+The previous section describes how to insert an element into a sorted stack. The key idea is that, before pushing a new value, the stack is arranged so that all elements smaller than or equal to the new value are at the top. After pushing the new value, the stack remains sorted. Any temporarily removed elements are then returned to the sorted stack in the correct order, ensuring the stack’s sorted property is preserved.
+
+Now, let’s move on to the topic of implementing a queue using two stacks.
+
+Queue from stacks
+
+Implementing a queue using two stacks is a classic problem. The goal is to provide a queue interface—where elements are inserted at the end and removed from the front—using only two stacks to store all elements. The solution involves using two stacks, often called “old” and “new.” When inserting new elements, you only push them onto the “new” stack. When you want to remove an element, you move all elements from the “new” stack to the “old” stack, but only if the “old” stack is empty. This reversal puts the oldest element at the top of the “old” stack, making it ready for removal.
+
+The key optimization is that you only transfer elements from the “new” stack to the “old” stack when the “old” stack is empty. This way, you avoid unnecessary transfers and improve efficiency. The “old” stack acts as a buffer, holding elements ready to be removed in the correct order. As long as the “old” stack has elements, you remove from it directly. Only when it becomes empty do you refill it from the “new” stack.
+
+The naive approach would be to reconstruct the queue order on every operation by popping all elements from one stack, accessing the head, and then pushing them back. However, the optimized solution described here is much more efficient, as it minimizes the number of transfers between stacks.
+
+In the provided Java code, two stacks are used: one for new elements, representing the tail of the queue, and one for old elements, representing the head. The peek and remove operations both call a shift method, which transfers elements from the new stack to the old stack only when the old stack is empty. This ensures that the oldest element is always at the top of the old stack, ready to be removed or peeked at.
+
+Composite stacks
+
+Next, let’s discuss how to store multiple stacks using a single dynamic array. One solution is to interleave the stacks within the array. For example, if you have three stacks, the array would look like this: a1, b1, c1, a2, b2, c2, a3, b3, c3, and so on. Each stack’s elements are distributed at regular intervals throughout the array.
+
+The Java code provided demonstrates this approach. The number of stacks is specified, and a dynamic array is used to hold all the stack data. An additional array keeps track of the head index for each stack. When pushing a value onto a specific stack, the code calculates the correct index by offsetting based on the number of stacks. If the array needs to grow, it is resized in chunks equal to the number of stacks, ensuring there is always space for at least one more element per stack. When popping, the code checks if the stack is empty by looking at the head index, and then retrieves and returns the value at the current head, updating the head index accordingly.
+
+Queue
+
+Now, let’s move on to the queue data structure itself. The queue is one of the most commonly used data structures, especially in algorithms involving graphs or tree traversals. The typical queue interface includes the following operations:
+
+Remove, which removes the element from the front of the queue.
+
+Insert, which adds a new element to the end of the queue.
+
+Peek, which returns the element at the front of the queue without removing it.
+
+Empty, which checks if the queue is empty and returns true or false.
+
+It’s important to note that, in Java’s default implementation, calling methods like peek or remove on an empty queue will throw a QueueEmptyException or a similar error. This behavior is something to keep in mind when working with queues in Java.
+
+The next section provides a Java class definition for a generic queue, which implements these standard operations.
+
+
+Let’s walk through a simple implementation of a queue data structure, similar to what you might find in Java.
+
+First, there is a private static class called QueueNode, which represents each entry in the queue. Each node holds a value and a reference to the next node in the sequence. Because of the way queues work, this node does not need to be doubly linked—meaning, it only points forward, not backward. This makes it very similar to a singly linked list.
+
+The queue itself maintains a reference to the head node. When you remove an item from the queue, you take the value from the head and move the head pointer forward to the next node. When inserting, you use the head to traverse the queue and find the end, so you can add the new item at the tail. While it’s possible to keep a direct reference to the tail for efficiency, this implementation keeps things simple by only tracking the head.
+
+The insert method checks if the head is null. If it is, that means the queue is empty, so it creates a new node, sets its value, and makes it the head. If the queue already has elements, it traverses from the head to the end of the queue to find the last node, then attaches a new node with the given value to the end.
+
+The remove method first checks if the queue is empty. If it is, it throws an exception, just like the standard Java queue implementation. Otherwise, it takes the value from the head node, moves the head pointer to the next node, and returns the value that was removed.
+
+The peek method also checks if the queue is empty and throws an exception if so. Otherwise, it simply returns the value at the head of the queue without removing it.
+
+Finally, the empty method checks whether the queue has any elements. It does this by seeing if the head is not null. If the head is null, the queue is empty.
+
+In summary, this code provides a basic queue with insert, remove, peek, and empty operations, using a singly linked list structure for its internal storage.
+
+

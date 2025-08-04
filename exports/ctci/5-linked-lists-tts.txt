@@ -1,0 +1,62 @@
+Introduction
+
+A linked list represents a sequence of nodes, where each node is connected to the next one. This structure is known as a singly linked list. There are variations, such as the doubly linked list, where each node also has a link to the previous node.
+
+In code, a basic node in a singly linked list is typically defined as a class with an integer value and a reference to the next node in the sequence.
+
+Creating a Linked List
+
+To create a linked list from a list of integers, we iterate through the elements, creating a new node for each value. The first node becomes the head of the list, and each subsequent node is linked to the previous one. The function returns the head node, which serves as the entry point to the list.
+
+Deleting from a Linked List
+
+Deleting a node from a linked list usually means removing the link to that node. This is done by connecting the previous node directly to the node after the one being deleted. If the node to be deleted is the head and contains the target value, we simply return the next node as the new head.
+
+The deletion process involves tracking both the current node and its parent as we traverse the list. When we find the node with the target value, we update the parent’s link to skip over the current node. The function then returns the potentially new head of the list.
+
+There is also a special case where you are asked to remove a node from the middle of the list, but you only have access to that node, not its parent. In this scenario, instead of removing the node itself, you copy the value from the next node into the current node, then continue this process until you reach the tail. Finally, you set the value of the last node to a default, such as zero. This approach is similar to shifting elements in a static array, but instead of using indices, you use node references.
+
+Runner Approach
+
+A crucial technique when working with linked lists is the runner approach. This involves traversing the list with two pointers, often called the slow and fast pointers. The fast pointer moves two steps at a time, while the slow pointer moves one step. This method is commonly used to detect loops in a linked list.
+
+If there is a loop, the fast and slow pointers will eventually meet at some node within the loop. Once they intersect, if you reset one pointer to the head and move both pointers one step at a time, they will meet again at the start of the loop. This guarantees the detection of the loop’s entry point.
+
+The general structure of the runner approach starts both pointers at the head of the list. In each iteration, the slow pointer moves to the next node, while the fast pointer moves two nodes ahead. If the pointers meet, a loop is detected.
+
+Detecting Loops
+
+To detect a loop in a linked list, we use the runner approach. Both pointers start at the head. The slow pointer advances by one node, and the fast pointer advances by two nodes. If they ever point to the same node, a loop exists in the list. This means the same node reference appears more than once in the sequence.
+
+Interspersing Items in a List
+
+Another application of the runner approach is interspersing items in a list. Imagine a linked list with an even number of elements, such as a1, a2, a3, a4, b1, b2, b3, b4. The goal is to rearrange the list so that it alternates between the two groups, resulting in a1, b1, a2, b2, a3, b3, a4, b4.
+
+To achieve this, you use two pointers: one starting at the head of the list, and the other starting at the midpoint. Both pointers move forward together, and you adjust the links so that nodes from each half are interleaved. The process continues until you reach the end of the list.
+
+Previous and Current Approach
+
+Now, let’s move on to the previous and current approach.
+
+
+This is a variation of the runner approach where we keep a reference to both the previous element in the list, known as the previous node, and the current node. This is usually done to make it easier when we want to delete elements from the list. This situation comes up frequently, and in these cases, both pointers are typically one step apart from each other. However, the previous node does not always move exactly one step behind the current node—it might depend on the specific algorithm being used.
+
+Recursive approach
+
+Another technique that is very common in linked list problems is the recursive approach. If you are having trouble solving a linked list problem, you should consider whether recursion might help. In linked list problems, recursive calls can traverse the list from head to tail, and when the recursive call returns, you effectively get an inverse traversal from tail to head. This is not without cost, since the space complexity is order n, due to the call stack.
+
+An example of this is finding the k-th to last element in a singly linked list. What can we do here? Using recursion, we can drill down to the tail of the list, keeping track of the current count of elements. At the bottom of the recursion, we will have traversed the entire list and counted all the elements. Then, as the recursive calls unwind, we can subtract k from the total element count and compare it to the current element's count. This way, we can find the exact node that is k elements behind the tail, or the last element.
+
+In the code example, a function called recursive is defined. It takes a node and an accumulator as arguments. The function uses a variable called total to store the total number of elements in the list. The goal is to find the third element from the end of the list. The function recursively traverses the list, incrementing the accumulator with each call. When it reaches the end of the list, it records the total count. As the recursion unwinds, it checks if the current element is k elements away from the end, and if so, prints its value.
+
+List interweaving
+
+List interweaving is a very important algorithm to understand. It weaves two lists into each other, effectively creating all possible permutations between the elements of the two lists. However, the relative positions or order of elements in each list are retained. For example, if one of the lists is one and two, the order of elements after weaving will always have one before two, no matter where they appear in the final result.
+
+In the code example, a function called weave is defined. It takes two linked lists, a prefix list, and a result list. The function recursively weaves the two lists together. If either of the source lists is empty, it clones the prefix and appends the remaining elements from both lists, then adds this combination to the result. Otherwise, it removes the front element from the first list, adds it to the prefix, and recurses. After unwinding, it restores the element to the first list. It then does the same for the second list. This process ensures that all possible interleavings are generated, while preserving the order of elements from each original list.
+
+How does this work in practice? Let's look at an example with the two lists: one and two, and three and four. The recursive function first exhausts the first list, putting all its elements into the prefix. When the base case is reached, the prefix contains all elements from the first list, and the remaining elements from the second list are appended. As the recursive stack unwinds, elements are returned to the first list one by one, and for each, the function explores the recursive calls for the second list. This depth-first approach generates all valid interleavings.
+
+For example, starting with the lists one and two, and three and four, the function first weaves one and two with three and four, with an empty prefix and result. It then weaves two with three and four, with one in the prefix. Next, it weaves an empty list with three and four, with one and two in the prefix, resulting in the sequence one, two, three, four. The function then explores weaving two with four, with one and three in the prefix, and so on, eventually generating all valid interleavings such as one, three, four, two.
+
+

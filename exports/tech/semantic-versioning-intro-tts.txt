@@ -1,0 +1,100 @@
+Introduction
+
+Let’s begin with the basics of semantic versioning. When you see a version number written as “major dot minor dot patch,” you should increment the major version when you make incompatible changes to your application programming interface, or API. The minor version should be increased when you add new features in a way that remains backward compatible. The patch version is for backward compatible bug fixes.
+
+There are also optional labels for pre-release versions and build metadata, which can be added as extensions to the major, minor, and patch format.
+
+In the world of software management, there’s a notorious problem known as dependency hell. As your system grows and you add more packages, you’re more likely to encounter this issue. In systems with many dependencies, releasing new versions of packages can quickly become a nightmare.
+
+If your dependency specifications are too strict, you risk version lock. This means you can’t upgrade a package without also releasing new versions of every package that depends on it. For example, if package A requires version one point two point three of package B, and package B updates to one point three point zero, you can’t use the new version of B unless you also release a new version of A that explicitly allows one point three point zero. This problem can cascade through your entire dependency tree, making upgrades difficult and error-prone.
+
+On the other hand, if your dependency specifications are too loose, you risk version promiscuity. This happens when your software allows any version of a dependency, which can lead to unexpected breakage. For instance, if package A says it works with any version greater than or equal to one point zero point zero of package B, and a breaking change is introduced in version two point zero point zero, package A might suddenly break when B updates.
+
+To solve these problems, we propose a simple set of rules for assigning and incrementing version numbers. These rules are based on common practices in both open and closed source software.
+
+For this system to work, you need to declare a public API. This can be done through documentation or enforced in the code itself, but it must be clear and precise. Once you’ve identified your public API, you communicate changes to it by incrementing your version number in specific ways.
+
+Consider the version format “x dot y dot z.” Bug fixes that don’t affect the API increment the patch version. Backward compatible additions or changes to the API increment the minor version. Backward incompatible changes increment the major version.
+
+This system is called semantic versioning. Under this scheme, version numbers and the way they change convey meaning about the underlying code and what has been modified from one version to the next.
+
+Specification
+
+Software that uses semantic versioning must declare a public API. This API can be defined in the code or in documentation, but it should be precise and comprehensive.
+
+A normal version number must take the form “x dot y dot z,” where x, y, and z are non-negative integers with no leading zeroes. X is the major version, Y is the minor version, and Z is the patch version. Each element must increase numerically.
+
+Once a versioned package has been released, its contents must not be modified. Any changes must be released as a new version.
+
+Major version zero, written as zero dot y dot z, is for initial development. Anything can change at any time, and the public API should not be considered stable.
+
+Version one point zero point zero defines the public API. After this release, how you increment the version number depends on changes to this public API.
+
+The patch version, which is the Z value, must be incremented if only backward compatible bug fixes are introduced. A bug fix is defined as an internal change that corrects incorrect behavior.
+
+The minor version, or Y value, must be incremented if new backward compatible functionality is added to the public API. It must also be incremented if any public API functionality is marked as deprecated. It may be incremented if substantial new functionality or improvements are introduced within the private code. The patch version must be reset to zero when the minor version is incremented.
+
+The major version, or X value, must be incremented if any backward incompatible changes are introduced to the public API. It may also include minor and patch level changes. Both the patch and minor versions must be reset to zero when the major version is incremented.
+
+A pre-release version may be indicated by appending a hyphen and a series of dot-separated identifiers immediately following the patch version. These identifiers must be made up of only ASCII alphanumeric characters and hyphens, and they must not be empty. Numeric identifiers must not have leading zeroes. Pre-release versions have lower precedence than the associated normal version. A pre-release version signals that the version is unstable and might not meet the intended compatibility requirements of its associated normal version. Examples include one point zero point zero dash alpha, one point zero point zero dash alpha dot one, and one point zero point zero dash zero dot three dot seven.
+
+Build metadata may be indicated by appending a plus sign and a series of dot-separated identifiers following the patch or pre-release version. These identifiers must also be ASCII alphanumeric characters and hyphens, and must not be empty. Build metadata must be ignored when determining version precedence. This means that two versions that differ only in build metadata have the same precedence. Examples include one point zero point zero dash alpha plus zero zero one, and one point zero point zero plus two zero one three zero three three one three one four four seven zero zero.
+
+Precedence refers to how versions are compared to each other when ordered. Precedence must be calculated by separating the version into major, minor, patch, and pre-release identifiers in that order. Build metadata does not affect precedence.
+
+Precedence is determined by the first difference when comparing each of these identifiers from left to right. Major, minor, and patch versions are always compared numerically. For example, one point zero point zero is less than two point zero point zero, which is less than two point one point zero, which is less than two point one point one.
+
+When the major, minor, and patch versions are equal, a pre-release version has lower precedence than a normal version. For example, one point zero point zero dash alpha is less than one point zero point zero.
+
+Precedence for two pre-release versions with the same major, minor, and patch version must be determined by comparing each dot-separated identifier from left to right until a difference is found. Identifiers that are only digits are compared numerically. Identifiers with letters or hyphens are compared lexically in ASCII sort order. Numeric identifiers always have lower precedence than non-numeric identifiers. Precedence for two pre-release versions with the same major, minor, and patch versions must be determined by comparing each dot-separated identifier from left to right until a difference is found.
+
+Why use semantic versioning
+
+This is not a new or revolutionary idea. In fact, you probably already do something similar. The problem is that “close” is not good enough. Without compliance to a formal specification, version numbers are essentially useless for dependency management.
+
+By giving a name and clear definition to these ideas, it becomes easy to communicate your intentions to the users of your software. Once these intentions are clear, you can finally make dependency specifications that are flexible, but not too flexible.
+
+Frequently asked questions
+
+How to deal with revision zero dot y dot z of initial development
+
+The simplest approach is to start your initial development release at zero point one point zero, and then increment the minor version for each subsequent release.
+
+How to know when to release one point zero point zero
+
+If your software is being used in production, it should probably already be at one point zero point zero. If you have a stable API that users depend on, you should be at one point zero point zero. If you are worrying a lot about backward compatibility, you should already be at one point zero point zero.
+
+Doesn’t this discourage rapid development and fast iteration?
+
+Major version zero is all about rapid development. If you are changing the API every day, you should either still be in version zero dot y dot z, or working on a separate development branch for the next major version.
+
+If even the tiniest backward incompatible change to the public API requires a major version, won’t we end up at version forty-two point zero point zero very quickly?
+
+This question is left open for further discussion.
+
+
+This is a question of responsible development and foresight.
+
+Incompatible changes should not be introduced lightly to software that has a lot of dependent code. The cost to upgrade can be significant. When you are required to bump a major version to release incompatible changes, it forces you to carefully consider the impact of your changes and weigh the cost against the benefits.
+
+Documentation is too much work
+
+As a professional developer, it is your responsibility to properly document software that is intended for use by others. Managing software complexity is crucial for keeping a project efficient, and this becomes difficult if nobody knows how to use your software or which methods are safe to call. Over time, following semantic versioning and insisting on a well-defined public API helps keep everything running smoothly for everyone involved.
+
+What to do if accidentally a backward incompatible change is released as a minor version
+
+If you realize that you have broken the contract and the semantic versioning specification by releasing a backward incompatible change as a minor version, you should immediately fix the problem. Release a new minor version that corrects the issue and restores backward compatibility. Even in this situation, it is not acceptable to modify already released versions. If necessary, document the problematic version and inform your users so they are aware of the issue.
+
+How to handle deprecated functionality
+
+Deprecating existing functionality is a normal part of software development and is often necessary for progress. When you deprecate part of your public API, you should do two things. First, update your documentation to inform users about the change. Second, issue a new minor release that includes the deprecation. Before you completely remove the functionality in a new major release, there should be at least one minor release containing the deprecation. This gives users time to transition smoothly to the new API.
+
+Does SemVer have a size limit of the version string
+
+There is no strict size limit for a semantic version string, but you should use good judgment. For example, a version string that is two hundred fifty-five characters long is probably excessive. Additionally, some systems may impose their own limits on the size of the version string.
+
+Is “v1.2.3” a valid semantic version
+
+Strictly speaking, “v1.2.3” is not a semantic version. However, prefixing a semantic version with the letter “v” is a common way to indicate that it is a version number. Abbreviating “version” as “v” is often seen in version control systems.
+
+

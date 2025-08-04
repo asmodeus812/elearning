@@ -1,0 +1,132 @@
+Introduction
+
+One of the most important concepts to understand in computer science is algorithm efficiency. This concept is crucial because it helps us describe how well an algorithm performs as the size of its input grows. Not understanding this can be a significant disadvantage, and it is often judged critically in technical interviews and assessments.
+
+What is Big O?
+
+Big O, also known as asymptotic run time, is a way to describe how the performance of an algorithm changes as the input size increases. In simple terms, no matter how large a constant is, and no matter how slow a linear increase might seem, eventually, a linear function will surpass a constant one as the input grows.
+
+For example, O of one, or constant complexity, means that no matter the input, the run time will always take the same fixed amount of time. In contrast, O of n, or linear complexity, means that the run time increases directly in proportion to the size of the input.
+
+There are many other types of complexity, such as logarithmic, quadratic, or exponential. For instance, log of n, n squared, or two to the power of n, each describe different non-constant run time complexities. The list of possible non-constant complexities is not fixed. Sometimes, the run time depends on multiple variables, not just n. For example, you might see n times m, where m is another input parameter. Sometimes, the dependent arguments are indirectly connected to the input and are a function of the input instead.
+
+Big O allows us to describe how the run time or space complexity scales, but it does not measure absolute units of time or space.
+
+Big Theta and Big Omega
+
+In academic settings, there are three related concepts: big O, big theta, and big omega. Each describes a different aspect of algorithm performance.
+
+Big O describes an upper bound on the run time. For example, if a function prints the values of an array of n items, it can be described as O of n, but it could also be described as O of n squared, O of n cubed, and so on. The printing is at least as fast as each of these run times, but it will never be less than the lowest complexity, which in this example is O of n.
+
+Big theta is the same concept, but for a lower bound. It means that an algorithm will not be slower than a certain run time, such as O of n.
+
+Big omega is when big O and big theta give a tight bound on the run time, meaning they converge to the same run time complexity. In industry, when people refer to big O, they usually mean this tight bound, not just the academic upper boundary.
+
+Common Complexities
+
+In practice, there are seven commonly occurring complexities, listed here from fastest to slowest.
+
+First, constant time, or O of one, such as accessing an array element.
+
+Second, logarithmic time, or O of log n, such as binary search.
+
+Third, linear time, or O of n, such as printing all elements in an array.
+
+Fourth, n times logarithmic time, or O of n log n, such as quick sort.
+
+Fifth, quadratic time, or O of n squared, such as bubble sort.
+
+Sixth, exponential time, or O of two to the n, such as calculating the Fibonacci sequence recursively.
+
+Seventh, factorial time, or O of n factorial, such as generating all permutations of a string.
+
+Best and Worst Cases
+
+When discussing best, worst, and expected run times, the industry usually focuses on the expected and worst cases. Often, the expected case is the same as the worst case, or the worst case is not a total failure of the algorithm.
+
+However, there are cases where the worst case differs significantly from the expected case. For example, in quick sort, the choice of pivot element and the sorting direction can affect performance. If you always choose the first element as the pivot and sort in reverse order, the array will not be divided in half each time. Instead, it will shrink by only one element per step, making the algorithm effectively linear in run time.
+
+Space Complexity
+
+Space complexity is a parallel concept to run time complexity. Each algorithm requires a certain amount of memory to execute, depending on its type. This could be constant or non-constant space.
+
+For example, consider a regular loop versus a recursive function that prints an array of n elements. The loop version uses constant space throughout execution. However, the recursive version uses O of n space, because the call stack grows with each recursive call.
+
+Dropping the Constants
+
+It is possible for an O of n algorithm to be faster than an O of one algorithm in practice, because big O describes the rate of increase, not absolute speed. A constant run time does not mean instant execution.
+
+For this reason, we drop the constants in run time analysis. For example, O of one times n, O of two times n, O of three times n, and so on, are all considered equivalent. The constant factor does not affect how the algorithm scales with input size.
+
+Consider an algorithm that finds the maximum and minimum elements in an array. You could use two separate loops, one for the maximum and one for the minimum, which would be O of two n. Or, you could use a single loop to find both, which would be O of n. In both cases, the complexity is O of n for time and O of one for space. Both algorithms scale the same way with n. Combining the tasks into one loop or using two separate loops does not change the run time complexity.
+
+Dropping Non-Dominant Terms
+
+Since we can drop constants, we can also drop non-dominant terms in complexity expressions. Sometimes, an algorithm's complexity has multiple terms, but one term is much larger than the others as the input grows. In these cases, we keep only the dominant term.
+
+For example, O of n squared plus n becomes O of n squared. O of n squared plus ten times n also becomes O of n squared. O of n cubed plus log n becomes O of n cubed. O of two to the n plus one thousand times n becomes O of two to the n.
+
+This simplification is only relevant when the terms depend on the same input parameter. If you have two different parameters, such as O of a plus b, you cannot reduce the expression without more information. If you know that one parameter is much larger than the other, you might simplify, but that requires additional data.
+
+Adding Versus Multiplying Complexities
+
+When do you add two complexities, and when do you multiply them? The rules are as follows.
+
+If, for each chunk of work A, you do B chunks of work, you multiply the complexities. This is usually seen in nested loops or similar structures.
+
+If, however, you do the work for each chunk of A and then for each chunk of B, you add the run times. This is similar to having loops executed one after the other.
+
+Amortized Time
+
+Amortized time describes situations where, occasionally, a worst-case scenario will occur, and it cannot be avoided. For example, consider a self-resizing array. When the array is full, the implementation doubles its size and copies the old elements into the new array. Most of the time, the operation is O of one, but occasionally, it degrades to O of n. Amortized time captures this average behavior over a sequence of operations.
+
+Log N Run Times
+
+In most algorithms, we deal with logarithms of base two, because the problem size is halved at each step. For example, in binary search on a sorted array, each iteration halves the number of elements to consider.
+
+Suppose you have an array with sixteen elements. To find a specific element, you need at most four comparisons. The run time still scales with the input, but it is not linear. Instead of sixteen comparisons, you do four.
+
+The general logarithm formula is: log base two of n equals k, which means two to the power of k equals n. For example, log base two of sixteen is four, because two to the fourth power is sixteen.
+
+Why is this four? You start with sixteen elements, take the midpoint, compare, and subdivide into two, until you have only one element or have found the target. The steps are: sixteen divided by two is eight, eight divided by two is four, four divided by two is two, and two divided by two is one.
+
+When you see a problem where the solution space is divided by two at each step, it is usually a log base two of n situation. If the problem space was divided by four, eight, or sixteen at each step, the log base would be four, eight, or sixteen, respectively. For example, log base four of sixteen is two, meaning you can find the solution in two steps instead of four.
+
+Note that the base of the logarithm does not matter for big O analysis. The complexity will still be logarithmic in the number of input arguments, whether it is log base ten, log base four, or any other base. The reason is that the curve described by the logarithm is the same, regardless of the base. Remember, big O does not evaluate absolute run time or space complexity, but rather describes scaling.
+
+What the logarithm describes is the type of scaling in relation to the input. We are not looking for which log base produces a smaller or better absolute value of steps, but instead, we are interested in the overall scaling of the input in relation to the solution.
+
+Recursive Run Times
+
+Given the following example, we need to determine the run time and space complexity of the provided function. 
+
+At this point, the document would typically present a code example. In this context, you would analyze the recursive function, describe its purpose, and explain how its run time and space complexity are determined based on the structure of the recursion.
+
+
+Let’s walk through the analysis of the recursive function and its complexity.
+
+First, here’s what the function does:
+
+The function, named f, takes an integer n as input. If n is less than or equal to one, it returns one. Otherwise, it calls itself twice with the argument n minus one, and returns the sum of those two results. In essence, this function doubles the result of f called with n minus one, for each n greater than one.
+
+Now, let’s consider what happens when you call f with the value four.
+
+When you call f with four, the function calls itself twice with three. Each of those calls to f with three, in turn, calls f with two twice, and so on, until the base case is reached. At each level of recursion, the number of calls doubles. This forms a binary tree of function calls, where each node represents a call to f, and each non-leaf node has two children.
+
+The depth of this recursion tree is four, corresponding to the initial input. The root node is at depth zero, and the leaves are at depth three. The total number of function calls is two to the power of four, minus one, which equals fifteen. This is because each level of the tree has twice as many nodes as the previous level, and the sum of nodes in a full binary tree of depth D is two to the power of D, minus one.
+
+To visualize this, imagine the tree:
+
+At the top, there is a single call to f with four. This splits into two calls to f with three. Each of those splits into two calls to f with two, and so on, until you reach the base case, where n is one. At the bottom level, there are eight calls to f with one.
+
+It’s important to clarify what the variable N represents in this context. Here, N is simply the input number to the function. It is not the size of an array, nor is it the depth of a data structure. However, the way the algorithm is written, the number of recursive calls, and thus the time complexity, is governed by this input number N.
+
+For each increase in N, the number of function calls doubles. This is because the branching factor of the recursion is two—each call to f results in two more calls, until the base case is reached. The depth of the recursion tree, in this case, matches the input N, but it’s important not to confuse the depth of the tree with the input itself. The runtime complexity is determined by the input N, not by the depth of the tree per se.
+
+In summary, the time complexity of this function is exponential in N. Specifically, it is on the order of two to the power of N, or O(2^N). This is because each call to f with N results in two calls to f with N minus one, and this doubling continues until the base case is reached.
+
+If the algorithm were changed, for example, to make three recursive calls instead of two, the branching factor would be three, and the complexity would be O(3^N). The key takeaway is that the algorithm’s scaling is determined by the input number N and the branching factor of the recursion.
+
+In conclusion, for the function f as defined, calling f with four results in fifteen function calls, and the time complexity is exponential in the input N. The structure of the recursion forms a perfectly balanced binary tree, and the number of calls grows rapidly as N increases.
+
+

@@ -1,0 +1,75 @@
+Introduction
+
+To crack the coding interview, you need to prepare with real interview questions. It is essential to practice on actual problems and learn to recognize their patterns. The goal is to develop fresh algorithms, not to memorize existing solutions.
+
+The Interview
+
+The interview itself is short. You might not get through more than a couple of questions or tasks in the span of forty-five minutes to an hour. Do your best to explain your process as you work through the problem. Speak out loud and walk the interviewer through your thought process.
+
+When you reach the whiteboard portion, avoid writing pseudo code. Instead, aim for a condensed version of real code. Try to make as few errors as possible while writing your solution.
+
+Interviewers typically evaluate you on several dimensions. First, analytical ability—did you need much help solving the problem? How optimal was your solution, and how long did it take you to arrive at it? If you had to design a new solution, did you structure the problem well and think through the trade-offs?
+
+Second, coding skills—were you able to successfully translate your algorithm into reasonable code? Was your code clean and well organized? Did you consider potential errors and demonstrate good style?
+
+Third, technical knowledge—do you have a strong foundation in computer science and the relevant technologies?
+
+Fourth, experience—have you made good technical decisions in the past? Have you built interesting projects, and have you shown drive and initiative?
+
+Finally, culture fit—do you have good communication skills, and do your values align with the company and team?
+
+The Questions
+
+The questions are not pre-selected. Each interviewer chooses their own questions, sometimes even on the spot. Some companies prefer solution-based questions that involve algorithms, while others focus on knowledge-based questions about technologies.
+
+The way your answers are evaluated is relative to how other candidates have answered the same questions. Your performance depends on how well or poorly others have done with those questions.
+
+Both experienced and novice candidates often get the same type of problem-solving questions. Some companies might hold experienced candidates to a lower standard, but that is not always the case. If you have experience with enterprise systems and frameworks but are not applying for such a role, you might need to show more technical skill to compensate.
+
+When answering questions, focus on your own contributions, not the team’s. Tell the interviewer what you have accomplished, not what the team has done.
+
+When talking about yourself, try to answer the following questions. What is your current role in the company you are or were at? Be brief. What is your college or university background? What did you study, and how did it go? After your education, give a brief history of your career, as reflected in your resume. Outside of work, what do you do? Do you work on projects in your spare time? Mention hobbies, especially if they are unique or technical.
+
+The Process
+
+The process usually starts with a screening interview, which may be over the phone or via chat. This might involve some problem solving or whiteboard problems. Do not take it lightly. Some companies use online shared editors or documents, while others might want you to write the problem on paper and read it back to them. There may be one to three screening interviews.
+
+Next is the on-site interview, which is in person. There are usually three to six interviews, some of which might be non-technical, such as a lunch meeting. Afterward, within a week or two, you should expect some feedback, especially if you are hired. However, no communication does not necessarily mean you have been rejected.
+
+The Resume
+
+Keep your resume short. Include the most impressive roles in your career so far—the ones that will make you stand out. Add the most relevant technologies you and your team have used.
+
+For each role, try to list your accomplishments using the format: accomplished X by implementing Y, which led to Z.
+
+Avoid listing too many technologies or languages, especially those you are not comfortable with. Shrink the list down to the ones you like most and feel most confident in.
+
+Try to avoid any grammatical mistakes in your resume. Some employers might discard a resume just because it contains errors.
+
+Be careful when listing certifications. Some companies might not appreciate a certificate for a specific technology or language, especially if the position you are applying for is not relevant to that skill.
+
+The Projects
+
+Include at least two to four projects that you consider your most significant accomplishments. State what each project was and which languages or technologies it used. Do not add every project you have ever done.
+
+Have a deep understanding of the technology and stack of the projects you have developed and listed on your resume. Make sure you cannot be caught off guard with questions about your own projects.
+
+Try to explain your projects clearly, but do not go into too much detail. Stick to the major points.
+
+The Interviewer
+
+There are some questions you can ask the interviewer to gain a better understanding of what it is like to work at the company.
+
+For example, you might ask about the ratio of testers to developers, and what the interaction is like. How does project planning work?
+
+You can ask what brought the interviewer to the company, and what has been most challenging for them.
+
+If you notice that the company uses a particular technology, ask how they handle specific problems with it.
+
+You might also ask why the product team chose to use one technology instead of another, especially if you know the pros and cons.
+
+Ask about opportunities within the company to learn about a technology or stack you are passionate about.
+
+Finally, if there is a technology you are not familiar with, ask how they use it in their projects.
+
+

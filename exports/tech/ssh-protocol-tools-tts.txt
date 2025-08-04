@@ -1,0 +1,122 @@
+Introduction. What is it?
+
+SSH, or Secure Shell, is a widely used and powerful software-based approach to network security. Whenever a computer sends data over a network, SSH automatically encrypts that data. When the data reaches its intended recipient, SSH decrypts it. This process is called transparent encryption, meaning users can work as usual, unaware that their communications are being securely encrypted on the network.
+
+SSH uses modern, secure encryption algorithms and is robust enough to be used in mission-critical applications at major corporations. It follows a client-server architecture. Typically, a system administrator installs and runs an SSH server program on a host computer, which then accepts or rejects incoming connections. Users run SSH client programs, usually on other computers, to make requests to the SSH server. These requests can include logging in, sending files, or executing commands. All communication between clients and servers is securely encrypted and protected from modification.
+
+This description is simplified, but it should give you a general idea of what SSH is and what it does. An SSH-based product might include clients, servers, or both. Unix products generally contain both clients and servers, while products on other platforms are usually just clients, though Windows-based servers do exist.
+
+If you are a Unix user, think of SSH as a secure replacement for the Unix r-commands, such as remote shell, remote login, and remote copy. In fact, the original SSH for Unix includes similarly named commands—ssb, scp, and slogin—as secure, drop-in replacements for the r-commands.
+
+What SSH is NOT
+
+Although SSH stands for Secure Shell, it is not a true shell in the sense of the Unix Bourne shell or C shell. It is not a command interpreter and does not provide features like wildcard expansion or command history. Instead, SSH creates a secure channel for running a shell on a remote computer, similar to how the Unix remote shell command works, but with end-to-end encryption between the local and remote computers.
+
+SSH is also not a complete security solution—no single tool is. It will not protect computers from active break-in attempts or denial of service attacks, and it will not eliminate other hazards such as viruses. However, it does provide robust and user-friendly encryption and authentication.
+
+The SSH protocol
+
+SSH is, first and foremost, a protocol—a specification for conducting secure communication over a network. The SSH protocol covers three main areas: authentication, encryption, and data integrity.
+
+Authentication reliably determines someone’s identity. For example, if you try to log into an account on a remote computer, SSH asks for digital proof of your identity. If you pass the test, you are allowed to log in; otherwise, SSH rejects the connection.
+
+Encryption scrambles data so that it is unintelligible except to the intended recipient. This protects your data as it passes over the network.
+
+Integrity guarantees that data traveling over the network arrives unaltered. If a third party captures and modifies your data in transit, SSH detects this fact.
+
+In short, SSH makes network connections between computers with strong guarantees that both parties are genuine. It also ensures that any data passing over these connections arrives unmodified and unread by eavesdroppers.
+
+Protocols, Products, Clients, and Confusion
+
+SSH-based products are those that implement the SSH protocol. These products are available for many flavors of Unix, Windows, Macintosh, and other operating systems. Both freely distributable and commercial products exist.
+
+The first SSH product, created for Unix, was simply called SSH. This can cause confusion because SSH is also the name of the protocol. Some people refer to it as Unix SSH, but since other Unix-based implementations are now available, this name is not entirely satisfactory.
+
+Overview of SSH features
+
+As already mentioned, SSH mostly revolves around secure login, data transmission, and data integrity.
+
+Secure login
+
+Imagine you have accounts on several computers on the Internet. Typically, you connect from a home PC to your Internet service provider, and then use a telnet program to log into your accounts on other computers. Unfortunately, telnet transmits your username and password in plain text over the Internet, where a malicious third party can intercept them. Additionally, your entire telnet session is readable by a network snooper.
+
+SSH completely solves this problem. Instead of running the insecure telnet program and protocol, you use the SSH program to log in to the remote account or computer. For example, you might use a command that specifies your username, the host you want to connect to, and the port number. The SSH client authenticates you to the remote computer’s SSH server using an encrypted connection, meaning your username and password are encrypted before they leave your local machine. The SSH server then logs you in, and your entire login session is encrypted as it travels between the client and server. Because the encryption is transparent, you will not notice any differences between telnet and the SSH client in terms of how you interact with the system.
+
+Secure data transfer
+
+Suppose you have two computers on the Internet and wish to transfer files between them. The file contains trade secrets about your business that must be kept confidential. Traditional file-transfer programs such as FTP, remote copy, or even email do not provide a secure solution. A third party can intercept and read packets as they travel over the network.
+
+One way to address this is to encrypt the file on the first machine with a program, send it via traditional means, and then decrypt it on the second machine. However, using SSH, you can transfer the file securely between the machines with a single secure copy command. When transmitted by the secure copy program, the file is automatically encrypted as it leaves the first machine and decrypted as it arrives on the second machine.
+
+Secure remote execution
+
+Suppose you are a system administrator who needs to run the same command on many computers. For example, you want to view the active processes for each user on four different computers on a local area network using a Unix command.
+
+Traditionally, you could use the remote shell command, assuming the remote shell daemon is configured properly on the remote computers. You would run a command that connects to each machine and executes the desired binary. This works, but it is insecure. The results of executing the binary are transmitted over the network as plain text. If you consider this information sensitive, the risk might be unacceptable. Worse, the remote shell authentication mechanism is very insecure and easily subverted.
+
+Instead, by using the secure shell command, you can connect to the remote machine and execute the same command. The syntax for both commands is nearly identical, and the visible output is the same. However, under the hood, the command and its results are encrypted, sent, and then decrypted. Strong authentication techniques are used to ensure secure user login.
+
+Keys and agents
+
+Suppose you have accounts on many computers on a network. For security reasons, you prefer to use different passwords for all accounts, but remembering so many passwords is difficult and can be a security problem in itself. The more often you type a password, the more likely you are to mistakenly type it in the wrong place.
+
+SSH offers various authentication mechanisms, and the most secure is based on keys rather than passwords. Keys are small blobs of data that uniquely identify an SSH user. For security, a key is kept encrypted and may be used only after entering a secret passphrase to decrypt it.
+
+Using keys together with a program called an authentication agent, SSH can authenticate you to all your computer accounts securely, without requiring you to memorize many different passwords or enter them repeatedly.
+
+Here’s how it works. First, you place files called public key files onto the remote computers. These public keys identify you on the remote machines you will later access. On your local machine, you start the authentication agent program, which runs in the background. This agent holds your keys in memory and only needs to be started once, typically when you log in to your local machine for the day. This process can be automated on most Unix systems using services or other tools such as systemd.
+
+Next, you choose the key or keys you will need during your login session. These must correspond to the keys you added to the remote machines in the first step, as they will be used to authenticate you when a connection is made. You then load the keys into the agent using a program designed for this purpose. This requires you to enter each key’s secret passphrase in order to load it into the agent, but this is done only once. As long as the agent is running, the keys remain loaded and available for authentication.
+
+
+At this point, you have an SSH agent program running on your local machine. This agent is holding your secret keys in memory. You are now finished with the setup. You have passwordless access to all your remote accounts that contain your public key files. This means you can say goodbye to the tedium of retyping passwords. The setup will last until you log out from your local machine or terminate the SSH agent.
+
+Access control
+
+Suppose you want to allow another person to use your computer account, but only for certain purposes. For example, while you are out of town, you might want your secretary to read your email, but not to do anything else in your accounts. With SSH, you can give your secretary access to your account without revealing or changing your password, and you can restrict them to only running the email program. No system administrator privileges are required to set up this restricted access.
+
+Port forwarding
+
+SSH can also increase the security of other TCP-based applications, such as Telnet, FTP, and the X Window System. A technique called port forwarding, or tunneling, reroutes TCP connections to pass through an SSH connection, transparently encrypting the data end to end. Port forwarding can also allow these applications to pass through network firewalls that would otherwise block them.
+
+For example, suppose you are logged into a remote machine while away from work and want to access the internal news server at your office. The network is connected to the internet, but a firewall blocks incoming connections to most ports, especially port one hundred nineteen, which is the news port. However, the firewall does allow incoming SSH connections, since the SSH protocol is considered secure enough that even very cautious system administrators trust it.
+
+SSH can establish a secure tunnel on an arbitrary local TCP port, such as port three thousand two, to the news port on the remote host. The command to do this might look cryptic at first, but here is what it does: it tells SSH to establish a secure connection from TCP port three thousand two on your local machine to TCP port one hundred nineteen, the news port, on the server news dot yoyodyne dot com. As a result, you can configure your news reading program to connect to port three thousand two on your local machine. The secure tunnel created by SSH will automatically communicate with the news server on that host, and all news traffic passing through the tunnel will be protected by encryption.
+
+History of SSH
+
+SSH version one, and the SSH one protocol, were developed in nineteen ninety-five by a researcher at the Helsinki University of Technology in Finland. After his university network was the victim of a password sniffing attack earlier that year, he created SSH one for his own use. When beta versions started gaining attention, he realized that his security product could be useful to a wider audience.
+
+In July nineteen ninety-five, SSH one was released to the public as free software with source code. This allowed people to copy and use the program without cost. By the end of the year, an estimated twenty thousand users in fifty countries had adopted SSH one, and the developer was receiving one hundred fifty email messages per day requesting support. In response, he founded SSH Communications Security Limited, or SCS.
+
+Also in nineteen ninety-five, Ylonen documented the SSH one protocol as an Internet Engineering Task Force, or IETF, internet draft. This document essentially described how the SSH one software worked after the fact. The protocol was somewhat ad hoc, with a number of problems and limitations discovered as the software grew in popularity. These problems could not be fixed without losing backward compatibility, so in nineteen ninety-six, SCS introduced a new major version of the protocol, SSH two point zero, or SSH two. This new version incorporated new algorithms and was incompatible with SSH one.
+
+In response, the IETF formed a working group called the Secure Shell to standardize the protocol and guide its development in the public interest. The working group submitted the first internet draft for the SSH two protocol in February nineteen ninety-seven.
+
+In nineteen ninety-eight, SCS released the software product SSH Secure Shell, based on the improved SSH two protocol. However, SSH two did not immediately replace SSH one in the field for two reasons. First, SSH two was missing a number of useful practical features and configuration options that SSH one had. Second, SSH two had a more restrictive license. The original SSH one had been freely available from Ylonen and the Helsinki University of Technology. Newer versions of SSH one from SCS were still freely available for most uses, even in commercial settings, as long as the software was not directly sold for profit or offered as a service to customers. SSH two, on the other hand, was a commercial product, allowing free use only for qualifying educational and nonprofit entities.
+
+As a result, when SSH two first appeared, most existing SSH one users saw few advantages to switching and continued to use SSH one. SSH one is still the most widely deployed version on the internet, even though SSH two is a better and more secure protocol.
+
+This situation is beginning to change, however, due to two developments: a loosening of the SSH two license and the appearance of free SSH two implementations. Products like OpenSSH are gaining prominence. Although many people have contributed to it, OpenSSH is largely the work of a single software developer. It supports both SSH one and SSH two in a single set of programs, whereas the products provided by Ylonen—SSH one and SSH two—have separate executables.
+
+While OpenSSH was developed under OpenBSD, it has been successfully ported to Linux, Solaris, and other operating systems, in close synchronization with the main releases. Although OpenSSH is relatively new and missing some features present in SSH one and SSH two, it is developing rapidly and promises to be a major SSH flavor in the near future.
+
+At the present time, development of SSH one has ceased except for important bug fixes, while development of SSH two and OpenSSH remains stable and active. Other SSH implementations exist as well, notably the commercial versions of SSH one and SSH two maintained and sold by F-Secure Corporation, as well as numerous ports and original products for the PC, Macintosh, and other operating systems. It is estimated that there are over two million SSH users worldwide, including hundreds of thousands of registered users of the SCS products.
+
+Related Technologies
+
+SSH is popular and convenient, but it is not the ultimate security solution for all networks. Authentication, encryption, and network security originated long before SSH and have been incorporated into many other systems.
+
+RSB Suite
+
+The Unix programs rsh, rlogin, and rcp, collectively known as the r commands, are the direct ancestors of the SSH one clients: ssh, slogin, and scp. The user interfaces and visible functionality are nearly identical to their SSH counterparts, except that SSH clients are secure. The r commands, in contrast, do not encrypt their connections and have a weak and easily subverted authentication model.
+
+An r-command server relies on two mechanisms for security: a network naming service and the notion of privileged TCP ports. When a server receives a connection from a client, it obtains the network address of the originating host and translates it into a hostname. This hostname must be present in a configuration file on the server, typically located at slash etc slash hosts dot equiv, for the server to permit access. The server also checks that the source TCP port number is in the range of one to one thousand twenty-four, since these port numbers can be used only by the Unix superuser, or root.
+
+If the connection passes both checks, the server believes it is talking to a trusted program on a trusted host and logs in the client as whatever user is requested. However, these two security checks are easily subverted. The translation of network address to a hostname is done by a naming service such as DNS. Most implementations have security holes, presenting opportunities to trick the server into trusting a host it should not. Then, a remote user can log into someone else's account on the server simply by having the same username.
+
+Likewise, blind trust in privileged TCP ports represents a serious security risk. An attacker who gains root privilege on a trusted machine can simply run a tailored version of the RSB client and log in as any user on the server host. Overall, reliance on these port numbers is no longer trustworthy in a world of desktop computers, whose users have administrative access as a matter of course, or whose operating systems do not support multiple users or privileges.
+
+If user databases on trusted hosts were always synchronized with the server, installation of privileged...
+
+

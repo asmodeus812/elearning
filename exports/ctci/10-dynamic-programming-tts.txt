@@ -1,0 +1,346 @@
+Introduction
+
+Dynamic programming problems are usually about finding non-analytical solutions to problems. But what does that mean? With most other algorithms, we typically find a single, specific solution to a problem—such as sorting an array, finding an element, swapping elements, or searching for a node in a tree. These problems often have one clear, analytical solution.
+
+In contrast, dynamic programming is used when a problem does not have just one analytical solution, or when finding only one solution is not enough. Instead, dynamic programming is about finding all possible solutions to a given problem.
+
+Principles
+
+Let’s discuss the major principles behind dynamic programming.
+
+Approach
+
+There are two main approaches: recursion and iteration.
+
+Recursion is very common in dynamic programming. It allows us to explore many permutations of a given set of inputs. Recursion is especially useful for a top-down approach, where recursive calls drill down from the top to the base cases, and then ascend the call stack.
+
+The iterative approach is similar, but it often uses a table to store results and build future results from this table. Usually, the table is initialized with a positive base case, and everything else is set to a negative case. The size of the array is typically based on the argument that will be mutated, and that same argument is used to key into the table or array.
+
+Types
+
+There are two main types: bottom-up and top-down.
+
+The bottom-up approach starts solving the problem from the base case. For example, when solving the Fibonacci sequence, we start from the first two numbers, which are both one, and build the solution from the bottom to the top.
+
+The top-down approach is the opposite. Here, we start with the final parameter and work our way down. This is mostly used with recursion, where recursive calls drill down to the base cases first, then ascend the call stack. Using Fibonacci as an example, we start with the target number N and drill down to N minus one and N minus two, until we reach the base cases.
+
+Optimizations
+
+There are two key optimizations: memoization and minimization.
+
+Memoization is often used with recursion. The same input might be visited in different branches of the recursion. By storing the result of a specific input, we can reuse it if it is visited again. For example, when computing the Fibonacci sequence, many numbers are recomputed in overlapping branches. Memoization allows us to remember and reuse these results.
+
+Minimization involves reducing the number of input arguments to our function. This can greatly help reduce the space complexity of the call stack frames themselves.
+
+Steps
+
+Let’s break down the steps for both the recursive and iterative approaches.
+
+Recursive Approach
+
+First, identify the input arguments. For example, you might have a target integer and a sequence of numbers.
+
+Next, determine which input arguments will change, or mutate, and which will remain constant. Typically, the target is reduced on each call, while the main sequence remains unchanged.
+
+Then, use a simple example to find the base cases—both negative and positive. For instance, if the target becomes negative, return false. If the target reaches zero, return true.
+
+After that, write the main body of the function, which will recurse and reduce the input. For each number in the sequence, reduce the target by that number and call the function recursively with the new target. If any recursive call returns true, stop and return true.
+
+Make sure to propagate the return value correctly according to the task. If a positive result is found, return true.
+
+Add a default return value at the end of the function body if needed. If no positive result is found, return false.
+
+To optimize, add memoization. Select a key, usually the argument you mutate, and check if the result is already stored. If so, return the stored value. Otherwise, store the result of each recursive call, including negative cases.
+
+Finally, go through the problem and execution flow by drawing a stack call tree to visualize the recursion.
+
+Iterative Approach
+
+Start by identifying the input arguments, such as a target integer and a sequence.
+
+Determine which argument will be mutated. This argument will be used to develop the main algorithm and to key into the tabulation table.
+
+Create the tabulation table. Its size is usually based on the mutating argument plus one.
+
+Initialize the table with the correct positive and negative cases. For example, set the base positive case at index zero, and set all other cases to a negative value.
+
+Implement the main algorithm body, which accumulates data into the tabulation table. Loop through all states in the table. When you find a positive case, build off of it by updating future states that can be reached by adding numbers from the sequence.
+
+Finally, go through the problem and execution flow by drawing out the states of the tabulation table.
+
+Recursive Problems
+
+Fibonacci Sequence
+
+One of the most common examples to demonstrate dynamic programming is the Fibonacci sequence. The goal is to generate the Nth number in the sequence, given only the number N.
+
+The most common solution uses dynamic programming with two main ideas: recursively finding the current Fibonacci number based on the previous ones, and memorizing already computed numbers to avoid recomputation.
+
+In the provided code, a class called Fibonacci is defined. It uses an array called MEMO to store computed Fibonacci numbers. The array is initialized with a value that cannot exist in a valid Fibonacci sequence, serving as a flag to check if a number at a given position has already been computed.
+
+This approach ensures that each Fibonacci number is computed only once, making the algorithm much more efficient than a naive recursive solution.
+
+
+Let’s begin by discussing the recursive Fibonacci function with memoization.
+
+This function, called fibonacci, takes a number n and returns the nth Fibonacci number. The first two numbers in the Fibonacci sequence are both one, so if n is less than or equal to two, the function returns one. If the value for n has already been computed and stored in the memoization array, the function simply returns that stored value. Otherwise, it computes the nth Fibonacci number by summing the previous two Fibonacci numbers, stores the result in the memo array for future use, and then returns it.
+
+Now, let’s talk about the complexity of this algorithm, both in terms of time and space.
+
+For the non-optimized version, which does not use memoization, each number in the sequence must be evaluated every time it is needed. Imagine a tree structure where each node branches into two, representing the recursive calls for n minus one and n minus two. For example, if n is five, the tree would have a branching factor of two and a depth of five. This results in a time complexity of O of two to the power of d, where d is the depth of the tree. In practice, the number of recursive calls is closer to one point six to the power of d, but for simplicity, we use two to the power of d. For n equals five, this would be thirty-two calls, though the actual number is closer to ten.
+
+The space complexity for this approach is O of d, because the maximum depth of the call stack is determined by the number n. At most, there will be n recursive calls on the stack at any given time.
+
+When we introduce memoization, the algorithm changes significantly. With a memoization table that stores already computed Fibonacci numbers, each number in the sequence is calculated exactly once. The recursive calls still drill down to the base cases, but as the recursion unwinds, previously computed values are reused from the memo table. This reduces the time complexity to O of d, since each Fibonacci number up to n is computed only once.
+
+However, the space complexity remains O of d, because the call stack can still reach a depth of n. Even with memoization, the recursion must reach the base case before unwinding.
+
+Looking at the call stack, we can see that many numbers are recomputed multiple times in the non-memoized version. With memoization, each value is cached as soon as it is computed, and reused whenever needed. For example, the first branch computed is five to four to three, then two plus one. The first number computed is three, then four, then five. Since the approach is top-down, we reach the base case first, then cache and reuse values as the recursion unwinds.
+
+To further illustrate the space complexity, consider the call path five to four to three to two plus one. At the deepest point, the stack contains five calls to the Fibonacci function. As the recursion unwinds, the stack never exceeds this depth.
+
+Now, let’s move on to the “can sum” problem.
+
+This problem asks whether a sequence or array of positive numbers can sum up to a given target sum. You are allowed to reuse numbers from the array as many times as needed. The goal is to determine if there is at least one combination of the given numbers that adds up to the target sum.
+
+To solve this, we need to define the base cases. If the target sum is zero, the answer is always true, because we can reach zero by not taking any numbers. If the target sum is negative, the answer is always false, because it is impossible to sum positive numbers to reach a negative target.
+
+Let’s look at an example. Suppose the target is five, and the numbers are two, three, one, four, and five. Possible sequences that sum to five include two and three, five and one, four and three, or five ones. Notice that numbers can be repeated, as in the last example with five ones. This worst-case scenario will help us analyze the algorithm’s complexity.
+
+To evaluate the runtime complexity, consider two factors. First, the height of the recursive call stack. If the sequence consists only of ones, we will have exactly as many function calls as the target value, because we subtract one from the target each time until we reach zero. In the worst case, this means the number of function calls equals the target.
+
+Second, the branching factor. This is the number of recursive calls made within each function call, which corresponds to the length of the sequence. For each number in the sequence, we make a recursive call.
+
+For space complexity, without memoization, it is determined by the depth of the tree, which is at most m, where m is the target. With memoization, we still make at most m calls, but we also store up to m keys and values in the memo table. In the worst case, with all ones, the memo table will have up to target entries. This means the space complexity becomes O of m squared.
+
+Putting it all together, the overall time complexity is the branching factor n to the power of the number of function calls m, or O of n to the m.
+
+To visualize this, imagine a tree where each node represents the current target sum. Each edge represents reducing the target by one of the numbers in the sequence. The top-down approach drills down the leftmost branches first. When a node becomes negative, we return false. When a node reaches zero, we return true. For any value greater than zero, we continue recursing.
+
+From this tree, we see that the first successful sequence might be two and three, which sums to five. Other valid sequences include five alone, three and two, one and four, or four and one. Since the problem only asks whether at least one sequence exists, we can return true and stop as soon as we find a valid combination.
+
+
+Let’s walk through a clear explanation and implementation of the problem, focusing on a top-down approach using recursion and memoization.
+
+First, we use a recursive function to determine if a target sum can be achieved by adding up numbers from a given sequence. The recursion drills down to the base cases—either the target becomes negative, which means we’ve overshot and cannot form the sum with positive numbers, or the target becomes exactly zero, which means we’ve found a valid sequence that sums to the original target. As the recursion unwinds, we propagate the result up the call stack. If any recursive path returns true, we can immediately return true for the current call as well.
+
+The main takeaway is to understand the base cases. If the target is negative, it’s impossible to reach the sum with only positive numbers, so we return false. If the target is zero, we’ve found a valid combination and return true. Otherwise, we iterate through each number in the sequence, subtract it from the target, and recursively check if the new target can be formed. If any recursive call returns true, we cache this result for the current target and return true. If none succeed, we cache false for this target and return false.
+
+The code block in Java defines a function called summable. This function checks if it’s possible to sum up to a given target using numbers from a sequence. It uses memoization to avoid redundant calculations by caching results for previously seen targets. The function handles three main cases: if the target is already cached, if the target is negative, and if the target is zero. It then recursively tries each number in the sequence, reducing the target each time, and returns true if any path leads to a valid sum.
+
+Now, let’s move on to the next concept.
+
+Best sequence
+
+An extension of the can-sum task is to find the best sequence—that is, the sequence with the fewest numbers that add up to the target sum. This problem is similar to the can-sum problem, but with a few key differences.
+
+We still reduce the target sum recursively, drilling down until we hit the base cases. As the call stack unwinds, each call to the best function returns either null or an empty list from the base cases, or the shortest list found in the loop. We use cloning to avoid reference issues when building up the result sequence.
+
+Here are the main adjustments:
+
+First, the base cases now return either an empty list or null. An empty list is returned when the sum reaches zero, indicating a successful combination. Null is returned when the target becomes negative, indicating failure.
+
+Second, when making the recursive call, we check if the result is not null. If it’s valid, we clone the returned list, append the current number, and consider it as a candidate for the best sequence.
+
+Third, we look for the minimum length sequence by comparing all possible combinations. The bestSequence variable keeps track of the shortest valid sequence found so far.
+
+Finally, if no valid sequence is found, bestSequence remains null. Otherwise, it holds the shortest sequence that sums to the target.
+
+The Java code block defines a function called best. This function returns the shortest list of numbers from the sequence that add up to the target. It uses memoization to cache results for each target. The function handles three cases: if the target is already cached, if the target is negative, and if the target is zero. It then iterates through each number in the sequence, recursively checks the new target, and builds up the result sequence by cloning and appending the current number. The function keeps track of the shortest sequence found and caches it for future reference.
+
+In summary, both functions use recursion and memoization to efficiently solve the problem. The summable function checks if a sum is possible, while the best function finds the shortest sequence that achieves the sum. The key is to handle the base cases correctly and use memoization to avoid redundant work.
+
+
+We have gone through all numbers in the sequence for the current target sum, and none of them returned true. This is the final base case where we can say that there is no number in the sequence that sums up to the target number. On top of that, we also mark that target sum as unreachable for this given input of sequence numbers by storing null for the sequence in the memoization table. The function then returns the best sequence found, which in this case is null.
+
+Can Construct
+
+Now, let's look at a variation of the "can sum" problem. In this version, we need to determine if a target word can be constructed by taking words from a dictionary passed in as input arguments. You might notice that this is essentially the same problem as before. We have a target and a sequence. The dictionary of words is not mutable, and we can take the same word from it as many times as we want—there is no limit. The target word is the one that will be mutated.
+
+The base case for this problem is straightforward. If the target word is empty—that is, the empty string—we return true. Any dictionary of words, even an empty one, can construct an empty target word by simply not picking anything.
+
+The way we solve this is by taking away from the target word until it becomes empty. If it does, that means we can construct the target from the given dictionary. Otherwise, if we end up with the target word being shorter than all words in the dictionary, we know that this case must return false.
+
+For example, consider the following:
+
+The target is "abcdef". The dictionary contains the words "ab", "abc", "cd", "ef", "def", and "abcd". The possible combinations that can make up the target word are "abc" followed by "def", "ab" followed by "cd" and then "ef", and "abcd" followed by "ef".
+
+From this example, we can see that there are multiple combinations from the dictionary that can make up the word. The order of appearance in the dictionary does not matter. However, when we take an item from the dictionary and compare it against a substring from the target word, we must always start from the beginning of the target word. We cannot simply take any substring, which actually makes the task a bit easier.
+
+The implementation defines a function called "constructible" that takes a target string and a dictionary of words. The main base case is that every empty word can be built from an array of any words by simply not picking anything from the array in the first place. This base case might seem a bit odd, but it helps us work with the string. For example, if we use the substring method with the begin index equal to the length of the string, the returned string is empty. This is not an exception or out-of-bounds error.
+
+If the target string is already in the memoization map, it means we have already processed it during the top-down recursion. Since we drill down first and then unwind, it is possible to encounter the same suffix or target word multiple times, depending on the initial target word and the dictionary. If it is in the map, we will have the result—either true or false—indicating whether we can construct that particular key or suffix from the dictionary.
+
+The function then iterates over each word in the dictionary. If the target word is shorter than the current word from the dictionary, we skip this word, since there is no way to build a shorter main word from a longer word in the dictionary.
+
+Next, we pull the same number of characters from the main word as our prefix. When this prefix matches the current word from the dictionary, we compare them. If they match, we call the function recursively with the rest of the string—the suffix. There is a trick here: when the substring method is called with a value for begin index equal to the string's length, it returns an empty string, which is our base case. This is how we keep pulling prefixes from the main word until it becomes empty.
+
+If the prefix is exactly equal to the word, or if the recursive call also returns true for the suffix part of the main word, we store true in the memoization table for this target and return true.
+
+If we do not enter the true branch above, it means we could not build anything from the words dictionary. Therefore, we store false in the memoization table for this target and return false.
+
+A few things to note from the implementation:
+
+We do not have a false base case exactly. We could add one where the target word is null, but for the sake of this task, let us assume the user will not pass a null value into the function call.
+
+There is a guard case in the for loop body, which ensures the current word from the dictionary is not bigger than the actual target word, since we reduce the target word on each recursive call.
+
+We always pull a prefix from the start of the target word, with the same length as the current word from the dictionary, and compare that prefix to the current word to make sure it can construct the word from the start.
+
+We use a special case of the substring function, which, when invoked with the length of the string as the first argument, returns an empty string.
+
+If we do not enter the positive branch in the if statement inside the for loop, we simply return false at the end of the function, meaning none of the words in the dictionary matched up during the loop.
+
+Evaluating the complexity of the solution:
+
+Without memoization, the complexity is the branching factor to the power of the depth of the tree. We will not make more than M number of calls, and we branch at most N times. Therefore, the time complexity is O of N to the power of M.
+
+With memoization, the complexity is modified. We now make at most O of M number of calls. However, we have to add the extra space occupied by the items in the memo table. In the worst-case scenario, if we have a sequence of all ones, we will also store at most the target number of keys and values in the memo table. Additionally, we need to account for the actual memory occupied by the prefix string we construct, which at worst can be of length M. So the final complexity ends up being O of M squared.
+
+Therefore, we can conclude that the runtime complexity is O of N to the power of M without memoization, or O of M with memoization. The space complexity is O of M without memoization, or O of M squared with memoization.
+
+All Words
+
+A variation of the previous problem is to collect all combinations from the dictionary that make up the target word, if any exist. We will try to collect the sequences in a list of strings, where each item in the list will be one of the words from the dictionary that makes up the final target word. They will be separated by commas. This is the same problem, which basically needs a few small modifications to make it work.
+
+The implementation defines a function called "allwords" that takes a target string and a dictionary of words. The positive base case is that if the target string is empty, we have truncated the target word to be empty. If it is empty, that means we have found a sequence that constructs the initial word.
+
+If the target is already in the memoization table, we return the stored result.
+
+If none of the branches below suffice, we will return null, which means there is no way to build the target string from any words in the dictionary provided.
+
+The function then iterates over each word in the dictionary. If the main word is smaller than the current item from the dictionary, we skip this word, since there is no way to build a shorter main word from a longer word in the dictionary.
+
+Next, we pull the prefix, which is exactly the size of the current word from the dictionary.
+
+
+Only if the prefix matches can we continue with the rest of the main target word. More precisely, we use the suffix to drill down further. If the prefix matches the word, we construct the rest of the word by calling the function recursively. If this recursive call returns a non-null result, it means that for the current prefix and suffix, we can construct the target word. This process is top-down: we drill down to the base case, then unwind, and only then can we decide if the word can be constructed. This is a very important observation.
+
+When the recursive call returns a valid result, we build a string of words from the dictionary that can be combined to make the target word. We use a string builder to construct this string, adding a delimiter to easily identify which words from the dictionary were used. If this is the first time we see a result, it might be null, so we initialize it with an empty array. We then add the built string of combinations to the final result, which we eventually return after the loop.
+
+At this point, the result will either be initialized or null. If it was initialized, it means we have found at least one, but possibly more, combinations from the word dictionary that make up the target word. We store this result in the memoization table. The return value serves both positive and negative cases. If we never entered any true branch in the loop, it will be null; otherwise, it will be initialized.
+
+The implementation is very similar to previous approaches, and here we see a familiar pattern emerge. The main difference is how we mutate and collect the result. In the implementation above, we have two base cases.
+
+The positive case is when the target word length is zero. In this case, we return a valid empty list. After all, if the target word is empty, we can create it by simply not taking anything from the dictionary in the first place.
+
+The negative case is when there is no sequence in the dictionary that makes up the target word. Here, we need to distinguish between the positive and negative cases. The most obvious solution is to return null for the list in the invalid case.
+
+In the example above, the challenging step is realizing that we actually flatten the results of the recursive calls before adding them to the final result. This is important because the final result returned from the recursive function must always be a one-dimensional array with entries. However, the call to the function itself also returns a one-dimensional array of entries. We cannot simply concatenate these two results; we have to flatten the return value of the call and then add it to the final result.
+
+This is the main difference in this task. The rest of the solution follows the well-established pattern of creating the base cases, both negative and positive, building the actual body of the function, adding to the final result, returning the result of the computation, and memoizing the results.
+
+Grid counter
+
+Another common task is, given a grid of N by M cells, where N is the number of rows and M is the number of columns, to find all possible ways to get from the top left corner, or start, to the bottom right one, or end. This task, similar to the Fibonacci problem, also leverages recursion and memoization. Here, we are required to compute all possible ways to go from one start position to another, moving only in two directions: right and down, to reach the bottom right coordinates.
+
+In the example below, the grid coordinates start from one, one, and the end coordinates and size of the grid are defined by the input arguments to the count function, which takes R and C as parameters.
+
+The code defines a class called GridPathCounter. This class uses a map to store the count for specific coordinates, represented as a string key in the format row, column. The memoization ensures that once a given coordinate position is visited, we do not have to visit it again, since all paths from that position have already been computed.
+
+The count function works as follows. When either of the coordinates points to an invalid position, meaning either the row or column is zero, there are no valid paths to reach the end goal. There is no grid where the row or columns can be zero, so the function returns zero in this case.
+
+If the grid is one by one, there is only one path between the start, which is the top left, and the end, which is the bottom right. Both are exactly the same grid cell, so the function returns one.
+
+A unique key is built from the current pair of coordinates to ensure a unique mapping between the coordinates and the count of paths to these specific coordinates. If the memoization map already contains this key, the function returns the stored value.
+
+Otherwise, the function calculates the count of paths from the current position to the previous possible positions. From the current position, we can either go up a row or to the left in the column coordinates. The function recursively calls itself for row minus one and the same column, and for the same row and column minus one, then adds the results.
+
+The count for this specific combination of rows and columns is stored in the memoization map using the unique key. This works because, as we go in both directions, one branch may reach a specific path first. When the second branch encounters the same coordinates, it finds that they have already been visited and computed. This only works because we are using a top-down approach, where the recursive calls drill down to the base cases and then ascend, accumulating the count for specific paths.
+
+Finally, the function returns the computed count.
+
+The memoization approach in this task is important. First, the key must be unique to correctly distinguish between the combination of row and column pairs. We cannot swap these, since the coordinates represent specific unique position pairs.
+
+To use the path grid counter with a grid of two rows and three columns, we call the count function with arguments two and three.
+
+If we look at an example of a two by three grid, we can notice several properties by examining the tree representing the call stack. The count function is called with the maximum coordinates, N by M, and the recursive approach is top-down. Going to the left in the tree means we go up a row, that is, row minus one. Going to the right in the tree means we go left a column, that is, column minus one.
+
+The pair branch root of one, two, is contained twice. This is where memoization stores the first time, coming from the row sub-path, it was visited, and simply references it from the memo table the second time, coming from the column sub-path.
+
+Nodes that contain zero in one of their pairs are invalid, and indeed, grids with zero dimensions are not valid according to our task.
+
+Iterative problems
+
+
+In this chapter, we are going to solve the same issue as before, but this time, we will use the iterative approach—also known as the tabulation approach—in dynamic programming. Instead of starting from the top and drilling down to the bottom, we take the inverse approach. We start from the bottom and build up to the top to find the solution. Usually, these implementations use an iterative method, where values are accumulated into a table or array. This table can be one-dimensional or multi-dimensional, depending on the problem.
+
+Fibonacci
+
+Let’s look at the Fibonacci sequence as an example. In the solution provided, we notice that the table used to create the sequence has a length of n plus one. Why is that? This is because we have to account for the positive base cases. In our example, these are the zeroth and first Fibonacci numbers. Usually, in dynamic programming solutions that use the iterative approach, the zeroth case is used to initialize the table with the positive base case, while the rest of the table is initialized with negative case values.
+
+The code defines a function called fibonacci that takes an integer n and returns the nth Fibonacci number using tabulation. It first checks for invalid input, then creates an array of size n plus one, fills it with negative values, and sets the base cases for zero and one. It then iteratively fills in the rest of the table by summing the two previous values, and finally returns the value at position n.
+
+Can sum
+
+Now, let’s consider the “can sum” problem. Given a target and an array of numbers, where each number can be reused, the task is to find out if there is at least one combination of the given numbers that sums up to the target. The same number from the array can be repeated multiple times. To solve this, we need to establish the basic base cases.
+
+The code defines a function called summable that takes a target integer and an array of numbers. It returns true if the target can be achieved by summing any combination of the numbers, allowing repeats. The function initializes a boolean array of size target plus one, sets the base case for zero to true, and then iteratively marks sums as possible if they can be reached by adding a number from the sequence to a previously achievable sum. The function finally returns whether the target sum is possible.
+
+Best sequence
+
+An extension of the can sum task is to find the best sequence—that is, the sequence with the least number of numbers that makes up the target sum.
+
+The code defines a function called best that takes a target integer and an array of numbers. It returns a list representing the shortest combination of numbers that add up to the target. The function initializes an array of lists, sets the base case for zero as an empty list, and then iteratively builds up possible combinations. For each achievable sum, it tries to extend the sequence by adding each number, and only updates the table if the new sequence is shorter than any existing one for that sum. The function returns the shortest sequence for the target, or null if it is not possible.
+
+Can construct
+
+A variation of the can sum problem is the “can construct” problem. Here, we need to determine if a target word can be constructed by concatenating words from a given dictionary. The iterative approach to this problem is a bit different. The key is to encode the characters of the target word into a boolean table array.
+
+The code defines a function called constructible that takes a target string and an array of words (the dictionary). It returns true if the target can be constructed by concatenating words from the dictionary. The function first checks if the target is empty, in which case it returns true, since the empty string can always be constructed by taking nothing from the dictionary. The rest of the implementation continues from this base case.
+
+
+Let’s walk through the logic and flow of this code, which is designed to determine if a target word can be constructed from a set of words in a dictionary.
+
+First, a boolean array called table is created. Its size is one more than the length of the target word. This extra space is important, as it allows us to represent all possible substring positions, including the empty prefix at the start.
+
+Initially, every value in the table is set to false. This means we assume, by default, that the target word cannot be built from the dictionary words. However, the very first position, table at index zero, is set to true. This represents the empty string, which can always be constructed.
+
+The main logic involves two nested loops. The outer loop iterates over each character position in the target word. For each position, the inner loop checks every word in the dictionary.
+
+At each step, the code tries to take a prefix from the target word, starting at the current position i, and extending for the length of the current dictionary word. If this prefix matches the dictionary word, the corresponding position in the boolean table is marked as true. Specifically, table at index i plus the length of the word is set to true. This indicates that the substring up to that point can be constructed from the dictionary.
+
+It’s important to note that the indices in the table represent positions in the target word, not just simple indices. For example, if the target word is “abcdef” and the dictionary contains “abc” and “def,” then after matching “abc” at the start, table at position three is set to true. Later, if “def” matches starting at position three, table at position six is set to true.
+
+The code includes detailed comments and examples to illustrate how the table is updated as matches are found. For instance, when “abc” is matched at the start, the table is updated to reflect that the substring up to position three can be built. When “def” is matched starting at position three, the table at position six is updated, indicating the entire target word can be constructed.
+
+After all iterations, the code returns the value at the last position in the table, which is table at index target length. If this value is true, it means the target word can be constructed from the dictionary words.
+
+Let’s consider a concrete example. Suppose the target word is “abcdef” and the dictionary contains “ab,” “abc,” “cd,” “ef,” “def,” and “abcd.” The code will find several combinations that can build the target word, such as “abc” followed by “def,” or “ab” followed by “cd” and then “ef,” or “abcd” followed by “ef.” The table is updated accordingly as these matches are found.
+
+The code also demonstrates, step by step, how the table changes as each prefix is checked against the dictionary words. For example, at position zero, matching “ab” sets table at position two to true, matching “abc” sets table at position three to true, and matching “abcd” sets table at position four to true. As the loop continues, further matches update the table, and by the time position three is reached, table at position six is set to true, indicating the target word can be constructed.
+
+Now, let’s move on to a variation of this task, called “count construct.”
+
+Count construct
+
+In this variation, instead of simply checking if the target word can be constructed, we want to count the total number of ways the target string can be built from the dictionary words.
+
+The approach is similar, but with a few key changes. Instead of a boolean array, we use an integer array called table, again with a size of target length plus one.
+
+If the target word is empty, the function immediately returns one. This is because there is exactly one way to construct the empty string—by choosing nothing from the dictionary.
+
+The rest of the logic follows the same pattern as before, but now, instead of marking positions as true or false, we increment the count at each position whenever a match is found. This way, the table accumulates the total number of ways each substring can be constructed.
+
+In summary, the code first checks if the target word can be constructed from the dictionary, using a boolean table. Then, in the count construct variation, it counts the total number of ways to build the target word, using an integer table. Both approaches rely on dynamic programming, updating the table as matches are found, and using the final value in the table to determine the answer.
+
+
+This section describes a dynamic programming approach to counting the number of ways to construct a target word from a set of dictionary words.
+
+First, the algorithm initializes an array, filling it with zeros. This array represents the number of ways to build up to each position in the target word. The only exception is the first position, which is set to one, indicating that there is one way to start—by having an empty prefix.
+
+The main loop iterates over each character position in the target word. For each position, it checks every word in the dictionary. If a word from the dictionary fits as a prefix at the current position, and matches the substring in the target, the algorithm updates the count at the position that comes after this word. Specifically, it adds the current count at position i to the count at position i plus the length of the matching word. This accumulation reflects the idea that if you can build up to position i, and a dictionary word matches the next segment, then you can also build up to the new position by extending with that word.
+
+At the end, the value at the last position in the array represents the total number of ways to construct the entire target word using the dictionary.
+
+To illustrate, consider the target word “abcdef” and a dictionary containing the words “ab,” “abc,” “cd,” “ef,” “def,” and “abcd.” The possible combinations to form the target are: “abc” followed by “def,” “ab” followed by “cd” and then “ef,” and “abcd” followed by “ef.”
+
+As the algorithm processes the target, it accumulates counts at each position where a dictionary word matches. For example, the word “ab” matches at the start, so the count at position two is incremented. Similarly, “abc” and “abcd” also match at the start, updating their respective positions. When the algorithm finds “cd” starting at position two, it updates the count at position four. This process continues, and when multiple paths reach the same position, their counts are summed.
+
+By the end, the count at the final position reflects all possible ways to assemble the target word from the dictionary. In this example, there are three ways to build “abcdef” from the given words.
+
+Grid counter
+
+Next, let’s consider a related problem: counting the number of ways to traverse a grid. Given a grid with N rows and M columns, the task is to find all possible ways to move from the top-left corner to the bottom-right corner. To solve this problem iteratively, we need to adjust our approach to how we examine the grid.
+
+

@@ -1,0 +1,334 @@
+Basic design
+
+Every non-trivial Java application makes use of data structures and algorithms. The Java Collections Framework provides a large set of readily usable, general-purpose data structures and algorithms. These data structures and algorithms can be used with any suitable data type in a type-safe manner. This is achieved through the use of a language feature called generics.
+
+The generics feature in Java may feel familiar to those who have used similar concepts in other languages, such as C plus plus. However, while the feature is similar in nature, it is quite different in the way it is implemented in the Java language.
+
+Generics
+
+The general syntax for defining generics and generic types is to wrap any non-primitive type in angle brackets, such as angle bracket T angle bracket. The letter T is just a placeholder, which the compiler uses during compile time to replace with the actual type declared by the user when a generic type is instantiated. It is matched against the actual definition of the type, mostly to make sure that the type adheres to the API and generic rules, such as T extends K or T super K.
+
+Since the entire generics feature in Java works at compile time, once the class is compiled, the actual generic type information is erased. This is different from how some other languages implement generics. However, this approach was chosen to keep backwards compatibility with older versions of the language and to avoid introducing breaking changes at such a fundamental level.
+
+In the provided example, a class called BoxPrinter is defined as a generic type with a placeholder T. The class stores a value of type T, and its constructor and toString method operate on this generic value. When creating an instance of BoxPrinter with a String, the compiler resolves the placeholder to String at compile time. Similarly, when creating an instance with an Integer, the compiler handles auto-boxing and resolves the type accordingly.
+
+The angle bracket T is simply a placeholder used in the declaration and definition of the class type. The example above also demonstrates the diamond syntax. Generics in Java operate at two stages. First is the declaration, when the generic type is defined and its signature is created. The user specifies what the generic type or holder class is. The second stage is the actual creation of the generic type, or in other words, an instance of a generic type, where the diamond syntax specifies the concrete type that the generic class definition will be created with.
+
+In a way, this works similarly to how templates work in C plus plus. In C plus plus, the compiler takes the template and performs a kind of find-and-replace action on the generic type signature to create a new type for each concrete type. Imagine that in the example above, two versions of BoxPrinter are created: one that stores an Integer and one that stores a String in the value member variable.
+
+For illustration, the example shows two classes: BoxPrinterString, which stores a String, and BoxPrinterInteger, which stores an Integer. While this is not exactly how generics work in Java, fundamentally, the compiler creates multiple unique versions of the type for each unique generic argument, regardless of how many generic arguments a given type declares.
+
+Syntax
+
+As already explained, the diamond syntax is used to both declare a generic type and define it in code. It is possible to skip the type in the creation of the instance to make typing less verbose.
+
+For example, creating a BoxPrinter of Integer can be done in two ways. The first way specifies the type in both the variable declaration and the constructor. The second way omits the type in the constructor, and the compiler infers it from the left-hand side. Both are functionally equivalent.
+
+However, if you omit the diamond pattern entirely, the compiler will issue a warning, as this tries to declare a non-generic instance of BoxPrinter. In this case, the compiler will infer the raw type as Object, which is the top-level type from which all types in Java extend. This is allowed for backwards compatibility, but it means you lose the benefits of compile-time type checking.
+
+If you try to use the diamond syntax on the left-hand side but specify a type on the right, the compiler will produce an error. The generic placeholder can only be inferred from the left-hand side of the expression, not the right.
+
+Raw-types
+
+As already mentioned, to retain backwards compatibility, certain syntaxes are allowed when defining generics. However, the compiler will infer the raw type by default, which is Object. This is fine, and the compilation process might complete with warnings, but you lose all benefits of compile-time checks when the actual generic type is not known or not specified.
+
+For example, if you create a List without specifying a type, all methods that return or work on an element of the list will, by default, return Object. This is not very useful, since users lose all compile-time type checking capabilities.
+
+Consider another example. If you create a raw List and add Strings to it, then assign it to a List of String, the compiler will generate a warning. If you then try to add an Integer to the List of String, the compiler will generate an error. However, if you assign a List of String to a raw List and then add an Integer, this compiles fine but results in a runtime exception when you try to use the list as a List of String.
+
+Using raw types is not recommended for the various reasons displayed above. The worst case is that the code throws at runtime due to a class cast exception. There are niche situations where the use of raw types might be necessary, but in general, it is never a good idea.
+
+Methods
+
+Just as you can define generic types, you can also define generic methods. They work the same way as generic types, but it depends on how the generic method is defined. If a method is defined in a generic type, and if the method itself is generic, these are two different constructs. The first does not define a generic method; the generic method is a side effect of the type being generic. The second defines a completely different language construct, which is a generic method. Generic methods can be either static or non-static.
+
+For example, consider a class with a static generic method called fill. This method takes a List of type T and a value of type T, and sets every element in the list to the given value. In the main method, you can create a List of Integer, add some values, and then call the fill method to set all elements to a specific value. Both calls are semantically identical. It is worth noting that if the list was of raw Object type, you could still provide stronger type checking by enforcing the type in the method call itself, by using the class name as a prefix to call the static method, or, if it was an instance method, by using the instance name in place of the class name.
+
+
+Even though this approach will print all types of warnings, it can be used to ensure that a generic type passed as an argument is treated accordingly, as long as the elements inside the generic are of a known type. For example, you might have a raw list assigned from an integer list, and then use a method called fill from the LitteralsAndTypes class to populate the raw list with the value one hundred.
+
+The method type is generic, but the type is inferred by the compiler from the types of the arguments passed in. It is not required to specify the type of the arguments explicitly. As shown above, if the argument is of a raw type, it is possible to provide the actual type of the generic by invoking the method with a specific type.
+
+Subtypes
+
+While it is possible to assign a derived type object to its base type reference, for generics, the type parameters must match exactly. Otherwise, a compiler error will occur. In other words, subtyping does not work for generic parameters—they have to match exactly.
+
+Subtyping works for class types. You can assign a derived type object to its base type reference. However, subtyping does not work for generic type parameters. You cannot assign a derived generic type parameter to a base type parameter.
+
+For example, consider a case where you try to assign a list of integers to a list of numbers. The right-hand side creates an array list that holds integers, but the left-hand side assigns it to a less strict type, in this case, number. If this were allowed, then the variable could be used in a context where you might insert any class that extends number, such as float. If you then called the add method to insert a float, it would produce a class cast exception at runtime, since the actual list points to an array list instance that holds only integers.
+
+Wildcards
+
+To overcome this issue, wildcard type parameters are used. They do not specify the exact type in the left-hand side expression. Wildcards can only be used on the left-hand side; you cannot instantiate a generic type with a wildcard, as that would be meaningless. The right-hand side must provide a concrete instance of the generic with an exact type, or if none is provided, the raw type is used by default, which means object.
+
+Wildcards have a different semantic meaning. They are not a replacement for the raw type or for object. The wildcard does not tell the compiler that the list holds different types of elements. Instead, it tells the compiler that the variable references a generic list type of homogeneous elements, but the specific type is unknown. For example, it could be a list of integers, a list of strings, or a list of floats. The underlying generic list instance always contains elements of the same type.
+
+Wildcards are not a replacement for object or raw types. They have a very special meaning. They imply that a variable is referencing a generic of an unknown type, but the instance is still of a generic class and of a specific homogeneous type.
+
+If you try to add an element to a list declared with an unbounded wildcard, such as list of question mark, the compiler will produce an error. This is because the wildcard stands for an unknown type. When you try to pass arguments to a generic type, the Java compiler tries to infer the type of the argument as well as the type of the generic, to ensure type safety. Since the variable references a list that holds unknown types, the compiler does not know which type to infer. If it allowed this, you might end up adding a string to a list that was actually created to hold integers, which would fail at runtime. The compiler is proactive and warns about issues as early as possible, since generics were added to the language to ensure type safety, replacing the old approach of using object.
+
+In general, when you provide a wildcard parameter, you cannot call methods that modify the object. However, you can still call methods that access the object's state. For example, with a list declared with a wildcard, you can safely call methods like get, size, or isEmpty.
+
+Limitations
+
+There are many limitations of generic types due to type erasure. Here are a few important ones.
+
+First, you cannot instantiate a generic type using the new operator. This is because the compiler does not know what the default constructor for the type T is at the moment of the generic's definition. That is only known when an actual usage of the generic type is in play, that is, when a generic type is instantiated. Remember, the type replacement happens at compile time, not at runtime. After compilation, the resulting bytecode will have the type erased, and there is no way to call a constructor of a type-erased type. If that were allowed at runtime, the expression would literally be new object, which is not valid.
+
+For example, if you try to create a new instance of T inside a generic class, the compiler will produce an error.
+
+Second, you cannot instantiate an array of a generic type. Again, the type replacement happens at compile time, not at runtime. After compilation, the resulting bytecode will have the type erased, and there is no way to call the array constructor for an erased type of unknown type. If that were allowed, it would basically be new object array of size one hundred.
+
+For example, if you try to create an array of T inside a generic class, the compiler will produce an error.
+
+Third, you can declare instance fields of type T, but not static fields of type T. This is because static members are bound to the class type itself, while generics are bound to a class type instance. There is no notion of an instance for the generic class type definition itself.
+
+For example, if you try to declare a static member of type T inside a generic class, the compiler will produce an error.
+
+Fourth, it is not possible to have generic exceptions. The reason is simple: catch statements are evaluated at runtime, and there is no way to specify a catch expression that would be able to capture different types of the generic exception, such as generic exception of string, generic exception of number, or generic exception of float.
+
+For example, if you try to define a generic exception class that extends throwable, the compiler will produce an error.
+
+Finally, generics cannot be instantiated from primitive types. For example, list of int or list of short is not valid and would produce a compile-time error.
+
+Summary
+
+The implementation of generics is static in nature. This means that the Java compiler interprets the generics specified in the source code and replaces the generic code with concrete types. This process is called type erasure. After compilation, the code looks similar to what a developer would have written with concrete types. Essentially, the use of generics offers two advantages. First, it introduces an abstraction, which enables you to write generic implementations. Second, it allows you to write generic implementations with type safety.
+
+Collections
+
+In Java eight, the collections framework was greatly overhauled to include the usage of the new generics feature. This allows it to provide a large, reusable set of collection types that are robust and flexible.
+
+Core
+
+The core of the collections framework revolves around a handful of interfaces and abstract classes, which serve as the building blocks of the entire collections framework.
+
+
+Java Collections Framework Overview
+
+Let’s begin with an overview of the main interfaces and classes in the Java Collections Framework, along with their purposes and relationships.
+
+Iterable
+
+A class that implements the Iterable interface can be used in a foreach statement. This means you can loop over its elements easily.
+
+Collection
+
+The Collection interface is the common base for most classes in the collection hierarchy. If you want to write methods that are very general, you can use the Collection interface as a parameter. For example, the max method in java.util.Collections takes a Collection and returns the largest element.
+
+List
+
+The List interface is for containers that store a sequence of elements. You can access elements by their index, and the order of insertion is preserved. Lists can contain duplicate elements.
+
+Set, SortedSet, and NavigableSet
+
+These interfaces are for containers that do not allow duplicate elements. SortedSet keeps its elements in a sorted order, while NavigableSet allows you to search for the closest matches to a given value.
+
+Queue and Deque
+
+The Queue interface is for containers that hold a sequence of elements for processing. Implementations can be either LIFO, which stands for last in, first out, like a stack, or FIFO, which stands for first in, first out, like a queue. The Deque interface allows you to insert or remove elements from both ends.
+
+Map, SortedMap, and NavigableMap
+
+These interfaces are for containers that map keys to values. In a SortedMap, the keys are kept in sorted order. NavigableMap allows you to search for and return the closest match for a given search criterion. Note that the Map hierarchy does not extend the Collection interface.
+
+Iterator and ListIterator
+
+If a class implements the Iterator interface, you can traverse its elements in the forward direction. If it implements ListIterator, you can traverse in both forward and reverse directions.
+
+Collection Interface Methods
+
+The Collection interface, as the base for all other collections, provides a minimal set of behaviors and actions. Here are some of the key methods:
+
+The addAll method adds all elements from another collection into the current container.
+
+The containsAll method checks if all elements from another collection are present in the current container.
+
+The removeAll method removes all elements from the current container that are also present in another collection.
+
+The retainAll method keeps only those elements in the current container that are also present in another collection, removing all others.
+
+Common Concrete Classes
+
+Now, let’s look at some of the most well-known and widely used concrete classes from the collections framework.
+
+ArrayList
+
+ArrayList is implemented internally as a resizable array. It is one of the most widely used concrete classes. Searching is fast, but inserting or deleting elements is slow because the elements may need to be shifted. ArrayList allows duplicate elements.
+
+LinkedList
+
+LinkedList is implemented as a doubly linked list. It is fast for inserting or deleting elements, but slow for searching. LinkedList can also be used as a stack, which is last in, first out, or as a queue, which is first in, first out. It allows duplicates.
+
+HashSet
+
+HashSet uses a hash-table data structure internally. It is used for storing a set of elements and does not allow duplicates. Searching and retrieving elements is fast, but the order of elements is not maintained.
+
+TreeSet
+
+TreeSet is implemented as a red-black tree. Like HashSet, it does not allow duplicates, but it stores elements in a sorted order. The position of each element is determined by the sorting order.
+
+HashMap
+
+HashMap is also implemented as a hash-table. It stores key-value pairs and uses hashing to find where to store or search for a pair. Searching and inserting are very fast, but the order of elements is not maintained.
+
+TreeMap
+
+TreeMap is implemented using a red-black tree. Unlike HashMap, TreeMap stores its elements in a sorted order, based on the keys.
+
+PriorityQueue
+
+PriorityQueue uses a heap data structure internally. It is designed for retrieving elements based on priority. No matter the order in which you insert elements, when you remove them, the highest priority element is retrieved first.
+
+ArrayList in Detail
+
+ArrayList is used to store a sequence of elements and specifically implements a resizable array. When you create a native array in Java, such as a new string array of size ten, the size is fixed at creation. In contrast, an ArrayList is dynamic and can grow as needed. Internally, an ArrayList allocates a block of memory and expands as required. Accessing elements is very fast, but adding or removing elements can be costly because the remaining elements may need to be copied or shifted.
+
+Here’s an example of how to use ArrayList in Java. In this example, a simple list is created and populated with random entries. The ArrayList is created without any arguments to the constructor, but internally, the implementation does not create an empty array. Instead, if no capacity is specified, the initial array size is ten.
+
+The code then adds three programming languages—C, C plus plus, and Java—to the list. Finally, it demonstrates the basic for-each structure in Java, which is a compile-time structure that gets compiled to an iterator. This pattern is usable for all types of collections that implement the iterator pattern and the Iterable interface.
+
+In summary, this example shows how to create an ArrayList, add elements to it, and iterate over its contents using a for-each loop.
+
+
+The iterator approach
+
+The iterator approach can also be used for traversing collections. This method is equivalent to the for-each loop described earlier, but it gives you manual control over the iteration process. With an iterator, you can use the next method to skip over more than one element, stop the iteration at a specific point, or even use the remove method to delete elements from the collection as you go.
+
+In the first example, an iterator is created for a list of languages. The code checks if there are more elements using hasNext, retrieves each element with next, and prints it out. This demonstrates basic iteration using an iterator.
+
+The next example shows how you can remove elements from a collection while iterating over it. Here, a mutable instance of an ArrayList iterator is created. Each call to next advances the iterator to the next element. The only way to access elements is by calling next, but you must first check with hasNext to ensure there is another element. The typical pattern is to call hasNext, then next.
+
+When removing elements, it is important to call next before calling remove. This is specified in the API documentation for the iterator’s remove method. If you call remove without first calling next, an exception will be thrown. Every remove call must be preceded by a call to next. The call to next moves the iterator forward, and then remove deletes the current element. This ensures the iterator remains in a valid state.
+
+Set
+
+Sets are collections that do not allow duplicate elements. Unlike a List, a Set does not remember the order in which you inserted elements—it is unordered. There are two important concrete classes for Set: HashSet and TreeSet.
+
+A HashSet is designed for quickly inserting and retrieving elements. It does not maintain any sorting order for the elements it holds. In contrast, a TreeSet stores elements in a sorted order, according to either a compare function or the compareTo method from the Comparable interface.
+
+For example, consider a pangram, which is a sentence that uses every letter of the alphabet at least once. You can break a pangram into its individual characters and store them in a TreeSet. This will automatically sort the characters. To do this, you can use the toCharArray method on a string, which returns an array of primitive characters. When adding these to a TreeSet, Java will automatically convert them to Character objects, thanks to auto-boxing.
+
+Map
+
+A map stores key and value pairs. The Map interface does not extend the Collection interface, but it provides methods that allow you to work with objects from classes that do implement Collection. The method names in Map are similar to those in Collection, making Map easy to understand and use.
+
+There are two important concrete classes of Map: HashMap and TreeMap.
+
+A HashMap uses a hash table data structure internally. Searching in a HashMap is fast. However, a HashMap does not remember the order in which elements were inserted, nor does it keep elements in any sorted order.
+
+A TreeMap, on the other hand, uses a red-black tree data structure. Unlike HashMap, TreeMap keeps elements in sorted order—not in the order of insertion, but according to the keys’ values. Searching and inserting in a TreeMap is somewhat slower than in a HashMap.
+
+The NavigableMap interface extends the SortedMap interface. TreeMap is the most widely used class that implements NavigableMap. As the name suggests, NavigableMap provides many methods for navigating the map. You can get the nearest value matching a given key, all values less than a given key, all values greater than a given key, and so on.
+
+For example, consider a TreeMap called examScores that maps integer scores to student names. You can add entries for different students and their scores. When you print the map, the keys will be in sorted order because TreeMap sorts them automatically. You can also print the map in descending order using the descendingMap method, which reorders the elements so that higher keys come first. The tailMap method returns a view of the map containing all entries with keys greater than or equal to a specified value, such as forty. Conversely, headMap would return all entries with keys less than forty. The firstEntry method retrieves the entry with the lowest key, which in this case is the student with the lowest score.
+
+Deque
+
+A Deque, pronounced “deck,” is a doubly linked queue. This data structure allows you to insert and remove elements from both ends. The Deque interface was introduced in Java six and extends the Queue interface, so all methods provided by Queue are also available in Deque.
+
+There are three concrete implementations of the Deque interface: LinkedList, ArrayDeque, and LinkedBlockingDeque. The Deque interface provides methods to operate on both ends of the queue, such as addFirst, addLast, removeFirst, and removeLast. These methods are self-explanatory based on their names.
+
+For example, consider a class called SpecialQueue that uses an ArrayDeque to store customer names. The addInQueue method adds a customer to the end of the queue. The removeFront method removes a customer from the front, and the removeBack method removes a customer from the back. This demonstrates how you can use Deque to manage a queue with flexible insertion and removal.
+
+Comparable
+
+The Comparable interface and its companion, the Comparator interface, provide ways to compare objects. These two interfaces are essential to the internals of the Java Collections framework. Many containers in the library require elements to be comparable, or for a comparator to be provided, to ensure that elements can be compared when inserted, removed, or searched.
+
+The Comparable interface defines a single method called compareTo. This is not a functional interface, but it is meant for types to implement so they can be compared with other instances of the same type. The compareTo method returns an integer value, which represents three possible states: the left object is greater than, equal to, or less than the right object. These correspond to positive, zero, and negative results, respectively.
+
+For example, consider a Student class that implements Comparable. The class has fields for id, name, and CGPA. The compareTo method in this example compares only the id of the student. The specific comparison logic can vary greatly depending on the type of object and the business rules involved. That is why interfaces like Comparable are needed—to allow custom comparison logic based on real-world requirements.
+
+Comparator
+
+Now, let’s move on to the Comparator interface.
+
+
+The companion interface to Comparable
+
+The Comparator interface is the companion to Comparable. While Comparable is used to define a natural, one-size-fits-all ordering for a class, Comparator is designed for one-off or special comparison operations based on different criteria. For example, if you have a Student class, you might want to sort students alphabetically by name in one situation, or by their grade point average, or GPA, in another. Since a single compareTo method in Comparable cannot handle all these different requirements, Comparator exists to let you define multiple ways to compare objects.
+
+Comparator is a functional interface, which means you can use it with lambda expressions or method references to create custom comparison logic. For instance, you might define a class called CGPAComparator that implements Comparator for Student objects. This class would compare two students based on their CGPA, or cumulative grade point average. You could then use this comparator to sort a list of students by their CGPA.
+
+The general rule is that most real-world classes have a natural order, so Comparable is usually sufficient. However, when you need customized sorting or ordering, you can use Comparator as a substitute.
+
+Stream
+
+The Stream interface is one of the most important additions in Java 8. It allows you to process sequences of elements in a functional style. There are specialized stream classes for primitive types, such as DoubleStream, LongStream, and IntStream, which are optimized for double, long, and int values.
+
+Streams in Java operate using what is called a stream pipeline. A stream pipeline is a sequence of operations chained together on a stream object. These operations transform the data and produce a final result. The pipeline is built by calling methods on a stream instance. Each method call adds a transformation to the pipeline, but the actual work is not performed until a terminal operation is invoked. Only when a terminal operation, such as forEach or collect, is called does the pipeline execute all the specified actions and produce a result.
+
+For example, you might have a class that demonstrates the components of a stream pipeline. In this example, you start by getting all the methods of the Object class, then create a stream from them. You map each method to its name, remove duplicates using distinct, and finally print each unique method name using forEach. The key point is that intermediate operations like map and distinct are only executed when the terminal operation, forEach, is called.
+
+Primitive streams
+
+Primitive types in Java have their own specialized stream interfaces: IntStream, DoubleStream, and LongStream. These do not directly extend from the Stream interface, but from a common base called BaseStream. The API for primitive streams is slightly different from the regular Stream API, since it deals with numeric types and provides additional methods.
+
+To create a primitive stream, you can use several static methods. The most common ones are for generating streams from arrays or within a predefined range. For example, IntStream provides methods to create a stream of integers within a range, either exclusive or inclusive of the end value. You can also concatenate two streams or create a stream from a set of values.
+
+Another useful method is iterate, which acts like a replacement for a standard for-loop. You provide a starting value and a function to generate the next value. You can also limit the number of elements to avoid creating an infinite stream.
+
+Creating streams
+
+There are several ways to create streams besides the static utility methods in the Stream or IntStream classes. The Arrays class was enhanced in Java 8 to allow you to create streams from arrays, whether they are arrays of primitives or arrays of objects. For example, you can create an IntStream from an array of integers, or a generic Stream from an array of objects.
+
+The Stream.of methods are essentially wrappers around Arrays.stream, providing a convenient way to create streams from a list of values or an array.
+
+Building streams
+
+If you know that a collection of items will be used immediately for stream operations, you can use the Stream.Builder interface to build a stream element by element. The builder interface provides methods to add elements, and once you are done, you can build the stream and start processing it.
+
+Existing interface
+
+Many Java classes provide built-in support for generating streams directly from their APIs. For example, the Files class can create a stream of lines from a file, the Pattern class can split a string into a stream of substrings, the Random class can generate a stream of random numbers, and the String class can create a stream of character codes.
+
+For instance, you can read all lines from a file as a stream and print them, split a string into words and process each word, generate a stream of random integers, or get the character codes from a string and process them as an IntStream. Note that the chars method on String returns an IntStream because characters in Java are treated as integers, specifically as two-byte values due to Java's use of UTF-16 encoding.
+
+Intermediate operations
+
+Intermediate operations in streams do not consume the stream but instead refine it. This means that the operations you invoke on a stream object are only executed when a terminal operation is called, such as forEach or collect.
+
+Some common intermediate operations include:
+
+Filter, which removes elements that do not match a given condition.
+
+Map, which applies a transformation function to each element in the stream.
+
+Distinct, which removes duplicate elements based on the equals method.
+
+Sorted, which sorts the elements in their natural order or using a custom comparator.
+
+Peek, which allows you to perform an action on each element as it passes through the stream, without modifying the stream itself.
+
+Limit, which restricts the number of elements in the stream to a specified size.
+
+These operations allow you to build complex data processing pipelines in a clear and concise way, deferring execution until you are ready to produce a result.
+
+
+Here is a demonstration of using intermediate operations to mutate a stream and observe its elements without terminating it. In this example, the peek operation is used to print each element, and finally, the count method is called to terminate the stream. Invoking the count method ensures that all the intermediate operations are executed in the order they were specified.
+
+The code in question creates a stream of the numbers one through five. It then maps each number to its square, uses peek to print each squared value, and finally calls count to trigger the processing of the stream.
+
+Intermediate operations do not produce a result immediately. Instead, they return the original stream object, allowing you to chain more intermediate operations. Importantly, until a terminal operation is invoked, none of the intermediate actions are actually executed. The lambda expressions representing these actions are simply stored within the stream. This design allows the stream to optimize its execution, since the actions are only performed when the stream is finally terminated.
+
+Terminal operations
+
+Terminal, or terminating, operations are usually the last operations called on a stream. Before this point, you can chain any number of intermediate operations, but only a terminal operation will actually process the stream. Once a terminal operation is called, the stream is closed. If you try to use the same stream object again—whether for another intermediate or terminal operation—an exception will be thrown. Specifically, you will encounter an IllegalStateException.
+
+Stream objects are intended for one-shot transformation pipelines. They are lightweight, as they simply wrap around the original object or collection. They do not copy or clone the elements. Instead, they provide a way to generate a new collection containing the transformed elements. Depending on the combination of terminal and intermediate operations, entirely new objects might be created, such as when using the map operation.
+
+Here are some common terminal operations and their purposes.
+
+The forEach method takes an action and calls it for every element in the stream.
+
+The toArray method returns an array containing all the elements in the stream.
+
+The min method returns the minimum value in the stream, using a provided comparison function.
+
+The max method returns the maximum value in the stream, also using a comparison function.
+
+The count method returns the number of elements in the stream.
+
+Once a stream has been finalized by calling a terminal operation, it is considered consumed. Any attempt to call another operation—whether intermediate or terminal—on the same stream object will result in an IllegalStateException.
+
+

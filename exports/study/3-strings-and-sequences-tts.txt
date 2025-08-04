@@ -1,0 +1,25 @@
+Sequences
+
+In the Java language, there are three main types that behave like strings and help us build dynamic sequences of characters. These types allow us to represent and manipulate text in different ways.
+
+It is important to note that, in Java, a string is an object. However, it has some special properties. For example, Java uses a technique called interning, which means that string literals are optimized and pooled by the Java Virtual Machine. This makes string creation more efficient, especially for commonly used values.
+
+The three main string-like types in Java are as follows.
+
+First, there is String. This is an immutable type in Java. Each string object can be created dynamically using the new keyword, or defined as a literal. The String class exposes an application programming interface, or API, that allows you to inspect the string, but not to change its state. When you use methods from the String API that appear to modify the string, they actually create a copy of the original string and return the new copy.
+
+Second, there is StringBuffer. This type will be discussed in more detail later.
+
+String
+
+Strings in Java can be created in a variety of ways. The two most common approaches are through interning, or through dynamic allocation.
+
+For example, when you write String myString1 equals "this is a test", the string is interned by the Java runtime. This means it is stored in a special pool for reuse.
+
+If you write String myString2 equals new String, with the value "this is a test", the string is dynamically created, even though it contains the same text as before.
+
+If you then write String myString3 equals "this is a test", the string is interned and reused from the pool. This means that myString1 and myString3 actually refer to the same object in memory.
+
+Java defines one operator for String objects, which is the plus sign. This operator is used to concatenate two strings. For example, if you write String myString equals "I" plus " like " plus "Java.", the resulting value of myString will be "I like Java."
+
+
