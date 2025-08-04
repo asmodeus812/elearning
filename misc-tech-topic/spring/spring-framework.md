@@ -61,7 +61,168 @@ public class DemoApplication {
 }
 ```
 
-# Spring boot
+# Modern guidelines
+
+### 1. Use `record` for DTOs
+- Auto-generates `equals()`, `hashCode()`, `toString()`, and getters.
+- Immutable by design (no Lombok needed).
+- Request/response DTOs (`@RequestBody`, `@ResponseBody`).
+- Immutable configuration properties (`@ConfigurationProperties`).
+
+```java
+public class UserDto {
+    private final String name;
+    private final int age;
+    // Boilerplate: constructor, getters, equals, hashCode, toString
+}
+```
+
+```java
+public record UserDto(String name, int age) { }
+```
+
+### 2. Prefer `var` for Local Variables (Judiciously)
+- Use `var` when the type is obvious (e.g., `new` expressions, builders).
+- Avoid `var` if it reduces readability (e.g., `var result = service.process()`).
+
+```java
+List<String> names = new ArrayList<>();
+```
+
+```java
+var names = new ArrayList<String>();
+```
+
+### 3. Replace Lombok with Java Language Features
+- Use `record` for DTOs (replaces `@Data`, `@Value`).
+- Use compact constructors:
+- When to Keep Lombok:
+  - `@Slf4j` (still concise).
+  - `@Builder` (until Java gets a native builder pattern).
+
+```java
+@Data
+@Builder
+public class Product { ... }
+```
+
+```java
+public record Product(String id, String name) {
+    public Product {
+        Objects.requireNonNull(id);
+    }
+}
+```
+
+### 4. Sealed Classes for Domain Models
+- Explicitly restricts inheritance (better domain modeling).
+- Works great with Spring Data JPA `@Entity` hierarchies.
+
+```java
+public abstract class Shape { ... }
+public class Circle extends Shape { ... }  // Unlimited extensibility
+```
+
+```java
+public sealed class Shape permits Circle, Rectangle { ... }
+```
+
+### 5. Pattern Matching (`instanceof` and `switch`)
+- Cleaner controller logic (e.g., handling polymorphic DTOs).
+
+```java
+if (obj instanceof String) {
+    String s = (String) obj;
+    System.out.println(s.length());
+}
+```
+
+```java
+if (obj instanceof String s) {
+    System.out.println(s.length());
+}
+```
+
+### 6. Text Blocks for JSON/HTML/SQL
+- `@Sql` annotations in internal tests.
+- Hardcoded API response examples.
+
+```java
+String json = "{\"name\":\"John\", \"age\":30}";
+```
+
+```java
+String json = """
+    {
+        "name": "John",
+        "age": 30
+    }
+    """;
+```
+
+### 7. Null Checks with `Objects.requireNonNullElse`
+
+```java
+return name != null ? name : "default";
+```
+
+```java
+return Objects.requireNonNullElse(name, "default");
+```
+
+### 8. HTTP Interface Clients (Java 21+)
+- No need for `@FeignClient` (standard Java interface).
+
+```java
+@FeignClient(url = "https://api.example.com")
+public interface UserClient {
+    @GetMapping("/users/{id}")
+    User getUser(@PathVariable String id);
+}
+```
+
+```java
+public interface UserClient {
+    @GetExchange("/users/{id}")
+    User getUser(String id);
+}
+```
+
+### 9. Avoid `@Autowired` use Constructor Injection Only
+- Immutable dependencies (thread-safe, no Lombok `@RequiredArgsConstructor` needed).
+
+```java
+@Autowired
+private UserService userService;
+```
+
+```java
+private final UserService userService;
+
+public UserController(UserService userService) {
+    this.userService = userService;
+}
+```
+
+### 10. Switch Expressions
+
+```java
+switch (status) {
+    case "OK": return 200;
+    case "BAD": return 400;
+    default: return 500;
+}
+```
+
+```java
+return switch (status) {
+    case "OK" -> 200;
+    case "BAD" -> 400;
+    default -> 500;
+};
+```
+
+# Getting started
 
 This section will teach you how to create a Spring Boot application using Maven and Gradle.
 
@@ -689,9 +850,9 @@ spring.application.name=demoservice
 ```yml
 spring:
  application:
- name: demoservice
+    name: demo
 server:
- port: 9090
+ port: 8080
 ```
 
 ### Value annotation
@@ -700,6 +861,412 @@ The @Value annotation is used to read the environment or application property va
 property value is shown below:
 
 ```java
-@Value("${property_key_name}")
+@Value("${spring.application.name}")
 private String applicationName;
 ```
+
+## Spring Profiles
+
+Spring boot supports different properties based on the Spring active profile. For example we can keep two separate files
+for development and production to run the Spring Boot application, or we can also use multi-document setup in the same
+file, in a regular yml file it is possible to separate different documents using the `---` atom, which is the
+equivalent of having different / separate files.
+
+```yml
+---
+# make sure that the logging is active for all profiles by default, we are using the INFO level, which means that we
+# will be logging everything above and including INFO level, that implies - INFO, WARN, ERROR.
+logging:
+  level:
+    com.spring.demo.core: INFO
+
+# this is the base document, or the default one which will be picked up by spring, anything defined here can be
+# overridden with specific active profile configuration
+spring:
+  application:
+    name: demo-base
+
+---
+spring:
+  application:
+    name: demo-local
+  config:
+    activate:
+      # this tells spring that this document will be only active if the current profile that is active is called `local`, in
+      # that case this file / document will be merged with the base config
+      on-profile:
+      - local
+---
+```
+
+The other traditional option that spring provides is separate files, each file has to include the name of the active
+profile in its name - `application, application-local, application-dev`, where the active properties will be, respectively
+in order - the profiles `default , local and dev`. The default profile is always active.
+
+While running the JAR file, we need to specify the spring active profile based on each properties file. By default,
+Spring Boot application uses the application.properties file. The command to set the spring active profile is shown
+below:
+
+```sh
+$ java -jar <demo-application>.jar --spring.profiles.active=dev
+```
+
+```plaintext
+2017-11-26 08:13:16.322 INFO 14028 --- [ main]
+com.tutorialspoint.demo.DemoApplication : The following profiles are active:
+dev
+```
+
+## Spring Logging
+
+Spring Boot uses Apache Commons logging for all internal logging. Spring Boot's default configurations provides a
+support for the use of Java Util Logging, Log4j2, and Logback. Using these, we can configure the console logging as well
+as file logging.
+
+If you are using Spring Boot Starters, Logback will provide a good support for logging. Besides, Logback also provides a
+use of good support for Common Logging, Util Logging, Log4J, and SLF4J.
+
+The default log messages will print to the console window. By default, "INFO", "ERROR" and "WARN" log messages will
+print in the log file.
+
+```plaintext
+[INFO] +- org.springframework.boot:spring-boot-starter-logging:jar:3.5.3:compile
+[INFO] |  +- ch.qos.logback:logback-classic:jar:1.5.18:compile
+[INFO] |  |  +- ch.qos.logback:logback-core:jar:1.5.18:compile
+[INFO] |  |  \- org.slf4j:slf4j-api:jar:2.0.17:compile
+[INFO] |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.24.3:compile
+[INFO] |  |  \- org.apache.logging.log4j:log4j-api:jar:2.24.3:compile
+[INFO] |  \- org.slf4j:jul-to-slf4j:jar:2.0.17:compile
+```
+
+### SLF4J (Simple Logging Facade for Java)
+
+- **Role**: Abstraction layer (facade) over concrete logging implementations.
+- **Purpose**: Decouples your code from specific logging frameworks.
+  - Provides a unified API (e.g., `LoggerFactory.getLogger()`).
+  - Allows switching implementations (Logback, Log4j2, etc.) without code changes.
+
+### Logback
+- **Default in Spring Boot**.
+  - Native SLF4J implementation (no adapter needed).
+  - Fast, flexible configuration via `logback.xml`.
+
+### Log4j2
+- **Successor to Log4j 1.x**.
+- **Strengths**:
+  - High performance (asynchronous logging).
+  - Advanced features (JSON/YAML config, plugins).
+
+### java.util.logging (JUL)
+- **Built into the JVM**.
+  - Limited features, poor performance.
+  - Rarely used directly (SLF4J bridges exist).
+
+```java
+import org.slf4j.Logger;
+Logger logger = LoggerFactory.getLogger(MyClass.class); // SLF4J API
+logger.info("Hello"); // Delegates to the implementation Logback/Log4j2
+```
+
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-logging</artifactId> <!-- Logback -->
+</dependency>
+```
+
+To use the `log4j2` Replace the starter dependency with `spring-boot-starter-log4j2`.
+
+By default, all logs will print on the console window and not in the files. If you want to print the logs in a file, you
+need to set the property **logging.file** or **logging.path** in the application.properties file.
+
+You can specify the log file path using the property shown below. Note that the log file name is spring.log.
+
+```yml
+# we have to provide the name of the log file, and path, by default these values are not set, thus no file logging is
+# performed but it is a good practice in production to make sure both are explicitly provided, and have a persistent log location,
+# note that this is using a relative path, the file will be created in the current working directory where the jar was run, the
+# reason being is that depending on your system, paths like /tmp or /var might not be accessible to the process running the jar,
+# and the log file will never be created, so make sure that your process has the permissions to read/write at the file.path location
+logging.file.path=./tmp/
+logging.file.name=spring.log
+```
+
+To modify the log levels, for all packages we can use the `root` prefix, this will enable logging levels for every
+package in the classpath, however it is possible to provide a more granular logging based on a specific package or even
+an entire sub-package.
+
+```yml
+logging:
+    level:
+        root=ERROR
+        com.my.package=TRACE
+        org.springframework.web: DEBUG
+        org.hibernate.SQL: DEBUG
+        org.hibernate.type: TRACE
+```
+
+## Usage example
+
+Here is a more advanced and complete example using the different options we have looked at such as logging,
+configurations, properties and injection
+
+```java
+package com.spring.demo.config;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class DefaultDemoAutoConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDemoAutoConfiguration.class);
+
+    public DefaultDemoAutoConfiguration() {
+        LOGGER.info("Creating the auto configuration bean DefaultDemoAutoConfiguration");
+    }
+
+    @Bean
+    DefaultAutoConfigBean defaultBeanFromAutoConfig(@Value("${spring.application.name}") String name) {
+        LOGGER.info("Initializing DefaultAutoConfigBean");
+        return new DefaultAutoConfigBean(name);
+    }
+
+    public static final class DefaultAutoConfigBean {
+
+        public DefaultAutoConfigBean(String name) {
+            LOGGER.info("Running DefaultAutoConfigBean constructor for {}", name);
+        }
+    }
+}
+```
+
+# Restful services
+
+Before you proceed to build a RESTful web service, it is suggested that you have knowledge of the following annotations:
+The `@RestController` annotation is used to define the RESTful web services. It serves JSON, XML and custom response. Its
+syntax is shown below:
+
+```java
+@RestController
+public class ProductServiceController {
+}
+```
+
+## Request Mapping
+
+The `@RequestMapping` annotation is used to define the Request URI to access the REST Endpoints. We can define Request
+method to consume and produce object. The default request method is GET. However the annotation itself has a field that
+can be used to specify the type - GET, POST, DELETE etc. All major METHOD types are supported out of the box. There are
+dedicated annotations which are called `PostMapping`, `GetMapping`, `DeleteMapping` and so forth, which are preferred over the
+plain direct usage of the `RequestMapping` annotation
+
+```java
+@RequestMapping(value="/products")
+public ResponseEntity<Object> getProducts() { }
+```
+
+## Request Body
+
+The `@RequestBody` annotation is used to define the request body content type. This is relevant when the request method
+in question is of type that is different than GET, in those cases it is possible to send payload to the Servlet. The
+payload in this case will be automatically de-serialized into the Product POJO, however if there are types mismatch
+present between the types of the fields or properties of the Product POJO then an error would be thrown.
+
+```java
+@RequestMapping(method=RequestMethod.POST, value="/products")
+public ResponseEntity<Object> createProduct(@RequestBody Product product) {
+}
+```
+
+This example shows how we can read in an ambiguous set of values and fields from the request instead of having a
+dedicated java class that defines the fields, this is possible due to the usage of the Object in the map which is
+polymorphic at runtime. The de-serialized values in the Map would Object instances, but actually be de-serialized values
+of class primitives such as Integer, String, Byte, Boolean etc.
+
+```java
+@RequestMapping(method=RequestMethod.POST, value="/products2")
+public ResponseEntity<Object> createProductMap(@RequestBody Map<String, Object> product) {
+}
+```
+
+## Path Variable
+
+The `@PathVariable` annotation is used to define the custom or dynamic request URI. The Path variable in request URI is
+defined as curly braces {} as shown below. This would inject the value of the templated entry in the path string in this
+case called {id} into the method argument, when the request is received, which would allow you to dynamically read a
+request value from the path. Take a good note of the name of the argument in the annotation - `id`, this has to match
+the value in the brackets. It is also possible to skip the value in the `@PathVariable` annotation, and the name would
+be inferred from the name of the argument of the function, this however is only possible if the jar is compiled with the
+-parameter option passed to the compiler, that would tell the compiler to retain the name of the arguments at runtime,
+making them accessible to the annotation processor that injects the value into the arguments of the function, by reading
+their names
+
+```java
+@RequestMapping(method=RequestMethod.GET, value="/products/{id}")
+public ResponseEntity<Object> updateProduct(@PathVariable("id") String id) {
+}
+```
+
+## Request Parameter
+
+The `@RequestParam` annotation is used to read the request parameters from the Request URL. By default, it is a required
+parameter. We can also set default value for request parameters as shown here:
+
+```java
+// one would be able to call this GET endpoint such as follows schema://hostname/products?name=product-name, the query
+// parameter is optional meaning that a call will match without it being present, and a value will be defined by default if
+// there is no value provided
+@RequestMapping(method=RequestMethod.GET, value="/products")
+public ResponseEntity<Object> getProduct(@RequestParam(value="name", required=false, defaultValue="honey") String name) {
+}
+```
+
+## Request Header
+
+While a request is being built by the client it is possible to construct a custom header that can be passed in the
+header section of the HTTP payload, this header has a name and a value, in our case the name is `x-product-name` note
+that the header names are **`not case sensitive`**, the values in there are usually primitive strings, numbers or
+boolean types.
+
+```java
+@RequestMapping(method=RequestMethod.GET, value="/products")
+public ResponseEntity<Object> getProduct(@RequestHeader("X-Product-Name") String name) {
+}
+```
+
+## Request Attribute
+
+The request attribute, is an internal construct that is attached to the request by the Servlet processor, as early as
+the request being captured by the web server, usually in the real world a special filter or interceptor might add some
+request attribute to the request before it reaches the method call in the restful controller, this can then be used to
+do some further processing, this usually can happen based on some business logic, or in the example below, based on some
+other properties found in the http request sent by the client.
+
+```java
+// based on some business logic a special attribute might be added to the request before it reaches the controller method
+// in our example we `imagine` that a special discount value will be added based on some heuristic calculated from the
+// client request payload.
+@RequestMapping(method=RequestMethod.GET, value="/products")
+public ResponseEntity<AuditLog> getProducts(@RequestAttribute("discount") Double discount) {
+}
+```
+
+## Controller example
+
+```java
+@RestController
+public class ProductsController {
+
+    @PostMapping("/products-body")
+    public ResponseEntity<Object> getProductsQuery(@RequestBody ProductResourceRecord product) {
+        return ResponseEntity.of(Optional.ofNullable(product));
+    }
+
+    @GetMapping("/products-header")
+    public ResponseEntity<Object> getProductsHeader(@RequestHeader("name") String name) {
+        return ResponseEntity.of(Optional.ofNullable(name));
+    }
+
+    @GetMapping("/products-query")
+    public ResponseEntity<Object> getProductsQuery(@RequestParam("name") String name) {
+        return ResponseEntity.of(Optional.ofNullable(name));
+    }
+
+    @GetMapping("/products-path/{id}")
+    public ResponseEntity<Object> getProductsPath(@PathVariable("id") String id) {
+        return ResponseEntity.of(Optional.ofNullable(id));
+    }
+
+    @GetMapping("/products-discount")
+    public ResponseEntity<Object> getProductsDiscount(@RequestAttribute("discount") Double discount) {
+        return ResponseEntity.of(Optional.ofNullable(discount));
+    }
+}
+```
+
+```http
+### 1. POST with @RequestBody
+POST http://localhost:8080/products-body
+Content-Type: application/json
+
+{
+    "id": "laptop",
+    "name": "Laptop",
+}
+
+### 2. GET with @RequestHeader
+GET http://localhost:8080/products-header
+name: PremiumCustomer
+
+### 3. GET with @RequestParam
+GET http://localhost:8080/products-query?name=Smartphone
+
+### 4. GET with @PathVariable
+GET http://localhost:8080/products-path/12345
+
+### 5. GET with @RequestAttribute (requires server-side setup)
+GET http://localhost:8080/products-discount
+```
+
+# Handling exceptions
+
+Handling exceptions and errors in API, and sending the proper responses to the client is good for enterprise
+application, in this chapter we will learn how to handle the exceptions in spring boot, before proceeding with exception
+handling let us gain an understanding on the following annotations:
+
+## @ControllerAdvice
+
+This annotation is used to handle the exceptions globally. What it does it create an advice - an advice is a type of
+functionality that is wrapped around a certain functionality, when you a controller method is triggered, a certain code
+can be executed before or after or around the execution of this method.
+
+```java
+public ResponseEntity<Object> getProducts() {}
+```
+
+If we assume we have this method present in our controller, the Advice can be called right before the method is called,
+right after the method exits or/and both could be done as well. Meaning that we can do some generic work before or/and
+after the method execution.
+
+In the most general use case that can be used to catch exceptions in a single location no mater which controller method
+was called. This is useful when used in conjunction with the `@ExceptionHandler` annotation.
+
+## @ExceptionHandler
+
+This annotation is used to handle the specific exceptions, what it does is annotate a method inside a class annotated
+with `@ControllerAdvice`, that method will be called when a specific exception of a specific type is emitted from a
+controller method.
+
+The advice is usually implemented internally with a library like `aspectj`, which allows us to inject at either runtime
+(through a proxy object) or compile time (by literally writing byte code during compile time) additional code around a
+certain construct like - method, constructor etc. The `ControllerAdvice` and the `ExceptionHandler` are provided by Spring
+to simplify the process.
+
+```java
+// we create an advice for controllers, this annotation will pick up this class and create an advice handler wrapped
+// around all methods in classes marked with RestController in our module, it could look something like that, in pseudo code:
+// try {
+//     return productController.getProducts();
+// } catch(Throwable e) {
+//     for handler in handlers {
+//         if e instanceOf handler.getException() {
+//             handler.executeExceptionHandlerMethod();
+//         }
+//     }
+// }
+@ControllerAdvice
+public class ProductExceptionController {
+
+    @ExceptionHandler(value = ProductNotfoundException.class)
+    public ResponseEntity<Object> exception(ProductNotfoundException exception) {
+        // handle the specific exception, if another exception is triggered this method will not be called, the
+        // ExceptionHandler specifically handles only this type of exception and ignores others, if you wish to be more
+        // generic you could create another method, annotated with - @ExceptionHandler(value = RuntimeException.class)
+    }
+}
+```
+

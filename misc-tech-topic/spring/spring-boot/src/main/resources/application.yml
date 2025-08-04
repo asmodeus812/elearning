@@ -1,1 +1,23 @@
-spring.application.name: demo
+---
+logging:
+  file:
+    name: spring.log
+    path: ./tmp/
+  level:
+    root: DEBUG
+    com.spring.demo.core: INFO
+
+spring:
+  application:
+    name: demo-base
+
+---
+spring:
+  application:
+    name: demo-local
+  config:
+    activate:
+      on-profile:
+      - local
+
+---
