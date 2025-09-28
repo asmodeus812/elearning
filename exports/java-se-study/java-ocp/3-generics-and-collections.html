@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>3-generics-and-collections</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#basic-design" id="toc-basic-design">Basic design</a>
+<ul>
+<li><a href="#generics" id="toc-generics">Generics</a>
+<ul>
+<li><a href="#syntax" id="toc-syntax">Syntax</a></li>
+<li><a href="#raw-types" id="toc-raw-types">Raw-types</a></li>
+<li><a href="#methods" id="toc-methods">Methods</a></li>
+<li><a href="#subtypes" id="toc-subtypes">Subtypes</a></li>
+<li><a href="#wildcards" id="toc-wildcards">Wildcards</a></li>
+<li><a href="#limitations" id="toc-limitations">Limitations</a></li>
+<li><a href="#summary" id="toc-summary">Summary</a></li>
+</ul></li>
+<li><a href="#collections" id="toc-collections">Collections</a>
+<ul>
+<li><a href="#core" id="toc-core">Core</a></li>
+<li><a href="#concrete" id="toc-concrete">Concrete</a></li>
+<li><a href="#arraylist" id="toc-arraylist">ArrayList</a></li>
+<li><a href="#set" id="toc-set">Set</a></li>
+<li><a href="#map" id="toc-map">Map</a></li>
+<li><a href="#deque" id="toc-deque">Deque</a></li>
+<li><a href="#comparable" id="toc-comparable">Comparable</a></li>
+<li><a href="#comparator" id="toc-comparator">Comparator</a></li>
+</ul></li>
+<li><a href="#stream" id="toc-stream">Stream</a>
+<ul>
+<li><a href="#primitive-streams" id="toc-primitive-streams">Primitive
+streams</a></li>
+<li><a href="#creating-streams" id="toc-creating-streams">Creating
+streams</a></li>
+<li><a href="#building-streams" id="toc-building-streams">Building
+streams</a></li>
+<li><a href="#existing-interface" id="toc-existing-interface">Existing
+interface</a></li>
+<li><a href="#intermediate-operations"
+id="toc-intermediate-operations">Intermediate operations</a></li>
+<li><a href="#terminal-operations" id="toc-terminal-operations">Terminal
+operations</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="basic-design">Basic design</h1>
+<p>Every non trivial Java application makes use of data structures and
+algorithms. The Java collections framework provides a large set of
+readily usable general purpose data structures and algorithms. These
+data structures and algorithms can be used with any suitable data type
+in a type safe manner; this is achieved through the use of a language
+feature called generics</p>
+<p>The generics feature in java can be very familiar to other similar
+concepts from other languages such as c++, however while this feature is
+similar in nature it is quite different in the way it is implemented in
+the Java Language in comparison</p>
+<h2 id="generics">Generics</h2>
+<p>The general syntax of defining generics and generic types is to wrap
+around any non primitive type in angle brackets such as
+<code>&lt;T&gt;</code>. The <code>T</code> name is just a placeholder
+which the compiler uses during compile time to replace with the actual
+type declared by the user when a generic type is instantiated, it is
+matched against the actual definition of the type, mostly to make sure
+that type adheres to the API and generic rules (e.g. T extends K, T
+super K), since the entire generic feature in Java works in compile
+time, once the class is compiled by the compiler the actual generic type
+information is erased away. This is different than how some other
+languages implement generics, however this was done to keep backwards
+compatibility with older versions of the language and avoid introducing
+breaking changes at such a fundamental level.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// this is how the declaration of a generic type looks like, note that the `T` type is simply a placeholder, which is</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">// replaced during compiler time by the compiler, if there are any restrictions on the place holder the compiler makes sure</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">// to validate them as well i.e one can define the placeholder such that T extends OtherType, this rule is enforced by the</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">// compiler.</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BoxPrinter<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> T val<span class="op">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">BoxPrinter</span><span class="op">(</span>T arg<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        val <span class="op">=</span> arg<span class="op">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="bu">String</span> <span class="fu">toString</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;[&quot;</span> <span class="op">+</span> val <span class="op">+</span> <span class="st">&quot;]&quot;</span><span class="op">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">// create an instance which stores a string, the placeholder is resolved during compile time, by the compiler, and</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">// matched against the type, in this case String</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>BoxPrinter<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> box <span class="op">=</span> <span class="kw">new</span> BoxPrinter<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;(</span><span class="st">&quot;test&quot;</span><span class="op">);</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">// note that auto-boxing will work with generics, the compiler will correctly convert this from a primitive type to</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">// Integer, before creating the instance, therefore this is allowed and is not a compiler error</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>BoxPrinter<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> box2 <span class="op">=</span> <span class="kw">new</span> BoxPrinter<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;(</span><span class="dv">1</span><span class="op">);</span></span></code></pre></div>
+<p>The <code>&lt;T&gt;</code> is simply a placeholder, which is used in
+the declaration and then in the definition of the class type. The
+example above shows the diamond syntax. As mentioned generics are
+happening at two stages in the java language - first is declaration,
+when the generic type is declared, meaning the <code>signature</code> of
+the type is created, the user specified what the generic type / holder
+class is, the second is the actual creation of the generic type, or in
+other words an instance of a generic type, where the diamond syntax
+<code>&lt;&gt;</code> specifies the concrete type that the generic class
+definition will be created with. In a way it works very similarly to how
+templates work in C++, where the templates are also resolved during
+compile time, in C++, one can think of it in the following way, the
+compiler takes in the template and does a sort of
+<code>find and replace</code> action on the generic type signature, to
+create a new type, where the generic type is instantiated, for each
+concrete type.</p>
+<p>Imagine that in the example presented above, two versions of
+<code>BoxPrinter</code> are created, one that stores an
+<code>Integer</code> and one that stores <code>String</code> in the val
+member variable. For more details see example blow</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BoxPrinterString <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="bu">String</span> val<span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the rest of the class members</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BoxPrinterInteger <span class="op">{</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="bu">Integer</span> val<span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the rest of the class members</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This is not exactly how generics work, in Java, but fundamentally
+this is what the compiler does, it creates multiple unique versions of
+the type, for each unique generic argument, no matter how many generic
+arguments a given type declares</p>
+<h3 id="syntax">Syntax</h3>
+<p>As already explained the diamond syntax is used to both declare a
+generic type, and define it in code. It is possible to skip the type in
+the creation of the instance, to make tying less verbose.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// those two are functionally equivalent, the second instantiation simply skips the contents inside of the brackets on</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">// the constructor, but they are inferred from the type, the left hand side</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>BoxPrinter<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> box1 <span class="op">=</span> <span class="kw">new</span> BoxPrinter<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;(</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>BoxPrinter<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> box2 <span class="op">=</span> <span class="kw">new</span> BoxPrinter<span class="op">&lt;&gt;(</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">// this however is incorrect, the compiler will spill out an warning, since this is trying to declare a non generic</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">// instance of `BoxPrinter`, since the explicit diamond pattern is not specified</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>BoxPrinter box3 <span class="op">=</span> <span class="kw">new</span> BoxPrinter<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;(</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">// this is functionally and fundamentally the same as the one above, this is not an error, because the language is</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">// trying to be backwards compatible with older versions, the compiler will simply try to replace the type argument with</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Object, when it is omitted</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>BoxPrinter box4 <span class="op">=</span> <span class="kw">new</span> <span class="fu">BoxPrinter</span><span class="op">(</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">// this is also functionally equivalent to the above, however in this case the placeholder types are known, the compiler</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">// will simply complain that there is unchecked cast between the left and right expression, since the left expression</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">// declares the generic types, however the right one produces BoxPrinter&lt;Object&gt; effectively</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>BoxPrinter<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> box5 <span class="op">=</span> <span class="kw">new</span> <span class="fu">BoxPrinter</span><span class="op">(</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">// this is straight up wrong, the generic placeholder can be inferred only from the left hand side of the expression,</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">// not the right hand, that would produce a compile time error</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>BoxPrinter<span class="op">&lt;&gt;</span> box5 <span class="op">=</span> <span class="kw">new</span> BoxPrinter<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;(</span><span class="dv">1</span><span class="op">);</span></span></code></pre></div>
+<h3 id="raw-types">Raw-types</h3>
+<p>As already mentioned, to retain backwards compatibility certain
+syntaxes are allowed when defining generics, however the compiler will
+infer the raw type by default, in this case that is <code>Object</code>
+the top level type from which all types in Java extend off of. This is
+fine, and the compilation process might complete fine, with warnings,
+however one looses all benefits of compile time checks when the actual
+generic type is not known, or is not specified.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// while this is possible, all methods which return/work on an element of the array would by default return Object,</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">// which is not very useful, since users loose all types of compile time type checking capabilities</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span> list <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">();</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span> list <span class="op">=</span> <span class="kw">new</span> <span class="bu">LinkedList</span><span class="op">();</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>list<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;First&quot;</span><span class="op">);</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>list<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;Second&quot;</span><span class="op">);</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> strList <span class="op">=</span> list<span class="op">;</span> <span class="co">// #0: generates a compiler warning</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>strList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">10</span><span class="op">);</span> <span class="co">// #1: generates compiler error</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span><span class="op">(</span><span class="bu">Iterator</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> itemItr <span class="op">=</span> strList<span class="op">.</span><span class="fu">iterator</span><span class="op">();</span> itemItr<span class="op">.</span><span class="fu">hasNext</span><span class="op">();)</span> <span class="op">{</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Item : &quot;</span> <span class="op">+</span> itemItr<span class="op">.</span><span class="fu">next</span><span class="op">());</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> strList2 <span class="op">=</span> <span class="kw">new</span> <span class="bu">LinkedList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>strList2<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;First&quot;</span><span class="op">);</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>strList2<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;Second&quot;</span><span class="op">);</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span> list2 <span class="op">=</span> strList2<span class="op">;</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>list2<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">10</span><span class="op">);</span> <span class="co">// #2: compiles fine, results in a runtime exception</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span><span class="op">(</span><span class="bu">Iterator</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> itemItr <span class="op">=</span> list2<span class="op">.</span><span class="fu">iterator</span><span class="op">();</span> itemItr<span class="op">.</span><span class="fu">hasNext</span><span class="op">();)</span> <span class="op">{</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Item : &quot;</span> <span class="op">+</span> itemItr<span class="op">.</span><span class="fu">next</span><span class="op">());</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>Using raw types is not recommended for the various reasons displayed above, the worse case is that the code throws at run time due to a class cast exception, there are niche situations where the use of raw types might be necessary, but in general it is never a good idea.</code></p>
+<h3 id="methods">Methods</h3>
+<p>The way one can define generic types, generic methods are also
+possible, they work the same way as generic types, however, it depends
+on the way the generic method is defined, if a method is defined in a
+generic type, and if the method itself is generic, those are two
+different constructs. The first one does not define a generic method,
+the generic method is a side effect of the type being generic, while the
+second one defines a completely different language construct which is a
+generic method. Generic methods can be either static or normal
+non-static ones.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">final</span> <span class="kw">class</span> ClassName <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="dt">void</span> <span class="fu">fill</span><span class="op">(</span><span class="bu">List</span><span class="op">&lt;</span>T<span class="op">&gt;</span> list<span class="op">,</span> T val<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> list<span class="op">.</span><span class="fu">size</span><span class="op">();</span> i<span class="op">++)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        list<span class="op">.</span><span class="fu">set</span><span class="op">(</span>i<span class="op">,</span> val<span class="op">);</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> intList <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;();</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        intList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">10</span><span class="op">);</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        intList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">20</span><span class="op">);</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// both calls are semantically identical, however it is worth noting that if the list was of raw Object type,</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">// one could still provide a stronger type checking by enforcing the type in the method call itself, by using the</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// class name as prefix to call the static method, or if it was an instance method use the instance name (variable)</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// in place of the class name shown in the example below</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fill</span><span class="op">(</span>intList<span class="op">,</span> <span class="dv">100</span><span class="op">);</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">// even though this will print all types of warnings, this approach can be used to make sure that a generic type</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">// that is passed in as argument is treated accordingly, if the elements inside the generic are of known type</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        <span class="bu">List</span> rawList <span class="op">=</span> intList<span class="op">;</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        LitteralsAndTypes<span class="op">.&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span><span class="fu">fill</span><span class="op">(</span>rawList<span class="op">,</span> <span class="dv">100</span><span class="op">);</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The method type is generic, however the type is inferred from the
+passed in types, by the compiler, it is not required to specify the type
+of the arguments, also as shown above, if the argument is of raw type,
+it is possible to provide the actual type of the generic by specially
+invoking the method.</p>
+<h3 id="subtypes">Subtypes</h3>
+<p>While it is possible to assign a derived type object to its base type
+reference. However, for generics the type parameters should match
+exactly, otherwise a compiler error is guaranteed, In other words
+subtyping does not work for generic parameters, they have to match
+exactly.</p>
+<p><code>Subtyping works for class types, you can assign a derived type object ot its base type reference, however subtyping does not work for generics type parameters - one can not assign a dervied generic type parameter to a base type parameter</code></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// this is not a valid generic declaration, while Number is indeed a valid super type for Integer, that is not valid</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">// when creating generic types, will spill out a compiler error</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Number</span><span class="op">&gt;</span> intList <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;();</span></span></code></pre></div>
+<p>So why is this wrong, here is the reason - the right hand side of the
+expression creates an array list, internally a dynamic array, which
+holds Integers, however, the left hand side assings to a less strict
+type, in this case Number, now imagine if this had worked, then that
+<code>intList</code> (take a note at the name of the variable) can be
+used in a context where one could simply insert any type of class which
+extends off of Number, say Float, and the moment one calls
+<code>intList.add(new Float(5));</code> that will produce a class cast
+exception during run time, since the actual intList points to an
+<code>ArrayList</code> instance which holds only Integers.</p>
+<h3 id="wildcards">Wildcards</h3>
+<p>To overcome issue above, wild card type parameters are used, they do
+not specify the exact type in the left hand side expression.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// note that wild cards can be used only in the left hand side expression, one can not instantiate a generic type of</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">// wild card, since that is meaningless, the right hand side of the expression has to provide a concrete instance of the</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">// generic with exact type or if non is provided then the raw type is used by default - meaning Object</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;?&gt;</span> wildCardList <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;();</span></span></code></pre></div>
+<p>Wild cards have different semantic meaning, they are not a
+replacement for the <code>raw</code> type, or <code>Object</code>, the
+wild card does NOT tell the compiler that <code>List</code> holds
+different types of elements (heterogeneous), what the wild card tells
+the compiler is that that variable references a generic
+<code>List</code> type of homogeneous elements that can hold any type of
+argument -
+<code>List&lt;Integer&gt;, List&lt;String&gt;, List&lt;Float&gt; etc</code>,
+meaning the underlying generic List instance is always
+containing/referencing the same type of elements</p>
+<p><code>Wildcards are not replacement for Object or Raw types, they have very special meaning, they imply that a variable is referencing a generic of an unknown type, but still the instance is of generic class and of a specific homogeneous type</code></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;?&gt;</span> wildCardList <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;();</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>wildCardList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">1</span><span class="op">);</span> <span class="co">// Compile error - cannot add to List&lt;?&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>wildCardList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">1</span><span class="op">);</span> <span class="co">// Compile error - cannot add to List&lt;?&gt;</span></span></code></pre></div>
+<p>The above would fail because the wild card is unbound, why is that a
+problem. When one uses wildcard type, the code implies to the compiler
+that the type information is ignored, so &lt;?&gt; stands for unknown
+type. Every time one tries to apss arguments to a generic type, the java
+compiler tries to infer the type of the passed in argument as well, as
+the type of the generics and to justify the type safety. Now calling add
+method to insert an element in the list, is not valid, since the
+variable references a list that holds unknown types (specified by the
+wild card). The compiler does not know which type to infer. That is why
+it just errors out. If it did not, one might end up adding String, to
+the list, which was already established will fail at run-time the
+compiler tries to be pro-active and warn about issues as early as
+possible, since generics were added to the language to ensure type
+safety, replacing the old approach of using Object to achieve the same,
+not forego it.</p>
+<p><code>In general when one provides a wildcard parameters, methods can not be called that modify the object, there are certain methods which can still be called that access the object's state, for the example with the list above methods like .get() .size() .empty() and so on, are still valid and can be called safely</code></p>
+<h3 id="limitations">Limitations</h3>
+<p>There are many limitations of generic types due to type erasure. A
+few important ones are as follows:</p>
+<ul>
+<li><p>You cannot instantiate a generic type using a new operator. -
+this is because the compiler does not know what the default constructor
+for the type T is at the moment of the generic’s definition, that is
+only known when an actual usage of the generic type is in play i.e when
+a generic type is instantiated. Remember the type replacement happens at
+compile time, not at run-time, meaning that after compilation, the
+resulting byte code will have the type erased, and there is no way to
+call a constructor of a type erased type. If that were allowed at
+run-time the expression would be literally - <code>new Object()</code>,
+which is not valid</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>T mem <span class="op">=</span> <span class="kw">new</span> <span class="fu">T</span><span class="op">();</span> <span class="co">// compiler error</span></span></code></pre></div></li>
+<li><p>You cannot instantiate an array of a generic type. - Remember the
+type replacement happens at compile time, not at run-time, meaning that
+after compilation, the resulting byte code will have the type erased,
+and there is no way to call the array constructor for erased type, of
+unknown type, what will end up happening if that were allowed is
+basically this - <code>new Object[100]</code></p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>T<span class="op">[]</span> amem <span class="op">=</span> <span class="kw">new</span> T<span class="op">[</span><span class="dv">100</span><span class="op">];</span> <span class="co">// compiler error</span></span></code></pre></div></li>
+<li><p>You can declare instance fields of type T, but not of static
+fields of type T. This is due to the fact that static members are bound
+to the <code>ClassType</code> itself, however generics are bound to a
+class type instance, there is no notion of an instance for the generic
+class type definition itself. For example</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Clazz<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">static</span> T staticMember<span class="op">;</span> <span class="co">// compiler error</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div></li>
+<li><p>It is not possible to have generic exceptions - the reason is
+pretty simple, the catch statements are evaluated during run-time, there
+is no way to specify a catch expression that would be able to capture
+different types of the generic exception, i.e
+<code>GenericException&lt;String&gt;, GenericException&lt;Number&gt;, GenericException&lt;Float&gt;</code></p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GenericException<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="kw">extends</span> <span class="bu">Throwable</span> <span class="op">{}</span></span></code></pre></div></li>
+<li><p>Generics can not be instantiated from primitive types -
+i.e. <code>List&lt;int&gt;, List&lt;short&gt; etc</code>, is not valid,
+and would produce a compile time error</p></li>
+</ul>
+<h3 id="summary">Summary</h3>
+<p>Implementation of generics is static in nature, which means that the
+Java compiler interprets the generics specified in the source code and
+replaces the generic code with concrete types. This is referred to as
+type erasure. After compilation, the code looks similar to what a
+developer would have written with concrete types. Essentially, the use
+of generics offers two advantages: first, it introduces an abstraction,
+which enables you to write generic implementation; second, it allows you
+to write generic implementation with type safety.</p>
+<h2 id="collections">Collections</h2>
+<p>In Java 8, the collections framework was greatly overhauled to
+include the usage of the new Generics feature, and that allows it to
+provide a big reusable set of collection types which are very robust and
+flexible</p>
+<h3 id="core">Core</h3>
+<p>The core of the collections framework is revolving around a handful
+of interfaces and abstract classes, which are the base blocks of the
+entire collections framework</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 91%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Class / Interface</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Iterable</td>
+<td>A class implementing this interface can be used for iterating with a
+foreach statement.</td>
+</tr>
+<tr class="even">
+<td>Collection</td>
+<td>Common base interface for classes in the collection hierarchy. When
+you want to write methods that are very general, you can pass the
+Collection interface. For example, max() method in java.util.Collections
+takes a Collection and returns an object.</td>
+</tr>
+<tr class="odd">
+<td>List</td>
+<td>Base interface for containers that store a sequence of elements. You
+can access the elements using an index, and retrieve the same element
+later (so that it maintains the insertion order). You can store
+duplicate elements in a List.</td>
+</tr>
+<tr class="even">
+<td>Set, SortedSet, NavigableSet</td>
+<td>Interfaces for containers that don’t allow duplicate elements.
+SortedSet maintains the set elements in a sorted order. NavigableSet
+allows searching the set for the closest matches.</td>
+</tr>
+<tr class="odd">
+<td>Queue, Deque</td>
+<td>Queue is a base interface for containers that holds a sequence of
+elements for processing. For example, the classes implementing Queue can
+be LIFO (last in, first out-as in stack data structure) or FIFO (first
+in, first out-as in queue data structure). In a Deque you can insert or
+remove elements from both the ends.</td>
+</tr>
+<tr class="even">
+<td>Map, SortedMap, NavigableMap</td>
+<td>Interfaces for containers that map keys to values. In SortedMap, the
+keys are in a sorted order. A NavigableMap allows you to search and
+return the closest match for given search criteria. Note that Map
+hierarchy does not extend the Collection interface.</td>
+</tr>
+<tr class="odd">
+<td>Iterator, ListIterator</td>
+<td>You can traverse over the container in the forward direction if a
+class implements the Iterator interface. You can traverse in both
+forward and reverse directions if a class implements the ListIterator
+interface.</td>
+</tr>
+</tbody>
+</table>
+<p>The collection interface itself, being the base for all other
+collections provides a minimal set of behavior and actions expressed in
+the methods below</p>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>boolean addAll(Collection&lt;? extends | Element&gt; coll)</td>
+<td>Adds all the elements in coll into the underlying container.</td>
+</tr>
+<tr class="even">
+<td>boolean containsAll(Collection&lt;?&gt; coll)</td>
+<td>Checks if all elements given in coll are present in the underlying
+container.</td>
+</tr>
+<tr class="odd">
+<td>boolean removeAll(Collection&lt;?&gt; coll)</td>
+<td>Removes all elements from the underlying container that are also
+present in coll.</td>
+</tr>
+<tr class="even">
+<td>boolean retainAll(Collection&lt;?&gt; coll)</td>
+<td>Retains elements in the underlying container only if they are also
+present in coll; it removes all other elements.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="concrete">Concrete</h3>
+<p>Several of the most well known and used concrete classes from the
+collections framework are listed in the table below, there are certainly
+more but these reflect the most commonly known data structures in
+programming</p>
+<table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 95%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Class</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ArrayList</td>
+<td>Internally implemented as a resizable array. This is one of the most
+widely used concrete classes. Fast to search, but slow to insert or
+delete. Allows duplicates.</td>
+</tr>
+<tr class="even">
+<td>LinkedList</td>
+<td>Internally implements a doubly linked list data structure. Fast to
+insert or delete elements, but slow for searching elements.
+Additionally, LinkedList can be used when you need a stack (LIFO) or
+queue (FIFO) data structure. Allows duplicates.</td>
+</tr>
+<tr class="odd">
+<td>HashSet</td>
+<td>Internally implemented as a hash-table data structure. Used for
+storing a set of elements-it does not allow storing duplicate elements.
+Fast for searching and retrieving elements. It does not maintain any
+order for stored elements.</td>
+</tr>
+<tr class="even">
+<td>TreeSet</td>
+<td>Internally implements a red-black tree data structure. Like HashSet,
+TreeSet does not allow storing duplicates. However, unlike HashSet, it
+stores the elements in a sorted order. It uses a tree data structure to
+decide where to store or search the elements, and the position is
+decided by the sorting order.</td>
+</tr>
+<tr class="odd">
+<td>HashMap</td>
+<td>Internally implemented as a hash-table data structure. Stores key
+and value pairs. Uses hashing for finding a place to search or store a
+pair. Searching or inserting is very fast. It does not store the
+elements in any order.</td>
+</tr>
+<tr class="even">
+<td>TreeMap</td>
+<td>Internally implemented using a red-black tree data structure. Unlike
+HashMap, TreeMap stores the elements in a sorted order. It uses a tree
+data structure to decide where to store or search for keys, and the
+position is decided by the sorting order.</td>
+</tr>
+<tr class="odd">
+<td>PriorityQueue</td>
+<td>Internally implemented using heap data structure. A PriorityQueue is
+for retrieving elements based on priority. Irrespective of the order in
+which you insert, when you remove the elements, the highest priority
+element will be retrieved first.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="arraylist">ArrayList</h3>
+<p>Used to store a sequence of elements. <code>ArrayList</code>
+specifically implements a <code>resizable</code> array. When creating a
+native array (i.e new String[10];) the size of the array is known and
+fixed, at the time of creation. However <code>ArrayList</code> is a
+dynamic array, it can grow in size as required. Internally an
+<code>ArrayList</code> allocates a block of memory and grows as
+required, So accessing array elements is very fast in
+<code>ArrayList</code>. However, when you add or remove elements
+internally the rest of the elements are copied, or shifted, so addition
+and deletion of elements are costly operations.</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// create a simple list, which is populated with random entries, initially the array list is created without any</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">// arguments to the constructor, internally the implementation however does not create an empty array, since that would be</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">// inefficient, when specified without capacity the array that is created is - 10, unless specified otherwise</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="bu">ArrayList</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> languageList <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>languageList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;C&quot;</span><span class="op">);</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>languageList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;C++&quot;</span><span class="op">);</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>languageList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;Java&quot;</span><span class="op">);</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">// the basic default for-each structure in java, this is a compile time structure, which gets compiled to an iterator,</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">// as shown below, it is usable for all types of collections which implement the iterator pattern and iterable interface</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span><span class="op">(</span><span class="bu">String</span> language <span class="op">:</span> languageList<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>language<span class="op">);</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co">// the iterator approach can also be used, this is equivalent to the for each above, however it is manually controlling</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="co">// the iteration process, meaning that one can use the call to next to skip over more than one element, stop the iteration</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="co">// at specific iterator point, or even use the .remove method from iterator to remove elements from the collection</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span><span class="op">(</span><span class="bu">Iterator</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> languageIter <span class="op">=</span> languageList<span class="op">.</span><span class="fu">iterator</span><span class="op">();</span> languageIter<span class="op">.</span><span class="fu">hasNext</span><span class="op">();)</span> <span class="op">{</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> language <span class="op">=</span> languageIter<span class="op">.</span><span class="fu">next</span><span class="op">();</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>language<span class="op">);</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="co">// this example shows how one can remove from the array while iterating using the iterator, note that, this creates a</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="co">// mutable instance of a specific ArrayList iterator, each call to next, will mutate the iterator instance in place, making</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="co">// it point to the next element in the array, internally.</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="bu">Iterator</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> language <span class="op">=</span> language<span class="op">.</span><span class="fu">iterator</span><span class="op">();</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="co">// when creating an iterator, the only way to obtain reference to the elements in the array is to call the next method,</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="co">// but before calling next one has to ensure that there is actually a `next` element, that is why the pattern usually is a</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="co">// call to hasNext followed by a call to next</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span><span class="op">(</span>language<span class="op">.</span><span class="fu">hasNext</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">// next has to be called first before the remove method is called, this is specified in the API documentation of the</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// remove method in iterator, otherwise the call to remove will throw an exception, every remove call has to be</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">// preceeded with next, the call to next moves to the next element first, mutates the current instance of the iterator,</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">// to point to the next element, then remove is called</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    language<span class="op">.</span><span class="fu">next</span><span class="op">();</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">// calling remove only after ensuring one has called the next method first, this is mandatory as mentioned in the</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">// docs of the iterator interface, otherwise undefined behavior will occur, exception as well</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>    language<span class="op">.</span><span class="fu">remove</span><span class="op">();</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="set">Set</h3>
+<p>Sets are collections that contain no duplicates, Unlike List a Set
+does not remember where you inserted the element, it is not ordered,.
+There are two important concrete classes for Set - <code>HashSet</code>
+and <code>TreeSet</code>, A <code>HashSet</code> is for quickly
+inserting and retrieving elements, it does not maintain any sorting
+order for the elements it holds, A <code>TreeSet</code>, stores the
+elements in a sorted order, according to the compare function or
+<code>compareTo</code> from the Comparable interface</p>
+<p>The example below shows how a <code>pangram</code>, can be destructed
+into its constituent elements which are all the characters of the
+alphabet and then put into <code>TreeSet</code>, and printed out in a
+sorted order, since <code>TreeSet</code> will sort it’s elements</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> pangram <span class="op">=</span> <span class="st">&quot;the quick brown fox jumps over the lazy dog&quot;</span><span class="op">;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Set</span><span class="op">&lt;</span><span class="bu">Character</span><span class="op">&gt;</span> aToZee <span class="op">=</span> <span class="kw">new</span> <span class="bu">TreeSet</span><span class="op">&lt;</span><span class="bu">Character</span><span class="op">&gt;();</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span><span class="op">(</span><span class="dt">char</span> gram <span class="op">:</span> pangram<span class="op">.</span><span class="fu">toCharArray</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    aToZee<span class="op">.</span><span class="fu">add</span><span class="op">(</span>gram<span class="op">);</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The pangram is: &quot;</span> <span class="op">+</span> pangram<span class="op">);</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">print</span><span class="op">(</span><span class="st">&quot;Sorted pangram characters are: &quot;</span> <span class="op">+</span> aToZee<span class="op">);</span></span></code></pre></div>
+<p>A pangram is a sentence that uses all letters in the alphabet at
+least once. You want to store characters of a pangram in a set. Since
+you need to use reference types for containers, one way to do this is to
+create <code>TreeSet</code> of Characters.</p>
+<p>To obtain the Characters or chars of a String type in Java one can
+use the <code>toCharArray</code>, which returns a char[], which is the
+primitive version of the boxed type Character, the auto-boxing will
+occur above, and one can safely add Character elements to the
+<code>TreeSet</code>.</p>
+<h3 id="map">Map</h3>
+<p>A map stores key and value pairs. The Map interface does not extend
+the Collection interface. However there are methods in the Map interface
+that you can use to get the objects classes that implement Collection
+interface to work around this problem. Also the method names in Map are
+very similar to the method names in Collection, so it is easy to
+understand and use Map. There are two important concrete classes of Map
+- <code>HashMap</code> and <code>TreeMap</code>.</p>
+<ul>
+<li><p>A <code>HashMap</code> - uses a hash table data structure
+internally. In HashMap searching is a fast operation. However HashMap
+neither remembers the order in which the elements were inserted nor does
+it keep elements in any sorted order.</p></li>
+<li><p>A <code>TreeMap</code> - uses a red black tree data structure
+internally. Unlike the HashMap, TreeMap keeps the elements in sorted
+order, not in the order of insertion, but in the order defined based on
+the values. Searching and inserting is somewhat slower operation that in
+the HashMap.</p></li>
+</ul>
+<p>The <code>NavigableMap</code> interface extends the
+<code>SortedMap</code> interface. The <code>TreeMap</code> class is the
+widely used clss that implements <code>NavigableMap</code>. As the name
+suggests with <code>NavigableMap</code>, one can navigate the Map
+easily. It has mnany methods that make Map navigation easy. You can get
+the nearest value matching a given key, all values less than the given
+key, all values greater than the given key and so on. Let us look at an
+example.</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">NavigableMap</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">,</span> <span class="bu">String</span><span class="op">&gt;</span> examScores <span class="op">=</span> <span class="kw">new</span> <span class="bu">TreeMap</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">,</span> <span class="bu">String</span><span class="op">&gt;();</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>examScores<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="dv">90</span><span class="op">,</span> <span class="st">&quot;Sophia&quot;</span><span class="op">);</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>examScores<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="dv">20</span><span class="op">,</span> <span class="st">&quot;Isabella&quot;</span><span class="op">);</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>examScores<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="dv">10</span><span class="op">,</span> <span class="st">&quot;Emma&quot;</span><span class="op">);</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>examScores<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="dv">50</span><span class="op">,</span> <span class="st">&quot;Olivea&quot;</span><span class="op">);</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">// this here would print the map as it is, containing the keys, in sorted order, since it is TreeMap and not a HashMap</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">// it is aware of and knowing how to sort the elements</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The data in the map is: &quot;</span> <span class="op">+</span> examScores<span class="op">);</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">// the call to `descendingMap`, will produce a new map with re-ordered elements in a descending order, in this case the</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="co">// higher valued keys would be sorted first, the lower one later on</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The data descending order is: &quot;</span> <span class="op">+</span> examScores<span class="op">.</span><span class="fu">descendingMap</span><span class="op">());</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="co">// the call to tail, will generate a map of all keys and entries in general that are at the tail of the map greater than</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="co">// 40, remember the `examScores` are stored in ascending order, therefore the higher values are towards the end or tail of</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="co">// the map, to achieve the reverse, use headMap(40), which would generate a new map with all scores lower than 40, from</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="co">// the head toward the end of the map</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Details of those who passed the exam: &quot;</span> <span class="op">+</span> examScores<span class="op">.</span><span class="fu">tailMap</span><span class="op">(</span><span class="dv">40</span><span class="op">));</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="co">// the call to first, will extract the first entry in this case the one with the lowest score, since the map as already</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="co">// mentioned is sorted in ascending order</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The lowest mark is: &quot;</span> <span class="op">+</span> examScores<span class="op">.</span><span class="fu">firstEntry</span><span class="op">());</span></span></code></pre></div>
+<h3 id="deque">Deque</h3>
+<p><code>Deque</code> or Deck, is a doubly linked queue, that is a data
+structure that allows you to insert and remove elements from both ends,
+The <code>Deque</code> interface was introduced in java 6, The deue
+interface extends the Queue interface. Hence all methods provided by
+Queue are also available in the <code>Deque</code> interface. There are
+three concrete implementations of the <code>Deque</code> interface:
+<code>LinkedList, ArrayDeque and LihnkedBlockingDeque</code>.</p>
+<p>The Deque interface provides multiple methods to operate on both ends
+of the queue, such as <code>addFirst</code>, <code>addLast</code>,
+<code>removeFirst</code>, <code>removeLast</code> and so on, which are
+pretty descriptive based on the name of the method.</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SpecialQueue <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="bu">Deque</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> queue <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayDeque</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">addInQueue</span><span class="op">(</span><span class="bu">String</span> customer<span class="op">){</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        queue<span class="op">.</span><span class="fu">addLast</span><span class="op">(</span>customer<span class="op">);</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">removeFront</span><span class="op">(){</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        queue<span class="op">.</span><span class="fu">removeFirst</span><span class="op">();</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">removeBack</span><span class="op">(){</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>        queue<span class="op">.</span><span class="fu">removeLast</span><span class="op">();</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="comparable">Comparable</h3>
+<p>The Comparable and its companion interface Comparator interfaces are
+meant to provide means of comparing objects. These two interfaces are
+very important to the general internals of the Collections framework in
+Java. A lot of containers in the library rely on elements being either
+comparable, or a special lambda expression comparator to be provided
+when creating the container to ensure that elements can be compared when
+inserted/removed/searched.</p>
+<p>The Comparable interface provides one single interface method,
+however this is not a <code>@FunctionalInterface</code> it is meant for
+types to implement it to compare with other types. Note that the method
+returns an integer value, this is because there are really three states
+in which a result of the comparison between two objects exists. Either
+the left &gt; right, left == right, left &lt; right. Which corresponds
+to positive, zero and negative result.</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">interface</span> <span class="bu">Comparable</span><span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">compareTo</span><span class="op">(</span>T o<span class="op">);</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Student <span class="kw">implements</span> <span class="bu">Comparable</span><span class="op">&lt;</span>Student<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> id<span class="op">;</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> name<span class="op">;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Double</span> cgpa<span class="op">;</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">Student</span><span class="op">(</span><span class="bu">String</span> studentId<span class="op">,</span> <span class="bu">String</span> studentName<span class="op">,</span> <span class="dt">double</span> studentCGPA<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        id <span class="op">=</span> studentId<span class="op">;</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>        name <span class="op">=</span> studentName<span class="op">;</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>        cgpa <span class="op">=</span> studentCGPA<span class="op">;</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this simple example compares only the id of the student, the comparison conditions vary greatly between the type</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// of object, and are usually some sort of business rules, which are not governed by the language but by real world</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// rules. That is why the need for interfaces like Comparable.</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">compareTo</span><span class="op">(</span>Student that<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">this</span><span class="op">.</span><span class="fu">id</span><span class="op">.</span><span class="fu">compareTo</span><span class="op">(</span>that<span class="op">.</span><span class="fu">id</span><span class="op">);</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="comparator">Comparator</h3>
+<p>The companion interface to Comparable, which is usually meant to
+provide a one-shot comparison operations based on some special criteria,
+for example given different requirements, one might wish to sort the
+Student type based on different criteria. Want to sort them
+alphabetically - use the name, based on score - use the <code>gpa</code>
+score, and so on. Those can not be expressed with a single
+<code>compoareTo</code> method, that is why <code>comparator</code>
+exists which is a <code>FunctionalInterface</code>, which can be used to
+create various criteria based on which to compare</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CGPAComparator <span class="kw">implements</span> <span class="bu">Comparator</span><span class="op">&lt;</span>Student<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">compare</span><span class="op">(</span>Student s1<span class="op">,</span> Student s2<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">(</span>s1<span class="op">.</span><span class="fu">cgpa</span><span class="op">.</span><span class="fu">compareTo</span><span class="op">(</span>s2<span class="op">.</span><span class="fu">cgpa</span><span class="op">));</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span>Student<span class="op">&gt;</span> students <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co">// create and populate an array of students</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="bu">Arrays</span><span class="op">.</span><span class="fu">sort</span><span class="op">(</span>students<span class="op">,</span> <span class="kw">new</span> <span class="fu">CGPAComparator</span><span class="op">());</span></span></code></pre></div>
+<p><code>The general rule of thumb is that most real world cases have a natural order to them, meaning that the Comparable interface can be used, in exceptional cases the Compartor interface can be used as a substitute, to make certain customized sorting or ordering decisions.</code></p>
+<h2 id="stream">Stream</h2>
+<p>The Stream interface is among the most important interfaces provided
+in the Java 8 release. The classes <code>Double|Long|IntStream</code>
+are specialization for the int,long and double primitive types.</p>
+<p>The streams in java operate on what is called the
+<code>stream pipeline</code>. The stream pipeline is a set of operations
+which are chained on a stream object, and are used to generate the final
+transformation and result for a Stream instance.</p>
+<p>The pipeline is represented by methods which can be called on an
+instance of a stream. Calls to each action, part of the pipeline,
+mutates the source stream instance/object, adding transformations to the
+pipeline, however the underlying actions are not performed until special
+terminal or termination operations are invoked on the stream instance,
+only then the actual pipeline springs into motion executing all actions
+previously specified on that stream instance, and a final result is
+obtained (usually the call to the termination action, returns the actual
+final result of the transformation pipeline)</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> StreamPipelineComponents <span class="op">{</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> <span class="op">[]</span>args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Method</span><span class="op">[]</span> objectMethods <span class="op">=</span> <span class="bu">Object</span><span class="op">.</span><span class="fu">class</span><span class="op">.</span><span class="fu">getMethods</span><span class="op">();</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>        Stream<span class="op">&lt;</span><span class="bu">Method</span><span class="op">&gt;</span> objectMethodStream <span class="op">=</span> <span class="bu">Arrays</span><span class="op">.</span><span class="fu">stream</span><span class="op">(</span>objectMethods<span class="op">);</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>        Stream<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> objectMethodNames <span class="op">=</span> objectMethodStream<span class="op">.</span><span class="fu">map</span><span class="op">(</span>method <span class="op">-&gt;</span> method<span class="op">.</span><span class="fu">getName</span><span class="op">());</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>        Stream<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> uniqueObjectMethodNames <span class="op">=</span> objectMethodNames<span class="op">.</span><span class="fu">distinct</span><span class="op">();</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>        uniqueObjectMethodNames<span class="op">.</span><span class="fu">forEach</span><span class="op">(</span><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">::</span>println<span class="op">);</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The example above shows all the different components of the Stream
+interface, the different methods the way they are used, the intermediate
+calls to methods like <code>map and distinct</code> and the termination
+call to <code>forEach</code>. Which makes sure that the stream is
+terminated, causing all the previously chained operations to
+execute.</p>
+<h3 id="primitive-streams">Primitive streams</h3>
+<p>As already mentioned the primitive types have their own stream
+interface, <code>IntStream</code>, <code>DoubleStream</code>,
+<code>LongStream</code>, these do not directly extend from the Stream
+interface, rather they extend from <code>BaseStream</code>.</p>
+<p>The API of the primitive streams is slightly different than the
+regular Stream API since it deals with numeric / integer types,
+therefore different methods are present on top of the obvious ones (like
+map or filter).</p>
+<p>To create a primitive stream there are several methods that can be
+used. The ones listed below are the most prolific and deserve more
+special attention since they are the mostly used in practice, when a new
+stream of integers has to be generated. It is either generated from an
+array of integers, or within some sort of predefined range.</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Located in the IntStream (analogous implementation in other primitive stream types</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> IntStream <span class="fu">range</span><span class="op">(</span><span class="dt">int</span> startInclusive<span class="op">,</span> <span class="dt">int</span> endExclusive<span class="op">)</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> IntStream <span class="fu">rangeClosed</span><span class="op">(</span><span class="dt">int</span> startInclusive<span class="op">,</span> <span class="dt">int</span> endInclusive<span class="op">)</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> IntStream <span class="fu">concat</span><span class="op">(</span>IntStream a<span class="op">,</span> IntStream b<span class="op">)</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> IntStream <span class="fu">of</span><span class="op">(</span><span class="dt">int</span><span class="kw">...</span> values<span class="op">)</span></span></code></pre></div>
+<p>Another method which could be wildly used is the iterate method,
+which is basically a replacement for the standard for-loop, and can be
+used like so.</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">// the first argument is the start of the range, the second argument is a function which increments the starting</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co">// iterator, and the limit in this case is optional, but if one wants to have a non-infinite loop is a good idea.</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>IntStream<span class="op">.</span><span class="fu">iterate</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> i <span class="op">-&gt;</span> i <span class="op">+</span> <span class="dv">1</span><span class="op">).</span><span class="fu">limit</span><span class="op">(</span><span class="dv">5</span><span class="op">)</span></span></code></pre></div>
+<h3 id="creating-streams">Creating streams</h3>
+<p>There are other ways to create streams as well, besides the newly
+provided static utility methods in the Stream or <code>IntStream</code>
+classes. The <code>Arrays</code> class was expanded with new
+capabilities in Java 8 allowing it to create new streams based on the
+target object, either a primitive (int example only given below) or a
+regular class type expressed as generic.</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Located in the Arrays class, added with Java 8 release</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> IntStream <span class="fu">stream</span><span class="op">(</span><span class="dt">int</span><span class="op">[]</span> array<span class="op">)</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="op">&lt;</span>T<span class="op">&gt;</span> Stream<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="fu">stream</span><span class="op">(</span>T<span class="op">[]</span> array<span class="op">)</span></span></code></pre></div>
+<p>The methods above are actually what is used in the implementation of
+the Stream.of methods, they use Arrays.stream to do the same exact
+thing,</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">// these are basically wrappers around the methods provided by Arrays - Arrays.stream</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>Stream<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">)</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>Stream<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="kw">new</span> <span class="bu">Integer</span><span class="op">[]{</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">})</span></span></code></pre></div>
+<h3 id="building-streams">Building streams</h3>
+<p>There is another way to create streams, element wise, instead of
+first collecting elements into a List or any other collection and then
+converting it into stream, if one is aware that a given collection of
+items will be immediately used for stream operations, then the
+Stream.Builder interface can be used</p>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">// The stream builder interface is quite simple it has two methods, both of which are doing the same exact thing, they</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co">// are simply aliases, the methods are accept and add, both of which add a new element to the stream, the stream builder</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co">// can be used like so.</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>Stream<span class="op">.</span><span class="fu">builder</span><span class="op">().</span><span class="fu">add</span><span class="op">(</span><span class="dv">1</span><span class="op">).</span><span class="fu">add</span><span class="op">(</span><span class="dv">2</span><span class="op">).</span><span class="fu">add</span><span class="op">(</span><span class="dv">3</span><span class="op">).</span><span class="fu">add</span><span class="op">(</span><span class="dv">4</span><span class="op">).</span><span class="fu">add</span><span class="op">(</span><span class="dv">5</span><span class="op">).</span><span class="fu">build</span><span class="op">()</span></span></code></pre></div>
+<h3 id="existing-interface">Existing interface</h3>
+<p>There are many other ways to build streams, most of the Java classes
+provides a quick way to construct streams right away directly from the
+API of the class itself. Classes such as Files, Pattern, Random and so
+on have built in support to generate streams directly</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">// here are some examples which show existing java classes and how they inter operate with streams, directly without the</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="co">// need for intermediate collection interface or structure to be created</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>Path<span class="op">.</span><span class="fu">lines</span><span class="op">(</span>Paths<span class="op">.</span><span class="fu">get</span><span class="op">(</span><span class="st">&quot;/&quot;</span><span class="op">)).</span><span class="fu">forEach</span><span class="op">(</span><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">::</span>println<span class="op">);</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="bu">Pattern</span><span class="op">.</span><span class="fu">compile</span><span class="op">(</span><span class="st">&quot; &quot;</span><span class="op">).</span><span class="fu">splitAsStream</span><span class="op">(</span><span class="st">&quot;java 8 streams&quot;</span><span class="op">).</span><span class="fu">forEach</span><span class="op">(</span><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">::</span>println<span class="op">);</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="kw">new</span> <span class="fu">RAndom</span><span class="op">().</span><span class="fu">ints</span><span class="op">().</span><span class="fu">limit</span><span class="op">(</span><span class="dv">5</span><span class="op">).</span><span class="fu">forEach</span><span class="op">(</span><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">::</span>println<span class="op">);</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;hello&quot;</span><span class="op">.</span><span class="fu">chars</span><span class="op">().</span><span class="fu">sorted</span><span class="op">().</span><span class="fu">forEach</span><span class="op">(</span>ch <span class="op">-&gt;</span> <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;%c &quot;</span><span class="op">,</span> ch<span class="op">));</span></span></code></pre></div>
+<p>Note that the chars() method on the String type returns an IntStream,
+reason being is that chars are treated as integers in Java, factually
+they are shorts, or at least 2 bytes, since Java stores the String
+representations in UTF-16, which mandates that the size of the char is
+at least 2 bytes.</p>
+<h3 id="intermediate-operations">Intermediate operations</h3>
+<p>Intermediate operations as already shown, simply do not consume the
+stream but refine it, refining the stream means that the operations
+which were invoked on the stream object will be executed only when a
+termination operation is called (such as forEach, collect etc).</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 66%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Stream&lt;&gt; filter(Predicate&lt;? super T&gt; check)</td>
+<td>Removes the elements for which the check predicate returns
+false.</td>
+</tr>
+<tr class="even">
+<td>&lt;&gt; Stream&lt;&gt; map(Function&lt;? super T,? extends R&gt;
+transform)</td>
+<td>Applies the transform() function for each of the elements in the
+stream.</td>
+</tr>
+<tr class="odd">
+<td>Stream&lt;&gt; distinct()</td>
+<td>Removes duplicate elements in the stream; it uses the equals()
+method to determine if an element is repeated in the stream.</td>
+</tr>
+<tr class="even">
+<td>Stream&lt;&gt; sorted(Comparator&lt;? super T&gt; compare)</td>
+<td>Sorts the elements in its natural order. The overloaded version
+takes a Comparator-you can pass a lambda function for that.</td>
+</tr>
+<tr class="odd">
+<td>Stream&lt;&gt; peek(Consumer&lt;? super T&gt; consume)</td>
+<td>Returns the same elements in the stream, but also executes the
+passed consume lambda expression on the elements.</td>
+</tr>
+<tr class="even">
+<td>Stream&lt;&gt; limit(long size)</td>
+<td>Removes the elements if there are more elements than the given size
+in the stream.</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">// here is a demonstration of the user of intermediate operations to mutate the stream, peek the elements, without</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="co">// terminating it and then finally invoke the count method which will terminate the stream, calling the count method will</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co">// actually make sure all other intermediate operations are executed in order as specified</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>Stream<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">).</span><span class="fu">map</span><span class="op">(</span>i <span class="op">-&gt;</span> i <span class="op">*</span> i<span class="op">).</span><span class="fu">peek</span><span class="op">(</span>i <span class="op">-&gt;</span> <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> &quot;</span><span class="op">,</span> i<span class="op">)).</span><span class="fu">count</span><span class="op">();</span></span></code></pre></div>
+<p><code>Intermediate operations do no produce result, instead they return the initial stream object instance, which can then be used to chain more intermediate operations, further more until a termination operation is invoked on the stream, the intermediate operation's actions are never executed, the lambda expression (object) which the operation represents is simply stored in the stream. This also allows the stream to internally optimize certain tasks since the execution of the actions happens only upon stream termination)</code></p>
+<h3 id="terminal-operations">Terminal operations</h3>
+<p>Terminating operations as already mentioned are usually the last
+operations to be called on a stream, before that calling any number of
+intermediate operations is optional, the terminating operations close
+the stream, meaning that if a variable references the stream object, and
+it is used again to call any operation on the stream (intermediate or
+terminating) an exception will be thrown, Stream object are usually
+meant for one short transformation pipelines, and they are not meant to
+be reusable, they are lightweight, since they simply wrap around the
+initial object or collection, and do not copy or clone the elements of
+that collection, they simply provide a way to generate a new collection
+of the original one, which contains the transformed elements in some
+state. Of course, depending on the terminating operation, and the
+intermediate operations entirely new objects might be created (i.e using
+map) after calling the final terminating operation on the stream
+object.</p>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 65%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>void forEach(Consumer&lt;? super T&gt; action)</td>
+<td>Calls the action for every element in the stream.</td>
+</tr>
+<tr class="even">
+<td>Object[] toArray()</td>
+<td>Returns an Object array that has the elements in the stream.</td>
+</tr>
+<tr class="odd">
+<td>Optional&lt;&gt; min(Comparator&lt;? super T&gt; | compare)</td>
+<td>Returns the minimum value in the stream (compares the objects using
+the given compare function).</td>
+</tr>
+<tr class="even">
+<td>Optional&lt;&gt; max(Comparator&lt;? super T&gt; | compare)</td>
+<td>Returns the maximum value in the stream (compares the objects using
+the given compare function).</td>
+</tr>
+<tr class="odd">
+<td>long count()</td>
+<td>Returns the number of elements in the stream.</td>
+</tr>
+</tbody>
+</table>
+<p><code>Once the stream has been finalized with calling a terminating operation, the stream is considered consumed, and any attempt to call any other operation on it - terminating or intermediate, will result in IllegalStateException</code></p>
+</body>
+</html>

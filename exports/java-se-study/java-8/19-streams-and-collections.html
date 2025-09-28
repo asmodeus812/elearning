@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>19-streams-and-collections</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#streams" id="toc-streams">Streams</a>
+<ul>
+<li><a href="#basestream" id="toc-basestream">BaseStream</a></li>
+<li><a href="#stream" id="toc-stream">Stream</a></li>
+<li><a href="#obtaining" id="toc-obtaining">Obtaining</a></li>
+<li><a href="#mapping" id="toc-mapping">Mapping</a></li>
+<li><a href="#filtering" id="toc-filtering">Filtering</a></li>
+<li><a href="#collecting" id="toc-collecting">Collecting</a></li>
+<li><a href="#grouping" id="toc-grouping">Grouping</a></li>
+<li><a href="#reduction" id="toc-reduction">Reduction</a></li>
+<li><a href="#parallel" id="toc-parallel">Parallel</a></li>
+<li><a href="#unordered" id="toc-unordered">Unordered</a></li>
+</ul></li>
+</ul>
+</nav>
+<h2 id="streams">Streams</h2>
+<p>Streams are one of the two most notable features in
+<code>JAVA 8</code>, the second being the lambda function. The lambda
+functional interface however enables the existence of the Streams API.
+Streams in java are types of objects which are not meant to hold any
+data, they also operate on data structures such as Lists, Maps etc.
+However they do not modify that structure in any way, in case the stream
+has to produce a result which represents an aggregate or otherwise a
+filtered version of the original data structure, the stream would
+produce a completely new instance of the structure such that it contains
+the relevant elements but will never modify the source structure.</p>
+<p><code>Streams provide a wrapper API around common data structures, to allow certain operations such as filtering, searching, ordering, aggregation, combining, grouping and many more data transformation utilities over the standard java collection utilities</code></p>
+<h3 id="basestream">BaseStream</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> BaseStream<span class="op">&lt;</span>T<span class="op">,</span> S <span class="kw">extends</span> BaseStream<span class="op">&lt;</span>T<span class="op">,</span> S<span class="op">&gt;&gt;</span> <span class="kw">extends</span> AutoCloseable <span class="co">// the signature of the BaseStream API</span></span></code></pre></div>
+<p>The <code>BaseStream</code> is the super interface for all other
+stream interfaces, including the Stream interface itself, it contains
+the most core methods that each stream must support, one of which is the
+<code>close</code> and <code>iterator</code> methods, which vare most
+probably the ones that are considered the most important.</p>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>iterator()</td>
+<td>obtain an iterator to the stream, using the iterator of the
+underlying structure</td>
+</tr>
+<tr class="even">
+<td>spliterator()</td>
+<td>obtain an split-iterator to the stream, using the split-iterator of
+the underlying structure</td>
+</tr>
+<tr class="odd">
+<td>sequential()</td>
+<td>return a sequential stream representation of the source stream, if
+the stream is already sequential reutrns the same instance</td>
+</tr>
+<tr class="even">
+<td>parallel()</td>
+<td>return a parallel stream representation of the source stream, if the
+stream is already parallel reutrns the same instance</td>
+</tr>
+<tr class="odd">
+<td>unordered()</td>
+<td>return an unordered stream representation of the source stream, if
+the stream is already unordered reutrns the same instance</td>
+</tr>
+<tr class="even">
+<td>close()</td>
+<td>closes the stream, meaning that no termination operations can be
+called on the stream any more</td>
+</tr>
+</tbody>
+</table>
+<h3 id="stream">Stream</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> Stream<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="kw">extends</span> BaseStream<span class="op">&lt;</span>T<span class="op">,</span> Stream<span class="op">&lt;</span>T<span class="op">&gt;&gt;</span> <span class="co">// the signature of the Stream API</span></span></code></pre></div>
+<p>The Stream interface extends the BaseStream, and is meant to provide
+the most commonly used aggregation and transformation operations that
+can be performed on any data structure</p>
+<table>
+<colgroup>
+<col style="width: 41%" />
+<col style="width: 58%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>filter(Predicate&lt;? super T&gt; predicate)</code></td>
+<td>Returns a stream consisting of elements that match the given
+predicate.</td>
+</tr>
+<tr class="even">
+<td><code>map(Function&lt;? super T, ? extends R&gt; mapper)</code></td>
+<td>Transforms each element of the stream using the provided mapping
+function and returns a new stream of the mapped elements.</td>
+</tr>
+<tr class="odd">
+<td><code>mapToInt(ToIntFunction&lt;? super T&gt; mapper)</code></td>
+<td>Transforms each element into an <code>int</code> and returns an
+<code>IntStream</code>.</td>
+</tr>
+<tr class="even">
+<td><code>mapToLong(ToLongFunction&lt;? super T&gt; mapper)</code></td>
+<td>Transforms each element into a <code>long</code> and returns a
+<code>LongStream</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>mapToDouble(ToDoubleFunction&lt;? super T&gt; mapper)</code></td>
+<td>Transforms each element into a <code>double</code> and returns a
+<code>DoubleStream</code>.</td>
+</tr>
+<tr class="even">
+<td><code>flatMap(Function&lt;? super T, ? extends Stream&lt;? extends R&gt;&gt; mapper)</code></td>
+<td>Flattens a stream of streams into a single stream by replacing each
+element with the contents of a mapped stream.</td>
+</tr>
+<tr class="odd">
+<td><code>flatMapToInt(Function&lt;? super T, ? extends IntStream&gt; mapper)</code></td>
+<td>Flattens a stream of streams of integers into an
+<code>IntStream</code>.</td>
+</tr>
+<tr class="even">
+<td><code>flatMapToLong(Function&lt;? super T, ? extends LongStream&gt; mapper)</code></td>
+<td>Flattens a stream of streams of longs into a
+<code>LongStream</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>flatMapToDouble(Function&lt;? super T, ? extends DoubleStream&gt; mapper)</code></td>
+<td>Flattens a stream of streams of doubles into a
+<code>DoubleStream</code>.</td>
+</tr>
+<tr class="even">
+<td><code>mapMulti(BiConsumer&lt;? super T, ? super Consumer&lt;R&gt;&gt; mapper)</code></td>
+<td>Applies a function to each element, producing zero or more results
+per input element and returns a new stream with these results.</td>
+</tr>
+<tr class="odd">
+<td><code>mapMultiToInt(BiConsumer&lt;? super T, ? super IntConsumer&gt; mapper)</code></td>
+<td>A multi-mapping function that produces an
+<code>IntStream</code>.</td>
+</tr>
+<tr class="even">
+<td><code>mapMultiToLong(BiConsumer&lt;? super T, ? super LongConsumer&gt; mapper)</code></td>
+<td>A multi-mapping function that produces a
+<code>LongStream</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>mapMultiToDouble(BiConsumer&lt;? super T, ? super DoubleConsumer&gt; mapper)</code></td>
+<td>A multi-mapping function that produces a
+<code>DoubleStream</code>.</td>
+</tr>
+<tr class="even">
+<td><code>distinct()</code></td>
+<td>Returns a stream with unique elements (no duplicates).</td>
+</tr>
+<tr class="odd">
+<td><code>sorted()</code></td>
+<td>Returns a stream where the elements are sorted in natural
+order.</td>
+</tr>
+<tr class="even">
+<td><code>sorted(Comparator&lt;? super T&gt; comparator)</code></td>
+<td>Returns a stream where the elements are sorted based on the provided
+comparator.</td>
+</tr>
+<tr class="odd">
+<td><code>peek(Consumer&lt;? super T&gt; action)</code></td>
+<td>Returns a stream where an action is performed on each element as
+they are consumed, mainly for debugging purposes.</td>
+</tr>
+<tr class="even">
+<td><code>limit(long maxSize)</code></td>
+<td>Limits the stream to the specified number of elements.</td>
+</tr>
+<tr class="odd">
+<td><code>skip(long n)</code></td>
+<td>Skips the first <code>n</code> elements in the stream and returns
+the remaining elements.</td>
+</tr>
+<tr class="even">
+<td><code>takeWhile(Predicate&lt;? super T&gt; predicate)</code></td>
+<td>Returns a stream consisting of the longest prefix of elements that
+match the predicate.</td>
+</tr>
+<tr class="odd">
+<td><code>dropWhile(Predicate&lt;? super T&gt; predicate)</code></td>
+<td>Drops the longest prefix of elements that match the predicate and
+returns the remaining elements.</td>
+</tr>
+<tr class="even">
+<td><code>forEach(Consumer&lt;? super T&gt; action)</code></td>
+<td>Performs the given action for each element of the stream.</td>
+</tr>
+<tr class="odd">
+<td><code>forEachOrdered(Consumer&lt;? super T&gt; action)</code></td>
+<td>Performs the given action for each element in encounter order,
+preserving the order of operations.</td>
+</tr>
+<tr class="even">
+<td><code>toArray()</code></td>
+<td>Returns an array containing all elements of the stream.</td>
+</tr>
+<tr class="odd">
+<td><code>toArray(IntFunction&lt;A[]&gt; generator)</code></td>
+<td>Returns an array containing the elements of the stream, with the
+provided array generator function.</td>
+</tr>
+<tr class="even">
+<td><code>reduce(T identity, BinaryOperator&lt;T&gt; accumulator)</code></td>
+<td>Performs a reduction on the elements using an identity value and an
+accumulator function.</td>
+</tr>
+<tr class="odd">
+<td><code>reduce(BinaryOperator&lt;T&gt; accumulator)</code></td>
+<td>Performs a reduction on the elements using an accumulator function,
+without an identity.</td>
+</tr>
+<tr class="even">
+<td><code>reduce(U identity, BiFunction&lt;U, ? super T, U&gt; accumulator, BinaryOperator&lt;U&gt; combiner)</code></td>
+<td>Performs a reduction with an identity, an accumulator function, and
+a combiner for parallel streams.</td>
+</tr>
+<tr class="odd">
+<td><code>collect(Supplier&lt;R&gt; supplier, BiConsumer&lt;R, ? super T&gt; accumulator, BiConsumer&lt;R, R&gt; combiner)</code></td>
+<td>Performs a mutable reduction (e.g., collects elements into a
+collection).</td>
+</tr>
+<tr class="even">
+<td><code>collect(Collector&lt;? super T, A, R&gt; collector)</code></td>
+<td>Performs a reduction using a <code>Collector</code>, which handles
+accumulation and final value production.</td>
+</tr>
+<tr class="odd">
+<td><code>toList()</code></td>
+<td>Collects the elements into a <code>List</code>.</td>
+</tr>
+<tr class="even">
+<td><code>min(Comparator&lt;? super T&gt; comparator)</code></td>
+<td>Finds the minimum element of the stream using the given
+comparator.</td>
+</tr>
+<tr class="odd">
+<td><code>max(Comparator&lt;? super T&gt; comparator)</code></td>
+<td>Finds the maximum element of the stream using the given
+comparator.</td>
+</tr>
+<tr class="even">
+<td><code>count()</code></td>
+<td>Returns the count of elements in the stream.</td>
+</tr>
+<tr class="odd">
+<td><code>anyMatch(Predicate&lt;? super T&gt; predicate)</code></td>
+<td>Returns <code>true</code> if any elements match the provided
+predicate.</td>
+</tr>
+<tr class="even">
+<td><code>allMatch(Predicate&lt;? super T&gt; predicate)</code></td>
+<td>Returns <code>true</code> if all elements match the provided
+predicate.</td>
+</tr>
+<tr class="odd">
+<td><code>noneMatch(Predicate&lt;? super T&gt; predicate)</code></td>
+<td>Returns <code>true</code> if no elements match the provided
+predicate.</td>
+</tr>
+<tr class="even">
+<td><code>findFirst()</code></td>
+<td>Returns the first element of the stream, if present.</td>
+</tr>
+<tr class="odd">
+<td><code>findAny()</code></td>
+<td>Returns any element of the stream, useful in parallel streams.</td>
+</tr>
+<tr class="even">
+<td><code>builder()</code></td>
+<td>Returns a <code>Stream.Builder</code> to incrementally build a
+stream.</td>
+</tr>
+<tr class="odd">
+<td><code>empty()</code></td>
+<td>Returns an empty stream.</td>
+</tr>
+<tr class="even">
+<td><code>of(T value)</code></td>
+<td>Returns a stream containing a single element.</td>
+</tr>
+<tr class="odd">
+<td><code>ofNullable(T value)</code></td>
+<td>Returns a stream containing the provided element if non-null,
+otherwise returns an empty stream.</td>
+</tr>
+<tr class="even">
+<td><code>of(T... values)</code></td>
+<td>Returns a stream of the provided elements.</td>
+</tr>
+<tr class="odd">
+<td><code>iterate(T seed, UnaryOperator&lt;T&gt; f)</code></td>
+<td>Creates an infinite stream where each next element is generated by
+applying the function <code>f</code> to the previous one, starting with
+the seed.</td>
+</tr>
+<tr class="even">
+<td><code>iterate(T seed, Predicate&lt;? super T&gt; hasNext, UnaryOperator&lt;T&gt; f)</code></td>
+<td>Generates a stream where each element is produced by applying the
+function <code>f</code>, while the <code>hasNext</code> predicate
+returns <code>true</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>generate(Supplier&lt;? extends T&gt; supplier)</code></td>
+<td>Creates an infinite stream where each element is generated by the
+provided supplier.</td>
+</tr>
+<tr class="even">
+<td><code>concat(Stream&lt;? extends T&gt; a, Stream&lt;? extends T&gt; b)</code></td>
+<td>Concatenates two streams into a single stream.</td>
+</tr>
+</tbody>
+</table>
+<p>Now each of these operations are classified in two major groups,
+either an operation is intermediate or terminal. Intermediate operations
+are such that they do not close the stream, they do not produce output,
+and more intermediate or terminal operations can follow them. Terminal
+operations usually close the stream, no more terminal or intermediate
+operations can be used after them and the stream is translated into a
+closed state, the stream is consumed, all intermediate operations up to
+this point attached or related to the stream instance are executed, a
+result is produced.</p>
+<p><code>Intermediate operations always produce another stream instance, usually they return the same/this instance of the stream and not a copy of the stream, while terminal operations produce a result of some sort, or in the case of forEach have no return type. Intermediate operations are not executed immediately after they are attached/intermediate function is called on a stream object, they are executed when a terminal operation on the stream is called.</code></p>
+<p>Another key point to note about the intermediate operations is that
+they are not <code>stateful</code> in the sense that they operate on
+elements of the stream or more precisely the underlying data structure
+independently of each other. However some like <code>sorted</code> do
+actually preserve some sort of state or relation between stream
+elements, because they have in order for the elements to be sorted. This
+plays a crucial role in talking about parallel or sequential or
+unordered stream types</p>
+<table>
+<thead>
+<tr class="header">
+<th>Method Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>filter</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>map</td>
+<td>Intermediate</td>
+</tr>
+<tr class="odd">
+<td>mapToInt</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>mapToLong</td>
+<td>Intermediate</td>
+</tr>
+<tr class="odd">
+<td>mapToDouble</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>flatMap</td>
+<td>Intermediate</td>
+</tr>
+<tr class="odd">
+<td>flatMapToInt</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>flatMapToLong</td>
+<td>Intermediate</td>
+</tr>
+<tr class="odd">
+<td>flatMapToDouble</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>mapMulti</td>
+<td>Intermediate</td>
+</tr>
+<tr class="odd">
+<td>mapMultiToInt</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>mapMultiToLong</td>
+<td>Intermediate</td>
+</tr>
+<tr class="odd">
+<td>mapMultiToDouble</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>distinct</td>
+<td>Intermediate</td>
+</tr>
+<tr class="odd">
+<td>sorted</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>sorted(Comparator)</td>
+<td>Intermediate</td>
+</tr>
+<tr class="odd">
+<td>peek</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>limit</td>
+<td>Intermediate</td>
+</tr>
+<tr class="odd">
+<td>skip</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>takeWhile</td>
+<td>Intermediate</td>
+</tr>
+<tr class="odd">
+<td>dropWhile</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>forEach</td>
+<td>Terminal</td>
+</tr>
+<tr class="odd">
+<td>forEachOrdered</td>
+<td>Terminal</td>
+</tr>
+<tr class="even">
+<td>toArray</td>
+<td>Terminal</td>
+</tr>
+<tr class="odd">
+<td>toArray(IntFunction)</td>
+<td>Terminal</td>
+</tr>
+<tr class="even">
+<td>reduce</td>
+<td>Terminal</td>
+</tr>
+<tr class="odd">
+<td>reduce(BinaryOperator)</td>
+<td>Terminal</td>
+</tr>
+<tr class="even">
+<td>collect</td>
+<td>Terminal</td>
+</tr>
+<tr class="odd">
+<td>toList</td>
+<td>Terminal</td>
+</tr>
+<tr class="even">
+<td>min</td>
+<td>Terminal</td>
+</tr>
+<tr class="odd">
+<td>max</td>
+<td>Terminal</td>
+</tr>
+<tr class="even">
+<td>count</td>
+<td>Terminal</td>
+</tr>
+<tr class="odd">
+<td>anyMatch</td>
+<td>Terminal</td>
+</tr>
+<tr class="even">
+<td>allMatch</td>
+<td>Terminal</td>
+</tr>
+<tr class="odd">
+<td>noneMatch</td>
+<td>Terminal</td>
+</tr>
+<tr class="even">
+<td>findFirst</td>
+<td>Terminal</td>
+</tr>
+<tr class="odd">
+<td>findAny</td>
+<td>Terminal</td>
+</tr>
+<tr class="even">
+<td>iterate</td>
+<td>Intermediate</td>
+</tr>
+<tr class="odd">
+<td>generate</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>concat</td>
+<td>Intermediate</td>
+</tr>
+<tr class="odd">
+<td>accept (Builder)</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>add (Builder)</td>
+<td>Intermediate</td>
+</tr>
+<tr class="odd">
+<td>build (Builder)</td>
+<td>Terminal</td>
+</tr>
+</tbody>
+</table>
+<h3 id="obtaining">Obtaining</h3>
+<p>To obtain a stream the most common use case from an instanc of a data
+structure implementing the <code>Collection</code> interface is to call
+the <code>stream()</code> or the <code>parallel()</code> methods, keep
+in mind that if a parallel stream can not be obtained a regular
+sequential stream will be returned the method will not throw
+exception</p>
+<p><code>A stream can be converted into a sequential or parallel at any time based on the use case at hand, each call to sequential or parallel (from BaseStream) creates a new instance of the stream using the source data of the original, it is either of parallel or sequential type</code></p>
+<h3 id="mapping">Mapping</h3>
+<p>One of the most common operations is to transform a stream of one
+type of elements into another type. This is called a mapping and usually
+it accepts a single input argument of the original type and single
+output argument of the resulting mapped type. That then is applied to
+all elements</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> numbers <span class="op">=</span> <span class="bu">Arrays</span><span class="op">.</span><span class="fu">asList</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">);</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> result <span class="op">=</span> numbers<span class="op">.</span><span class="fu">parallelStream</span><span class="op">()</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">map</span><span class="op">(</span>n <span class="op">-&gt;</span> n <span class="op">*</span> n<span class="op">)</span>        <span class="co">// convert to squares</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">toList</span><span class="op">();</span>              <span class="co">// collect result</span></span></code></pre></div>
+<h3 id="filtering">Filtering</h3>
+<p>Another very common operation is to apply a filter on the list of
+elements, the function reference itself, receives the element from the
+stream, and returns a <code>boolean</code> result, <code>true</code>
+implies the element should be retained in the stream, while
+<code>false</code>, implies that the element can be filtered out /
+discarded. while</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> numbers <span class="op">=</span> <span class="bu">Arrays</span><span class="op">.</span><span class="fu">asList</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">);</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> result <span class="op">=</span> numbers<span class="op">.</span><span class="fu">parallelStream</span><span class="op">()</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">filter</span><span class="op">(</span>n <span class="op">-&gt;</span> n <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="co">// only even numbers</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">toList</span><span class="op">();</span>              <span class="co">// collect result</span></span></code></pre></div>
+<h3 id="collecting">Collecting</h3>
+<p>Another common operation is to collect, or convert a stream into a
+collection, of some sort, that could be a List, Map, Set or any other
+type of <code>collection</code>, even custom user collections, there are
+no real restrictions on what / how the collection is done, as long as
+the collection provides implementation against the
+<code>Collector</code> interface. There exists a companion utility class
+called <code>Collectors</code>, which contains common methods which are
+used for collecting streams into lists, sets, maps etc, with exposed
+methods such as <code>toList, toSet, toMap</code></p>
+<h4 id="tolist">ToList</h4>
+<p>One of the most frequently used methods on the Collectors API, it has
+two major methods which are used to create a list from the unerlying
+stream.</p>
+<ul>
+<li><p><code>toList</code> - which basically uses an
+<code>ArrayList</code> as the underlying implementation, and adds all
+elements from the stream to the list, remember that the elements
+themselves are added by reference, the only thing that is getting
+<code>discarded</code> is actually the original data structure, which
+the stream wrapped around in the first place during its
+creation</p></li>
+<li><p><code>toUnmodifiableList</code> - that is the same implementation
+as above, still usihng an <code>ArrayList</code> to collect the
+elements, however, at the end the elements are moved from the mutable
+<code>ArrayList</code> into a unmutable list, using the
+<code>List.of</code> API which collects the elements of the source array
+into a unmodifiable list - using the internal jdk implemented type
+<code>ImmutableCollections</code></p></li>
+</ul>
+<h4 id="toset">ToSet</h4>
+<p>This one works similarly to the <code>toList</code> interface from
+the collectors API, it does again provide two methods, one to produce a
+mutable <code>set</code> and another one to produce an immutable one.
+Works by internally storing into a <code>HashSet</code>, and the
+immutable version is using <code>Set.of</code></p>
+<h4 id="tomap">ToMap</h4>
+<p>The toMap method has a lot of overloads, providing different means of
+collecting elements into a map, mostly the overloaded methods deal with
+<code>key</code> handling, and <code>collisions</code>.</p>
+<p>The most basic usage of <code>toMap</code>, simply takes in the value
+from the source to be mapped and it is passed to the two mapper
+functions, one is supposed to return the key of the map, the other is
+supposed to return the value for that key,</p>
+<ul>
+<li><p>in first the example below, the name is mapped through the
+identity function, meaning the key is simply the entry from the list
+(the length of the name), the value for the mapping is the length of the
+entry from the list (the length of the name).</p></li>
+<li><p>the second example below, the mapping function remains the same,
+however a merging function is added, which tells the underlying
+<code>Collectors</code> how to reconcile values that map to the same
+key</p></li>
+<li><p>the third example is the same as the first one, and the second
+one, with the difference being that the third argument for the map, is
+actually the supplier, or map constructor, this allows clients to pass
+in custom map implementations instead</p></li>
+</ul>
+<p><code>Note that by default if there are duplicate keys the basic version of toMap which is not passed in a merger function will use an internal one, the internal one will throw exception if duplicate key is inserted into the map</code></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> names <span class="op">=</span> <span class="bu">Arrays</span><span class="op">.</span><span class="fu">asList</span><span class="op">(</span><span class="st">&quot;Alice&quot;</span><span class="op">,</span> <span class="st">&quot;Bob&quot;</span><span class="op">,</span> <span class="st">&quot;Charlie&quot;</span><span class="op">,</span> <span class="st">&quot;David&quot;</span><span class="op">,</span> <span class="st">&quot;Jon&quot;</span><span class="op">);</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Map</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">,</span> <span class="bu">Integer</span><span class="op">&gt;</span> nameLengthMap <span class="op">=</span> names<span class="op">.</span><span class="fu">stream</span><span class="op">().</span><span class="fu">collect</span><span class="op">(</span>Collectors<span class="op">.</span><span class="fu">toMap</span><span class="op">(</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    name <span class="op">-&gt;</span> name<span class="op">,</span> <span class="co">// Key the name itself</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span><span class="op">::</span>length <span class="co">// Value the length of the naem</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">));</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">Map</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">,</span> <span class="bu">Long</span><span class="op">&gt;</span> nameCountMap <span class="op">=</span> names<span class="op">.</span><span class="fu">stream</span><span class="op">().</span><span class="fu">collect</span><span class="op">(</span>Collectors<span class="op">.</span><span class="fu">toMap</span><span class="op">(</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    name <span class="op">-&gt;</span> name<span class="op">,</span>             <span class="co">// Key: the name itself</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    name <span class="op">-&gt;</span> <span class="dv">1L</span><span class="op">,</span>               <span class="co">// Value: initial count of 1</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Long</span><span class="op">::</span>sum                 <span class="co">// Merging function to sum counts for duplicates</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="op">));</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="bu">Map</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">,</span> <span class="bu">Long</span><span class="op">&gt;</span> nameCountMap <span class="op">=</span> names<span class="op">.</span><span class="fu">stream</span><span class="op">().</span><span class="fu">collect</span><span class="op">(</span>Collectors<span class="op">.</span><span class="fu">toMap</span><span class="op">(</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    name <span class="op">-&gt;</span> name<span class="op">,</span>             <span class="co">// Key: the name itself</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    name <span class="op">-&gt;</span> <span class="dv">1L</span><span class="op">,</span>               <span class="co">// Value: initial count of 1</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Long</span><span class="op">::</span>sum                 <span class="co">// Merging function to sum counts for duplicates</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    MyHashMap<span class="op">::</span><span class="kw">new</span>            <span class="co">// Provide a custom map implementation</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="op">));</span></span></code></pre></div>
+<p><code>The toMap functions have a version called toConcurrentMap which is meant to optimize performance when collecting elements, by leveraging parallel streams (see below) however the interface for them is the same as for the basic toMap methods</code></p>
+<h3 id="grouping">Grouping</h3>
+<p>A special case for mapping function which produces a map where the
+default is that a merging function is specially designed to collect all
+values with the same keys into a bucket. Usually an array or list. The
+idea is that a list of entries or values can be grouped by some common
+properties, in this case when they end up mapping to the same key.</p>
+<p>In the example below, the names are grouped by the length of the name
+itself, the most simple classifier function used for this grouping. In
+the second and third example a grouping factory methods are provided,
+one is for the actual top level map result which represents the
+grouping, the second is for the value type, which is where the elements
+are accumulated into.</p>
+<p><code>Similarly to the toMap methods, the grouping methods also support a concurrent version to optimize the grouping by using parallel streaming</code></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> names <span class="op">=</span> <span class="bu">Arrays</span><span class="op">.</span><span class="fu">asList</span><span class="op">(</span><span class="st">&quot;Alice&quot;</span><span class="op">,</span> <span class="st">&quot;Bob&quot;</span><span class="op">,</span> <span class="st">&quot;Charlie&quot;</span><span class="op">,</span> <span class="st">&quot;David&quot;</span><span class="op">,</span> <span class="st">&quot;Eve&quot;</span><span class="op">);</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Map</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">,</span> <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;&gt;</span> groupedByLength <span class="op">=</span> names<span class="op">.</span><span class="fu">stream</span><span class="op">().</span><span class="fu">collect</span><span class="op">(</span>Collectors<span class="op">.</span><span class="fu">groupingBy</span><span class="op">(</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span><span class="op">::</span>length <span class="co">// Key for the grouping is the length of the name</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">));</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="bu">Map</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">,</span> <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;&gt;</span> groupedByLength <span class="op">=</span> names<span class="op">.</span><span class="fu">stream</span><span class="op">().</span><span class="fu">collect</span><span class="op">(</span>Collectors<span class="op">.</span><span class="fu">groupingBy</span><span class="op">(</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span><span class="op">::</span>length<span class="op">,</span> <span class="co">// Key for the grouping is the length of the name</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    MyHashMap<span class="op">::</span><span class="kw">new</span><span class="op">,</span> <span class="co">// Map factory can be provided as second argument</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    MyArrayList<span class="op">::</span><span class="kw">new</span><span class="op">,</span> <span class="co">// The factory for the grouped map values</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="op">));</span></span></code></pre></div>
+<h3 id="reduction">Reduction</h3>
+<p>One of the key features of streams is reduction operations, such
+operations are terminal operations that return a result that is based on
+the elements in the stream, and are not of the same type as the initial
+data structure wrapped in the stream.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">ArrayList</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> myList <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>myList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">7</span><span class="op">);</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>myList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">18</span><span class="op">);</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>myList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">10</span><span class="op">);</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>myList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">24</span><span class="op">);</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>myList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">17</span><span class="op">);</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>myList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">5</span><span class="op">);</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>Stream<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> myStream <span class="op">=</span> myList<span class="op">.</span><span class="fu">stream</span><span class="op">();</span> <span class="co">// return a stream representation of the list, simply wraps the collection into a stream</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>Optional<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> minVal <span class="op">=</span> myStream<span class="op">.</span><span class="fu">min</span><span class="op">(</span><span class="bu">Integer</span><span class="op">::</span>compare<span class="op">);</span> <span class="co">// reducing the result, into a single min value from the stream of integers</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">// the call to min on myStream will terminate the stream, meaning that no more terminal or intermediate operations can be called on it</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>myStream <span class="op">=</span> myList<span class="op">.</span><span class="fu">stream</span><span class="op">();</span> <span class="co">// obtain a new reference of a new stream object, since it is of the same type re-use the old stream variable</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>Optional<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> maxVal <span class="op">=</span> myStream<span class="op">.</span><span class="fu">max</span><span class="op">(</span><span class="bu">Integer</span><span class="op">::</span>compare<span class="op">);</span> <span class="co">// reducing the result, into a single max value from the stream of integers</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">// the call to min on myStream will terminate the stream, meaning that no more terminal or intermediate operations can be called on it</span></span></code></pre></div>
+<p>The list of reduction operations that stream API supports are listed
+below, all of them are a special case of the <code>reduce</code>
+operation, but exist for convenience since are very often used,
+operations such as min, max, sum or count for example.</p>
+<ul>
+<li><code>reduce</code> - general reduce operation accepting an
+accumulator lambda</li>
+<li><code>count</code> - return the count of elements in the stream</li>
+<li><code>min</code> - compute the <code>min</code> element in the
+stream</li>
+<li><code>max</code> - compute the <code>max</code> element in the
+stream</li>
+<li><code>sum</code> - compute the <code>sum</code> of all elements in
+the stream</li>
+<li><code>average</code> - compute the <code>avg</code> between all the
+elements of the stream</li>
+<li><code>anyMatch</code> - check if any element matches a
+predicate</li>
+<li><code>allMatch</code> - check if all elements match a predicate</li>
+<li><code>noneMatch</code> - check if none of the elements match a
+predicate</li>
+<li><code>findFirst</code> - find the first element that matches a
+predicate</li>
+<li><code>findAny</code> - find any element that matches a predicate
+(relevant for parallel streams)</li>
+</ul>
+<p>The reduce operations have some restrictions, there are certain rules
+that the reduction must follow in order for the result to be predictable
+and correct.</p>
+<ul>
+<li><p><code>stateless</code> - the reduce lambda or operation itself
+must not store any state about the iteration process or elements being
+visited</p></li>
+<li><p><code>non-interfering</code> - the reduce operation must never
+interfere or mutate the source structure, while the reduction is being
+executed.</p></li>
+<li><p><code>associative</code> - no matter how the elements are
+traversed the reduce must always produce the correct result without
+having to store any state about the elements being traversed, given the
+following expression - <code>10 _ (2 _ 7)</code> - is associative, it
+does not matter in what order the elements are multiplied, however this
+- 10 * (2 + 7), is not associative, and thus one can not rely on the
+reduce operation to be correct</p></li>
+</ul>
+<p><code>Associativity is of particular importance to the use of reduction operations on parallel streams, discussed in the next section.</code></p>
+<h3 id="parallel">Parallel</h3>
+<p>The parallel streams are of big importance, especially when huge
+amounts of data need to be processed, they can dramatically speed up
+execution of certain operations, a parallel stream can be obtained
+eitehr at the time of obtaining the stream using the
+<code>parallelStream</code> method, instead of <code>stream</code> from
+the <code>Collections</code> API, or to convert an existing stream to a
+parallel one using the <code>API</code> provided by the
+<code>BaseStream</code> interface</p>
+<p>Parallel streams have one very specific caveat when dealing when
+reducing operations, since a parallel stream reduce operations can be
+split in such a way that multiple reduce operations are run on separate
+chunks of the elements in the stream, one has to provide additional
+<code>combiner</code> function lambda reference, which is used to tell
+the underlying implementation how to <code>combine</code> results coming
+from different parallel executions, for example let’s say we would like
+to multiply the square roots of all elements in a stream</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">ArrayList</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> myList <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>myList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">7</span><span class="op">);</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>myList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">18</span><span class="op">);</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>myList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">10</span><span class="op">);</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>myList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">24</span><span class="op">);</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>myList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">17</span><span class="op">);</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>myList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="dv">5</span><span class="op">);</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>Stream<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> myStreamPar <span class="op">=</span> myList<span class="op">.</span><span class="fu">parallelStream</span><span class="op">();</span> <span class="co">// return a parallel stream representation of the list, simply wraps the collection into a stream</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="bu">Integer</span> accPar <span class="op">=</span> myStreamPar<span class="op">.</span><span class="fu">reduce</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="op">(</span>acc<span class="op">,</span> elem<span class="op">)</span> <span class="op">-&gt;</span> acc <span class="op">*</span> <span class="op">(</span>elem <span class="op">*</span> elem<span class="op">),</span> <span class="op">(</span>left<span class="op">,</span> right<span class="op">)</span> <span class="op">-&gt;</span> left <span class="op">*</span> right<span class="op">);</span> <span class="co">// reduce the list into result (a*a) * (b*b)</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>Stream<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> myStreamSeq <span class="op">=</span> myList<span class="op">.</span><span class="fu">stream</span><span class="op">();</span> <span class="co">// return a sequential stream representation of the list, simply wraps the collection into a stream</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="bu">Integer</span> accSeq <span class="op">=</span> myStreamSeq<span class="op">.</span><span class="fu">reduce</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="op">(</span>acc<span class="op">,</span> elem<span class="op">)</span> <span class="op">-&gt;</span> acc <span class="op">*</span> <span class="op">(</span>elem <span class="op">*</span> elem<span class="op">));</span> <span class="co">// reduce the list into result (a*a) * (b*b)</span></span></code></pre></div>
+<p>The <code>first</code> call to <code>reduce</code> above, uses the
+accumulator and combiner lambda functions, to correctly compute the
+product of the squares of each element in the list. Why does it work,
+the <code>accumulator</code>, tells the stream how to accumulate the
+current result <code>acc</code> with an element from the list, while the
+<code>combiner</code> tells the stream how to combine two parallel
+computations, or in other words two separate accumulation results into
+one. The combiner function is used to tell the stream how to combine two
+accumulators, while the accumulator is used to tell the stream how to
+accumulate elements into one. The <code>second</code> call to
+<code>reduce</code> on the sequential stream does not need any combiner,
+since there is no parallel execution, there are no parallel
+accumulations being done, therefore no need to provide a combiner.</p>
+<p>In general the parallel stream implementation in java uses the
+fork/join along with split iterators, the basic idea is as follows:</p>
+<ul>
+<li><p>Splitting the Data: The <code>Spliterator</code> is used to
+divide the source data into smaller segments. Each segment can be
+processed independently by different threads.</p></li>
+<li><p>Fork/Join Framework: Java’s Fork/Join framework manages a pool of
+worker threads to execute tasks concurrently. Each worker thread can
+take one of the segments provided by the <code>Spliterator</code> and
+process it.</p></li>
+<li><p>Combining Results: After processing, the results from the
+segments are combined using a combiner function. This step is crucial,
+especially in operations like reduce, where partial results need to be
+aggregated into a final result.</p></li>
+</ul>
+<h3 id="unordered">Unordered</h3>
+<p>Another property of streams which affects the way data is being
+processed in certain situations, generally speaking the
+ordered/unordered nature of a stream depends on the underlying data
+structure. If the stream is wrapped around a
+<code>ArrayList, LinkedList, TreeSet</code>, generally these are
+considered <code>ordered</code> structures, while if the stream is
+wrapped around a <code>HashMap</code> or <code>HashSet</code> are
+considered <code>unordered</code>. The <code>unordered</code> part plays
+a role when the stream is of type <code>parallel</code> stream. How does
+it work ? Well if the stream is parallel but ordered, the processing is
+done using a fork / join, each batch of elements is processed in
+parallel, then when time comes to combine the results, the results are
+combined in order, if the stream is unordered the combination is done in
+whatever order, possibly as soon as there are at least two results to
+combine completed, instead with the ordered type, it might be waiting
+for all results from the parallel processing to complete, then sort them
+in order and only then run the combine function / lambda. Parallel
+streams will eagerly combine as soon as there are results/chunks
+finished and ready to be combined.</p>
+</body>
+</html>

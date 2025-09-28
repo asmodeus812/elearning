@@ -1,0 +1,68 @@
+Release
+
+In this document, we will discuss the most recent Java releases. Java 19 was released on September fifteenth, twenty twenty-two. Java 20 followed on March twenty-first, twenty twenty-three. Java 21 arrived on September twelfth, twenty twenty-three. These dates reflect Oracle’s typical six-month release cadence for Java, with new feature releases coming out in March and September each year.
+
+Language
+
+Patterns
+
+There have been several improvements to pattern matching, especially with the instanceOf keyword for records. Now, you can deconstruct and directly reference the fields of a record within a conditional block that uses instanceOf. This means you can access a record’s fields without first referencing the instance variable itself. However, if two records have the same field names, deconstruction will not work and will result in a compiler error.
+
+For example, consider a record called Point with fields x and y. In the main method, you can check if an object is an instance of Point and, if so, access x and y directly within the if block. This avoids the need to reference the point variable itself. However, if you have two records with the same field names, the compiler will throw an error due to ambiguity.
+
+Switch
+
+The switch statement has also been extended. It can now match based on type patterns and conditional expressions. This is not limited to record types, but it is particularly useful for them, as it avoids the need to handle different types separately.
+
+For instance, you can define a method called formatShape that takes an object called shape. Using the new switch syntax, you can match on different record types such as Circle, Rectangle, and Triangle, and return a formatted string for each. If the shape does not match any known type, the default case returns “Unknown shape.”
+
+The switch expression can also match not just on type, but on the value of a property. For example, you can check if a Circle’s radius is positive and return a different message. It’s important to remember that switch expressions are evaluated from top to bottom, so more specific cases must come before general ones.
+
+Additionally, type pattern matching can be applied to a regular class hierarchy, not just records. The class hierarchy must be well-defined and unambiguous, or else a compile-time error will occur. The when keyword can be used for more refined checks. For example, you can match on a Circle class and check if its radius is positive, or on a Rectangle class and check if it is a square by comparing its length and width.
+
+If you think about it, the new pattern matching for switch in Java effectively flattens what would traditionally require a multi-level switch or nested if-else structure. This flattening makes it much easier to write, read, and maintain branching logic that involves both type-checking and value-based conditions.
+
+To illustrate, the old way in Java eight would involve an outer switch on the type property, then a nested switch on the properties of the instance, such as the circle’s radius or the rectangle’s side length. The new syntax allows you to express all of this in a single, flat switch statement, making the code more concise and readable.
+
+Templates
+
+Templates are a preview feature in Java 21. This feature provides an alternative to the String.format method, supporting common template syntax such as dollar sign, open curly brace, variable, close curly brace. The goal is to avoid the usual string concatenation when embedding variables within a string.
+
+For example, traditionally you might write: “Hello, ” plus name plus “! You are ” plus age plus “ years old.” With string templates in Java 21, you can write: STR dot, open quote, Hello, dollar sign, open curly brace, name, close curly brace, exclamation mark, You are, dollar sign, open curly brace, age, close curly brace, years old, close quote. When you print this message, it outputs: Hello, Alice! You are thirty years old.
+
+The new STR dot syntax allows the string to reference variables from the local context. In the example above, the string variables name and age are referenced within the template. This is syntactic sugar that gets compiled to a String.format type of expression, but it provides an easy way to construct strings with embedded variables.
+
+It’s important to note that any runtime value can be evaluated within the expression, but the returned value will always be treated as a literal string. There is no way for external variables to inject dangerous templates within another template. This design prevents misuse of templates by bad actors.
+
+Platform
+
+There are several small improvements at the platform level. The most significant is the introduction of a lightweight platform thread alternative called virtual threads. Virtual threads provide seamless integration with existing code, requiring only minor adjustments. Most of these adjustments involve using different implementations of the ExecutorService, which now can spawn and manage virtual threads instead of native platform threads.
+
+Next, we will discuss virtual threads in more detail.
+
+
+One of the most significant additions to the Java language is the introduction of the new virtual thread model. This model allows developers to create extremely lightweight and fast threads, which are much less resource-intensive compared to the traditional operating system-level threads that have been the standard in Java up until now.
+
+Virtual threads are managed directly by the Java Virtual Machine, or JVM. Instead of creating a dedicated platform thread for each task, the JVM creates internal threads that it schedules and manages itself. In this way, the JVM acts much like an operating system scheduler, but specifically for virtual threads.
+
+Although virtual threads are ultimately executed on real operating system threads, the JVM has much more control over how they are scheduled. This means that the JVM can run many virtual threads on a single platform thread, something that was not possible before. Each virtual thread is given a specific amount of execution time. If a virtual thread blocks for input or takes too long, it can yield control to another virtual thread running on the same platform thread. The JVM distributes execution time among all virtual threads sharing a platform thread, scheduling them in a way similar to how an operating system schedules platform threads.
+
+This approach allows the JVM to create far fewer platform threads, while running many more virtual threads on top of them. In effect, this introduces a third level of threading. At the lowest level, there is CPU multi-core threading, which is true hardware-level multithreading. Above that, there is platform or operating system threading, where the operating system schedules tasks on each CPU core. And now, with virtual threads, the Java Virtual Machine schedules tasks on top of the platform threads.
+
+To illustrate how this works in practice, consider the following example. The familiar ExecutorService API can now be used to create thread pools that use virtual threads instead of platform threads. This is achieved by providing a different thread factory when creating the executor. Since the new virtual threading model is, from the user's perspective, indistinguishable from platform threads, there is no friction in adopting virtual threads in existing code.
+
+In the example, a fixed thread pool is created with four virtual threads using the Executors.newFixedThreadPool method, and a virtual thread factory is specified. Ten tasks are submitted to the pool. Each task prints a message indicating it is running in a virtual thread, then simulates some blocking work by sleeping for one hundred milliseconds. If a thread blocks, the JVM can yield control to other virtual threads, ensuring fair scheduling and efficient use of resources. Finally, the executor is shut down, which ensures that all pending tasks are completed, but no new tasks are accepted.
+
+Next, let's discuss the Foreign Function and Memory, or FFM, interface.
+
+With recent Java releases, there is a move to deprecate the old Java Native Interface, or JNI, and Remote Method Invocation, or RMI, in favor of a more modern approach: the Foreign Function and Memory interface. This is also known as FFI, or foreign function interface, in other languages. It allows Java code to interact with functions implemented in other languages, primarily C and C plus plus.
+
+For example, consider a C structure called Person, which contains an integer age and a character array for the name. There is also a function called print_person, which prints the name and age of a person. This C code is compiled into a shared library using the GCC compiler, producing a file called libperson.so. This library must be available on the classpath when the Java application is run.
+
+On the Java side, the application uses the FFM API to define the memory layout of the Person struct, allocate memory for it, and set its fields. The memory layout in Java must match exactly the layout defined in the C API, and the memory is allocated on the heap. The address of the struct is then passed to the native print_person function.
+
+It is important to note that Java does not manage dynamic structures when interacting with FFM. For example, character arrays or strings must be appropriately sized to avoid overflow issues, just as in plain C. While there are some safeguards, the FFM interface itself does not fully protect against such scenarios. Its main purpose is to provide a way to interact with external libraries written in other languages.
+
+In summary, the FFM interface allows Java applications to define and manage memory layouts that match native structures, allocate and populate those structures, and invoke native functions, all while maintaining control over memory management and data integrity. This opens up new possibilities for integrating Java with native code in a safer and more modern way.
+
+

@@ -1,0 +1,92 @@
+Release
+
+Generally, there have been several improvements in the algorithms for garbage collection in Java, as well as the introduction of new types of garbage collection algorithms. These changes were made in the versions between Java twelve and Java seventeen.
+
+Language
+
+Switch
+
+With Java seventeen, the improved switch statement was standardized. The new switch expression syntax allows you to define a switch statement in a style similar to a lambda expression. This means you can use a switch statement to obtain a result, effectively giving it a return value.
+
+For example, you can now write a switch expression that takes an integer representing a day of the week and returns a string indicating whether it is a weekday or a weekend. If the value does not match any expected day, it throws an exception. This makes switch statements more concise and expressive.
+
+Text-blocks
+
+Previously, it was not possible to define multi-line text strings or blocks in Java without concatenating multiple lines using the plus sign. With Java seventeen, a new syntax using triple double quotes was added. This allows you to define continuous text or string blocks easily.
+
+For instance, you can now define a multi-line JSON string directly in your code, making it much more readable and maintainable.
+
+Instanceof
+
+Since Java sixteen, the instanceof keyword has been enhanced to support pattern matching. It is common in code to check if an object is an instance of a certain type, and then cast it within the conditional block. With this improvement, the cast is no longer needed. The compiler will automatically interpret the instanceof check and auto-cast the object to the type being checked.
+
+For example, if you check whether an object is a string, you can immediately use it as a string within the block, without an explicit cast. This makes the code cleaner and less error-prone.
+
+Records
+
+The record feature in Java is designed to simplify the creation of simple, immutable data transfer objects, which are very common in the language. These types usually provide straightforward setter and getter methods, constructors, and generic implementations of equals, hashCode, and toString. The record keyword allows you to create these simple data transfer objects with minimal code.
+
+For example, you can define a record called Person with a name and age. Creating an instance and accessing its members is straightforward. All fields in a record are effectively final, meaning they cannot be modified once assigned in the constructor. Each member generates a method with the same name, without a get prefix. You can use either the member accessor or the method to access the value.
+
+Records provide an implicit canonical constructor that initializes all fields in the order they are declared. However, you can also define a custom constructor, which must delegate to the default constructor. Additional methods can be added to the record, but they cannot modify the state of the record.
+
+For example, you might define a record called Circle with a method to calculate its area. The constructor can be redefined for validation, but you cannot manually assign to the members; this is handled by the default constructor. Attempting to assign to the members directly will result in a compiler error.
+
+A final example demonstrates a record called Product, which includes a custom constructor for validation and an additional method to compute the total cost. Creating an instance and calling its methods is straightforward, and the record remains immutable.
+
+Sealed
+
+Sealed classes in Java allow you to specify which subclasses can extend or inherit from them. The new keyword permits is used to implement this behavior.
+
+For example, you can define a sealed class called Shape and specify that only Circle and Square are allowed to extend it. If you try to create another subclass, such as Sphere, that extends Shape without being permitted, it will result in a compile-time error.
+
+The main purpose of sealed classes is to enforce a well-defined hierarchy. By requiring that all permitted subclasses are known to the superclass, the class hierarchy becomes fully defined and cannot be extended unpredictably.
+
+Floating
+
+New hexadecimal support for floating-point numbers was added, allowing you to specify a floating-point hexadecimal number as a literal. For example, you can define a double value using hexadecimal notation, which is equivalent to a specific decimal value.
+
+SIMD
+
+A new vectorization API provides access to intrinsic and SIMD, or Single Instruction Multiple Data, vector instructions for supported architectures. The new elements in the standard Java libraries allow you to access system intrinsics directly from the language, instead of relying on remote method invocation or foreign function interfaces to underlying C libraries.
+
+For example, you can allocate input and output arrays, define a vector species for a two hundred fifty-six bit integer vector, and process data in chunks of eight elements at a time. The code loads data from the input arrays into integer vectors, performs a vectorized addition, and copies the result back into the output array. This pattern is common when working with SIMD intrinsics for high-performance computing.
+
+Memory
+
+Java now allows for access and linking against foreign native APIs, such as those from the C runtime. It also allows for manipulating the native memory layout. The MemoryLayout class can be used to describe the contents of a memory segment in a language-neutral fashion.
+
+There are two main types in the layout hierarchy. Value layouts are used to represent values of a given size and kind, while padding layouts are used to represent portions of a memory segment that should be ignored, primarily for alignment reasons.
+
+For example, you can create a simple data structure layout in Java that is equivalent to a C struct containing an eight-bit unsigned integer called kind, followed by two thirty-two bit padding fields. This allows for precise control over memory layout when interfacing with native code.
+
+
+Let’s begin with a description of how memory layouts and native structures are constructed in Java.
+
+The memory layout described here creates a native structure. The first member of this structure is a field with a size of eight bits, and its byte order is determined by whether the system is big-endian or little-endian. After this field, the structure includes two padding entries, each thirty-two bits in size. This layout is useful for aligning data in memory and ensuring compatibility with native code.
+
+Next, there is a simple example that demonstrates how to create a structure using the MemoryLayout and ValueLayout classes. ValueLayout is a helper type that provides common value layouts, such as those for integers, floats, and doubles.
+
+In this example, the structure contains two integer fields named x and y, which represent a two-dimensional point in space. The memory layout for this structure is allocated within a try-with-resources block. This is important because the memory allocated is outside the control of the Java Virtual Machine, so the caller is responsible for freeing it. By using a try-with-resources block, the memory is automatically released after use.
+
+Within this block, the structure is initialized by writing values to the x and y fields. The values are then read back from memory, and the coordinates of the point are printed to the console.
+
+Now, let’s move on to improvements in the Java library.
+
+Several small enhancements have been made to the base Java package library API, mainly for convenience. The String class and other commonly used classes have been extended with new static utility methods. These additions are designed to improve interoperability with the language and reduce the need for external third-party libraries.
+
+Focusing on the String class, several new methods have been added to improve readability and usability. For example, the lines method returns a stream of strings, splitting the original string into lines. The repeat method repeats the contents of the string a specified number of times.
+
+For instance, if you have a string containing “Hello” followed by a newline and then “World,” calling the lines method will print each line separately. Similarly, if you have the string “abc” and call the repeat method with the argument three, the result will be “abcabcabc.”
+
+Turning to the Files class, a new method has been introduced that returns the position of the first mismatched byte between two files. This method compares the contents of two files and identifies where they first differ. If there is no mismatch, it returns negative one. The position is given as a long value, ranging from zero up to the size of the smaller file.
+
+Now, let’s discuss platform-level changes.
+
+A new command-line tool called jpackage has been introduced to simplify the packaging of native applications for different platforms. This tool outputs an executable installer and can produce executable, disk image, or package files for various operating systems, such as Windows, macOS, and Linux. The installer can be customized with an icon, signing authority—which is especially important for macOS—and other properties.
+
+There have also been improvements to messaging, particularly in native runtime exceptions like NullPointerException. These exceptions now provide more detailed and descriptive error messages, giving finer-grained context information in stack traces. For example, when a null value is accessed, the error message will be more specific about what went wrong.
+
+Finally, there have been significant changes to encapsulation. Access to internal libraries and application programming interfaces is now much more restricted. This change is intended to improve security and stability by forcing libraries and applications to rely on public, stable APIs. As a result, compatibility is improved, and the risk of breaking changes is reduced.
+
+

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>0-language-and-features</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#release" id="toc-release">Release</a>
+<ul>
+<li><a href="#language" id="toc-language">Language</a>
+<ul>
+<li><a href="#switch" id="toc-switch">Switch</a></li>
+<li><a href="#text-blocks" id="toc-text-blocks">Text-blocks</a></li>
+<li><a href="#instanceof" id="toc-instanceof">Instanceof</a></li>
+<li><a href="#records" id="toc-records">Records</a></li>
+<li><a href="#sealed" id="toc-sealed">Sealed</a></li>
+<li><a href="#floating" id="toc-floating">Floating</a></li>
+<li><a href="#simd" id="toc-simd">SIMD</a></li>
+<li><a href="#memory" id="toc-memory">Memory</a></li>
+</ul></li>
+<li><a href="#library" id="toc-library">Library</a>
+<ul>
+<li><a href="#string" id="toc-string">String</a></li>
+<li><a href="#files" id="toc-files">Files</a></li>
+</ul></li>
+<li><a href="#platform" id="toc-platform">Platform</a>
+<ul>
+<li><a href="#packaging" id="toc-packaging">Packaging</a></li>
+<li><a href="#messaging" id="toc-messaging">Messaging</a></li>
+<li><a href="#encapsulation"
+id="toc-encapsulation">Encapsulation</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="release">Release</h1>
+<p>Generally there are several improvements in the algorithms for
+garbage collection, as well as new types of garbage collection
+algorithms which were introduced in the newer versions between java 12
+and 17.</p>
+<h2 id="language">Language</h2>
+<h3 id="switch">Switch</h3>
+<p>With java 17, the new improved switch statement was standardized. The
+new switch expression syntax allows one to define a switch statement
+like a lambda expression. This allows the switch statement to be used to
+obtain a result, in other words give a switch statement a return
+value.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> day <span class="op">=</span> <span class="dv">4</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> dayType <span class="op">=</span> <span class="cf">switch</span> <span class="op">(</span>day<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span> <span class="op">-&gt;</span> <span class="st">&quot;Weekday&quot;</span><span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="dv">6</span><span class="op">,</span> <span class="dv">7</span> <span class="op">-&gt;</span> <span class="st">&quot;Weekend&quot;</span><span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">default</span> <span class="op">-&gt;</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">IllegalArgumentException</span><span class="op">(</span><span class="st">&quot;Invalid day: &quot;</span> <span class="op">+</span> day<span class="op">);</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div>
+<h3 id="text-blocks">Text-blocks</h3>
+<p>Before it was not possible to define multi-line text strings or
+blocks, unless they were concatenated from multiple lines using the
+<code>+</code> sign, with java 17 the new syntax using <code>"""</code>
+was added which allows one to define continuous text or string
+blocks</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> json <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="st">    {</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;name&quot;: &quot;John Doe&quot;,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;age&quot;: 30</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="st">    }</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;&quot;&quot;</span><span class="op">;</span></span></code></pre></div>
+<h3 id="instanceof">Instanceof</h3>
+<p>Since java 16, the <code>instanceof</code> keyword has been improved
+to support pattern matching. It is very common in code to express a
+conditional statement which checks if a given object is an instance of
+another, and in the body of the condition a cast is performed, since
+java 16, that cast is no longer needed, the compiler will correctly
+interpret the <code>instanceof</code> check in the enclosing block and
+auto cast the object to the type being checked against</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Object</span> obj <span class="op">=</span> <span class="st">&quot;Hello, World!&quot;</span><span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>obj <span class="kw">instanceof</span> <span class="bu">String</span> s<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// a cast for obj to String is not required to use</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;String length: &quot;</span> <span class="op">+</span> s<span class="op">.</span><span class="fu">length</span><span class="op">());</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="records">Records</h3>
+<p>The record is a way to improve the verbose creation of simple
+<code>immutable</code> data transfer objects, which are very common in
+the java language, these types usually provide transparent/pass-through
+setter and <code>getter</code> methods, and constructors, along with
+generic equals and <code>hashCode</code> and <code>toString</code>, that
+is why the record keyword allows one to create very simple
+<code>DTOs</code>.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">record</span> <span class="fu">Person</span><span class="op">(</span><span class="bu">String</span> name<span class="op">,</span> <span class="dt">int</span> age<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>Person person <span class="op">=</span> <span class="kw">new</span> <span class="fu">Person</span><span class="op">(</span><span class="st">&quot;Alice&quot;</span><span class="op">,</span> <span class="dv">25</span><span class="op">);</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>person<span class="op">);</span> <span class="co">// Person[name=Alice, age=25]</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>person<span class="op">.</span><span class="fu">name</span><span class="op">);</span> <span class="co">// this member access is valid, prints the name</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>person<span class="op">.</span><span class="fu">name</span><span class="op">());</span> <span class="co">// this is also valid, prints the name as well</span></span></code></pre></div>
+<p>All fields or members in the Record are effectively final, meaning
+that they can not be modified, once declared, or assigned in the
+constructor, each member generates a method in the form
+<code>member()</code> there is not <code>get</code> prefix for the
+methods, the member <code>accessor</code> can also be used instead of
+the <code>getter method</code>. Records provide an implicit canonical
+constructor (a constructor that initializes all fields in the header in
+order). But it is possible for one to manually fill up the constructor,
+it is also important to note that the Record can have only one
+constructor</p>
+<p>Additional methods may be added to the record, those however must
+not, they can not modify the state of the record. It is also possible to
+define a custom constructor, which must however delegate to the default
+constructor</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">record</span> <span class="fu">Circle</span><span class="op">(</span><span class="dt">double</span> radius<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">area</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">PI</span> <span class="op">*</span> radius <span class="op">*</span> radius<span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>It is important to note that the constructor can be re-defined, but
+no members can be assigned manually, these will be delegated to the
+default constructor generated by the run-time, the custom constructor
+can possibly only do validation on the input arguments or parameters.
+Attempting to assign to the members of the record will produce a
+<code>compiler error</code></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">record</span> <span class="fu">Person</span><span class="op">(</span><span class="bu">String</span> name<span class="op">,</span> <span class="dt">int</span> age<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// This is not valid syntax, members can not be assigned externally, only the implicit constructor</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> Person <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">name</span> <span class="op">=</span> name<span class="op">;</span> <span class="co">// this will produce a compiler error</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">age</span> <span class="op">=</span> age <span class="op">*</span> <span class="dv">2</span><span class="op">;</span> <span class="co">// this will produce a compiler error</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// This however is allowed, the members assignment will be delegated to the default constructor</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> Person <span class="op">{</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>age <span class="op">&gt;</span> <span class="dv">18</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">IllegalStateException</span><span class="op">(</span><span class="st">&quot;Age must not be below 18&quot;</span><span class="op">)</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>A final example which demonstrates an extended constructor and custom
+methods for a record can be seen below.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">record</span> <span class="fu">Product</span><span class="op">(</span><span class="bu">String</span> name<span class="op">,</span> <span class="dt">double</span> price<span class="op">,</span> <span class="dt">int</span> quantity<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Custom constructor with validation, members assigned automatically from the default constructor provided by the run-time</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> Product <span class="op">{</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>price <span class="op">&lt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">IllegalArgumentException</span><span class="op">(</span><span class="st">&quot;Price cannot be negative&quot;</span><span class="op">);</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>quantity <span class="op">&lt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">IllegalArgumentException</span><span class="op">(</span><span class="st">&quot;Quantity cannot be negative&quot;</span><span class="op">);</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Additional method for computing total cost, can not and does not modify, the state of the record instance</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">totalCost</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> price <span class="op">*</span> quantity<span class="op">;</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>Product apple <span class="op">=</span> <span class="kw">new</span> <span class="fu">Product</span><span class="op">(</span><span class="st">&quot;Apple&quot;</span><span class="op">,</span> <span class="fl">0.50</span><span class="op">,</span> <span class="dv">10</span><span class="op">);</span> <span class="co">// Create a product record, with given parameters</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>apple<span class="op">);</span>                      <span class="co">// Product[name=Apple, price=0.5, quantity=10]</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>apple<span class="op">.</span><span class="fu">totalCost</span><span class="op">());</span>          <span class="co">// Output: 5.0</span></span></code></pre></div>
+<h3 id="sealed">Sealed</h3>
+<p>Sealed classes in java are those classes which specialize which
+sub-classes can extend or sub-class from it, the new keyword
+<code>permits</code> is used to implement this behavior</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> <span class="kw">class</span> <span class="bu">Shape</span> <span class="kw">permits</span> Circle<span class="op">,</span> Square <span class="op">{}</span> <span class="co">// Specify which classes can extend Shape</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">final</span> <span class="kw">class</span> Circle <span class="kw">extends</span> <span class="bu">Shape</span> <span class="op">{}</span> <span class="co">// The Circle is allowed to extend from Shape</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">final</span> <span class="kw">class</span> Square <span class="kw">extends</span> <span class="bu">Shape</span> <span class="op">{}</span> <span class="co">// The Square is allowed to extend from Shape</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">final</span> <span class="kw">class</span> Sphere <span class="kw">extends</span> <span class="bu">Shape</span> <span class="op">{}</span> <span class="co">// This will produce a compile time error</span></span></code></pre></div>
+<p>The main purpose of sealed classes is to enforce a well-defined
+hierarchy. By requiring that all permitted <code>subclasses</code> are
+known to the <code>superclass</code>, the class hierarchy becomes fully
+defined and cannot be extended unpredictably.</p>
+<h3 id="floating">Floating</h3>
+<p>New hexadecimal support for floating numbers was added, allowing one
+two specify a floating hex number as a literal like so, shown below</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">double</span> hexValue <span class="op">=</span> <span class="fl">0x1.0p-3</span><span class="op">;</span> <span class="co">// Equivalent to 1 / 8 = 0.125</span></span></code></pre></div>
+<h3 id="simd">SIMD</h3>
+<p>New <code>vectorization</code> API provides access to intrinsic and
+<code>SIMD</code> vector instructions for supported architectures. The
+new elements in the standard java libraries allow one to access system
+<code>intrinsics</code> directly from the language instead of having to
+do some sort of <code>RMI</code> or <code>FFI</code> access to
+underlying C libraries.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// allocate some input and output structures to store the input and the result of the operations to be executed.</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span><span class="op">[]</span> arrayA <span class="op">=</span> <span class="op">{</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">,</span> <span class="dv">6</span><span class="op">,</span> <span class="dv">7</span><span class="op">,</span> <span class="dv">8</span><span class="op">};</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span><span class="op">[]</span> arrayB <span class="op">=</span> <span class="op">{</span><span class="dv">8</span><span class="op">,</span> <span class="dv">7</span><span class="op">,</span> <span class="dv">6</span><span class="op">,</span> <span class="dv">5</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">1</span><span class="op">};</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span><span class="op">[]</span> result <span class="op">=</span> <span class="kw">new</span> <span class="dt">int</span><span class="op">[</span>arrayA<span class="op">.</span><span class="fu">length</span><span class="op">];</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Define the species (shape) for a 256-bit IntVector</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>VectorSpecies<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> SPECIES <span class="op">=</span> IntVector<span class="op">.</span><span class="fu">SPECIES_256</span><span class="op">;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co">// Process in chunks of 256 bits (8 lanes for 32-bit integers)</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co">// The loop below will effectively loop over 8 elements at a time, in this example just a single loop iteration will be</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">// executed, the offset per iteration is +8, The data from the input arrayA and arrayB will be loaded into an int vector</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">// which are then going to be added together into the result vector, and the result copied back to the result array.</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">// This is a common pattern which is usually performed and used when dealing with SIMD intrinsics</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(;</span> i <span class="op">&lt;</span> SPECIES<span class="op">.</span><span class="fu">loopBound</span><span class="op">(</span>arrayA<span class="op">.</span><span class="fu">length</span><span class="op">);</span> i <span class="op">+=</span> SPECIES<span class="op">.</span><span class="fu">length</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Load vectors from the arrays, from java land</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    IntVector va <span class="op">=</span> IntVector<span class="op">.</span><span class="fu">fromArray</span><span class="op">(</span>SPECIES<span class="op">,</span> arrayA<span class="op">,</span> i<span class="op">);</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    IntVector vb <span class="op">=</span> IntVector<span class="op">.</span><span class="fu">fromArray</span><span class="op">(</span>SPECIES<span class="op">,</span> arrayB<span class="op">,</span> i<span class="op">);</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Perform a vectorized addition</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    IntVector vc <span class="op">=</span> va<span class="op">.</span><span class="fu">add</span><span class="op">(</span>vb<span class="op">);</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Copy the result back into java land</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    vc<span class="op">.</span><span class="fu">intoArray</span><span class="op">(</span>result<span class="op">,</span> i<span class="op">);</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="co">// Print the result stored in the array</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> value <span class="op">:</span> result<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">print</span><span class="op">(</span>value <span class="op">+</span> <span class="st">&quot; &quot;</span><span class="op">);</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="memory">Memory</h3>
+<p>Allows for access / linking against foreign native <code>API</code>
+for example from the C run-time. Allows for manipulating the native
+memory layout</p>
+<p><code>MemoryLayout</code> can be used to describe the contents of a
+memory segment in a language neutral fashion. There are two leaves in
+the layout hierarchy a <code>value layout</code> which are used to
+represent value of a given size and kind, and
+<code>padding layout</code> which are used as the name suggests to
+represent a portion of a memory segment whose contents should be ignored
+and which are primarily present or alignment reasons.</p>
+<p>In the example below it is shown how one can create a simple data
+structure layout, which is the equivalent of the same in C</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">uint8_t</span>  kind<span class="op">;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">uint32_t</span> padding1<span class="op">;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">uint32_t</span> padding2<span class="op">;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// The memory layout below constructs a native struct which contains as the first member, with a size in bits - 8, and</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">// the bytes order which is either going to be BIG_ENDIAN or LITTLE_ENDIAN. Then additional padding is defined in this</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">// case 2x32 bits padding entries</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>MemoryLayout taggedValuesWithHole <span class="op">=</span> MemoryLayout<span class="op">.</span><span class="fu">sequenceLayout</span><span class="op">(</span><span class="dv">5</span><span class="op">,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    MemoryLayout<span class="op">.</span><span class="fu">structLayout</span><span class="op">(</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        MemoryLayout<span class="op">.</span><span class="fu">valueLayout</span><span class="op">(</span><span class="dv">8</span><span class="op">,</span> <span class="bu">ByteOrder</span><span class="op">.</span><span class="fu">nativeOrder</span><span class="op">()).</span><span class="fu">withName</span><span class="op">(</span><span class="st">&quot;kind&quot;</span><span class="op">),</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        MemoryLayout<span class="op">.</span><span class="fu">paddingLayout</span><span class="op">(</span><span class="dv">32</span><span class="op">),</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        MemoryLayout<span class="op">.</span><span class="fu">paddingLayout</span><span class="op">(</span><span class="dv">32</span><span class="op">)</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="op">));</span></span></code></pre></div>
+<p>There is a simple example below, which demonstrates how a simple
+<code>struct</code> can be created with the usage of the
+<code>MemoryLayout</code> and the <code>ValueLayout</code> - which is a
+helper type which provides common value layouts such as integer, float,
+double, and so on. The <code>struct</code> below contains two integer
+fields - x, y which represent some sort of 2 dimensional point in space.
+Then the memory layout is allocated in a try-with-resources block since,
+the actual memory that is produced is not within the scope or control of
+the JVM, which means that the caller has the responsibility to free up
+this memory, this is done by putting it in a try with resource block,
+which will make sure to free up the memory after use, the structure is
+then initialized with values, and the values are read back</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Define a struct layout for two 32-bit integers</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>MemoryLayout pointLayout <span class="op">=</span> MemoryLayout<span class="op">.</span><span class="fu">structLayout</span><span class="op">(</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    ValueLayout<span class="op">.</span><span class="fu">JAVA_INT</span><span class="op">.</span><span class="fu">withName</span><span class="op">(</span><span class="st">&quot;x&quot;</span><span class="op">),</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    ValueLayout<span class="op">.</span><span class="fu">JAVA_INT</span><span class="op">.</span><span class="fu">withName</span><span class="op">(</span><span class="st">&quot;y&quot;</span><span class="op">)</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span>MemorySegment segment <span class="op">=</span> MemorySegment<span class="op">.</span><span class="fu">allocateNative</span><span class="op">(</span>pointLayout<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Write values to the fields</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    MemoryAccess<span class="op">.</span><span class="fu">setIntAtOffset</span><span class="op">(</span>segment<span class="op">,</span> pointLayout<span class="op">.</span><span class="fu">byteOffset</span><span class="op">(</span>PathElement<span class="op">.</span><span class="fu">groupElement</span><span class="op">(</span><span class="st">&quot;x&quot;</span><span class="op">)),</span> <span class="dv">10</span><span class="op">);</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    MemoryAccess<span class="op">.</span><span class="fu">setIntAtOffset</span><span class="op">(</span>segment<span class="op">,</span> pointLayout<span class="op">.</span><span class="fu">byteOffset</span><span class="op">(</span>PathElement<span class="op">.</span><span class="fu">groupElement</span><span class="op">(</span><span class="st">&quot;y&quot;</span><span class="op">)),</span> <span class="dv">20</span><span class="op">);</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Execute work with the contents of the point structure, writing or updating them</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Read values from the fields</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> x <span class="op">=</span> MemoryAccess<span class="op">.</span><span class="fu">getIntAtOffset</span><span class="op">(</span>segment<span class="op">,</span> pointLayout<span class="op">.</span><span class="fu">byteOffset</span><span class="op">(</span>PathElement<span class="op">.</span><span class="fu">groupElement</span><span class="op">(</span><span class="st">&quot;x&quot;</span><span class="op">)));</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> y <span class="op">=</span> MemoryAccess<span class="op">.</span><span class="fu">getIntAtOffset</span><span class="op">(</span>segment<span class="op">,</span> pointLayout<span class="op">.</span><span class="fu">byteOffset</span><span class="op">(</span>PathElement<span class="op">.</span><span class="fu">groupElement</span><span class="op">(</span><span class="st">&quot;y&quot;</span><span class="op">)));</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Point coordinates: (&quot;</span> <span class="op">+</span> x <span class="op">+</span> <span class="st">&quot;, &quot;</span> <span class="op">+</span> y <span class="op">+</span> <span class="st">&quot;)&quot;</span><span class="op">);</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="library">Library</h2>
+<p>Several small improvements to the base java package library API were
+done, demonstrated below, mostly for convenience the String and other
+commonly used classes were extended with new static utility methods to
+facilitate better interop with the language, avoiding reliance on
+external 3rd party libraries and utility packages.</p>
+<h3 id="string">String</h3>
+<p>There are several new methods added to the String type, which improve
+the readability and usability of String instances, without the need of
+third party libraries and utilities. New methods such as String::lines,
+String::repeat. The new lines method returns a
+<code>Stream&lt;String&gt;</code>. The <code>repeat</code> method on the
+other hand repeats the current contents of the String instance, N
+number/count time</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> text <span class="op">=</span> <span class="st">&quot;Hello</span><span class="sc">\n</span><span class="st">World&quot;</span><span class="op">;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>text<span class="op">.</span><span class="fu">lines</span><span class="op">().</span><span class="fu">forEach</span><span class="op">(</span><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">::</span>println<span class="op">);</span> <span class="co">// Prints each line separately</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> text <span class="op">=</span> <span class="st">&quot;abc&quot;</span><span class="op">;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">::</span><span class="fu">println</span><span class="op">(</span>text<span class="op">.</span><span class="fu">repeat</span><span class="op">(</span><span class="dv">3</span><span class="op">));</span> <span class="co">// Prints abc 3 times, - &quot;abcabcabc&quot;</span></span></code></pre></div>
+<h3 id="files">Files</h3>
+<p>A new method to the files class, which returns the first byte
+position where the two files have a mismatch, effectively the new method
+compares two files, and finds where the two files have a mismatch, the
+signature of the method is like follows, shown below</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* Finds and returns the position of the first mismatched byte in the content</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">* of two files, or {@code -1L} if there is no mismatch. The position will be</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">* in the inclusive range of {@code 0L} up to the size (in bytes) of the</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">* smaller file. */</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">long</span> <span class="fu">mismatch</span><span class="op">(</span>Path path<span class="op">,</span> Path path2<span class="op">)</span> <span class="kw">throws</span> <span class="bu">IOException</span></span></code></pre></div>
+<h2 id="platform">Platform</h2>
+<h3 id="packaging">Packaging</h3>
+<p>A new <code>jpackage</code> CLI tool to simplify the packaging of
+native applications for different platforms, it outputs an executable
+installer. It can produce <code>exe</code> <code>dmg</code> or
+<code>deb/rpm</code> packages for the different operating systems. The
+installer can also be specified with an icon, signing authority
+(important for macos) and other properties.</p>
+<h3 id="messaging">Messaging</h3>
+<p>Several improvements to the native run-time exceptions like
+<code>NullPointerException</code>, to provide more fine grained details
+and context information for the stack traces. The new messages include
+more descriptive error messages for when a <code>null</code> value is
+attempted to be read or accessed.</p>
+<h3 id="encapsulation">Encapsulation</h3>
+<p>Access to internal libraries and <code>APIs</code> is greatly
+restricted, to improve security and stability. Forces libraries and
+applications to rely on public, stable <code>API</code> improving
+compatibility.</p>
+</body>
+</html>

@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>8-java-io-fundamentals</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#io-streams" id="toc-io-streams">IO Streams</a>
+<ul>
+<li><a href="#console" id="toc-console">Console</a>
+<ul>
+<li><a href="#creating" id="toc-creating">Creating</a></li>
+<li><a href="#output" id="toc-output">Output</a></li>
+<li><a href="#input" id="toc-input">Input</a></li>
+</ul></li>
+<li><a href="#streams" id="toc-streams">Streams</a>
+<ul>
+<li><a href="#hierarchy" id="toc-hierarchy">Hierarchy</a></li>
+</ul></li>
+<li><a href="#character-streams" id="toc-character-streams">Character
+streams</a></li>
+<li><a href="#byte-streams" id="toc-byte-streams">Byte streams</a>
+<ul>
+<li><a href="#data-streams" id="toc-data-streams">Data streams</a></li>
+<li><a href="#object-streams" id="toc-object-streams">Object
+streams</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#summary" id="toc-summary">Summary</a></li>
+</ul>
+</nav>
+<h1 id="io-streams">IO Streams</h1>
+<p>The input and output in Java is vast, and it does not only include
+console or file input output operations, alone. The public static fields
+in out and err in <code>java.lang.System</code> class respectively
+represent the standard input output and error streams. System.in is of
+type <code>InputStream</code> and System.out and System.err are of type
+<code>PrintStream</code>.</p>
+<p>The example below shows how to read in from the standard
+<code>in</code> descriptor stream (stdin) which is by default usually
+provided by the <code>tty</code>, and is the keyboard, or other input
+devices</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">print</span><span class="op">(</span><span class="st">&quot;Type a character: &quot;</span><span class="op">);</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> val <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the return type of read is int, but it returns a byte value!</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    val <span class="op">=</span> <span class="bu">System</span><span class="op">.</span><span class="fu">in</span><span class="op">.</span><span class="fu">read</span><span class="op">();</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">IOException</span> ioe<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Cannot read input &quot;</span> <span class="op">+</span> ioe<span class="op">);</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">exit</span><span class="op">(-</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;You typed: &quot;</span> <span class="op">+</span> val<span class="op">);</span></span></code></pre></div>
+<p>The most basic example, which reads one byte from the input stream
+(stdin), the read method reads one byte, in the range of 0 to 255. Hence
+for example for input character of 5, the print out is actually 53,
+since that is the ascii code of the digit 5. The reason the read method
+does not return byte instead, is because the method also returns -1 or
+can return value outside the 255 range to signal some sort of abnormal
+result occurred from reading</p>
+<p>The standard INPUT and OUTPUT streams are initialized when the JVM
+starts, Sometimes it is useful to redirect the standard streams by
+reassigning them. The method System.setIn, takes an
+<code>InputStream</code> object and the methods
+<code>System.setOut</code> and <code>System.setError</code> take in
+<code>PrintStream</code>, those are static methods, and allow one to
+override the default stdin and stdout stream descriptors to point to
+something else, for example a file.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span><span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">PrintStream</span> ps <span class="op">=</span> <span class="kw">new</span> <span class="bu">PrintStream</span><span class="op">(</span><span class="st">&quot;log.txt&quot;</span><span class="op">);</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">setOut</span><span class="op">(</span>ps<span class="op">);</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Test output to System.out&quot;</span><span class="op">);</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">Exception</span> ee<span class="op">){</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    ee<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The snippet above shows a demonstration how all System.out calls can
+be redirected to a file instead of the standard output, which in a tty
+environment is usually the display. That is useful for logging purposes,
+among other things</p>
+<h2 id="console">Console</h2>
+<p>That class helps reading the data from the standard in, instead of
+relying on reading byte sized chunks from System.in, the console class
+takes care of providing a more user friendly interface to do more
+advanced reading from <code>stdin</code> without the general overhead.
+The console class also provides printing capabilities, meaning it also
+has reference to <code>stdout</code></p>
+<h3 id="creating">Creating</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Console</span> console <span class="op">=</span> <span class="bu">System</span><span class="op">.</span><span class="fu">console</span><span class="op">();</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span><span class="op">(</span>console <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Cannot retrieve console object&quot;</span><span class="op">);</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">exit</span><span class="op">(-</span><span class="dv">1</span><span class="op">);</span> <span class="co">// terminate the application</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">// read a line and print it through printf</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>console<span class="op">.</span><span class="fu">printf</span><span class="op">(</span>console<span class="op">.</span><span class="fu">readLine</span><span class="op">());</span></span></code></pre></div>
+<p>The console object provided by the call to System.console(). The
+console object that is produced is not a direct wrapper around the
+objects from System.in or System.out, it directly interacts with the
+underlying operating system, to obtain the file descriptors to
+<code>stdin</code> and <code>stdout</code>, and also provides as
+mentioned a better API to help usability.</p>
+<p><code>Note if this program is started from the command line, it will work just fine, however if it is started from an IDE, or through an internal process or indirectly, it will fail to obtain console object. That is because the JVM itself, is started indirectly in the IDE tool, instead of in the console or terminal</code></p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 87%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Reader reader()</td>
+<td>Returns the Reader object associated with this Console object; can
+perform read operations through this returned reference.</td>
+</tr>
+<tr class="even">
+<td>PrintWriter writer()</td>
+<td>Returns the PrintWriter object associated with this Console object;
+can perform write operations through this returned reference.</td>
+</tr>
+<tr class="odd">
+<td>String readLine()</td>
+<td>Reads a line of text String (and this returned string object does
+not include any line termination characters); returns null if it fails
+(e.g., the user pressed Ctrl+Z or Ctrl+D in the console)</td>
+</tr>
+<tr class="even">
+<td>String readLine(String fmt, Object… args)</td>
+<td>Same as the readLine() method, but it first prints the string fmt
+(</td>
+</tr>
+<tr class="odd">
+<td>char[] readPassword()</td>
+<td>Reads a password text and returns as a char array; echoing is
+disabled with this method, so when the user types the password, nothing
+will be displayed in the console.</td>
+</tr>
+<tr class="even">
+<td>char[] readPassword(String fmt, Object… args)</td>
+<td>Same as the readPassword() method, but it first prints the string
+given as the format string argument before reading the password
+string.</td>
+</tr>
+<tr class="odd">
+<td>Console format(String fmt, Object… args)</td>
+<td>Writes the formatted string (created based on values of fmt string
+and the args passed) to the console.</td>
+</tr>
+<tr class="even">
+<td>Console printf(String fmt, Object… args)</td>
+<td>Writes the formatted string (created based on values of fmt string
+and the args passed) to the console. This printf method is the same as
+the format method: This is a “convenience method”-the method printf and
+the format specifiers are familiar to most C/C++ programmers, so this
+method is provided in addition to the format method.</td>
+</tr>
+<tr class="odd">
+<td>void flush()</td>
+<td>Flushes any of the data still remaining to be printed in the console
+object’s buffer.</td>
+</tr>
+</tbody>
+</table>
+<p>The Console class also supports formatting input and output. These
+methods are mostly using string-formatting flags to format strings. It
+is quite similar to the printf() function provided in the library of the
+C programming language. The first parameter of the <code>printf</code>
+method is a format string. A format string may contain string literals
+and format specifiers. The actual arguments are passed after the format
+string. This method can throw <code>IllegalFormatException</code> of the
+passed format is not correct.</p>
+<h3 id="output">Output</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>%[argument_index][flags][width][.precision]datatype_specifier</span></code></pre></div>
+<ul>
+<li>Each format specifier starts with % sign followed by argument index.
+flags width and precision information, and ends with a data type
+specifier</li>
+<li>Argument index refers to the position of the argument in the
+argument list it is an integer followed by <span
+class="math inline">, <em>a</em><em>s</em><em>i</em><em>n</em>1</span>
+and 2$ for first and second argument respectively</li>
+<li>Flags are single character symbols that specify the characteristics
+such as alignment and filling characters, for padding. For instance flag
+“-” specified left alignment and “0” pads the number types with leading
+zeroes</li>
+<li>The width specifier indicates the minimum number of characters that
+will span in the final formatted string, then it is padded with spaces
+by default, in case the data is bigger than the specified width the full
+data appears in the output without trimming.</li>
+<li>The precision fields specifies the number precision digits in the
+output, relevant only for floating point number arguments</li>
+<li>Finally is the data type indicates the type of expected input data.
+The field is a placeholder for the specified input data.</li>
+</ul>
+<p>Let’s analyze the following format string -
+<code>"%-15s \t %5d \t\t %d \t\t %.1f \n"</code></p>
+<ul>
+<li><code>%-15s</code> - a string padded to at least 15 chars</li>
+<li><code>%5d</code> - decimal or integer with at most 5 digits (padded
+with spaces if less)</li>
+<li><code>%.1f</code> - floating point number that can be displayed with
+at most 1 digit after the floating point</li>
+<li><code>\t</code> - all formatted arguments are padded or separated
+with a tabstop, to make some equal space between them</li>
+</ul>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 94%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>%b</td>
+<td>Boolean</td>
+</tr>
+<tr class="even">
+<td>%c</td>
+<td>Character</td>
+</tr>
+<tr class="odd">
+<td>%d</td>
+<td>Decimal integer (signed)</td>
+</tr>
+<tr class="even">
+<td>%e</td>
+<td>Floating point number in scientific format</td>
+</tr>
+<tr class="odd">
+<td>%f</td>
+<td>Floating point number in decimal format</td>
+</tr>
+<tr class="even">
+<td>%g</td>
+<td>Floating point number in decimal or scientific format depending on
+the value passed as argument)</td>
+</tr>
+<tr class="odd">
+<td>%h</td>
+<td>Hashcode of the passed argument</td>
+</tr>
+<tr class="even">
+<td>%n</td>
+<td>Line separator (new line character)</td>
+</tr>
+<tr class="odd">
+<td>%o</td>
+<td>Integer formatted as an octal value</td>
+</tr>
+<tr class="even">
+<td>%s</td>
+<td>String</td>
+</tr>
+<tr class="odd">
+<td>%t</td>
+<td>Date/time</td>
+</tr>
+<tr class="even">
+<td>%x</td>
+<td>Integer formatted as an hexadecimal value</td>
+</tr>
+</tbody>
+</table>
+<p><code>All of the format symbols are also supported by the format method in the Console class as well, the format strings and symbols in general are applicable in general in a wide variety of places in the java standard library</code></p>
+<ul>
+<li><p>If you do not specify any string formatting specifier, the
+printf() method will not print anything from the given
+arguments!</p></li>
+<li><p>Flags such as “-” and “0” make sense only when you specify width
+with the format specifier string.</p></li>
+<li><p>You can also print the % character in a format string; however,
+you need to use an escape sequence for it. In format specifier strings,
+% is an escape character, which means you need to use %% to print a
+single %.</p></li>
+<li><p>You can use the argument index feature (an integer value followed
+by $ symbol) to explicitly refer to the arguments by their index
+position. For example, the following prints “world hello” because the
+order of arguments are reversed:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>console<span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;</span><span class="sc">%2$s</span><span class="st"> </span><span class="sc">%1$s</span><span class="st"> </span><span class="sc">%n</span><span class="st">&quot;</span><span class="op">,</span> <span class="st">&quot;hello&quot;</span><span class="op">,</span> <span class="st">&quot;world&quot;</span><span class="op">);</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">// $2 refers to the second argument (&quot;world&quot;) and</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">// $1 refers to the first argument (&quot;hello&quot;)</span></span></code></pre></div></li>
+<li><p>The &lt; symbol in a format string supports relative index with
+which you can reuse the argument matched by the previous format
+specifier. For example, assuming console is a valid Console object, the
+following code segment prints “10 a 12”:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>console<span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> %&lt;x %&lt;o&quot;</span><span class="op">,</span> <span class="dv">10</span><span class="op">);</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">// 10 - the decimal value, a - the hexadecimal value of 10, and</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">// 12 - the octal value of 10</span></span></code></pre></div></li>
+<li><p>If you do not provide the intended input data type as expected by
+the format string, then you can get an IllegalFormatConversionException.
+For instance, if you provide a string instead of an expected integer in
+your printRow() method implementation, you will get following
+exception:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Exception in thread &quot;main&quot; java.util.IllegalFormatConversionException:</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>d != java.lang.String</span></code></pre></div></li>
+</ul>
+<h3 id="input">Input</h3>
+<p>It is also possible to use the console class to get input, there are
+some existing methods such as readLine (and other read based ones) In
+this methods the first arguments is the format specified string, and the
+following arguments are the values that will be passed to the format
+specifier string. These two methods return the character data read from
+the console.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Console</span> console <span class="op">=</span> <span class="bu">System</span><span class="op">.</span><span class="fu">console</span><span class="op">();</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span><span class="op">(</span>console <span class="op">!=</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> userName <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span><span class="op">[]</span> password <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    userName <span class="op">=</span> console<span class="op">.</span><span class="fu">readLine</span><span class="op">(</span><span class="st">&quot;Enter your username: &quot;</span><span class="op">);</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    password <span class="op">=</span> console<span class="op">.</span><span class="fu">readPassword</span><span class="op">(</span><span class="st">&quot;Enter password: &quot;</span><span class="op">);</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// password is a char[]: convert it to a String first, then compare</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="op">(</span>userName<span class="op">.</span><span class="fu">equals</span><span class="op">(</span><span class="st">&quot;scrat&quot;</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="kw">new</span> <span class="bu">String</span><span class="op">(</span>password<span class="op">).</span><span class="fu">equals</span><span class="op">(</span><span class="st">&quot;nuts&quot;</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        console<span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;login successful!&quot;</span><span class="op">);</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        console<span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;wrong user name or password&quot;</span><span class="op">);</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// &quot;empty&quot; out the password since its use is over</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Arrays</span><span class="op">.</span><span class="fu">fill</span><span class="op">(</span>password<span class="op">,</span> <span class="ch">&#39; &#39;</span><span class="op">);</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Note that at the end the password is emptied out, this is a common
+practice, to empty out the read password string once its use is over, it
+is using the arrays fill method for this purpose. This is secure
+programming practice to avoid malicious reads of program data to
+discover passwords strings. That is why the <code>readPassword</code>
+returns a <code>char[]</code> instead of a <code>String</code>, the
+String object will live in memory, and is also immutable, meaning there
+is no easy way to forcefully destroy its contents, once after the
+password is read, used and no longer needed</p>
+<h2 id="streams">Streams</h2>
+<p>The streams API discussed in earlier chapters are not the same as the
+IO streams discussed here, they have very different purpose and
+application. Streams are ordered sequences of data. Java deals with
+input and output in terms of streams. When one reads a sequence of bytes
+from a binary file, the reading is done from an input stream (since the
+flux of information is from the file towards the run-time) when writing
+to file, one would use output stream (since the flux of information is
+from the run-time to the file)</p>
+<p>Character streams</p>
+<ul>
+<li>meant for reading or writing to character or text based IO such as
+text files text documents, XML, HTML files.</li>
+<li>the data is usually utf-16 encoded and stored.</li>
+<li>iput and output characters streams are called readers and writers
+respectively</li>
+<li>the abstract classes of Reader and Writer and their derived classes
+in the java package provide support for character streams.</li>
+</ul>
+<p>Byte streams</p>
+<ul>
+<li>meant for reading or writing to binary data io such as executable
+files, image files and files in low level file formats such as .zip
+.class .obj and .exe.</li>
+<li>data dealt with is bytes, units of 8-bit data</li>
+<li>input and output byte streams re simply called input &amp; output
+streams, respectively</li>
+<li>the abstract classes of InputStream and OutputStream and their
+derived classes are what provide support for byte streams</li>
+</ul>
+<p><code>Mixing different streams for different purposes is not recommended, for example if one tries to read a .bmp image with a Reader (character stream) since the character streams read and parse the read bytes as UTF-16, the final result will not be as expected, in this case one should use regular InputStream to read the contents of the image</code></p>
+<h3 id="hierarchy">Hierarchy</h3>
+<p>Character streams</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>Writer</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>+-- BufferedWriter</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>+-- CharArrayWriter</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>+-- FilterWriter</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>|   +-- OutputStreamWriter</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>|       +-- FileWriter</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>|   +-- PrintWriter</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>+-- PipedWriter</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>+-- StringWriter</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>Reader</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>+-- BufferedReader</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>+-- CharArrayReader</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>+-- FilterReader</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>|   +-- PushbackReader</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>+-- InputStreamReader</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>|   +-- FileReader</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>+-- PipedReader</span></code></pre></div>
+<p>Byte streams</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>InputStream</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>+-- AudioInputStream</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>+-- ByteArrayInputStream</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>+-- FileInputStream</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>+-- FilterInputStream</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>|   +-- BufferedInputStream</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>|   +-- DataInputStream</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>|   +-- PushbackInputStream</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>+-- ObjectInputStream</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>+-- PipedInputStream</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>+-- SequenceInputStream</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>+-- StringBufferInputStream (Deprecated)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>OutputStream</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>+-- ByteArrayOutputStream</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>+-- FileOutputStream</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>+-- FilterOutputStream</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>|   +-- BufferedOutputStream</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>|   +-- DataOutputStream</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>|   +-- PrintStream</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>+-- ObjectOutputStream</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>+-- PipedOutputStream</span></code></pre></div>
+<h2 id="character-streams">Character streams</h2>
+<p>The example below shows the most basic example of how one would try
+to read a file on disk, however it is also very inefficient since it is
+calling read, in a while loop, and read will read char by char, from the
+file, and then print out. However this approach is no where near robust
+or even correct, depending on the file’s encoding, the characters that
+the calls to System.out.print might show complete garbage.</p>
+<p>The reason is simple, when dealing with <code>UTF-8</code> or
+<code>UTF-16</code> encoded files, one ‘symbol’ or ‘character’ in the
+file can be encoded in different widths, between 1 and 4 bytes (in case
+of UTF-8) or between 2 and 4 bytes (in case of UTF-16). When reading
+with read() and immediately printing, the call to read might read only
+half of the surrogate pair in the UTF encoding, where as both surrogates
+have to be printed and stored together. Therefore this is not robust way
+to work with files, only if the file is ASCII encoded, meaning it only
+contains 1 byte wide characters is that approach actually going to
+work</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">FileReader</span> inputFile <span class="op">=</span> <span class="kw">new</span> <span class="bu">FileReader</span><span class="op">(</span><span class="st">&quot;file.txt&quot;</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> ch <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// while there are characters to fetch, read, and print the</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// characters when EOF is reached, read() will return -1,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// terminating the loop</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span><span class="op">(</span> <span class="op">(</span>ch <span class="op">=</span> inputFile<span class="op">.</span><span class="fu">read</span><span class="op">())</span> <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ch is of type int - convert it back to char</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// before printing</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">print</span><span class="op">(</span> <span class="op">(</span><span class="dt">char</span><span class="op">)</span>ch <span class="op">);</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">FileNotFoundException</span> fnfe<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the passed file is not found ...</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;Cannot open the given file </span><span class="sc">%s</span><span class="st"> &quot;</span><span class="op">,</span> file<span class="op">);</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="cf">catch</span><span class="op">(</span><span class="bu">IOException</span> ioe<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// some IO error occurred when reading the file ...</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;Error when processing file </span><span class="sc">%s</span><span class="st">... skipping it&quot;</span><span class="op">,</span> file<span class="op">);</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>As mentioned above this example is very crude, and it is not
+recommended to read files like that, ever. It is slow and prone to
+errors, due to the fact that the encoding of the file is not-known. This
+example can be modified to use <code>BufferedReader</code> instead,
+which is a type of reader which buffers the calls to read method, and it
+can read line by line or also stores the actual contents that are being
+read into a String</p>
+<h2 id="byte-streams">Byte streams</h2>
+<p>Byte streams are used for processing files that do not contain human
+readable text. For example a Java source file has human readable
+content, but a .class file does not A .class file is meant for
+processing by the JVM, hence you must use byte streams to process the
+.class file. Each file format usually has some sort of number written
+out as the first byte, this is done to allow programs to easily
+distinguish what a given file type is immediately instead of having to
+parse chunks of it. This is also true for some text files as well, in
+UTF files, there is something called BOM - byte order mark, which is
+used to indicate the endian-ness (byte-orderf0 of the file and to signal
+the encoding scheme of the file (UTF-8, 16, 32).</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// side note, take a look at the explicit casts of bytes below, which is because all numeric literals in java are by</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">// default ints/integer and down-casts are not implicit in java, every down-cast has to be manually specified</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="dt">byte</span> <span class="op">[]</span>magicNumber <span class="op">=</span> <span class="op">{(</span><span class="dt">byte</span><span class="op">)</span> <span class="bn">0xCA</span><span class="op">,</span> <span class="op">(</span><span class="dt">byte</span><span class="op">)</span><span class="bn">0xFE</span><span class="op">,</span> <span class="op">(</span><span class="dt">byte</span><span class="op">)</span><span class="bn">0xBA</span><span class="op">,</span> <span class="op">(</span><span class="dt">byte</span><span class="op">)</span><span class="bn">0xBE</span><span class="op">};</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">FileInputStream</span> fis <span class="op">=</span> <span class="kw">new</span> <span class="bu">FileInputStream</span><span class="op">(</span>fileName<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// magic number is of 4 bytes -</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// use a temporary buffer to read first four bytes</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">byte</span><span class="op">[]</span> u4buffer <span class="op">=</span> <span class="kw">new</span> <span class="dt">byte</span><span class="op">[</span><span class="dv">4</span><span class="op">];</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// read a buffer full (4 bytes here) of data from the file</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="op">(</span>fis<span class="op">.</span><span class="fu">read</span><span class="op">(</span>u4buffer<span class="op">)</span> <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span><span class="op">)</span> <span class="op">{</span> <span class="co">// if read was successful</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the overloaded method equals for two byte arrays</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// checks for equality of contents</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span><span class="bu">Arrays</span><span class="op">.</span><span class="fu">equals</span><span class="op">(</span>magicNumber<span class="op">,</span> u4buffer<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;The magic number for passed file </span><span class="sc">%s</span><span class="st"> matches</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>                that of a <span class="op">.</span><span class="fu">class</span> file<span class="st">&quot;, fileName);</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;The magic number for passed file </span><span class="sc">%s</span><span class="st"> does not</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>                match that of a <span class="op">.</span><span class="fu">class</span> file<span class="st">&quot;, fileName);</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">FileNotFoundException</span> fnfe<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;file does not exist with the given file name &quot;</span><span class="op">);</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">IOException</span> ioe<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;an I/O error occurred while processing the file&quot;</span><span class="op">);</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In the example above a read of the binary file is shown where the
+first 4 bytes are read and compared to the special magic number, in this
+case this is for .class files, which have the following 4 bytes as a
+magic number put at the very start of the file -
+<code>"0xCAFEBABE"</code></p>
+<p>To write data out to files one can simply use the
+<code>OutputStream</code> class, the process is pretty much the inverse
+of reading data from a binary file using the <code>InputStream</code>
+class</p>
+<h3 id="data-streams">Data streams</h3>
+<p>There are some special types of byte Streams, which provide ease of
+use for writing primitive types in java. These are the so called Data
+streams. These streams provide a general API to write out primitive
+types, such as Byte, Short, Int, Long etc. These are usually represented
+as multi-byte values in the java run-time, meaning that to write write
+them out into a file, and then read them special rules or assumptions
+have to be employed. That is why they are not written out in a human
+readable format, the actual bytes of the internal representation is
+dumped in the file. While it is possible for these values to be written
+out in plain text, it would be much harder to be read back and parsed,
+especially the float or double (floating point type numbers)</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">DataOutputStream</span> dos <span class="op">=</span> <span class="kw">new</span> <span class="bu">DataOutputStream</span><span class="op">(</span><span class="kw">new</span> <span class="bu">FileOutputStream</span><span class="op">(</span><span class="st">&quot;temp.data&quot;</span><span class="op">)))</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// write values 1 to 10 as byte, short, int, long, float and double</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// omitting boolean type because an int value cannot</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// be converted to boolean</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">10</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        dos<span class="op">.</span><span class="fu">writeByte</span><span class="op">(</span>i<span class="op">);</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        dos<span class="op">.</span><span class="fu">writeShort</span><span class="op">(</span>i<span class="op">);</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        dos<span class="op">.</span><span class="fu">writeInt</span><span class="op">(</span>i<span class="op">);</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        dos<span class="op">.</span><span class="fu">writeLong</span><span class="op">(</span>i<span class="op">);</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        dos<span class="op">.</span><span class="fu">writeFloat</span><span class="op">(</span>i<span class="op">);</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        dos<span class="op">.</span><span class="fu">writeDouble</span><span class="op">(</span>i<span class="op">);</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">DataInputStream</span> dis <span class="op">=</span> <span class="kw">new</span> <span class="bu">DataInputStream</span><span class="op">(</span><span class="kw">new</span> <span class="bu">FileInputStream</span><span class="op">(</span><span class="st">&quot;temp.data&quot;</span><span class="op">)))</span> <span class="op">{</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the order of values to read is byte, short, int, long, float and</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// double since we&#39;ve written from 0 to 10,</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the for loop has to run 10 times</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">10</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">// %d is for printing byte, short, int or long</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// %f, %g, or %e is for printing float or double</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// %n is for printing newline</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> </span><span class="sc">%d</span><span class="st"> </span><span class="sc">%d</span><span class="st"> </span><span class="sc">%d</span><span class="st"> </span><span class="sc">%g</span><span class="st"> </span><span class="sc">%g</span><span class="st"> </span><span class="sc">%n</span><span class="st">&quot;</span><span class="op">,</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>            dis<span class="op">.</span><span class="fu">readByte</span><span class="op">(),</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>            dis<span class="op">.</span><span class="fu">readShort</span><span class="op">(),</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>            dis<span class="op">.</span><span class="fu">readInt</span><span class="op">(),</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>            dis<span class="op">.</span><span class="fu">readLong</span><span class="op">(),</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>            dis<span class="op">.</span><span class="fu">readFloat</span><span class="op">(),</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>            dis<span class="op">.</span><span class="fu">readDouble</span><span class="op">());</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In the example above, which has the rest of the code abridged, for
+brevity, a file is populated with all the numbers from 1 to 10, and
+their primitive representation, so for each number from 1 to 10, the
+byte, short, int, long, float and double values of this number
+<code>i</code> is written out to the file, in that order. The next part
+of the code reads the same values back, note that the order of reading
+the values is the same, as the one used to write out the numbers, the
+number of items being read from the file is 10 too.</p>
+<p>Why does it matter ? Well the byte ordering is strict, each primitive
+value has a certain size, bytes are usually 1 byte long, shorts are 2,
+int is 4, long 8, and so on. Meaning that to read them back correctly
+the same order has to be retained, otherwise garbage values would be
+read back if the reading part of the code starts reading double or float
+first for example.</p>
+<h3 id="object-streams">Object streams</h3>
+<p>These types of streams are similar to data streams, however they are
+meant to write out entire java Objects into files, Java in general has
+quite useful serializtion rules which allows objects instances to be
+dumped to and read from a file, relatively easily.</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Map</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">,</span> <span class="bu">String</span><span class="op">&gt;</span> presidentsOfUS <span class="op">=</span> <span class="kw">new</span> <span class="bu">HashMap</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>presidentsOfUS<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">&quot;Barack Obama&quot;</span><span class="op">,</span> <span class="st">&quot;2009 to --, Democratic Party, 56th term&quot;</span><span class="op">);</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>presidentsOfUS<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">&quot;George W. Bush&quot;</span><span class="op">,</span> <span class="st">&quot;2001 to 2009, Republican Party, 54th and 55th terms&quot;</span><span class="op">);</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>presidentsOfUS<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">&quot;Bill Clinton&quot;</span><span class="op">,</span> <span class="st">&quot;1993 to 2001, Democratic Party, 52nd and 53rd terms&quot;</span><span class="op">);</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">ObjectOutputStream</span> oos <span class="op">=</span> <span class="kw">new</span> <span class="bu">ObjectOutputStream</span><span class="op">(</span><span class="kw">new</span> <span class="bu">FileOutputStream</span><span class="op">(</span><span class="st">&quot;object.data&quot;</span><span class="op">)))</span> <span class="op">{</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    oos<span class="op">.</span><span class="fu">writeObject</span><span class="op">(</span>presidentsOfUS<span class="op">);</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">FileNotFoundException</span> fnfe<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;cannot create a file with the given file name &quot;</span><span class="op">);</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">IOException</span> ioe<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;an I/O error occurred while processing the file&quot;</span><span class="op">);</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">ObjectInputStream</span> ois <span class="op">=</span> <span class="kw">new</span> <span class="bu">ObjectInputStream</span><span class="op">(</span><span class="kw">new</span> <span class="bu">FileInputStream</span><span class="op">(</span><span class="st">&quot;object.data&quot;</span><span class="op">)))</span> <span class="op">{</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Object</span> obj <span class="op">=</span> ois<span class="op">.</span><span class="fu">readObject</span><span class="op">();</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="op">(</span>obj <span class="op">!=</span> <span class="kw">null</span> <span class="op">&amp;&amp;</span> obj <span class="kw">instanceof</span> <span class="bu">Map</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Map</span><span class="op">&lt;?,</span> <span class="op">?&gt;</span> presidents <span class="op">=</span> <span class="op">(</span><span class="bu">Map</span><span class="op">&lt;?,</span> <span class="op">?&gt;)</span> obj<span class="op">;</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;President name </span><span class="sc">\t</span><span class="st"> Description&quot;</span><span class="op">);</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span><span class="op">(</span><span class="bu">Map</span><span class="op">.</span><span class="fu">Entry</span><span class="op">&lt;?,</span> <span class="op">?&gt;</span> president <span class="op">:</span> presidents<span class="op">.</span><span class="fu">entrySet</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;</span><span class="sc">%s</span><span class="st"> </span><span class="sc">\t</span><span class="st"> </span><span class="sc">%s</span><span class="st"> </span><span class="sc">%n</span><span class="st">&quot;</span><span class="op">,</span> president<span class="op">.</span><span class="fu">getKey</span><span class="op">(),</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>                president<span class="op">.</span><span class="fu">getValue</span><span class="op">());</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">FileNotFoundException</span> fnfe<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;cannot create a file with the given file name &quot;</span><span class="op">);</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">IOException</span> ioe<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;an I/O error occurred while processing the file&quot;</span><span class="op">);</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">ClassNotFoundException</span> cnfe<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;cannot recognize the class of the object - is the file corrupted?&quot;</span><span class="op">);</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The example above is similar to the example using the Data stream, in
+this case one object instance, of type Map, is written out to a file,
+and then read back. The contents of the map are persistent in the file,
+and are also serialized along with the rest of the properties.</p>
+<p>The serialization process converts contents of the objects in memory
+with the description of the contents - metadata. When the object has
+references to other objects the serialization mechanism also includes
+them as part of the serialized bytes.</p>
+<p>When serializing data Java includes not only the object data itself,
+but also metadata about the class type, which allows Java to reconstruct
+the exact type of the object during deserialization. This includes
+objects like Map, List, Set or even custom user created objects.</p>
+<p>When an object is serialized the other important property that is
+included as well is the <code>serialVersionUID</code> this is like a
+crude method to version the class, that way when an object is written
+out to a file, then read out, the version values in
+<code>serialVersionUID</code> are compared with the ones in the class
+definition, if there is mismatch the reading will not succeed.</p>
+<p>The <code>serialVersionUID</code> is a unique identifier that helps
+ensure that a serialized object is compatible with the class definition
+it is being <code>deserialized</code> into. This is important for
+maintaining backward compatibility when you change the class over
+time.While the <code>Serializable</code> interface is required for an
+object to be serialized, the <code>serialVersionUID</code> field helps
+control the versioning and compatibility during
+serialization/deserialization. Without this <code>UID</code>, Java
+generates it automatically based on the class structure (which can lead
+to issues when the class changes).</p>
+<p>Imagine that a user class was written out to a file with its initial
+version the very first time the class was declared, some objects of it
+were serialized, however over time this class definition has changed and
+new fields were added or old ones removed, there is no way for Java to
+know how to read this new modified version of the user class from the
+file. In such situations, it is possible to customize the way an
+instance is read from the file on a user level</p>
+<p>There are special private methods, which are not overriding or
+overloading any methods existing in the Object class, they are special
+ones, which are only looked up by the Java serialization pipeline, they
+are called - <code>readObject(ObjectInputStream in)</code> and
+<code>writeObject(ObjectInputStream out)</code>. They give the user the
+ability to manually write out an object, or read it for that matter, in
+the example above, the reading/writing can then be tied to the changes
+in the class, or the actual process of writing/reading can be done in a
+custom flexible way to handle future changes in the class’s
+declaration</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CustomUserClass <span class="kw">implements</span> <span class="bu">Serializable</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// some user defined fields</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">void</span> <span class="fu">writeObject</span><span class="op">(</span><span class="bu">ObjectOutputStream</span> out<span class="op">)</span> <span class="kw">throws</span> <span class="bu">IOException</span> <span class="op">{</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        out<span class="op">.</span><span class="fu">defaultWriteObject</span><span class="op">();</span> <span class="co">// Write default fields</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        out<span class="op">.</span><span class="fu">writeInt</span><span class="op">(</span>customField<span class="op">);</span> <span class="co">// Write custom field</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">void</span> <span class="fu">readObject</span><span class="op">(</span><span class="bu">ObjectInputStream</span> in<span class="op">)</span> <span class="kw">throws</span> <span class="bu">IOException</span><span class="op">,</span> <span class="bu">ClassNotFoundException</span> <span class="op">{</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        in<span class="op">.</span><span class="fu">defaultReadObject</span><span class="op">();</span> <span class="co">// Read default fields</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        customField <span class="op">=</span> in<span class="op">.</span><span class="fu">readInt</span><span class="op">();</span> <span class="co">// Read custom field</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h1 id="summary">Summary</h1>
+<p>Read and write data from the console</p>
+<ul>
+<li><p>The public static fields in, out, and err in java.lang.System
+class respectively represent the standard input, output and error
+streams. System.in is of type java.io.InputStream and System.out and
+System.err are of type java.io.PrintStream.</p></li>
+<li><p>You can redirect standard streams by calling the methods
+<code>System.setIn</code>, <code>System.setOut</code> and
+<code>System.setError</code>.</p></li>
+<li><p>You can obtain a reference to the console using the
+System.<code>console()</code> method; if the <code>JVM</code> is not
+associated with any console, this method will fail and return
+null.</p></li>
+<li><p>Many methods are provided in Console-support formatted I/O. You
+can use the <code>printf()</code> and <code>format()</code> methods
+available in the Console class to print formatted text; the overloaded
+<code>readLine()</code> and <code>readPassword()</code> methods take
+format strings as arguments.</p></li>
+<li><p>The template of format specifiers is:
+%[flags][width][.precision]datatype_specifier Each format specifier
+starts with the % sign, followed by flags, width, and precision
+information, and ending with a data type specifier. In the format
+string, the flags, width, and precision information are optional but the
+% sign and data type specifier are mandatory.</p></li>
+<li><p>Use the <code>readPassword()</code> method for reading secure
+strings such as passwords. It is recommended to use Array’s
+<code>fill()</code> method to “empty” the password read into the
+character array (to avoid malicious access to the typed
+passwords).</p></li>
+</ul>
+<p>Use the java.io package classes</p>
+<ul>
+<li><p>The java.io package has classes supporting both character streams
+and byte streams.</p></li>
+<li><p>You can use character streams for text-based I/O. Byte streams
+are used for databased I/O.</p></li>
+<li><p>Character streams for reading and writing are called readers and
+writers respectively (represented by the abstract classes of Reader and
+Writer).</p></li>
+<li><p>Byte streams for reading and writing are called input streams and
+output streams respectively (represented by the abstract classes of
+<code>InputStream</code> and <code>OutputStream</code>).</p></li>
+<li><p>You should only use character streams for processing text files
+(or human-readable files), and byte streams for data files. If you try
+using one type of stream instead of another, your program won’t work as
+you would expect; even if it works by chance, you’ll get nasty bugs. So
+don’t mix up streams, and use the right stream for a given task at
+hand.</p></li>
+<li><p>For both byte and character streams, you can use buffering. The
+buffer classes are provided as wrapper classes for the underlying
+streams. Using buffering will speed up the I/O when performing bulk I/O
+operations.</p></li>
+<li><p>For processing data with primitive data types and strings, you
+can use data streams.</p></li>
+<li><p>You can use object streams (classes
+<code>ObjectInputStream</code> and <code>ObjectOutputStream</code>) for
+reading and writing objects in memory to files and vice versa.</p></li>
+</ul>
+</body>
+</html>

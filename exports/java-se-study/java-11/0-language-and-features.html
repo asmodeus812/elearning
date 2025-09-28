@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>0-language-and-features</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#release" id="toc-release">Release</a>
+<ul>
+<li><a href="#general" id="toc-general">General</a></li>
+<li><a href="#language" id="toc-language">Language</a></li>
+<li><a href="#library" id="toc-library">Library</a></li>
+<li><a href="#platform" id="toc-platform">Platform</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="release">Release</h1>
+<p>Java 9 (Released in September 2017). This language release adds many
+improvements to the libraries and <code>APIs</code> but does not
+introduce any new significant changes to the base language itself unlike
+future iterations which do, like java 10 or 11. Java 10 Released in
+March 2018, and Java 11 Released September 2018, are more incremental
+changes and improvements to the Java 9 release. Below are presented the
+most notable features from each release between java 9 and 11</p>
+<h2 id="general">General</h2>
+<ol type="1">
+<li><p><code>JShell</code> (Java Shell) - Interactive command-line tool
+for evaluating code snippets. Ideal for learning, experimentation, and
+quick prototyping. One can use the java shell to REPL to quickly test
+and iterate over small pieces of code, for example the shell script
+below is used to start the jshell with a default set of import
+statements which allows the user to quickly use library features which
+are not immediately accessible.</p>
+<p>The <code>startup.jsh</code> file could contain a set of
+<code>pre-defined</code> initialization steps, in this example it simply
+contains a set of import statements which are to be loaded when the
+<code>jshell</code> is started</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">import</span> java.util.<span class="pp">*</span><span class="kw">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">import</span> java.time.<span class="pp">*</span><span class="kw">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">import</span> java.io.<span class="pp">*</span><span class="kw">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">import</span> java.math.<span class="pp">*</span><span class="kw">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">import</span> java.nio.file.<span class="pp">*</span><span class="kw">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">import</span> java.net.<span class="pp">*</span><span class="kw">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="ex">import</span> java.text.<span class="pp">*</span><span class="kw">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">import</span> java.util.stream.<span class="pp">*</span><span class="kw">;</span></span></code></pre></div>
+<p>The command below starts the shell, and passes the file defined
+above, with the import statements to initialize the shell environment
+outright</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode sh"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">jshell</span> <span class="at">--startup</span> startup.jsh</span></code></pre></div></li>
+<li><p><code>@SafeVarargs</code> on Private Methods - The
+<code>@SafeVarargs</code> annotation, previously allowed only on final
+and static methods, can now be used with private methods. That
+annotation is used to mark method’s variable arguments as being used in
+a safe manner by the method’s implementation, in the example below, the
+actual usage is not safe, even though marked, it is showing that the
+complier will not emit any warnings since the method is annotated with
+the <code>SafeVarargs</code> annotation however, during run-time the
+implementation will fail with <code>ClassCastException</code></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode md"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>The body of the method or constructor declaration performs potentially unsafe operations, such as an assignment to an</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>element of the variable arity parameter&#39;s array that generates an unchecked warning. Some unsafe operations do not</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>trigger an unchecked warning. For example, the aliasing in</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="at">@SafeVarargs</span> <span class="co">// Not an actually safe implementation!</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">method</span><span class="op">(</span><span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span><span class="kw">...</span> stringLists<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Object</span><span class="op">[]</span> array <span class="op">=</span> stringLists<span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> tmpList <span class="op">=</span> <span class="bu">Arrays</span><span class="op">.</span><span class="fu">asList</span><span class="op">(</span><span class="dv">42</span><span class="op">);</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    array<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> tmpList<span class="op">;</span> <span class="co">// Semantically invalid, but compiles without warnings</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> s <span class="op">=</span> stringLists<span class="op">[</span><span class="dv">0</span><span class="op">].</span><span class="fu">get</span><span class="op">(</span><span class="dv">0</span><span class="op">);</span> <span class="co">// Oh no, ClassCastException at runtime!</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div></li>
+<li><p><code>try-with-resources</code> Improvements - You can now use
+final or effectively final variables with
+<code>try-with-resources</code> without explicitly defining them inside
+the block. Note that this variable has to be considered final by the
+compiler, since if it is re-assigned it would be hard to detect which
+resource has to be released, and the value or resource reference before
+the re-assignment will leak</p>
+<p>Prior to java 9 the following had to be done in order to use the
+resource within the block,</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">FileInputStream</span> fileInputStream <span class="op">=</span> <span class="kw">new</span> <span class="bu">FileInputStream</span><span class="op">(</span><span class="st">&quot;test.txt&quot;</span><span class="op">);</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">FileInputStream</span> input <span class="op">=</span> fileInputStream<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// use input</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>However with the new addition the final variable can be outside of
+the scope and be re-used within the try-with-resources without being
+redefined. The variable can be effectively final, meaning that as long
+as it is not re-assigned anywhere, the compiler will not complain about
+it. However if it is re-assigned compile time error will occur.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">FileInputStream</span> fileInputStream <span class="op">=</span> <span class="kw">new</span> <span class="bu">FileInputStream</span><span class="op">(</span><span class="st">&quot;test.txt&quot;</span><span class="op">);</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">// fileInputStream is effectively final (not reassigned anywhere)</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span>fileInputStream<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// use fileInputStream variable directly, can not be re-assigned</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div></li>
+</ol>
+<h2 id="language">Language</h2>
+<ol type="1">
+<li><p><code>var keyword for local variables and type inference</code>:
+Allows for local variable declarations without explicitly specifying the
+type. Java infers the type based on the right hand side expression.
+However there are some specific use cases where the usage of var is
+restricted in the language</p>
+<ul>
+<li>Can <code>not</code> be used to define class members and fields -
+<code>public final class Test { private var test = "string"; }</code></li>
+<li>Can <code>not</code> be used as return type of functions or methods
+- <code>public var method() { return "" }</code></li>
+<li>Can <code>not</code> be used to assign null -
+<code>var invalid = null;</code></li>
+<li>Can <code>not</code> be used to infer lambda reference results -
+<code>var lambda = () -&gt; "i-return-string";</code></li>
+<li>Can <code>not</code> be used to create compound assignments -
+<code>var n = 1, f = 10;</code></li>
+<li>Can not be used for method parameters -
+<code>public void method(var param) { return "" }</code></li>
+</ul>
+<p>Besides the restrictions above, the <code>var</code> keyword can be
+used in every other context, it is mostly a syntax sugar around verbose
+types and names, when a variable is assigned through var it will infer
+the type of the right hand expression, never the super or sub-type of
+the given expression -
+<code>var arrayList = new ArrayList&lt;&gt;()</code>, the type of
+<code>arrayList</code> will be <code>ArrayList</code>. Explicit casts
+are permitted where they are valid -
+<code>var nilString = (String) null;</code></p></li>
+</ol>
+<h2 id="library">Library</h2>
+<ol type="1">
+<li><p><code>Stream</code> API Enhancements - new methods
+<code>takeWhile</code>, <code>dropWhile</code>, and iterate for more
+fluent functional-style programming. These are very similar to
+<code>filter</code> however there is a key difference, while
+<code>filter</code> goes through all elements - not stopping, possibly
+not in order, the new methods always go over elements in order and stop
+at the first element that does not match the predicate (takeWhile) or
+start processing in order and remove elements as long as the predicate
+is fulfilled (dropWhile)</p>
+<p>The new methods make sense when they are used on ordered/sorted
+streams of elements, such as the list below, since they will execute in
+order starting from the beginning, stopping at the first element that
+does not meet the predicate condition</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> numbers <span class="op">=</span> <span class="bu">List</span><span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">,</span> <span class="dv">6</span><span class="op">,</span> <span class="dv">7</span><span class="op">,</span> <span class="dv">8</span><span class="op">,</span> <span class="dv">9</span><span class="op">);</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> result <span class="op">=</span> numbers<span class="op">.</span><span class="fu">stream</span><span class="op">()</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                            <span class="op">.</span><span class="fu">takeWhile</span><span class="op">(</span>n <span class="op">-&gt;</span> n <span class="op">&lt;</span> <span class="dv">5</span><span class="op">)</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                            <span class="op">.</span><span class="fu">collect</span><span class="op">(</span>Collectors<span class="op">.</span><span class="fu">toList</span><span class="op">());</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>result<span class="op">);</span> <span class="co">// Output: [1, 2, 3, 4]</span></span></code></pre></div></li>
+<li><p><code>Optional</code> API Enhancements - methods
+<code>ifPresentOrElse</code>, or, and stream added to improve the
+usability of Optional. The new method gives the ability for one to run
+two actions on optional one when the optional is present, the other when
+the optional is empty, both arguments use lambda function reference and
+the general signature of the method looks like that</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ifPresentOrElse</span><span class="op">(</span>Consumer<span class="op">&lt;?</span> <span class="kw">super</span> T<span class="op">&gt;</span> action<span class="op">,</span> <span class="bu">Runnable</span> emptyAction<span class="op">)</span></span></code></pre></div></li>
+<li><p><code>CompletableFuture</code> - new methods
+<code>newIncompleteFuture</code>, <code>defaultExecutor</code>,
+<code>completeAsync</code>, and <code>orTimeout</code>. The most notable
+is <code>completeAsync</code>, which allows one to modify the completion
+state of the future, after it was created but before it was started or
+completed. It is similar to <code>supplyAsync</code> which is a static
+method which produces a new instance of the
+<code>CompletedFuture</code>, while <code>completeAsync</code> is a
+member method which mutates the current instance’s state. Another one
+<code>newIncompleteFuture</code> is a companion to the new
+<code>completeAsync</code> it basically is a replacement for calling
+<code>supplyAsync</code> without running the future, to run it call
+<code>thenApply</code></p></li>
+</ol>
+<h2 id="platform">Platform</h2>
+<ol type="1">
+<li><p><code>Multi-Release JARs</code> - allows for packaging multiple
+versions of classes optimized for different Java versions within the
+same JAR. The structure of the jar is such that by default for java 8
+and below, the compiled class files are still contained at the root of
+the jar, however, the META-INF folder can contain sub-directories for
+different java versions (9 and above). To compile the jar first call
+<code>javac -d out/base src/com/myapp/*.java</code> and to add
+additional release versions for different java run-times simply run
+<code>javac --release 9 -d out/9 src9/com/myapp/*.java</code>, that will
+compile the classes, but will not package a jar, to package the jar -
+<code>jar --create --file library.jar --main-class     com.myapp.Main -C out/base .</code>
+to package the base implementation, and
+<code>jar --update --file mylibrary.jar --release 9 -C     out/9 .</code>
+to update the created jar with the new release classes.</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>mylibrary.jar</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>|-- com/myapp/Main.class                  # Default (Java 8 and below)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>|-- META-INF</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>|   -- versions</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>|       -- 9</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>|           -- com/myapp/Main.class      # Java 9+ version of Main.class</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>|       -- 11</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>|           -- com/myapp/Main.class      # Java 11+ version of Main.class</span></code></pre></div></li>
+<li><p><code>Java Platform Module System (Project Jigsaw)</code>:
+Modularized the JDK into smaller modules, reducing memory usage and
+improving startup time by only loading necessary modules. Introduced the
+module-info.java file. This feature allows jar packages to package only
+the required modules which are being used. Decreases the general
+footprint of the jar significantly, reduces friction, and improves
+performance. Inside each package, or on package level, a special
+<code>module-info.java</code> file can be provided which specifies what
+the module exports, what it depends or requires and defines the name of
+the module. What is more interesting is the fact that the JDK itself was
+modularized, meaning that the end-user has the ability to package their
+own JDK, which would include only the required/used modules by the
+specific application. This is also useful since this packages jdk can be
+distributed along with the application package, providing a 100%
+reproduce able environment and run-time.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>module com<span class="op">.</span><span class="fu">example</span><span class="op">.</span><span class="fu">myapp</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    requires java<span class="op">.</span><span class="fu">sql</span><span class="op">;</span>             <span class="co">// Requires another module (from the JDK)</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    requires com<span class="op">.</span><span class="fu">external</span><span class="op">.</span><span class="fu">library</span><span class="op">;</span> <span class="co">// Requires a custom module, for example, an external library</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    exports com<span class="op">.</span><span class="fu">example</span><span class="op">.</span><span class="fu">myapp</span><span class="op">.</span><span class="fu">api</span><span class="op">;</span>           <span class="co">// Exports the API package</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    exports com<span class="op">.</span><span class="fu">example</span><span class="op">.</span><span class="fu">myapp</span><span class="op">.</span><span class="fu">utils</span><span class="op">;</span>         <span class="co">// Exports a utilities package</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Internal packages are not exported and remain hidden by default</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The module-info file provides meta information for package exports,
+it does not export individual classes, in the example above, the root
+package <code>com.example.myapp</code>, exports a specific number of
+modules, it also specifies dependencies, Unlike typical
+<code>fat-jars</code> - jars built by systems like <code>maven</code> or
+<code>gradle</code>, that contain all dependencies for a given
+application, the <code>module</code> approach works differently, the
+final jar contains only the actual application, however when the
+application is started the modules are provided on the
+<code>module-path</code> the module path is like the class path, it is a
+list of modules which have to be loaded by the run-time, those are the
+dependent modules for the application. Below is a short script which
+shows how a module based application is run, the module-path specifies a
+directory with dependencies, directory full of <code>jars</code> and the
+module application itself. The module approach is an alternative to
+provide a more fine grained control over traditional build-systems, like
+<code>gradle</code> or <code>maven</code>, which are third party tools,
+unrelated to java itself, now the language provides its own idiomatic
+specification on how to manage and control dependencies, through a
+higher level module system, instead of specifying class-paths</p>
+<p>Module way of building, packaging &amp; running, during packaging,
+modules are used only for compiling, during running the modules have to
+be again specified</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode sh"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">javac</span> <span class="at">-d</span> <span class="va">$BIN_DIR</span> <span class="at">--module-path</span> <span class="st">&quot;</span><span class="va">$LIBS_DIR</span><span class="st">/external-library.jar&quot;</span> <span class="va">$SRC_DIR</span>/module-info.java <span class="va">$SRC_DIR</span>/MainApp.java <span class="va">$SRC_DIR</span>/utils/Utils.java <span class="co"># Package the application</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> <span class="at">--module-path</span> <span class="st">&quot;</span><span class="va">$LIBS_DIR</span><span class="st">/external-library.jar:</span><span class="va">$BIN_DIR</span><span class="st">&quot;</span> <span class="at">--module</span> com.example.myapp/com.example.myapp.MainApp <span class="co"># Run the application</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Note that the 3rd party libraries are present during compilation and running of the application, two stages, imply one can upgrade them</span></span></code></pre></div>
+<p>Traditional way of building, packaging &amp; running, everything is
+included on the <code>classpath</code>, 3rd party and actual application
+classes</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode sh"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">javac</span> <span class="at">-d</span> <span class="va">$BIN_DIR</span> <span class="at">-cp</span> <span class="st">&quot;</span><span class="va">$LIBS_DIR</span><span class="st">/external-library.jar&quot;</span> <span class="va">$SRC_DIR</span>/MainApp.java <span class="va">$SRC_DIR</span>/utils/Utils.java <span class="co"># Package the application</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> <span class="at">-cp</span> <span class="st">&quot;</span><span class="va">$BIN_DIR</span><span class="st">:</span><span class="va">$LIBS_DIR</span><span class="st">/external-library.jar&quot;</span> MainApp <span class="co"># Run the application</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Note libraries are packaged in the final jar, meaning that there is no easy way to provide new versions without re-packaging everything</span></span></code></pre></div>
+<p><code>Note that the module approach gives the power of upgrading the 3rd party libraries during run-time / running the application without having to re-package the application with new versions of the libraries, as long as the API provided by the libraries is still compatible, which is quite powerful, since one could upgrade only the application dependencies without having to re-compile the application</code></p>
+<p>The module approach bears very strong resemblance to how DLLs
+(dynamic link libraries) or Shared Objects work, the general premise is
+the same, the application is compiled against the API - contract of a
+given library, however the implementation itself is not packaged within
+the application, it is linked dynamically during run-time, hence the
+name, The old approach of bundling resembles the static linking in a
+way</p></li>
+<li><p><code>Java Linker</code>: New tool to create custom
+<code>runtime</code> images with only required modules, reducing
+application size. As a continuation of the <code>module</code> approach,
+the <code>jlink</code> now gives one the ability to package a java
+runtime along with the application itself, in a single jar. This is like
+a fat-jar, but instead of 3-rd party libraries in the jar, the jar
+contains the <code>JDK</code> runtime modules, only those used /
+required by the application, along with the application source itself,
+the 3rd party libraries are still specified outside during
+<code>runtime</code></p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode sh"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compile the application with required modules and 3rd party dependencies</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">javac</span> <span class="at">-d</span> mods/com.example.myapp <span class="at">--module-path</span> libs src/com/example/MyApp.java src/module-info.java</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create and package a minified version of the JDK along with the application itself</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="ex">jlink</span>   <span class="at">--module-path</span> <span class="st">&quot;</span><span class="va">$JAVA_HOME</span><span class="st">/jmods:mods&quot;</span> <span class="dt">\</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">--add-modules</span> com.example.myapp <span class="dt">\</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">--output</span> my-custom-runtime <span class="dt">\</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">--strip-debug</span> <span class="dt">\</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">--compress</span> 2 <span class="dt">\</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">--no-header-files</span> <span class="dt">\</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">--no-man-pages</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Run The minified JDK, which contains its own binaries - java/javac</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="ex">./my-custom-runtime/bin/java</span> <span class="at">-m</span> com.example.myapp/com.example.MyApp</span></code></pre></div></li>
+</ol>
+</body>
+</html>

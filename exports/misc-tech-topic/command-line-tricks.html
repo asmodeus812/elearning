@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>command-line-tricks</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#practical-terminal-commands-every-developer-should-know"
+id="toc-practical-terminal-commands-every-developer-should-know">🧠
+Practical Terminal Commands Every Developer Should Know</a>
+<ul>
+<li><a href="#repeat-the-last-command"
+id="toc-repeat-the-last-command">🔁 1. <code>!!</code> → Repeat the Last
+Command</a></li>
+<li><a href="#reuse-the-last-argument"
+id="toc-reuse-the-last-argument">🔄 2. <code>!$</code> → Reuse the Last
+Argument</a></li>
+<li><a href="#oldnew-fix-typos-quickly"
+id="toc-oldnew-fix-typos-quickly">✍️ 3. <code>^old^new</code> → Fix
+Typos Quickly</a></li>
+<li><a href="#alt-.-mac-esc-.-cycle-through-last-arguments"
+id="toc-alt-.-mac-esc-.-cycle-through-last-arguments">🔤 4.
+<code>Alt + .</code> (Mac: <code>Esc + .</code>) → Cycle Through Last
+Arguments</a></li>
+<li><a href="#xargs-turn-output-into-arguments"
+id="toc-xargs-turn-output-into-arguments">🔗 5. <code>xargs</code> →
+Turn Output into Arguments</a></li>
+<li><a href="#tee-save-output-while-still-seeing-it"
+id="toc-tee-save-output-while-still-seeing-it">📤 6. <code>tee</code> →
+Save Output While Still Seeing It</a></li>
+<li><a href="#grep--r-pattern-.-search-inside-files-recursively"
+id="toc-grep--r-pattern-.-search-inside-files-recursively">🔍 7.
+<code>grep -R "pattern" .</code> → Search Inside Files
+Recursively</a></li>
+<li><a href="#fc-edit-and-rerun-your-last-command"
+id="toc-fc-edit-and-rerun-your-last-command">📝 8. <code>fc</code> →
+Edit and Rerun Your Last Command</a></li>
+<li><a href="#n-reuse-a-specific-argument"
+id="toc-n-reuse-a-specific-argument">🎯 9. <code>!!:n</code> → Reuse a
+Specific Argument</a></li>
+<li><a href="#ctrl-a-ctrl-e-jump-to-line-startend"
+id="toc-ctrl-a-ctrl-e-jump-to-line-startend">⌨️ 10.
+<code>Ctrl + a</code> / <code>Ctrl + e</code> → Jump to Line
+Start/End</a></li>
+<li><a href="#ctrl-w-ctrl-u-delete-words-or-lines"
+id="toc-ctrl-w-ctrl-u-delete-words-or-lines">✂️ 11.
+<code>Ctrl + w</code> / <code>Ctrl + u</code> → Delete Words or
+Lines</a></li>
+<li><a href="#gsoldnew-global-replace-in-last-command"
+id="toc-gsoldnew-global-replace-in-last-command">🔁 12.
+<code>!!:gs/old/new/</code> → Global Replace in Last Command</a></li>
+<li><a href="#df--h-du--sh-check-disk-usage"
+id="toc-df--h-du--sh-check-disk-usage">💽 13. <code>df -h</code> /
+<code>du -sh *</code> → Check Disk Usage</a></li>
+<li><a href="#lsof--i-port-see-whats-using-a-port"
+id="toc-lsof--i-port-see-whats-using-a-port">🔌 14.
+<code>lsof -i :&lt;port&gt;</code> → See What’s Using a Port</a></li>
+<li><a href="#nc--zv-host-port-test-if-a-port-is-open"
+id="toc-nc--zv-host-port-test-if-a-port-is-open">🌐 15.
+<code>nc -zv &lt;host&gt; &lt;port&gt;</code> → Test if a Port is
+Open</a></li>
+<li><a href="#cd---jump-back-to-previous-directory"
+id="toc-cd---jump-back-to-previous-directory">🔙 16. <code>cd -</code> →
+Jump Back to Previous Directory</a></li>
+<li><a href="#ctrl-l-clear-the-screen-instantly"
+id="toc-ctrl-l-clear-the-screen-instantly">🧹 17. <code>Ctrl + l</code>
+→ Clear the Screen Instantly</a></li>
+<li><a href="#bonus-tips" id="toc-bonus-tips">🆕 Bonus Tips</a>
+<ul>
+<li><a href="#history-view-command-history"
+id="toc-history-view-command-history">✅ <code>history</code> → View
+Command History</a></li>
+<li><a href="#pushd-popd-stack-navigation-for-directories"
+id="toc-pushd-popd-stack-navigation-for-directories">✅
+<code>pushd</code> / <code>popd</code> → Stack Navigation for
+Directories</a></li>
+<li><a href="#watch-repeatedly-run-a-command"
+id="toc-watch-repeatedly-run-a-command">✅ <code>watch</code> →
+Repeatedly Run a Command</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="practical-terminal-commands-every-developer-should-know">🧠
+Practical Terminal Commands Every Developer Should Know</h1>
+<p>Level up your command-line skills with these practical terminal
+tricks. These tips can save you time, fix mistakes quickly, or help
+debug without extra tools. Whether you’re a beginner or a power user,
+there’s something here for everyone.</p>
+<hr />
+<h2 id="repeat-the-last-command">🔁 1. <code>!!</code> → Repeat the Last
+Command</h2>
+<p>Forget to use <code>sudo</code>? No need to retype everything.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> apt-get install curl</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Permission</span> denied</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> sudo !!</span></code></pre></div>
+<p><code>!!</code> re-runs your last command. Handy for correcting
+permission issues.</p>
+<hr />
+<h2 id="reuse-the-last-argument">🔄 2. <code>!$</code> → Reuse the Last
+Argument</h2>
+<p>Automatically inserts the last argument from your previous
+command.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> mkdir logs</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> cd !$</span></code></pre></div>
+<p>Here, <code>!$</code> becomes <code>logs</code>.</p>
+<hr />
+<h2 id="oldnew-fix-typos-quickly">✍️ 3. <code>^old^new</code> → Fix
+Typos Quickly</h2>
+<p>Fixes the first occurrence of a typo and re-runs the command.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> cat fole.txt</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ^fole^file</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> cat file.txt</span></code></pre></div>
+<p>Great for minor typo corrections.</p>
+<hr />
+<h2 id="alt-.-mac-esc-.-cycle-through-last-arguments">🔤 4.
+<code>Alt + .</code> (Mac: <code>Esc + .</code>) → Cycle Through Last
+Arguments</h2>
+<p>Pulls the last argument from previous commands and cycles through
+them.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> vim server_config.yml</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> cat <span class="op">&lt;</span>Alt+.<span class="op">&gt;</span></span></code></pre></div>
+<p>Inserts <code>server_config.yml</code>.</p>
+<hr />
+<h2 id="xargs-turn-output-into-arguments">🔗 5. <code>xargs</code> →
+Turn Output into Arguments</h2>
+<p>Pass a list of items into another command.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ls <span class="pp">*</span>.log <span class="kw">|</span> <span class="fu">xargs</span> rm</span></code></pre></div>
+<p>Deletes all <code>.log</code> files using <code>rm</code>.</p>
+<hr />
+<h2 id="tee-save-output-while-still-seeing-it">📤 6. <code>tee</code> →
+Save Output While Still Seeing It</h2>
+<p>Splits output to both screen and file.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> make build <span class="kw">|</span> <span class="fu">tee</span> build.log</span></code></pre></div>
+<p>Useful for logging while watching build progress.</p>
+<hr />
+<h2 id="grep--r-pattern-.-search-inside-files-recursively">🔍 7.
+<code>grep -R "pattern" .</code> → Search Inside Files Recursively</h2>
+<p>Finds all occurrences of a pattern in the current directory.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> grep <span class="at">-R</span> <span class="st">&quot;TODO&quot;</span> .</span></code></pre></div>
+<p>Ideal for scanning source code or config files.</p>
+<hr />
+<h2 id="fc-edit-and-rerun-your-last-command">📝 8. <code>fc</code> →
+Edit and Rerun Your Last Command</h2>
+<p>Opens the last command in your default editor for modification.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> fc</span></code></pre></div>
+<p>Great for editing long or complex commands.</p>
+<hr />
+<h2 id="n-reuse-a-specific-argument">🎯 9. <code>!!:n</code> → Reuse a
+Specific Argument</h2>
+<p>Extract a specific argument from the last command.</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> echo one two three</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> echo !!:2</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">two</span></span></code></pre></div>
+<p><code>!!:2</code> uses the second argument.</p>
+<hr />
+<h2 id="ctrl-a-ctrl-e-jump-to-line-startend">⌨️ 10.
+<code>Ctrl + a</code> / <code>Ctrl + e</code> → Jump to Line
+Start/End</h2>
+<ul>
+<li><code>Ctrl + a</code>: Move to beginning of line.</li>
+<li><code>Ctrl + e</code>: Move to end of line.</li>
+</ul>
+<p>Boosts navigation speed.</p>
+<hr />
+<h2 id="ctrl-w-ctrl-u-delete-words-or-lines">✂️ 11.
+<code>Ctrl + w</code> / <code>Ctrl + u</code> → Delete Words or
+Lines</h2>
+<ul>
+<li><code>Ctrl + w</code>: Delete word before the cursor.</li>
+<li><code>Ctrl + u</code>: Delete entire line before the cursor.</li>
+</ul>
+<p>Helpful for cleaning up commands.</p>
+<hr />
+<h2 id="gsoldnew-global-replace-in-last-command">🔁 12.
+<code>!!:gs/old/new/</code> → Global Replace in Last Command</h2>
+<p>Replaces <strong>all</strong> instances of <code>old</code> with
+<code>new</code>.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> echo world world</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> !!:gs/world/universe/</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="ex">universe</span> universe</span></code></pre></div>
+<p>Perfect for mass substitutions.</p>
+<hr />
+<h2 id="df--h-du--sh-check-disk-usage">💽 13. <code>df -h</code> /
+<code>du -sh *</code> → Check Disk Usage</h2>
+<p>Find out what’s eating your storage:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> df <span class="at">-h</span>       <span class="co"># Disk free space (human readable)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> du <span class="at">-sh</span> <span class="pp">*</span>    <span class="co"># Size of all files/folders in current dir</span></span></code></pre></div>
+<hr />
+<h2 id="lsof--i-port-see-whats-using-a-port">🔌 14.
+<code>lsof -i :&lt;port&gt;</code> → See What’s Using a Port</h2>
+<p>Find the process locking a port.</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> lsof <span class="at">-i</span> :8080</span></code></pre></div>
+<p>Now you know what to kill or restart.</p>
+<hr />
+<h2 id="nc--zv-host-port-test-if-a-port-is-open">🌐 15.
+<code>nc -zv &lt;host&gt; &lt;port&gt;</code> → Test if a Port is
+Open</h2>
+<p>Quick connectivity check:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> nc <span class="at">-zv</span> google.com 443</span></code></pre></div>
+<p>Useful for debugging networking issues.</p>
+<hr />
+<h2 id="cd---jump-back-to-previous-directory">🔙 16. <code>cd -</code> →
+Jump Back to Previous Directory</h2>
+<p>Like an “undo” for <code>cd</code>.</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> cd projectA</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> cd ../projectB</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> cd <span class="at">-</span></span></code></pre></div>
+<p>Jumps you back to <code>projectA</code>.</p>
+<hr />
+<h2 id="ctrl-l-clear-the-screen-instantly">🧹 17. <code>Ctrl + l</code>
+→ Clear the Screen Instantly</h2>
+<p>Forget typing <code>clear</code>. Just use:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Ctrl</span> + l</span></code></pre></div>
+<hr />
+<h2 id="bonus-tips">🆕 Bonus Tips</h2>
+<h3 id="history-view-command-history">✅ <code>history</code> → View
+Command History</h3>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> history</span></code></pre></div>
+<p>See all past commands. Use <code>!123</code> to re-run command
+#123.</p>
+<hr />
+<h3 id="pushd-popd-stack-navigation-for-directories">✅
+<code>pushd</code> / <code>popd</code> → Stack Navigation for
+Directories</h3>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pushd folderA</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pushd folderB</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> popd</span></code></pre></div>
+<p>Let you switch between directories using a stack.</p>
+<hr />
+<h3 id="watch-repeatedly-run-a-command">✅ <code>watch</code> →
+Repeatedly Run a Command</h3>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> watch <span class="at">-n</span> 2 ls <span class="at">-l</span></span></code></pre></div>
+<p>Runs <code>ls -l</code> every 2 seconds. Great for monitoring file
+changes.</p>
+</body>
+</html>

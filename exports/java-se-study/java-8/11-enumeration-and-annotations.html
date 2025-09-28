@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>11-enumeration-and-annotations</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#enumeration" id="toc-enumeration">Enumeration</a>
+<ul>
+<li><a href="#declaration" id="toc-declaration">Declaration</a></li>
+<li><a href="#usage" id="toc-usage">Usage</a></li>
+<li><a href="#restrictions" id="toc-restrictions">Restrictions</a></li>
+<li><a href="#comparison" id="toc-comparison">Comparison</a></li>
+<li><a href="#methods" id="toc-methods">Methods</a></li>
+<li><a href="#members" id="toc-members">Members</a></li>
+</ul></li>
+<li><a href="#wrappers" id="toc-wrappers">Wrappers</a>
+<ul>
+<li><a href="#extraction" id="toc-extraction">Extraction</a></li>
+<li><a href="#boxing" id="toc-boxing">Boxing</a></li>
+</ul></li>
+<li><a href="#annotations" id="toc-annotations">Annotations</a>
+<ul>
+<li><a href="#retention" id="toc-retention">Retention</a></li>
+<li><a href="#obtaining" id="toc-obtaining">Obtaining</a></li>
+<li><a href="#types" id="toc-types">Types</a></li>
+<li><a href="#inheriting" id="toc-inheriting">Inheriting</a></li>
+<li><a href="#target" id="toc-target">Target</a></li>
+<li><a href="#functional" id="toc-functional">Functional</a></li>
+<li><a href="#type" id="toc-type">Type</a></li>
+<li><a href="#repeating" id="toc-repeating">Repeating</a></li>
+</ul></li>
+</ul>
+</nav>
+<h2 id="enumeration">Enumeration</h2>
+<p>Java provides what is often also provided by other language like C or
+C++, which is often called <code>enumeration</code> a way for a program
+to define a set of constants, which are logically related, however
+unlike most other languages where enumeration is basically an integer or
+ordinal number in Java the enumeration or enum is actually a type, more
+specifically a class. That provides a lot of benefits, since we can
+treat enums like classes with methods and even instance variables.</p>
+<p><code>Most importantly have to remember that Java enumerations are instances of the enum which itself is a simple class types, the run time does not treat them in any special ways, they inherit from the Enum class implicitly</code></p>
+<h3 id="declaration">Declaration</h3>
+<p>To declare an enum in java, the most simplest way is to use the enum
+keyword and block inside of which the enums are listed. Note that those
+are separated by a comma, they can be on a single or multi line. Since
+enumerations are classes, the list of enums defined inside are actually
+instances of the enumeration class itself, in essence we create
+instances of <code>Apples</code>, which are immutable (kind of) and also
+defined at compile/source time. Also by default the enum instances
+defined in an enumeration are <code>public static final</code>, but that
+is implicitly used and deduced by the compiler, the enum class or type
+itself is by default implicitly also defined as
+<code>public static</code></p>
+<p>Usually it is recommended that the enumeration constants are either
+all upper case or follow the standard type naming convention which is
+PascalCase.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">enum</span> Apples <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    Johnatan<span class="op">,</span> GoldenDel<span class="op">,</span> RedDel<span class="op">,</span> Winesap<span class="op">,</span> Cortland</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Even though by default they are implicitly
+<code>public static final</code> we are NOT allowed to define any
+modifiers to the enumerated entries inside enum</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">enum</span> Apples <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> Johnatan<span class="op">,</span> GoldenDel<span class="op">,</span> RedDel<span class="op">,</span> Winesap<span class="op">,</span> Cortland <span class="co">// compile time error, no user specified modifiers are allowed</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="usage">Usage</h3>
+<p>Since enumerations are instances of a class type / enumeration type,
+to access elements of it the type of enumeration has to be referenced
+first</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>    Apples ap <span class="op">=</span> Apples<span class="op">.</span><span class="fu">RedDel</span></span></code></pre></div>
+<p>Enumerations are compile time constants, and as such they can be used
+in a switch statement, inside a switch statement we can always use a
+constant, i.e an identifier that does not evaluate to expression</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Apples ap <span class="op">=</span> <span class="kw">...</span><span class="op">.</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">switch</span><span class="op">(</span>ap<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> GoldenDel<span class="op">:</span> <span class="op">{</span> <span class="co">// ap is of type Apples, no need to prefix it with Apples.[enumeration]</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> RedDel<span class="op">:</span> <span class="op">{</span> <span class="co">// ap is of type Apples, no need to prefix it with Apples.[enumeration]</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">default</span> <span class="op">{</span> <span class="co">// default case</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="restrictions">Restrictions</h3>
+<p>There are some restrictions enforced on java annotations which if not
+met will produce a compile time error.</p>
+<ul>
+<li>they can not be generic or accept or be declared with generic type
+parameters</li>
+<li>annotations can not inherit other annotations (e.g. with extends
+keyword)</li>
+<li>all methods of an annotation must return a type and accept no
+arguments</li>
+<li>annotation method return types can be primitive, String or Class,
+enum, annotation or an array of the all fore mentioned</li>
+</ul>
+<h3 id="comparison">Comparison</h3>
+<p>As already mentioned the enumerations within an enum type are defined
+at compile time, meaning that each time we use the [enum].<a
+href="#enumeration">enumeration</a> combination we refer to an instance
+of the enum class, however since we refer to the same instance it is
+possible to compare them with <code>==</code>, yes, the <code>==</code>
+still does a reference compare however since they are immutable the
+[enum].<a href="#enumeration">enumeration</a> always refers to the same
+enumeration from enum no matter at which point of the program it is
+used</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Apples apOne <span class="op">=</span> Apples<span class="op">.</span><span class="fu">GoldenDel</span><span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Apples apTwo <span class="op">=</span> Apples<span class="op">.</span><span class="fu">GoldenDel</span><span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span><span class="op">(</span>apOne <span class="op">==</span> apTwo<span class="op">);</span></span></code></pre></div>
+<p>This works since all references to an enumeration, refer to the very
+same object instance which was initially created, and it lives in the
+JVM, at run-time. Meaning that enums are not treated with any special
+kind of attention when it comes to the usual operations that can be
+performed on them, they are simply a convenient way and a convention to
+create an immutable final static instance of a class which can be
+globally referred to.</p>
+<h3 id="methods">Methods</h3>
+<p>Every enumeration in an enum type, implicitly inherits from the Enum
+class in java.lang, this class has a few methods which are exposed to be
+used with a specific enumeration such as</p>
+<ul>
+<li><p>ordinal - extract the ordinal, in other words the position of
+enumeration in the list of enumerations in the enum type, as defined in
+source, starting from 0</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>Apples<span class="op">.</span><span class="fu">GoldeDel</span><span class="op">.</span><span class="fu">ordinal</span><span class="op">()</span> <span class="co">// this will produce an integer result of 1 (second entry/enumeration in Apples enum type, counting from 0)</span></span></code></pre></div></li>
+<li><p>compareTo - meant to compare one enumeration to another, be
+careful it is comparing the ordinal of the current instance with another
+enumeration’s ordinal, then it returns this.ordinal - that.ordinal,
+meaning that it will be negative if current ordinal is less than
+other.ordinal, positive otherwise, equal if both have the same
+ordinal</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Apples apOne <span class="op">=</span> Apples<span class="op">.</span><span class="fu">GoldenDel</span><span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>Apples apTwo <span class="op">=</span> Apples<span class="op">.</span><span class="fu">RedDel</span><span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span><span class="op">(</span>apOne<span class="op">.</span><span class="fu">compareTo</span><span class="op">(</span>apTwo<span class="op">)</span> <span class="op">&lt;</span> <span class="dv">1</span><span class="op">);</span> <span class="co">// in the example above GoldenDel comes right before the RedDel, therefore GoldenDel&#39;s ordinal is smaller than RedDel&#39;s</span></span></code></pre></div></li>
+<li><p>values - extract all values of the given enum type, note that
+this method also exists on the enum type as well as on the enumeration
+and produces the same result</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>Apples<span class="op">[]</span> apples <span class="op">=</span> Apples<span class="op">.</span><span class="fu">RedDel</span><span class="op">.</span><span class="fu">values</span><span class="op">();</span> <span class="co">// valid exists on the enumeration itself</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>Apples<span class="op">[]</span> applesAgain <span class="op">=</span> Apples<span class="op">.</span><span class="fu">values</span><span class="op">();</span> <span class="co">// valid, exists on the type itself too</span></span></code></pre></div></li>
+<li><p>valueOf - can either take a name (of the enumeration target) or
+can take a class and enumeration target name, also exists on both an
+enumeration and it’s type</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>Apples apTarget <span class="op">=</span> Apples<span class="op">.</span><span class="fu">RedDel</span><span class="op">.</span><span class="fu">valueOf</span><span class="op">(</span><span class="st">&quot;RedDel&quot;</span><span class="op">);</span> <span class="co">// valid exists on the enumeration itself</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>Apples apTarget <span class="op">=</span> Apples<span class="op">.</span><span class="fu">valueOf</span><span class="op">(</span><span class="st">&quot;RedDel&quot;</span><span class="op">);</span> <span class="co">// valid, exists on the type itself</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>Apples apTarget <span class="op">=</span> Apples<span class="op">.</span><span class="fu">valueOf</span><span class="op">(</span>Apples<span class="op">.</span><span class="fu">class</span><span class="op">,</span> <span class="st">&quot;RedDel&quot;</span><span class="op">);</span> <span class="co">// also valid, but not really useful in general</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>Apples apTarget <span class="op">=</span> <span class="bu">Enum</span><span class="op">.</span><span class="fu">valueOf</span><span class="op">(</span>Apples<span class="op">.</span><span class="fu">class</span><span class="op">,</span> <span class="st">&quot;RedDel&quot;</span><span class="op">);</span> <span class="co">// valid exists on the base enum class, obviously</span></span></code></pre></div></li>
+<li></li>
+</ul>
+<h3 id="members">Members</h3>
+<p>Since already established that enumerations are instances of the
+enum, which is a normal java class type, it is also good to note that
+instance member variables and methods can be defined for them.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">enum</span> Apple <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Jonathan</span><span class="op">(</span><span class="dv">10</span><span class="op">),</span> <span class="fu">GoldenDel</span><span class="op">(</span><span class="dv">9</span><span class="op">),</span> <span class="fu">RedDel</span><span class="op">(</span><span class="dv">12</span><span class="op">),</span> <span class="fu">Winesap</span><span class="op">(</span><span class="dv">15</span><span class="op">),</span> <span class="fu">Cortland</span><span class="op">(</span><span class="dv">8</span><span class="op">);</span> <span class="co">// do not omit this when having enumeration members defined !</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> price<span class="op">;</span> <span class="co">// by default the access modifier is also private if none is specified</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Apple</span><span class="op">(</span><span class="dt">int</span> p<span class="op">)</span> <span class="op">{</span> <span class="co">// this constructor is implicitly private, done to encapsulate the creation only in the Apple enum type itself</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        price <span class="op">=</span> p<span class="op">;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">getPrice</span><span class="op">()</span> <span class="op">{</span> <span class="co">// by default package-protected, just as regular class method members</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> price<span class="op">;</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>Note that if any members are defined for an enum, the list of enumerations has to be terminated with semicolon ; - otherwise it is compile time error, further more the member variables are by default PRIVATE, if no modifier is specified, while the member methods are implicitly package-private, the constructor is PRIVATE as the member variables</code></p>
+<p>Just like any other java class, in enum class types we can also
+define <code>static</code> and <code>final</code> members which work the
+same way as they do in any other regular class type in the language</p>
+<h2 id="wrappers">Wrappers</h2>
+<p>The java standard language provides the basic primitives which are
+common in other languages as already disussed, those are
+<code>byte, short, int, long, float, double, boolean, char</code>, for
+each of them the language provides what are called Wrapper classes,
+which represent the same primitive however they are not actually
+primitives but actual fully formed java class types which are
+<code>Byte, Short, Integer, Long, Float, Double, Boolean and Character</code>.</p>
+<p>These wrappers are often very useful because the language has a
+special feature, only valid for the primitive types where the wrapper
+class and primitive can be used intercangeably, that is called
+<code>auto-boxing</code>. This boxing is what the compiler does
+implicitly when it sees that a given variable or method accept an
+argument of a given type but another is passed - e.g. it accepts
+primitive but wrapper is passed, or the other way around</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="fu">method</span><span class="op">(</span><span class="bu">Integer</span> i<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="fu">method</span><span class="op">(</span><span class="bu">Double</span> d<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">method</span><span class="op">(</span><span class="dv">5</span><span class="op">);</span> <span class="co">// java will box the primitive into Integer</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="fu">method</span><span class="op">(</span><span class="fl">5.5d</span><span class="op">);</span> <span class="co">// java will box the primitive into Double</span></span></code></pre></div>
+<h3 id="extraction">Extraction</h3>
+<p>Each of the wrappers has a method which can be used to extract the
+unboxed raw primitive value inside the wrapped class. Those methods
+follow the naming pattern of <code>{primitiveType}Value()</code></p>
+<ul>
+<li><p>Boolean.<code>booleanValue()</code></p></li>
+<li><p>Character.<code>charValue()</code></p></li>
+<li><p>Byte.<code>byteValue()</code></p></li>
+<li><p>Short.<code>shortValue()</code></p></li>
+<li><p>Integer.<code>integerValue()</code></p></li>
+<li><p>Long.<code>longValue()</code></p></li>
+<li><p>Float.<code>floatValue()</code></p></li>
+<li><p>Double.<code>doubleValue()</code></p></li>
+</ul>
+<p><code>Note that the integral wrappers - Byte, Short, Integer, Long, Float and Double inherit by default from Number class which exposes those methods, meaning that one can invoke Byte.doubleValue or Integer.floatValue, which will do exactly as expected return the actual double or float representation value of the boxed type</code></p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Integer</span> boxed <span class="op">=</span> <span class="dv">850</span><span class="op">;</span> <span class="co">// auto boxing the primitive value of 5 into new Integer(5);</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>boxed<span class="op">.</span><span class="fu">byteValue</span><span class="op">();</span> <span class="co">// this will overflow the byte, and return 82</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>boxed<span class="op">.</span><span class="fu">doubleValue</span><span class="op">();</span> <span class="co">// this will return the double representation of 850, which is 850.0d</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>boxed<span class="op">.</span><span class="fu">floatValue</span><span class="op">();</span> <span class="co">// this will return the double representation of 850, which is 850.0f</span></span></code></pre></div>
+<h3 id="boxing">Boxing</h3>
+<p>To expand on the auto boxing and unboxing of variables one needs to
+understand that this is done during runtime, and is not in any way
+efficient, since the runtime has to implicitly create objects of the
+wrapper type when a primitive is used but a wrapper expected, and vice
+versa, the compiler will use the methods mentioned above to obtain the
+raw value where wrapper is used, but primitive required. Therefore one
+should not rely too much on boxing and unboxing, and use raw primitives
+whenever possible, which is usually easy.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Integer</span> k <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Integer</span> f <span class="op">=</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Integer</span> r <span class="op">=</span> k <span class="op">*</span> f<span class="op">;</span> <span class="co">// the runtime will first unbox into primitives, evaluate the expression `k*f` and then box back the result into the variable `r`</span></span></code></pre></div>
+<p>The auto boxing and unboxing can happen in expressions too, from the
+example above one can observe that a lot of <code>new</code> wrapper
+objects might be temporarily created to auto box/unbox which can lead to
+loss in performance</p>
+<p>Auto promoting types is also something that works with auto boxing
+and unboxing, the premise is similar since auto promoting is already in
+the language, and as an example multiplying an integer and double -
+<code>Double r = new Double(k.doubleValue() * f.integerValue()); - this is how the byte code might look like - simplified</code></p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Double</span> k <span class="op">=</span> <span class="fl">1.25d</span><span class="op">;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Integer</span> f <span class="op">=</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Double</span> r <span class="op">=</span> k <span class="op">*</span> f<span class="op">;</span> <span class="co">// will be automatically promoted to double, since the expression will evaluate to double, and assign to the resulting variable just fine</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="bu">Integer</span> q <span class="op">=</span> k <span class="op">*</span> f<span class="op">;</span> <span class="co">// this is a compile time error, since auto-promotion will upgrade the expression to double, can not down-cast double to integer automatically</span></span></code></pre></div>
+<p><code>Auto boxing and unboxing also works on Boolean wrappers, which is quite cool because that means that one can use a Boolean wrapper inside an if statement however be careful because auto unboxing is not safe, what if the Boolean wrapper instance was null, well the auto unboxing will fail, there is no way to call booleanValue method on a null wrapper object</code></p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Boolean</span> b1 <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Boolean</span> b2 <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span><span class="op">(</span>b1 <span class="op">&amp;&amp;</span> b2<span class="op">);</span> <span class="co">// b1 will be auto-unboxed and fail with null pointer since the compiler simply tries to do b1.booleanValue() &amp;&amp; b2.booleanValue()</span></span></code></pre></div>
+<h2 id="annotations">Annotations</h2>
+<p>Annotations in java language are a way for the program to define a
+data about itself, the annotations can be used in reflection to obtain
+information and specifics about the program and the underlying code
+implementation.</p>
+<p>To declare an annotation the special <code>@interface</code> keyword
+is used, each annotation contains only methods, but no these methods
+have no bodies, the implementation itself is provided by java, in that
+regard the annotation is very much like a regular interface, hence the
+keyword used above.</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="at">@interface</span> <span class="bu">Annotation</span> <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">val</span><span class="op">();</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Annotation is a super-interface of all annotations. It is declared
+within the java.lang.annotation package. It overrides hashCode(),
+equals(), and toString(), which are defined by Object. It also specifies
+annotationType(), which returns a Class object that represents the
+invoking annotation.</p>
+<h3 id="retention">Retention</h3>
+<p>Each annotation can be specified what is called retention policy
+which is telling the compiler at which stage of the program’s lifecycle
+this annotation is going to be kept. The retention itself is an
+annotation, provided by the java library, it is named
+<code>@Retention</code> and located inside <code>java.lang</code>
+package</p>
+<ul>
+<li>SOURCE - this is the annotation is only kept in source code, meaning
+it is discarded during byte code generation</li>
+<li>CLASS - the annotation information is retained after the byte code
+generation and stored in the <code>.class</code> file</li>
+<li>RUNTIME - the information is kept throughout the runtime of the
+program and can be obtained during runtime</li>
+</ul>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="at">@Retention</span><span class="op">(</span><span class="bu">RetentionPolicy</span><span class="op">.</span><span class="fu">RUNTIME</span><span class="op">)</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="at">@interface</span> <span class="bu">Annotation</span> <span class="op">{</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">val</span><span class="op">();</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="obtaining">Obtaining</h3>
+<p>To extract information about an annotation, one can use the built in
+java reflection mechanisms to do so, by fetching the annotation types
+defined on given identifiers - classes, methods etc.</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="kw">class</span> Meta <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Annotation</span><span class="op">(</span>val <span class="op">=</span> <span class="dv">1234</span><span class="op">)</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">method</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Annotation</span><span class="op">(</span>val <span class="op">=</span> <span class="dv">1234</span><span class="op">)</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">method</span><span class="op">(</span><span class="bu">String</span> arg1<span class="op">,</span> <span class="dt">int</span> arg2<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> args<span class="op">[])</span> <span class="op">{</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    Meta ob <span class="op">=</span> <span class="kw">new</span> <span class="fu">Meta</span><span class="op">();</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Class</span><span class="op">&lt;?&gt;</span> c <span class="op">=</span> ob<span class="op">.</span><span class="fu">getClass</span><span class="op">();</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Method</span> m <span class="op">=</span> c<span class="op">.</span><span class="fu">getMethod</span><span class="op">(</span><span class="st">&quot;method&quot;</span><span class="op">);</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Method</span> m2 <span class="op">=</span>  c<span class="op">.</span><span class="fu">getMethod</span><span class="op">(</span><span class="st">&quot;method&quot;</span><span class="op">,</span> <span class="bu">String</span><span class="op">.</span><span class="fu">class</span><span class="op">,</span> <span class="dt">int</span><span class="op">.</span><span class="fu">class</span><span class="op">);</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Annotation</span> anno <span class="op">=</span> m<span class="op">.</span><span class="fu">getAnnotation</span><span class="op">(</span><span class="bu">Annotation</span><span class="op">.</span><span class="fu">class</span><span class="op">);</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Annotation</span> anno2 <span class="op">=</span> m2<span class="op">.</span><span class="fu">getAnnotation</span><span class="op">(</span><span class="bu">Annotation</span><span class="op">.</span><span class="fu">class</span><span class="op">);</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot; &quot;</span> <span class="op">+</span> anno<span class="op">.</span><span class="fu">val</span><span class="op">());</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot; &quot;</span> <span class="op">+</span> anno2<span class="op">.</span><span class="fu">val</span><span class="op">());</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">NoSuchMethodException</span> exc<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Method Not Found.&quot;</span><span class="op">);</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>From the example above, the annotation information for two different
+methods is obtained, observe that the information about the method
+without any arguments and a method with arguments, as specified in the
+methods declaration. There is a way to obtain all annotations for a
+given target - by using getAnnotations(), which simply returns a list of
+Annotations instances of the Annotation type class</p>
+<p>The Annotation API also provides a way to check if a give annotation
+exists instead of locating it one can simply obtain a boolean flag
+indicating if a given annotation is present on a given target -
+isAnnotationPresent(annotationClass) -</p>
+<h3 id="types">Types</h3>
+<ul>
+<li>Annotation - this is the base class for all annotations, from which
+they extend</li>
+<li>AnnotatedElement - this is the base interface to annotate elements -
+Method, Package, Class, and so on.</li>
+<li>AnnotatedType - this type is reserved for annotations which are put
+on <code>args</code> or <code>return</code> types in general</li>
+</ul>
+<h3 id="inheriting">Inheriting</h3>
+<p>By default all methods which obtain information about a given single
+or list of annotations, will try to obtain all annotations, including
+inherited ones, by default annotations are not inherited, but they can
+be annotated with a special annotation to specify that they are. How
+that works is simple, when one invokes the <code>getAnnotations</code>
+method the reflection implementation will start walking the entire class
+hierarchy, upwards, checking which annotations have the inherited
+annotations, adding them to the list of collected annotations, those
+that do not have one (by default) will simply not be present in the
+final result list. To obtain only the current level annotations without
+traversing the entire tree, one must use the
+<code>getDeclaredAnnotations</code> or in general the
+<code>*Declared*</code> variant of the methods related to obtaining
+annotation information, for a given target.</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="at">@Inherited</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="at">@interface</span> <span class="bu">Annotation</span> <span class="op">{</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">val</span><span class="op">();</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="target">Target</h3>
+<p>The target annotation specified what target the given annotation is
+applicable for, by default when an annotation is created without a
+target, it is applicable everywhere, which is usually not what we want,
+some specific annotations must only be targeting specific language
+objects - methods, packages, classes and so on, below in the table are
+listed all types that an annotation can be specified for. Note the
+TYPE_USE - which is used to annotate both the return type and arguments
+of a given method, this is quite powerful, especially being able to
+target specific arguments on a method.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Target</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ANNOTATION_TYPE</td>
+<td>Another annotation</td>
+</tr>
+<tr class="even">
+<td>CONSTRUCTOR</td>
+<td>Constructor</td>
+</tr>
+<tr class="odd">
+<td>FIELD</td>
+<td>Field</td>
+</tr>
+<tr class="even">
+<td>LOCAL_VARIABLE</td>
+<td>Local variable</td>
+</tr>
+<tr class="odd">
+<td>METHOD</td>
+<td>Method</td>
+</tr>
+<tr class="even">
+<td>PACKAGE</td>
+<td>Package</td>
+</tr>
+<tr class="odd">
+<td>PARAMETER</td>
+<td>Parameter</td>
+</tr>
+<tr class="even">
+<td>TYPE</td>
+<td>Class, interface, or enumeration</td>
+</tr>
+<tr class="odd">
+<td>TYPE_PARAMETER</td>
+<td>Type parameter (Added by JDK 8.)</td>
+</tr>
+<tr class="even">
+<td>TYPE_USE</td>
+<td>Type use (Added by JDK 8.)</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="at">@Target</span><span class="op">({</span> <span class="bu">ElementType</span><span class="op">.</span><span class="fu">FIELD</span><span class="op">,</span> <span class="bu">ElementType</span><span class="op">.</span><span class="fu">LOCAL_VARIABLE</span> <span class="op">})</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="at">@interface</span> <span class="bu">Annotation</span> <span class="op">{</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">val</span><span class="op">();</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="functional">Functional</h3>
+<p>The functional interface annotation specifies that an interface is
+functional - what that means is that an interface has only one single
+method (like <code>Runnable</code>) that needs to be implemented, this
+can be used by the compiler to then optimize and simplify the byte code
+generation, it also allows one to define a lambda function where a class
+or type is expected</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="at">@FunctionalInterface</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> Functional <span class="op">{</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">work</span><span class="op">();</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Concrete <span class="op">{</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">method</span><span class="op">(</span>Functional functional<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>Concrete c <span class="op">=</span> <span class="kw">new</span> <span class="fu">Concrete</span><span class="op">();</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>c<span class="op">.</span><span class="fu">method</span><span class="op">(()</span> <span class="op">=&gt;</span> <span class="op">{</span> <span class="co">/* method body implements the functional interface as anonymous class but represented as lambda function */</span> <span class="op">});</span></span></code></pre></div>
+<p><code>Note that by default all interfaces that have just one single abstract, non-implemented method are by default implicitly treated as FunctionalInterface type, meaning that one does not need to manually specify the annotation for this to be true</code></p>
+<h3 id="type">Type</h3>
+<p>As already mentioned with java 8, the new type annotation was added
+which allows annotations to be placed on method return and argument
+types, even in the <code>throws</code> declaration of a method in front
+of an exception type. One can also annotate the <code>this</code>
+implicit method parameter passed to object method invocations</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Concrete <span class="op">{</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">methodOne</span><span class="op">()</span> <span class="kw">throws</span> <span class="at">@TypeAnno</span> <span class="bu">NullPointerException</span> <span class="op">{</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">@TypeAnno</span> <span class="bu">Integer</span> <span class="fu">methodTwo</span><span class="op">(</span><span class="at">@TypeAnno</span> Concrete <span class="kw">this</span><span class="op">,</span> <span class="dt">int</span> i<span class="op">,</span> <span class="dt">int</span> j<span class="op">)</span> <span class="op">{</span> <span class="co">// note that we have exposed the implicit `this` argument of type Concrete</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In the example above one can see how not only the return type can be
+annotated, but the declaration in the <code>throws</code> block, as well
+as the implicit <code>this</code> which is passed on every instance
+member method invocation.</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">// An annotation that can be applied to a type function return type or argument.</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="at">@Target</span><span class="op">(</span><span class="bu">ElementType</span><span class="op">.</span><span class="fu">TYPE_USE</span><span class="op">)</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="at">@interface</span> TypeUse <span class="op">{</span> <span class="op">}</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="co">// An annotation that can be applied to a type parameter i.e generics</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="at">@Target</span><span class="op">(</span><span class="bu">ElementType</span><span class="op">.</span><span class="fu">TYPE_PARAMETER</span><span class="op">)</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="at">@interface</span> TypeParam <span class="op">{</span> <span class="op">}</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co">// An annotation that can be applied to a field declaration - class member field.</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="at">@Target</span><span class="op">(</span><span class="bu">ElementType</span><span class="op">.</span><span class="fu">FIELD</span><span class="op">)</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="at">@interface</span> FieldAnno <span class="op">{</span> <span class="op">}</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="co">// An annotation that can be applied to a method declaration. - class member method</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="at">@Target</span><span class="op">(</span><span class="bu">ElementType</span><span class="op">.</span><span class="fu">METHOD</span><span class="op">)</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="at">@interface</span> MethodAnno <span class="op">{</span> <span class="op">}</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="co">// An annotation that can be applied to a type - class, enum, interface and so on</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="at">@Target</span><span class="op">(</span><span class="bu">ElementType</span><span class="op">.</span><span class="fu">TYPE</span><span class="op">)</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="at">@interface</span> <span class="bu">Type</span> <span class="op">{</span> <span class="op">}</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a><span class="co">// the TypeParam here targets the type parameter itself, as part of the class declaration</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="at">@Type</span> <span class="kw">class</span> SomeClass<span class="op">&lt;</span><span class="at">@TypeParam</span> T <span class="kw">extends</span> <span class="bu">Integer</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the FieldAnno here targets the declared member field, not the return type of the field</span></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="at">@FieldAnno</span> <span class="bu">Integer</span> variable<span class="op">;</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="at">@MethodAnno</span> <span class="at">@TypeUse</span> <span class="bu">Integer</span> <span class="fu">method</span><span class="op">(</span><span class="at">@TypeUse</span> <span class="bu">Integer</span> input<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">// one can see that MethodAnno, and TypeUse both target different things</span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">// - MethodAnno - targets the method declaration in this case</span></span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">// - TypeUse - targets the return type as well as the method argument and locals</span></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>        <span class="at">@TypeUse</span> TypeAnnoDemo<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> target <span class="op">=</span> <span class="kw">new</span> <span class="at">@TypeUse</span> <span class="bu">Integer</span><span class="op">(</span>input<span class="op">.</span><span class="fu">byteValue</span><span class="op">());</span></span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>An annotation can be put anywhere around the identifier, and only based on the target of the annotation can we actually deduce the exact target that is going to be annotated. Be careful, even if an annotation is put on another line above the identifier that does not mean it somehow changes the scope or target of the annotation</code></p>
+<h3 id="repeating">Repeating</h3>
+<p>Since the annotations strictly specify that by default only one
+instance of the given annotation can exist on a target, one can not
+simply put as many of the same annotation as one wants on the same
+target, to do this first the annotation has to be marked as repeatable,
+and a special container annotation has to be created for this repeatable
+annotation.</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">// the annotation that needs to be repeated</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="at">@Retention</span><span class="op">(</span><span class="bu">RetentionPolicy</span><span class="op">.</span><span class="fu">RUNTIME</span><span class="op">)</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="at">@Repeatable</span><span class="op">(</span>MyRepeatedAnnos<span class="op">.</span><span class="fu">class</span><span class="op">)</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="at">@interface</span> MyAnno <span class="op">{</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> <span class="fu">str</span><span class="op">()</span> <span class="kw">default</span> <span class="st">&quot;Testing&quot;</span><span class="op">;</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">val</span><span class="op">()</span> <span class="kw">default</span> <span class="dv">9000</span><span class="op">;</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="co">// container which will hold the annotations, compiler handles that</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="at">@Retention</span><span class="op">(</span><span class="bu">RetentionPolicy</span><span class="op">.</span><span class="fu">RUNTIME</span><span class="op">)</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="at">@interface</span> MyRepeatedAnnos <span class="op">{</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    MyAnno<span class="op">[]</span> <span class="fu">value</span><span class="op">();</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="co">// declare multiple annotations of the same type on the same target</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="at">@MyAnno</span><span class="op">(</span>str <span class="op">=</span> <span class="st">&quot;First annotation&quot;</span><span class="op">,</span> val <span class="op">=</span> <span class="op">-</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="at">@MyAnno</span><span class="op">(</span>str <span class="op">=</span> <span class="st">&quot;Second annotation&quot;</span><span class="op">,</span> val <span class="op">=</span> <span class="dv">100</span><span class="op">)</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">method</span><span class="op">(</span><span class="bu">String</span> str<span class="op">,</span> <span class="dt">int</span> i<span class="op">)</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="co">// one can then obtain the container itself which will by default hold only the repeated annotations of the specified type</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="bu">Annotation</span> anno <span class="op">=</span> m<span class="op">.</span><span class="fu">getAnnotation</span><span class="op">(</span>MyRepeatedAnnos<span class="op">.</span><span class="fu">class</span><span class="op">);</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="co">// this is also possible if we know the type of the repeated annotation as well.</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a><span class="bu">Annotation</span><span class="op">[]</span> annos <span class="op">=</span> m<span class="op">.</span><span class="fu">getAnnotationsByType</span><span class="op">(</span>MyAnno<span class="op">.</span><span class="fu">class</span><span class="op">);</span></span></code></pre></div>
+</body>
+</html>

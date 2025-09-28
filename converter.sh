@@ -2,7 +2,7 @@
 set -euo pipefail
 
 die_json_err() {
-    echo "Response invalid JSON:"
+    echo "Response invalid json"
     echo "$1"
     exit 1
 }
@@ -15,7 +15,7 @@ check_api_error() {
     fi
 }
 
-chunk_stdin_by_chars() {
+chunk_stdin_chars() {
     local maxlen="$1"
     local outdir="$2"
     mkdir -p "$outdir"
@@ -48,21 +48,27 @@ chunk_stdin_by_chars() {
     '
 }
 
-if [ $# -lt 2 ]; then
-    echo "Usage $0 {input-file} export_folder"
+if [ $# -lt 1 ]; then
+    echo "Usage $0 {input_file}"
     exit 1
 fi
-
-input="$1"
-target="$2"
 
 if [ -z "${OPENAI_API_KEY:-}" ]; then
     echo "Please set your OPENAI_API_KEY environment variable."
     exit 1
 fi
 
-target="$(pwd "$input")/exports/$2/$(basename "$input")"
-mkdir -p "$(pwd)/exports/$2" && echo "Processing $input"
+source=$1
+cwd="$(pwd)"
+cwd="${cwd%/}"
+
+input=$(basename "$source")
+relative="${source#"$cwd"/}"
+target=$(dirname "$cwd/exports/$relative")
+mkdir -p "$target" && echo "Processing $input"
+
+source="$cwd/$source"
+target="$target/$input"
 
 SYSTEM_PROMPT="$(
     cat <<'EOF'
@@ -89,9 +95,9 @@ Structure & flow:
 
 Code, commands, and config:
 - Do not read raw syntax or punctuation-heavy content verbatim.
-- For each code block, replace with a 1–3 sentence, plain-English summary of what it does and why it matters. Mention key function/class names, but avoid symbol-level detail. Try to explain what the essense of it is.
+- For each code block, replace with a 1–3 sentence, plain-English of what it does and why it matters. Mention key function/class names, but avoid symbol-level detail. Try to explain what the essense of it is.
   - Example: “This block defines a function called add that takes two numbers and returns their sum.”
-- For CLI or config snippets, summarize their purpose and outcome (e.g., “This installs the dependencies {name},” “This command fetches the page and prints the status from {website}”).
+- For CLI or config snippets, explain their purpose and outcome (e.g., “This installs the dependencies {name},” “This command fetches the page and prints the status from {website}”).
 
 Clarity & listenability:
 - Expand dense sentences slightly for clarity; split run-ons.
@@ -101,9 +107,9 @@ Clarity & listenability:
 EOF
 )"
 
-summary="${target}-tts.txt"
+text="${target}-tts.txt"
 
-if [[ -f "$summary" ]]; then
+if [[ -f "$text" ]]; then
     echo "Text to speech already exists for $input."
 else
     echo "Converting $input to text to speech ..."
@@ -112,11 +118,11 @@ else
     out_chunks="$tmp_sum/out_chunks"
     mkdir -p "$in_chunks" "$out_chunks"
 
-    summary_maxlen=9000
-    chunk_stdin_by_chars "$summary_maxlen" "$in_chunks" <"$input.md"
+    chunk_maxlen=9000
+    chunk_stdin_chars "$chunk_maxlen" "$in_chunks" <"$source.md"
     mapfile -t in_files < <(printf '%s\n' "$in_chunks"/chunk_*.txt | sort)
     if [ ${#in_files[@]} -eq 0 ]; then
-        echo "No input chunks produced; cannot summarize."
+        echo "No input chunks produced, cannot convert."
         exit 1
     fi
     echo "Created ${#in_files[@]} input chunk(s)."
@@ -145,18 +151,18 @@ else
         echo "$resp" | jq . >/dev/null 2>&1 || die_json_err "$resp"
         check_api_error "$resp"
 
-        chunk_summary="$(echo "$resp" | jq -r '.choices[0].message.content')"
-        echo "$chunk_summary" >"$out_chunks/summary_${idx}.txt"
+        chunk_text="$(echo "$resp" | jq -r '.choices[0].message.content')"
+        echo "$chunk_text" >"$out_chunks/text_${idx}.txt"
     done
 
-    touch "$summary"
+    touch "$text"
     for i in $(seq 1 "${#in_files[@]}"); do
-        cat "$out_chunks/summary_${i}.txt" >>"$summary"
-        printf '\n\n' >>"$summary"
+        cat "$out_chunks/text_${i}.txt" >>"$text"
+        printf '\n\n' >>"$text"
     done
 
     rm -rf "$tmp_sum"
-    echo "Saved summary to $summary"
+    echo "Saved converted text to $text"
 fi
 
 outfile="${target}.mp3"
@@ -164,14 +170,14 @@ outfile="${target}.mp3"
 if [[ -f "$outfile" ]]; then
     echo "Audio file alrady exists for $input."
 else
-    echo "Generating TTS from $summary..."
+    echo "Generating TTS from $text..."
 
     maxlen=3900
     tmpdir="$(mktemp -d)"
     chunks_dir="$tmpdir/chunks"
     mkdir -p "$chunks_dir"
 
-    chunk_stdin_by_chars "$maxlen" "$chunks_dir" <"$summary"
+    chunk_stdin_chars "$maxlen" "$chunks_dir" <"$text"
     mapfile -t chunk_files < <(printf '%s\n' "$chunks_dir"/chunk_*.txt | sort)
     if [ ${#chunk_files[@]} -eq 0 ]; then
         echo "No chunks produced for TTS."

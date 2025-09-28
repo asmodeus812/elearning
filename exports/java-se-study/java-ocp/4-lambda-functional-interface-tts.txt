@@ -1,0 +1,145 @@
+Functional interface
+
+The Java utility function namespace package includes a wide range of built-in interfaces. Many other packages in the Java library rely on these interfaces, which are defined in this package.
+
+Before you define your own custom functional interface, it’s a good idea to check if an existing one from the util.function package already fits your needs. Most of the functional interfaces in this package cover the most common patterns used in lambda expressions. They can also be shared and used with internal Java libraries, such as Stream and others.
+
+Functional
+
+Let’s look at the most commonly used functional interfaces defined in the java.util.function package. It’s important to note that many of these interfaces have specialized versions. For example, IntPredicate is a specialization of the Predicate interface, designed for integer conditions and used in IntStream. Another example is UnaryOperator, which is a specialization of the Function interface. UnaryOperator takes and returns a single result of the same type.
+
+Here are the core functional interfaces and their typical uses:
+
+Predicate, parameterized with a type, checks a condition and returns a boolean value. For example, it is used in the filter method of java.util.stream.Stream to remove elements that don’t match a given condition.
+
+Consumer, also parameterized with a type, performs an operation that takes an argument but returns nothing. This is used in the forEach method in collections and streams, allowing you to traverse and process each element.
+
+Function, parameterized with two types, takes an argument and returns a result. It is commonly used in the map method of streams to transform or operate on values and return a new result.
+
+Supplier, parameterized with a type, represents an operation that returns a value to the caller. The returned value could be the same or different each time.
+
+The method names for these interfaces are straightforward and easy to remember, as they are based on the interface name itself.
+
+For Predicate, the method is test, which takes an argument and returns a boolean result based on the target argument.
+
+For Consumer, the method is accept, which takes an argument, performs an action, and returns no result.
+
+For Function, the method is apply, which takes an argument, performs an action, and returns a new result of a possibly different type.
+
+For Supplier, the method is get, which simply returns a result without accepting any external argument.
+
+Method References
+
+Most common implementations of these interfaces use method references from existing libraries and APIs. This approach leverages the power of functional interfaces, especially when working with streams.
+
+For example, consider a predicate that uses the String isEmpty method as a function reference. In this case, each string entry in the stream is passed to isEmpty, which returns a boolean indicating whether the string is empty.
+
+Another example is a consumer that uses System.out.println as a function reference. This prints each element of the stream, taking in at least one argument and returning nothing.
+
+A function example might use Integer.parseInt as a method reference. This maps a string to an integer by parsing it. If parsing fails, an exception is thrown. The function takes a string as input and returns an integer.
+
+For a supplier, you might use a method reference to Random.nextBoolean. This is a function with no input arguments that generates a new random boolean value each time it is called.
+
+In all these examples, function references are used, which is a cornerstone feature of lambda expressions and functional interfaces introduced in Java 8. This feature works seamlessly with streams, allowing for clean and concise functional-style code.
+
+One key takeaway is the use of instance methods as function references, such as String isEmpty and random nextBoolean. Both are instance methods, but in the case of String isEmpty, the implicit this argument is each entry in the stream. The method signature matches the predicate interface, which expects a boolean test with a string argument.
+
+For random nextBoolean, the instance reference is specified in the declaration, so the first argument to nextBoolean is the random instance variable. This matches the supplier interface, which expects a get method returning a boolean.
+
+The Integer parseInt example matches the function interface. Here, parseInt is a static method in the Integer class. It takes a string as input and returns an integer, matching the apply method of the function interface.
+
+The differences between these cases are subtle but powerful. Sometimes, it can be tricky to get the method reference syntax right or to read it clearly, but it enables very expressive code.
+
+Constructor references
+
+Constructor references for any class work similarly to regular method references. In fact, they are much like static methods, since constructors do not take a reference to this. Constructors can take any number of arguments, often none, but sometimes one or more. The return value of a constructor is, of course, a new instance of the class.
+
+For example, you can create a supplier of strings by referencing the String constructor. This matches the supplier functional interface, and the method reference syntax is String new.
+
+This example shows how a class constructor can be mapped to an existing functional interface from the java.util package. Using a method reference with new, the lambda expression is simplified to String new.
+
+Interfaces
+
+Now, let’s look at some of the most important functional interfaces provided in java.util.function. These extend the core four interfaces with different capabilities, useful for various contexts. The goal is to cover all possible cases and combinations between raw class types and primitive types.
+
+Primitive
+
+There are also primitive versions of the functional interface classes provided by java.util. These are designed to work with the primitive versions of stream types, such as IntStream and DoubleStream. The next section provides a list of these primitive functional interfaces.
+
+
+Functional Interfaces in Java Utilities
+
+Let’s explore the key functional interfaces provided in the Java utilities package, focusing on their purpose and how they differ.
+
+First, we have the Predicate interfaces for primitive types. The IntPredicate, LongPredicate, and DoublePredicate interfaces each define a method called test. This method takes a single argument of type int, long, or double, respectively, and returns a boolean value. Essentially, these interfaces are used to evaluate a condition on a primitive value and return true or false.
+
+Next, we have the Function interfaces for primitive types. The IntFunction, LongFunction, and DoubleFunction interfaces each define a method called apply. This method takes a primitive argument—int, long, or double—and returns a result of a generic type R. These are used when you want to transform a primitive value into another type.
+
+There are also interfaces that convert from a generic type to a primitive. For example, ToIntFunction, ToLongFunction, and ToDoubleFunction each define a method that takes a generic argument and returns an int, long, or double, respectively.
+
+Additionally, there are interfaces for converting between primitive types. For example, IntToLongFunction takes an int and returns a long, IntToDoubleFunction takes an int and returns a double, and so on for other combinations like LongToIntFunction, LongToDoubleFunction, DoubleToIntFunction, and DoubleToLongFunction.
+
+Now, let’s look at the Consumer interfaces for primitives. IntConsumer, LongConsumer, and DoubleConsumer each define a method called accept, which takes a primitive argument and returns nothing. These are used when you want to perform an operation on a value without returning a result. There are also object-primitive consumer interfaces, such as ObjIntConsumer, ObjLongConsumer, and ObjDoubleConsumer, which take both a generic object and a primitive value.
+
+For supplying values, there are Supplier interfaces for primitives. BooleanSupplier, IntSupplier, LongSupplier, and DoubleSupplier each define a method that takes no arguments and returns a boolean, int, long, or double, respectively.
+
+Here’s an example to illustrate how a predicate function is used with streams. In this case, an IntPredicate is passed to the filter method of an IntStream. The filter checks if each integer in the range from one to nine is even, and then prints the even numbers. This demonstrates how predicates can be used to filter data in streams.
+
+Binary Functional Interfaces
+
+The binary interfaces in java.util expand on the existing pattern by adding one more input argument to the functional interfaces. This means that, for example, a BiPredicate takes two arguments and returns a boolean, a BiConsumer takes two arguments and returns nothing, and a BiFunction takes two arguments and returns a result. The method names remain the same—test, accept, and apply—but now accept two parameters instead of one.
+
+Unary Functional Interfaces
+
+The unary functional interfaces are a specialization of the Function interface. The UnaryOperator interface, for example, takes a single argument of type T and returns a result of the same type T. This is useful when you want to perform an operation where the input and output types are the same.
+
+Overview of the java.util.function Package
+
+The java.util.function package consists entirely of functional interfaces. There are four core interfaces: Predicate, Consumer, Function, and Supplier. The rest are primitive versions, binary versions, and derived interfaces such as UnaryOperator. The main difference between these interfaces is the signature of their abstract methods.
+
+Summary
+
+Let’s summarize the built-in functional interfaces.
+
+Predicate, Consumer, Function, and Supplier differ mainly based on the signature of their abstract method.
+
+A Predicate tests a given condition and returns true or false. Its abstract method is named test, takes a parameter of generic type T, and returns a boolean.
+
+A Consumer consumes an object and returns nothing. Its abstract method is named accept, takes an argument of generic type T, and returns void.
+
+A Function operates on an argument and returns a result. Its abstract method is named apply, takes an argument of generic type T, and returns a generic type R.
+
+A Supplier supplies a value, taking no arguments but returning something. Its abstract method is named get, takes no arguments, and returns a generic type T.
+
+The forEach method defined in the Iterable interface, which is implemented by collection classes, accepts a Consumer.
+
+Primitive Versions
+
+The built-in interfaces Predicate, Consumer, Function, and Supplier operate on reference type objects. For primitive types, there are specializations available for int, long, and double.
+
+When the Stream interface is used with primitive types, it can result in unnecessary boxing and unboxing of primitive values to their wrapper types. This can slow down code and waste memory, because extra wrapper objects are created. Therefore, whenever possible, prefer using the primitive type specializations of the functional interfaces Predicate, Consumer, Function, and Supplier. This leads to more efficient and performant code.
+
+
+Primitive Versions of Functional Interfaces
+
+The primitive versions of the functional interfaces Predicate, Consumer, Function, and Supplier are available only for the types int, long, and double. For the Supplier interface, the boolean type is also included in addition to these three types.
+
+If you need to use these interfaces with types such as char, byte, or short, you must use implicit conversions to the relevant int version. Similarly, when working with the float type, you can use the version designed for double.
+
+For example, if you want to use a Predicate with a char value, you would convert the char to an int and use IntPredicate. If you have a float value, you would use DoublePredicate after converting the float to a double.
+
+Binary Versions of Functional Interfaces
+
+The functional interfaces BiPredicate, BiConsumer, and BiFunction are binary versions of Predicate, Consumer, and Function, respectively. These binary versions take two arguments instead of one. The prefix “Bi” indicates that the interface works with two input values.
+
+There is no binary equivalent for the Supplier interface, since Supplier does not take any arguments.
+
+Unary Versions
+
+The UnaryOperator interface is a functional interface that extends the Function interface. It represents an operation on a single operand that produces a result of the same type as its operand.
+
+There are also primitive type specializations of UnaryOperator. These are IntUnaryOperator, LongUnaryOperator, and DoubleUnaryOperator, which are designed for int, long, and double types, respectively.
+
+In summary, when working with functional interfaces in Java, you have specialized versions for primitive types, binary versions for operations that require two arguments, and unary versions for operations on a single argument. For types not directly supported, such as char or float, you can use the closest primitive specialization with implicit type conversion.
+
+

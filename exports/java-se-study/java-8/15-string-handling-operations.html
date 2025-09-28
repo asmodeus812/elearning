@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>15-string-handling-operations</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#charsequence" id="toc-charsequence">CharSequence</a>
+<ul>
+<li><a href="#strings" id="toc-strings">Strings</a>
+<ul>
+<li><a href="#constructors" id="toc-constructors">Constructors</a></li>
+<li><a href="#basics" id="toc-basics">Basics</a></li>
+<li><a href="#comparison" id="toc-comparison">Comparison</a></li>
+<li><a href="#searching" id="toc-searching">Searching</a></li>
+<li><a href="#reducing" id="toc-reducing">Reducing</a></li>
+</ul></li>
+<li><a href="#stringbufferstringbuilder"
+id="toc-stringbufferstringbuilder">StringBuffer/StringBuilder</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="charsequence">CharSequence</h1>
+<p><code>CharSequence</code> is the base interface from which most of
+everything in the core library that is considered a
+<code>string or a sequence</code> of some sorts implements. It provides
+the very basic interface which all sequences of characters must
+implement</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">length</span><span class="op">();</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> <span class="fu">toString</span><span class="op">();</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">boolean</span> <span class="fu">isEmtpy</span><span class="op">();</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> <span class="fu">charAt</span><span class="op">(</span><span class="dt">int</span> index<span class="op">);</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">.....................</span><span class="op">.</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// and many many more</span></span></code></pre></div>
+<h2 id="strings">Strings</h2>
+<h3 id="constructors">Constructors</h3>
+<p>Unless specified otherwise in the constructor the Java runtime will
+use the system encoding to create strings, when they are passed in under
+the form of char or byte arrays, usually that is either UTF-8 or
+UTF-16</p>
+<ol type="1">
+<li>String(char[] chars) - takes in array of 2-byte sized chars, to
+construct a new string object</li>
+<li>String(byte[] bytes) - an alternative variant of the char[]
+constructor where 1-byte sized elements are used</li>
+<li>String(StringBuilder builder) - a copy constructor for strings which
+copies the contents of a StringBuilder to a new string object</li>
+<li>Literals - string literals are special type of String objects which
+are handled by the runtime, as already described these literals are
+pooled by the runtime which allows them to be re-used e.g. String lit =
+“literal” (literals are constant and compile time values defined in
+source code)</li>
+</ol>
+<h3 id="basics">Basics</h3>
+<ol type="1">
+<li><p>Concatenation - the java language does not allow any arithmetic
+operators to be used on strings except for the <code>+</code> operator
+which can be used to concatenate strings, string literals as well - if
+concatenation of a multiple string literals is performed, one final
+string object is generated from those and stored in the string pool.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>     <span class="bu">String</span> <span class="dt">long</span> <span class="op">=</span> <span class="st">&quot;one&quot;</span> <span class="op">+</span> <span class="st">&quot;two&quot;</span> <span class="op">+</span> <span class="st">&quot;three&quot;</span><span class="op">;</span> <span class="co">// will produce one string object pooled by the run-time</span></span></code></pre></div>
+<p>Note, extra care needs to be taken when concatenating strings with
+other types, since there is no precedence the expression will be
+evaluated left to right, therefore one could face the following case
+which has different behavior based on the actual expression</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>     <span class="bu">String</span> expr <span class="op">=</span> <span class="st">&quot;four &quot;</span> <span class="op">+</span> <span class="dv">2</span> <span class="op">+</span> <span class="dv">2</span><span class="op">;</span> <span class="co">// this will produce the string four 22, not four 4</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>     <span class="bu">String</span> expr <span class="op">=</span> <span class="st">&quot;four &quot;</span> <span class="op">+</span> <span class="op">(</span><span class="dv">2</span> <span class="op">+</span> <span class="dv">2</span><span class="op">);</span> <span class="co">// this will produce the string four 4, not four 22</span></span></code></pre></div></li>
+</ol>
+<p><code>When concatenation is performed, Java would use the Object.toString or String.valueOf methods to convert the other data types to strings objects, that is how the language is able to concatenate seemingly unrelated to String objects</code></p>
+<ol start="2" type="1">
+<li><p>Extraction - to extract characters from a string, there are
+several interfaces which the core library exposes -
+<code>charAt, getChars or getBytes</code></p>
+<ul>
+<li>charAt - extract single character from a string</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> s <span class="op">=</span> <span class="st">&quot;This is a demo of the charAt method.&quot;</span><span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> c <span class="op">=</span> s<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span><span class="dv">3</span><span class="op">);</span> <span class="co">// extract char from index 3</span></span></code></pre></div>
+<ul>
+<li>getChars - extract a range of characters from a string</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>     <span class="bu">String</span> s <span class="op">=</span> <span class="st">&quot;This is a demo of the getChars method.&quot;</span><span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>     <span class="dt">int</span> start <span class="op">=</span> <span class="dv">10</span><span class="op">;</span> <span class="dt">int</span> end <span class="op">=</span> <span class="dv">14</span><span class="op">;</span> <span class="co">// starting and ending indices in the string</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>     <span class="dt">char</span> buf<span class="op">[]</span> <span class="op">=</span> <span class="kw">new</span> <span class="dt">char</span><span class="op">[</span>end <span class="op">-</span> start<span class="op">];</span> <span class="co">// make array with space for 4 characters</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>     s<span class="op">.</span><span class="fu">getChars</span><span class="op">(</span>start<span class="op">,</span> end<span class="op">,</span> buf<span class="op">,</span> <span class="dv">0</span><span class="op">);</span> <span class="co">// pull 4 characters from index 10 to 14 non inclusive</span></span></code></pre></div>
+<ul>
+<li>getBytes - extract the byte representation of the string</li>
+</ul>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> s <span class="op">=</span> <span class="st">&quot;This is a demo of the getBytes method.&quot;</span><span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">byte</span><span class="op">[]</span> bytes <span class="op">=</span> s<span class="op">.</span><span class="fu">getBytes</span><span class="op">();</span> <span class="co">// converts the utf-16 encoded string into ascii byte array</span></span></code></pre></div>
+<ul>
+<li>toCharArray - convert the entire string to a char array</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> s <span class="op">=</span> <span class="st">&quot;This is a demo of the toCharArray method.&quot;</span><span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span><span class="op">[]</span> bytes <span class="op">=</span> s<span class="op">.</span><span class="fu">toCharArray</span><span class="op">();</span> <span class="co">// convert the entire string to a 2-byte wide char array</span></span></code></pre></div></li>
+</ol>
+<h3 id="comparison">Comparison</h3>
+<p>To compare the contents of two string objects, instead of their
+reference one has to use the <code>equals or equalsIgnoreCase</code>,
+which are pretty much self explanatory.</p>
+<ol type="1">
+<li>equals / equalsIgnoreCase - compare the strings character wise,
+either <code>ignoring or respecting the character casing</code></li>
+<li>regionMatches - compares a region from one string to another, the
+method is overloaded to accept a flag of <code>ignoreCase</code></li>
+<li>startsWith / endsWith - checks if the given string starts or ends
+with another string, a specialized case of
+<code>regionMatches</code></li>
+<li>compareTo / compareToIgnoreCase - implements comparable, and for
+strings that implies comparing them <code>lexicographically</code> or in
+<code>alphabetical</code> order</li>
+</ol>
+<h3 id="searching">Searching</h3>
+<ol type="1">
+<li><p>indexOf - finds the first index or -1 if not found, in a string
+that matches a given char or string/substring</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">indexOf</span><span class="op">(</span><span class="dt">int</span> ch<span class="op">,</span> <span class="dt">int</span> startIndex<span class="op">)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">indexOf</span><span class="op">(</span><span class="bu">String</span> str<span class="op">,</span> <span class="dt">int</span> startIndex<span class="op">)</span></span></code></pre></div></li>
+<li><p>lastIndexOf - finds the last index or -1 if not found, in a
+string that matches a given char or string/substring</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">lastIndexOf</span><span class="op">(</span><span class="dt">int</span> ch<span class="op">,</span> <span class="dt">int</span> startIndex<span class="op">)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">lastIndexOf</span><span class="op">(</span><span class="bu">String</span> str<span class="op">,</span> <span class="dt">int</span> startIndex<span class="op">)</span></span></code></pre></div></li>
+</ol>
+<h3 id="reducing">Reducing</h3>
+<p>Since strings are <code>immutable</code> one can not simply modify a
+string, since none of the api methods work on the instance itself, each
+operation that produces a string creates a new string object in the java
+run-time. Therefore to reduce one string to another one could use
+various forms of the <code>substring</code> methods</p>
+<ol type="1">
+<li><p>substring - generate a new string object from the source string
+instance, starting at a given start index, and optional end index (non
+inclusive)</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> <span class="fu">substring</span><span class="op">(</span><span class="dt">int</span> startIndex<span class="op">)</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> <span class="fu">substring</span><span class="op">(</span><span class="dt">int</span> startIndex<span class="op">,</span> <span class="dt">int</span> endIndex<span class="op">)</span></span></code></pre></div></li>
+<li><p>concat - to extend multiple string objects, and produce a new
+one, it is equivalent to using the <code>+ operator</code></p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> <span class="fu">concat</span><span class="op">(</span><span class="bu">String</span> other<span class="op">)</span></span></code></pre></div></li>
+<li><p>replace - replaces a single char or string in a string,
+generating a new instance representing the replacement result</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> <span class="fu">replace</span><span class="op">(</span><span class="dt">char</span> target<span class="op">,</span> <span class="dt">char</span> replacement<span class="op">)</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> <span class="fu">replace</span><span class="op">(</span><span class="bu">CharSequence</span> target<span class="op">,</span> <span class="bu">CharSequence</span> replacement<span class="op">)</span></span></code></pre></div></li>
+<li><p>trim - returns a copy of the source string in which all the
+leading and trailing white space characters are removed, including tabs
+and other unicode white space characters</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> <span class="fu">trim</span><span class="op">()</span></span></code></pre></div></li>
+<li><p>join - extension of the concat method which produces a join of a
+number of strings with a specific delimiter</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> <span class="fu">join</span><span class="op">(</span><span class="bu">CharSequence</span> delim<span class="op">,</span> <span class="bu">CharSequence</span><span class="kw">...</span> strings<span class="op">)</span></span></code></pre></div></li>
+<li><p>toUppser/LowerCase - produce a copy of the original string object
+where all character casings are converted to lower or upper
+case.</p></li>
+</ol>
+<h2 id="stringbufferstringbuilder">StringBuffer/StringBuilder</h2>
+<p>This is the <code>de-facto</code> structure to be used if one wishes
+to produce a mutating string object, <code>StringBuilder</code> provides
+a fast way to <code>append/preprend</code> to a string, without having
+to pay the cost of copying the string constantly as it is using an
+internal dynamic array instead and provides methods to mutate it
+directly, unlike the base <code>String</code> class. The
+<code>StringBuilder</code> also has another companion class
+<code>StringBuffer</code> which is essentially the same, the difference
+is that <code>StringBuilder is synchronized</code> it is equivalent to
+the difference between <code>Integer and AtomicInteger</code> classes
+provided by the Java core.</p>
+<p>The default constructor for both takes in either a size (initial
+capacity), or the ability to construct it initially from an existing
+<code>CharSequence</code>, such as a String.</p>
+<p><code>Note that since the buffer/builder allows the string to be mutated, the api provides a way to reduce or expand the string at any point, using either other strings - append, prepend, insert, or explicitly setting the length of the string, with methods such as setLength, the internal buffer which stores the string is bound by a capacity property which signifies how much emtpy space the buffer contains before a new reallocation is required to expand it, shrinking the buffer is done with trimToSize which will reduce the capcity of the buffer to match the size or length of the string</code></p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">StringBuffer</span> <span class="bu">StringBuffer</span><span class="op">()</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">StringBuffer</span> <span class="bu">StringBuffer</span><span class="op">(</span><span class="dt">int</span> size<span class="op">)</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">StringBuffer</span> <span class="bu">StringBuffer</span><span class="op">(</span><span class="bu">CharSequence</span> chars<span class="op">)</span></span></code></pre></div>
+<ol type="1">
+<li><p>capacity() - the current capacity the <code>buffer</code> can
+hold</p></li>
+<li><p>length() - the current actual length of the <code>string</code>
+contained</p></li>
+<li><p>ensureCapacity(int) - enlarge the capacity of the
+<code>buffer</code></p></li>
+<li><p>charAt(int)/setChaAt(int, char) - extract or update a given
+character at a given position in the string</p></li>
+<li><p>setLength(int) - extends or reduces the length of the string,
+<code>null</code> chars are added to fill in empty space if length is
+bigger than current string, otherwise string is reduced to the given
+length</p></li>
+<li><p>append(String) - appends a string to the end of the
+buffer</p></li>
+<li><p>prepend(String) - prepends a string at the start of the
+buffer</p></li>
+<li><p>insert(int start, String) - inserts a string at a given starting
+index</p></li>
+<li><p>trimToSize() - reduce the internal capacity to match the length
+of the string</p></li>
+<li><p>reverse() - reverse the string contents, this is fast since no
+re-allocation needs to be done</p></li>
+<li><p>delete(int, int)/delCharAt(int) - deletes a substring given a
+start and end index, or a single char at position</p></li>
+<li><p>replace(int, int, String) - replace a range within the buffer,
+given start and end positions for the range, taking care of overriding
+over the range with a given string</p></li>
+</ol>
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ssh-protocol-tools</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#introduction" id="toc-introduction">Introduction</a>
+<ul>
+<li><a href="#what-ssh-is-not" id="toc-what-ssh-is-not">What SSH is
+NOT</a></li>
+<li><a href="#the-ssh-protocol" id="toc-the-ssh-protocol">The SSH
+protocol</a></li>
+<li><a href="#protocols-products-clients-and-confusion"
+id="toc-protocols-products-clients-and-confusion">Protocols, Products,
+Clients and Confusion</a></li>
+<li><a href="#overview-of-ssh-features"
+id="toc-overview-of-ssh-features">Overview of SSH features</a>
+<ul>
+<li><a href="#secure-login" id="toc-secure-login">Secure login</a></li>
+</ul></li>
+<li><a href="#secure-data-transfer" id="toc-secure-data-transfer">Secure
+data transfer</a></li>
+<li><a href="#secure-remote-execution"
+id="toc-secure-remote-execution">Secure remote execution</a></li>
+<li><a href="#keys-and-agents" id="toc-keys-and-agents">Keys and
+agents</a></li>
+<li><a href="#access-control" id="toc-access-control">Access
+control</a></li>
+<li><a href="#port-forwarding" id="toc-port-forwarding">Port
+forwarding</a></li>
+<li><a href="#history-of-ssh" id="toc-history-of-ssh">History of
+SSH</a></li>
+<li><a href="#related-technologies"
+id="toc-related-technologies">Related Technologies</a>
+<ul>
+<li><a href="#rsb-suite" id="toc-rsb-suite">RSB Suite</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="introduction">Introduction</h1>
+<p>What is it ? SSH is the Secure Shell, a popular powerful software
+based approach to network security. Whenever data is sent by a computer
+to the network, SSH automatically encrypts it. When the data reaches its
+intended recipient, SSH automatically decrypts it. The result is
+transparent encryption: users can work normally unaware that their
+communications are safely encrypted on the network. In addition, SSH
+uses modern secure encryption algorithms and is effective enough to be
+found within mission critical application at major corporations.</p>
+<p>SSH has a client/server architecture. An SSH server program typically
+installed and run by a system administrator, accepts or rejects incoming
+connections to its host computer. Users then run SSH client programs,
+typically on other computers to make requests of the SSH server, such as
+- logging in, sending files, or executing commands. All communication
+between the clients and the servers are security encrypted and protected
+from modification.</p>
+<p>Our description is simplified but should give you a general idea of
+what SSH is and does. An SSH based product might include clients,
+servers or both. Unix products generally container both clients and
+servers, those on other platforms are usually just clients, though
+Windows based servers do exist.</p>
+<p>If you are a Unix user, think of SSH as a secure form of the Unix
+r-commands, <code>rsb</code> (remote shell), <code>rlogin</code> (remote
+login) and <code>rcp</code> (remote copy). In fact the original SSH for
+Unix includes the similarly named commands <code>ssb</code>,
+<code>scp</code> and <code>slogin</code>, as secure, drop in
+replacements for the r-commands</p>
+<h2 id="what-ssh-is-not">What SSH is NOT</h2>
+<p>Although SSH stands for Secure Shell, it is not a true shell in the
+sense of the Unix <code>Bourne shell</code> (bash) and
+<code>C shell</code> (sh). It is not a command interpreter nor does it
+provide wildcard expansion command history and so forth. Rather, SSH
+creates a channel for running a shell on a remote computer in the manner
+of the Unix <code>rsb</code> command. With end-to-end encryption between
+the local and remote computer. SSH is also not a complete security
+solution - but then again nothing is. It will not protect computers from
+active break-in attempts or denial of service attacks, and it wont
+eliminate other hazards such as viruses. It does however provide a
+robust and user friendly encryption and authentication.</p>
+<h2 id="the-ssh-protocol">The SSH protocol</h2>
+<p>SSH is a protocol first and foremost, not a product, It is a
+specification of how to conduct secure communication over a network. The
+SSH protocol covers authentication, encryption and the integrity of data
+transmitted over a network.</p>
+<ul>
+<li><p>Authentication - reliably determines someone’s identity. If you
+try to log into an account on a remote computer, SSH asks for digital
+proof of your identify. If you pass the test, you may log in; otherwise
+SSH rejects the connection.</p></li>
+<li><p>Encryption - scrambles data so it is unintelligible expect to the
+intended recipient. This protects your data as it passes over the
+network.</p></li>
+<li><p>Integrity - guarantees the data traverling over the network
+arrives unaltered. If a third party captures and modifies you data in
+transit SSH detects this fact.</p></li>
+</ul>
+<p>In short, SSH, makes network connections between computers with
+strong guarantees that the parties on both ends of the connection are
+genuine. It also ensures that any data passing over these connections
+arrives unmodified and unread by eavesdroppers</p>
+<h2 id="protocols-products-clients-and-confusion">Protocols, Products,
+Clients and Confusion</h2>
+<p>SSH based products are those that implement the SSH protocol, for
+many flavors of UNIX, Windows, Macintosh and other operating systems.
+Bot freely distributable and commercial products are available. The
+first SSH product, was created for Unix, was simply called SSH. This
+causes confusion because SSH is also the name of the protocol. Some
+people called it Unix SSH, but other unix based implementations are not
+available so the name is not satisfactory.</p>
+<h2 id="overview-of-ssh-features">Overview of SSH features</h2>
+<p>As already mentioned SSH mostly revolves around secure login, data
+transmission and integrity</p>
+<h3 id="secure-login">Secure login</h3>
+<p>Let us suppose that we have accounts on several computers on the
+Internet. Typically you connect from a home PC to your ISP, and then use
+a telnet program to log into your accounts on other computers.
+Unfortunately telnet transmits your username and password in plaintext,
+over the internet, where a malicious third party can intercept them.
+Additionally your entire telnet session is readable by a network
+snooper. SSH completely solves this problem. Rather than running the
+insecure telnet program and protocol, you run the SSH program ssh, to
+login to the remote account or computer. This is done with the following
+<code>ssh -l smith host.example.com -p 22</code></p>
+<p>The clients authenticates you to the remote computer’s SSH server
+using an encrypted connection meaning that your username and password
+are encrypted before they leave the local machine. The SSH server then
+logs you in and your entire login session is encrypted as it travels
+between the client and server. Because the encryption is transparent you
+will not notice any differences between telnet and the SSH client.</p>
+<h2 id="secure-data-transfer">Secure data transfer</h2>
+<p>Suppose you have two computers or machines on the internet and wish
+to transfer files between them, The file contains trade secrets about
+your business, however that must be kept from prying eyes. A traditional
+file-transfer program such as ftp, rcp or even email, does not provide a
+secure solution. A third party can intercept and read packets as it as
+they travel over the network. To get around this problem you can encrypt
+the file on the first machine, with a program, then send it over via
+traditional means, and decrypt the file on the second machine. Using
+SSH, the file can be transferred, securely between the machines with a
+single secure copy command - <code>scp myfile user@host.com</code>. When
+transmitted by scp the file is automatically encrypted as it leaves the
+first machine, and decrypted as it arrives on the second machine</p>
+<h2 id="secure-remote-execution">Secure remote execution</h2>
+<p>Suppose you are a system admin who needs to run the same command on
+many computers. You would like to view the active processes for each
+user on four different computers. On a local area network using the Unix
+command /usr/ucb/w. Traditionally one could use <code>rsb</code>,
+assuming that the <code>rsb</code> daemon, <code>rsbd</code> is
+configured properly on the remote computers.
+<code>rsh $machine /usr/usb/w</code>. This will work, however it is
+insecure, The results of executing the <code>/usr/usb/</code> binary are
+transmitted over the network as plaintext. If you consider this
+information sensitive, the risk might be unacceptable, Worse the
+<code>rsb</code> authentication mechanism is very insecure, and easily
+subverted. Instead using the <code>ssb</code> command one can do -
+<code>ssb $machine /usr/ucb/w</code>. Where the <code>$machine</code> is
+a <code>sh</code> variable which represents the host name of the machine
+to connect to, that could be a FQDN, or an IP address.</p>
+<p>The syntax for both commands is nearly identical and the visible
+output is identical, but under the hood, the command and its results are
+encrypted, sent, and then decrypted, and strong authentication
+techniques will be used to ensure secure user login.</p>
+<h2 id="keys-and-agents">Keys and agents</h2>
+<p>Suppose you have accounts on many computers on a network. For
+security reasons you prefer different passwords on all accounts, but
+remembering so many passwords is difficult. It is also a security
+problem in itself. The more often you type a password, the more likely
+you mistakenly type it in the wrong place. SSH has various
+authentication mechanisms and the most secure is based on keys rather
+than passwords. Keys are a small blob of bits that uniquely identifies
+an SSH user. For security a key is kept encrypted, and it may be used
+only after entering a secret pass phrase to decrypt it.</p>
+<p>Using keys together with a program called an authentication agent,
+SSH can authenticate you to all computers accounts securely without
+requiring you to memorize many different passwords, or enter them
+repeatedly. The way it works is like that:</p>
+<ul>
+<li><p>In advance (only once) you place files called public key files
+into the remote computers. These enable you to access the remote
+machines. These public keys identify <code>you as you</code> on the
+remote machines, you would later try to access</p></li>
+<li><p>On your local machine, invoke the ssh-agent program which runs in
+the background. This daemon will hold the keys <code>in memory</code>,
+and only needs to be started once, when you login to your local machine
+for the day, this can be automated on most Unix systems, using
+<code>services</code>, or other tools such as
+<code>systemd</code>.</p></li>
+<li><p>Choose the key (or keys) you will need during your login session.
+These <code>have to correspond to the keys added in step one</code> to
+the remote machines, they will be used to authenticate you when a
+connection is made.</p></li>
+<li><p>Load the keys into the agent, with the
+<code>ssh-add program</code>. This requires knowledge or each key’s
+secret passphrase in order to load it into the ssh-agent daemon, this is
+however done only once and until the agent daemon works, the keys are
+loaded</p></li>
+</ul>
+<p>At this point you have an ssh-agent program running on your local
+machine, holding your secret keys, in memory. You are now done. You have
+password less access to all your remote accounts that contain your
+public key files. Say goodbye to all the tedium of retyping passwords.
+The setup lasts until you log out from the local machine or terminate
+the ssh-agent</p>
+<h2 id="access-control">Access control</h2>
+<p>Suppose you want to permit another person to use your computer
+account but only for certain purposes, for example while you are out of
+town you would like your secretary to read your email but not to do
+anything else in your accounts. With SSH you can give your secretary
+access to your account without revealing or changing your password, and
+with only the ability to run the email program. No system administrator
+privileges are required so setup this restricted access.</p>
+<h2 id="port-forwarding">Port forwarding</h2>
+<p>SSH can increase the security of other TCP based apps such as telnet
+ftp and the X Window subsystem. A technique called port forwarding or
+tunneling re routes, TCP connection to pass through an SSH connection
+transparently encrypting it end to end, Port forwarding can also pass
+such apps through network firewalls that otherwise prevent their use.
+Suppose you are logged into a remote machine away from work and want to
+access the internal news server at your office. The network is connected
+to the internet but a network firewall blocks incoming connections to
+the most ports particularly port 119 the news post. The firewall does
+allow incoming SSH connections however, since the SSH protocol is secure
+enough that even that network, with its rabidly paranoid system
+administrators trust it. SSH can establish a secure tunnel on an
+arbitrary local TCP port say port 3002 to the news port on the remote
+host, the command might look a bit cryptic at this early stage but here
+it is - <code>ssh -L 302:localhost:119 news.yoyodyne.com</code> This
+says <code>ssh</code> please establish a secure connection from TCP port
+3002 on my local machine to TCP port 119 the news port on the server -
+news.yoyodyne.com, So in order to securely configure your news reading
+program to connect to port 3002 on your local machine. The secure tunnel
+created by ssh automatically communicates with the news server on that
+host, and the news traffic passing through the tunnel is protected by
+encryption.</p>
+<h2 id="history-of-ssh">History of SSH</h2>
+<p><code>SSH1</code> and the SSH-1 protocol were developed in 1995, by a
+researched at the Helsinki University of Technology in Finland. After
+his university network was the victim of password sniffing atatck
+earlier that year, he whipped up <code>SSH1</code> for himself. When
+beta versions started gaining attention however he realized that his
+security product could be put to wider use. In July 1995
+<code>SSH1</code> was released to the public as free software with
+source code, permitting people to copy and use the program without cost,
+by the end of hte year and estimated 20k users in 50 countries had
+adopted <code>SSH1</code> and he was fending off 150 email messages per
+day requesting support. In response he founded the SSH communications
+security, Ltd (<code>SCS</code>).</p>
+<p>Also in 1995 Yolonen documented the <code>SSH1</code> protocol as an
+internet engineering task force (<code>IETF</code>) internet draft which
+essentially described the operation of the <code>SSH1</code> software
+after the fact. It was somewhat ad-hoc protocol with a number of
+problems and limitations discovered as the software grew in popularity.
+These problems could not be fixed without losing backward compatibility
+so in 1996 <code>SCS</code> introduced a new major version of the
+protocol SSH 2.0 or <code>SSH2</code> that incorporates new algorithms
+and is incompatible with <code>SSH1</code>. In response, the
+<code>IETF</code> formed a working group called the Secure Shell to
+standardize the protocol and guide its development in the public
+interest. The working groups submitted the first internet draft for the
+<code>SSH2</code> protocol in February 1997</p>
+<p>In 1998 <code>SCS</code> released the software product SSH secure
+shell - based on the superior <code>SSH2</code> protocol. However
+<code>SSH2</code> did not replace <code>SSH1</code> in the field for two
+reasons. First <code>SSH2</code> was missing a number of useful
+practical features and configuration options of <code>SSH1</code>.
+Second <code>SSH2</code> had a more restrictive license. The original
+<code>SSH1</code> had been freely available from Ylonen and the Helsinki
+University of Technology. Newer versions of <code>SSH1</code> from
+<code>SCS</code> were still freely available for most uses even in
+commercial settings, as long as the softwaer was not directly sold for
+profit or offered as a service to customers. <code>SSH2</code> on the
+other hand was a commercial product, allowing gratis use only for
+qualifying education and non profit entities. As a result when
+<code>SSH2</code> first appeared most existing <code>SSH1</code> users
+saw few advantages to <code>SSH2</code> and continued to use
+<code>SSH1</code>.<code>SSH1</code> is still the most widely deployed
+version on the internet even though the <code>SSH2</code> is a better
+and more secure protocol.</p>
+<p>The situation promises to change, however as a result of two
+developments, a loosening of the <code>SSH2</code> license and the
+appearance of free <code>SSH2</code> implementations. Products like
+OpenSSH are gaining prominence. Though many people have contributed to
+it OpenSSH largely the work of a single software developer. It supports
+both <code>SSH1</code> and <code>SSH2</code> in a single set of
+programs, whereas the products provided by Ylonen <code>SSH1</code> and
+<code>SSH2</code> have separate executables. While OpenSSH was developed
+under OpennBSD, it has been ported successfully to Linux, Solaris and
+other operating systems, in tight synchronization with the main
+releases. Although OpenSSH is relatively new and missing some features
+present in <code>SSH1</code> and <code>SSH2</code> it is developing
+rapidly and promises to be a major SSH flavor in the near future.</p>
+<p>At present time, development of <code>SSH1</code> has ceased except
+for important bug fixes while development of <code>SSH2</code> and
+OpenSSH remains stable and active. Other SSH implementations, notably
+the commercial versions of <code>SSH1</code> and <code>SSH2</code>
+maintained and sold by <code>FSecure Corporation</code> and numerous
+ports and original products for the PC Macintosh and other operating
+systems. It is estimated there are over two million SSH users worldwide,
+including hundreds of thousands of registered users of the
+<code>SCS</code> products</p>
+<h2 id="related-technologies">Related Technologies</h2>
+<p>SSH is popular and convenient but we certainly do not claim it is the
+ultimate security solution for all networks, authentication, encryption
+and network security originated way before SSH and have been
+incorporated int o many other systems.</p>
+<h3 id="rsb-suite">RSB Suite</h3>
+<p>The unix programs <code>rsb rlogin and rcp</code> collectively known
+as the r commands are the direct ancestors of the <code>SSH1</code>
+clients <code>ssh slogin and scp</code>. The user interfaces and visible
+functionality are nearly identical to their ssh counterparts expect that
+ssh clients are secure. The r commands in contrast do not encrypt their
+connections and have are weak and easily subverted authentication
+model.</p>
+<p>An r-command server relies on two mechanism for security, a network
+naming service and the notion of privileged TCP ports. Upon receiving a
+connection from a client the server obtain the network address of the
+originating host and translates it into a hostname. This hostname must
+be present in a configuration file on the server typically
+<code>/etc/hots.quiv</code>, for the server to permit access. The server
+also checks that the source TCP port number is in the range of 1-1024
+since these port numbers can be used only by the UNIX superuser or root.
+I the connection passes both checks the server believes it is talking to
+a trusted program on a trusted host and logs in the client as whatever
+user is requested.</p>
+<p>These two security checks are easily subverted. The translation of
+network address to a hostname is done by a naming service such as a DNS
+service. Most implementations have security holes presenting
+opportunities to trick the server into trusting a host it should not.
+Then a remote user can log into someone else’s account on the server
+simply by having the same username.</p>
+<p>Likewise blind trust in privileged TCP ports represents a serious
+security risk. A cracker who gains root privilege on a trusted machine
+can simply run a tailored version of the RSB client and log in as any
+user on the server host. Overall reliance on these port number is no
+longer trustworthy in a world of desktop computers, whose users have
+administrative access as a matter of course or whose operating systems
+do not support multiple users or privileges .</p>
+<p>If user databases on trusted hosts were always synchornized with the
+server, installation of privileged</p>
+</body>
+</html>

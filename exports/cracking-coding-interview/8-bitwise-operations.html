@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>8-bitwise-operations</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#introduction" id="toc-introduction">Introduction</a></li>
+<li><a href="#representation" id="toc-representation">Representation</a>
+<ul>
+<li><a href="#basics" id="toc-basics">Basics</a></li>
+<li><a href="#negative" id="toc-negative">Negative</a></li>
+<li><a href="#real" id="toc-real">Real</a></li>
+<li><a href="#endianess" id="toc-endianess">Endianess</a></li>
+</ul></li>
+<li><a href="#operations" id="toc-operations">Operations</a>
+<ul>
+<li><a href="#general-operations" id="toc-general-operations">General
+Operations</a></li>
+<li><a href="#logical-shifts" id="toc-logical-shifts">Logical
+Shifts</a></li>
+<li><a href="#arithmetic-shifts" id="toc-arithmetic-shifts">Arithmetic
+Shifts</a></li>
+<li><a href="#get-bit" id="toc-get-bit">Get bit</a></li>
+<li><a href="#set-bit" id="toc-set-bit">Set bit</a></li>
+<li><a href="#clear-bit" id="toc-clear-bit">Clear bit</a></li>
+<li><a href="#toggle-bit" id="toc-toggle-bit">Toggle bit</a></li>
+</ul></li>
+<li><a href="#tricks" id="toc-tricks">Tricks</a>
+<ul>
+<li><a href="#power-of-two" id="toc-power-of-two">Power of two</a></li>
+<li><a href="#max-number" id="toc-max-number">Max number</a></li>
+<li><a href="#min-number" id="toc-min-number">Min number</a></li>
+<li><a href="#multiply-by-2n" id="toc-multiply-by-2n">Multiply by
+2^n</a></li>
+<li><a href="#divide-by-2n" id="toc-divide-by-2n">Divide by 2^n</a></li>
+<li><a href="#check-equals" id="toc-check-equals">Check equals</a></li>
+<li><a href="#check-odd" id="toc-check-odd">Check odd</a></li>
+<li><a href="#swap" id="toc-swap">Swap</a></li>
+<li><a href="#check-sign" id="toc-check-sign">Check sign</a></li>
+<li><a href="#flip-sign" id="toc-flip-sign">Flip sign</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="introduction">Introduction</h1>
+<p>Bit-wise operations are usually used to optimize some solutions or
+problems, to tightly pack data or quickly do some computations. There
+are various tricks achieved with bit wise operations, below are the most
+common ones, and the most important ones.</p>
+<h1 id="representation">Representation</h1>
+<p>This is one of the most important crucial details to understand, how
+binary numbers are represented and how the same representation is
+extended, to also allow for representing negative numbers or even
+decimal / real ones as well</p>
+<h2 id="basics">Basics</h2>
+<p>Binary number are represented as a chain or a string of of 1s and 0s.
+This string is enumerated (usually) from right to left, the right most
+bit being the least significant and the leftmost being the most
+significant. The numbering starts from 0 up to number of bits - 1. Some
+common types and their sizes, note that the size is platform dependent
+but the types and the sizes listed below are the ones most commonly
+seen</p>
+<ul>
+<li>byte = 8 bits = 1 byte</li>
+<li>short = 16 bits = 2 bytes</li>
+<li>integer = 32 bits = 4 bytes</li>
+<li>long = 64 bits = 8 bytes</li>
+<li>double = 64 = 8 bytes</li>
+<li>long double 80 bits = 10 bytes</li>
+</ul>
+<p>As some of the sizes defined above vary from platform to platform,
+and they are implementation dependent, for example on some platform long
+and int might have the same size (4 bytes - x86), on other platforms
+integer could be defined as 16 bits. Older x86 systems usually define
+long as 32 bits, while long long is 64, on newer x64-86 systems these
+are usually both 64 bits wide. There are many variations but what is
+important, to remember is the general stride / size of each of those
+primitives.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>    // unsigned representation</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    0b1011010111101011</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    // signed representation</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    1b1011010111101011</span></code></pre></div>
+<h2 id="negative">Negative</h2>
+<p>To represent a negative number we use what is called 2s complement,
+negative numbers reserve the top most significant bit to represent the
+sign, which means that the total range that can be represented is
+halved, for example an 8 bit positive unsigned number can store 256
+values, from 0 to 255, however 8 bit signed number can store values from
+-128, 0 &amp; up to 127. The total numbers that are represented are
+still 256, but the range is halved in two effectively</p>
+<p>The trick with 2s complement is that negative numbers are represented
+as the complement of their positive representation. The table below
+gives us an example of a 4bit wide number, which can represent the
+numbers from the range <code>[-8, 0, 7]</code></p>
+<table>
+<thead>
+<tr class="header">
+<th>Number</th>
+<th>Positive</th>
+<th>Negative</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0000</td>
+<td>—-</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0001</td>
+<td>1111</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0010</td>
+<td>1110</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>0011</td>
+<td>1101</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>0100</td>
+<td>1100</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>0101</td>
+<td>1011</td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td>0110</td>
+<td>1010</td>
+</tr>
+<tr class="even">
+<td>7</td>
+<td>0111</td>
+<td>1001</td>
+</tr>
+<tr class="odd">
+<td>8</td>
+<td>—-</td>
+<td>1000</td>
+</tr>
+</tbody>
+</table>
+<p>Take a good look at how the negative numbers mirror the positive
+ones, for example 1 is <code>0b001</code> while -1 is
+<code>1b111</code>. Two’s complement, is calculated by taking the number
+and subtracting it from the max stride. For 4 bit width, we can
+represent a total of 16 numbers in total, that is <code>2^4</code>,
+therefore to represent negative 1, we have
+<code>-1 = 2^(4-1) - 1 = 7</code>, meaning the binary representation of
+<code>-1</code> is the same as the normal positive representation of the
+number <code>7</code> which is <code>0b111</code>, with the difference
+being only the sign bit therefore <code>-1 = 1b111</code>. Note that
+above we take <code>2^(4-1) == 2^3</code>, since the top most bit is
+reserved for sign, effectively halving the range we can represent.</p>
+<p>Note how 0 and -8 are actually also mirrored, just as every other
+number in the range form <code>[7 to -7]</code> is, the only difference
+being the sign bit, and in total we still have 16 numbers we can
+represent. (from <code>-1 to -7, plus 1 to 7 = 14</code>, then
+<code>0 and 8 = 2</code>, totaling 16 unique numbers)</p>
+<p>This allows us to exploit negative numbers, which are very often used
+in bit wise operations to create masks such as:</p>
+<ul>
+<li>mask with none bits set -&gt; 0 = 0b0000</li>
+<li>mask with only one bit set -&gt; 1 = 0b0001</li>
+<li>mask with with all bits set -&gt; -1 = 0b1111</li>
+</ul>
+<h2 id="real">Real</h2>
+<p>Also called floating point representation, the floating in the name
+suggests that the integer part of the real number can have a variable
+width of bits it can occupy. This allows us to represent fractions with
+more precision after the floating point number, or less precision but
+have more bits for the integer part of the floating number, e.g.</p>
+<ul>
+<li>more precision <code>1.23946792387456923</code></li>
+<li>less precision <code>23984.2874</code></li>
+</ul>
+<h2 id="endianess">Endianess</h2>
+<p>The endianess of a memory defines how at the machine level the memory
+is represented</p>
+<ul>
+<li>little endian - stores the least significant byte of information at
+the lowest smallest / address - <code>0x00FF = 255</code></li>
+<li>big endian - stores the most significant byte of the information at
+the lowest / smallest address - <code>0xFF00 = 255</code></li>
+</ul>
+<p>Historically, Intel processors have always been little endian, while
+processors like the 6502, Motorolla, have always been employing big
+endian byte order. This is mostly relevant information when the same
+software has to be deployed on platforms with differing endianess. For
+example something developed on an Intel platform must be carefully
+ported over to another platform if it is using big endian byte order</p>
+<h1 id="operations">Operations</h1>
+<p>There are just a few generally applicable operations on per bits
+basis. They are often used in conjunction to build composite operations
+to mutate and transform a bit set or a number of bits into some other
+state.</p>
+<h2 id="general-operations">General Operations</h2>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 49%" />
+<col style="width: 13%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Operation</th>
+<th>Description</th>
+<th>Example</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AND</td>
+<td>1 when both bits are 1</td>
+<td>1 &amp; 1 = 1</td>
+<td>1 &amp; 0 = 0</td>
+<td>0 &amp; 0 = 0</td>
+</tr>
+<tr class="even">
+<td>XOR</td>
+<td>1 when both bits are different</td>
+<td>1 ^ 1 = 0</td>
+<td>1 ^ 0 = 1</td>
+<td>0 ^ 0 = 0</td>
+</tr>
+<tr class="odd">
+<td>OR</td>
+<td>1 when one or both bits are 1</td>
+<td>1 | 1 = 1</td>
+<td>1 | 0 = 1</td>
+<td>0 | 0 = 0</td>
+</tr>
+<tr class="even">
+<td>NOT</td>
+<td>1 when bit is 0, 0 when bit is 1</td>
+<td>~1 = 0</td>
+<td>~0 = 1</td>
+<td>———-</td>
+</tr>
+<tr class="odd">
+<td>LEFT SHIFT</td>
+<td>shifts a bit into a position to the left</td>
+<td>1 &lt;&lt; 5 = 32</td>
+<td>———-</td>
+<td>———-</td>
+</tr>
+<tr class="even">
+<td>RIGHT SHIFT</td>
+<td>shifts a bit into a position to the right</td>
+<td>32 &gt;&gt; 5 = 1</td>
+<td>———-</td>
+<td>———-</td>
+</tr>
+</tbody>
+</table>
+<h2 id="logical-shifts">Logical Shifts</h2>
+<p>During the left and right bit shifts,
+<code>essentially move the bits that many positions in each direction</code>,
+taking the example from above, shifting left the number <code>1</code>
+means the bit which sits at position 0, will be moved 5 positions to the
+left, going into position 5 (where position of the bit is actually an
+index, starting from 0). Therefore to shift by 5 positions, we can start
+<code>counting from 0, 5 positions forward</code>, start counting
+<code>from current position of the 1st set bit</code> in the number (in
+our example the number is 1, the 1st set bit is at index 0)</p>
+<p>To summarize this in a formula,
+<code>take the index / position of the first set bit, and simply add the number by which the target is being shifted</code>.
+The inverse is applicable for shifting in the other direction, but
+instead of addition we
+<code>subtract from the bit's index / position</code></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>    0b0000001 - 1st set bit at index 0, therefore 0 + 5 = 5</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    0b0100000 - the result is the bit is now moved at index 5</span></code></pre></div>
+<h2 id="arithmetic-shifts">Arithmetic Shifts</h2>
+<p>There are the arithmetic left and right shifts, which work a bit
+differently than the logical ones, while in logical right and left
+shifts, we simply move all bits to the left or right by a specified
+offset, in arithmetic shifts in addition to what happens during logical
+shift, the most significant bits that are freed up are filled with the
+sign bit of. This has the effect of <code>dividing</code> a number by
+two, rounding down, for odd numbers</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a> --------------</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a> 10110101 = -75</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a> --------------</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a> 11011010 = -38</span></code></pre></div>
+<p>Note in the example above shifting to the right is accompanied by
+filling up the most significant bits which are freed up (and in a
+logical shift would otherwise be a 0), by the sign or to be more precise
+by value of the most significant bit of the number, in this case 1.</p>
+<p>Both the logical shift operation and arithmetic ones are used to
+divide or multiply a number by the <code>number shifted bits * 2.</code>
+Shifts can be useful as efficient ways to perform multiplication or
+division of signed or unsigned integers by powers of two.</p>
+<p>Arithmetic shifting left by n bits on a signed or unsigned binary
+number has the effect of multiplying it by 2n. While logical shifting
+has the same effect as arithmetic, however only valid when applied on
+unsigned integers</p>
+<h2 id="get-bit">Get bit</h2>
+<p>The approach here, knowing the index of the target bit, is to move
+that specific bit at the least position, after that simply check if that
+bit is a 0 or a 1 by bit wise AND against 0b01. Note that the bit
+argument is and index, meaning it ranges for normal 4 byte integers,
+from 0 to 31 inclusive, for a total of 32 bits</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">getBit</span><span class="op">(</span><span class="dt">int</span> value<span class="op">,</span> <span class="dt">int</span> bit<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>        <span class="co">// to get the value of a bit, we need to consider what that entails, to first shift the bit we want to the beginning of the</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">// bit wise order, meaning we shift to the right the original value exactly &#39;bits&#39; number of bits, then we can bit wise and this</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// value with the value of 1, the value of 1 has just one bit set, the 0th bit, the rest are all 0s, AND it with the shifted</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// number would leave only that 0th bit - bit(3) -&gt; value(10110) &gt;&gt; 3 -&gt; shifted(00010) &amp; mask(00001) -&gt; result(00000). Note</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">// that the value of the bit is an index, bit(3), means the 4th bit in the number</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> shifted <span class="op">=</span> value <span class="op">&gt;&gt;</span> bit<span class="op">;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> shifted <span class="op">&amp;</span> <span class="bn">0x01</span><span class="op">;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h2 id="set-bit">Set bit</h2>
+<p>To set a bit at a specific position we have to build a mask where
+only that specific bit at that position is set to 1, then we simply bit
+wise OR against the original number. If the bit at that position in the
+number was originally 0, it would become a 1, if it was 1, it is already
+set.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">setBit</span><span class="op">(</span><span class="dt">int</span> value<span class="op">,</span> <span class="dt">int</span> bit<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>        <span class="co">// to set a bit, what we need to consider is that the specific bit should become 1, while the rest must remain as they are, to</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">// do this at the bit position we have to have a 1, and the rest of the bits can be 0, but instead of AND, we do a bit wise OR</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// between the mask and the value - bit(3) -&gt; value (10110) | mask(01000) = result(11110). Note that the value of the bit is an</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// index, bit(3) means the 4th bit in the number</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> mask <span class="op">=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> bit<span class="op">);</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> value <span class="op">|</span> mask<span class="op">;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h2 id="clear-bit">Clear bit</h2>
+<p>To clear a bit, means to set it to 0, this is the inverse operation
+of setting a bit. What that means is that we can simply extend the set
+bit logic, by simply applying a bit wise not on the mask and then apply
+AND bit wise against the original number, the mask would be only 1s, and
+a single 0, at the bit position we want to clear.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">clearBit</span><span class="op">(</span><span class="dt">int</span> value<span class="op">,</span> <span class="dt">int</span> bit<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>        <span class="co">// to clear a bit, what we need to consider is that the specific bit should become 0, while the reset must remain as they are,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">// to do this at the bit position we have to have a 0 value, and the rest of the mask should be all 1s, then we and the value</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// and the mask - bit(2) -&gt; value (10110) &amp; mask(11011) = result(10010). Note that the value of the bit is an index, bit(2)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// means the 3rd bit in the number</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> mask <span class="op">=</span> <span class="op">~(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> bit<span class="op">);</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> value <span class="op">&amp;</span> mask<span class="op">;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h2 id="toggle-bit">Toggle bit</h2>
+<p>To toggle the bit means to flip it, if it was 1 it would become a 0,
+and vice versa. The approach here is to make a mask that is all 0s, and
+have a single bit set to 1, at the position we want to flip the bit.
+Then XOR the mask and the number. That xor operation would make sure to
+keep the 1s and 0s from the original number in place, and only ‘flip’
+the set bit at the position, from the mask</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">toggleBit</span><span class="op">(</span><span class="dt">int</span> value<span class="op">,</span> <span class="dt">int</span> bit<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>        <span class="co">// to toggle a bit we first create a mask with the specific bit set to 1, the rest are going to be 0s. To toggle the bit we can</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">// simply xor the mask and the original value. What happens, is that the 0s in the mask would keep the 1s from the value, since</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// and the 0s from the mask would keep the 0s from the original value too. Since XOR (1 ^ 0 = 1) and XOR (0 ^ 0 = 0), therefore</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// - bit(2) -&gt; value (10110) ^ mask(00100) = result(10010). Note that the value of the bit is an index, bit(2)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> mask <span class="op">=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> bit<span class="op">);</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> value <span class="op">^</span> mask<span class="op">;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h1 id="tricks">Tricks</h1>
+<h2 id="power-of-two">Power of two</h2>
+<p>This is a pretty commonly used approach to check if a number if a
+power of 2, how does it work, think about how a power of two number is
+represented, it has only one 1 bit set in its representation,</p>
+<p>For example the number 32, which is 2^5, which looks like: 0b100000
+== 1 &lt;&lt; 5. If we subtract 1 from that number we would get 0b011111
+== 31. If we bit wise AND those two numbers, we will get exactly and
+always 0. Any other number that is not a power of two would not produce
+a 0 when we bit wise AND them with the same (number - 1)</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">boolean</span> <span class="fu">pow2</span><span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">(</span>n <span class="op">&amp;</span> <span class="op">(</span>n <span class="op">-</span> <span class="dv">1</span><span class="op">))</span> <span class="op">==</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h2 id="max-number">Max number</h2>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">max</span><span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h2 id="min-number">Min number</h2>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">min</span><span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h2 id="multiply-by-2n">Multiply by 2^n</h2>
+<p>Logical and arithmetic shifts have the property of multiplying the
+number by <code>2^n</code> when shifting to the left</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">mult2</span><span class="op">(</span><span class="dt">int</span> x<span class="op">,</span> <span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x <span class="op">&lt;&lt;</span> n<span class="op">;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h2 id="divide-by-2n">Divide by 2^n</h2>
+<p>Logical and arithmetic shifts have the property of dividing the
+number by <code>2^n</code> when shifting to the right</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">div2</span><span class="op">(</span><span class="dt">int</span> x<span class="op">,</span> <span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x <span class="op">&gt;&gt;</span> n<span class="op">;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h2 id="check-equals">Check equals</h2>
+<p>To verify two numbers are equal, apply the XOR operations between
+them, if that produces 0, then all bits were exactly the same in all
+positions between the two input numbers, if there was one or more bit
+position which was different XOR would have produced a 1 in that
+position, and the result would not equal exactly 0.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">equals</span><span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">(</span>a <span class="op">^</span> b<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h2 id="check-odd">Check odd</h2>
+<p>Remember that there only two types of numbers, it can either be odd
+one, or even.</p>
+<p>To check if a number is odd, we need to realize that odd numbers are
+basically even numbers + 1. That is each even number added with 1
+produces an odd number. Each odd number + 1 produces an even number.</p>
+<p>Now going back to the binary representation, if the least significant
+bit is 1, that is the 0th bit, we can guarantee that whatever number it
+is, it is always going to be odd, we AND against a mask of 1, that will
+extract the 0th bit, and if it is 1, we know the number is odd</p>
+<p>A simple example below demonstrates, how odd numbers all have 1 in
+their least significant bit position (the 0th bit index), conversely,
+the even numbers all have 0 in their least significant bit position.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Number</th>
+<th>Representation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0000</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0001</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0010</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>0011</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>0100</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>0101</td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td>0110</td>
+</tr>
+<tr class="even">
+<td>7</td>
+<td>0111</td>
+</tr>
+</tbody>
+</table>
+<p>This assumption &amp; logical deduction, comes from the fact that if
+we try to convert a number from binary, where the 0th position is one,
+that would produce the following result
+<code>..... + 1 * 2^0</code>.</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">boolean</span> <span class="fu">odd</span><span class="op">(</span><span class="dt">int</span> a<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">(</span>a <span class="op">&amp;</span> <span class="dv">1</span><span class="op">)</span> <span class="op">==</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h2 id="swap">Swap</h2>
+<p>To swap two numbers without using a temporary variable. If we take
+the example of the numbers a <code>0b101</code> and b
+<code>0b010</code>.</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>   a = (a) 0b101 ^ (b) 0b010 = 0b111</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>   b = (a) 0b111 ^ (b) 0b010 = 0b101</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>   a = (a) 0b111 ^ (b) 0b101 = 0b010</span></code></pre></div>
+<p>What we can take from the example above, is that the first XOR
+operation creates a special <code>mask</code>. That mask is used in two
+more xor operations against the original numbers to produce the other
+one - <code>b = b ^ mask</code> then <code>a = b ^ mask</code></p>
+<p>When applying XOR between number <code>b</code> and the
+<code>mask</code>, we would zero out all bits that are the same between
+the <code>mask</code> and the number <code>b</code>, the ones that
+remain 1s, essentially are leaving / producing the original number
+<code>a</code> as a result.</p>
+<p>When applying the XOR between the same <code>mask</code> and the
+number <code>a</code> (which is now assigned to the variable
+<code>b,</code> from the previous step), we do the exact same operation,
+zero out all bits that are the same between <code>mask</code> and the
+number <code>a</code>, the ones that remain 1s, produce the original
+number <code>b</code> as a result</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>   a <span class="op">^=</span> b<span class="op">;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>   b <span class="op">^=</span> a<span class="op">;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>   a <span class="op">^=</span> b<span class="op">;</span></span></code></pre></div>
+<h2 id="check-sign">Check sign</h2>
+<p>Checking the sign of two numbers by XOR operation, since we only care
+about the most significant bit, we know that if the bits are the same,
+XOR would produce a 0, in the most significant bit position, therefore
+the number would be 0 or positive, if the numbers are different we would
+get a negative mask by XOR between a and b</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">boolean</span> <span class="fu">sign</span><span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">(</span>a <span class="op">^</span> b<span class="op">)</span> <span class="op">&gt;=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h2 id="flip-sign">Flip sign</h2>
+<p>To flip the sign of a number we have to consider what that means, to
+keep the original value of the number while getting it’s negative
+representation, think about the number <code>6 = 0b110</code>, the
+negative representation of <code>6 = 1b010</code>, or in other words
+<code>2^3 - 6 = 2</code> and indeed that is the number
+<code>2 = 0b010</code> with the most significant bit set to 1, that is
+why we get <code>1b010</code>.</p>
+<p>However, when we bit wise not a number, and we think about it in the
+context of the 2’s complement representation, we actually get the
+opposite number but with one less (for positive) and one more (for
+negative). Going back to the example <code>6</code>, bit wise not 6
+<code>0b110</code> is <code>1b001</code>, which is actually the number
+<code>-7</code>, if we add 1 to it, we will get exactly
+<code>-6</code></p>
+<p>The same logic would actually apply too if the number was originally
+negative, if we have <code>-6 = 1b010</code>, we do a flip we get
+<code>0b101</code>, which is 5, we add one and we get
+<code>6 = 0b110</code></p>
+<p>Why is the number off by 1, when we do a flip? That is due to the
+fact we can represent one more special type of number that is neither
+positive nor negative, and that is the number zero <code>0</code>. This
+is why in two’s complement the numbers we can represent (for 4 bit
+numbers) are from <code>-(2^3) through 0 to +(2^3)-1</code>, that is 8
+negative numbers, 7 positive and 0, in other words the range
+<code>[-8, 0, 7]</code>, that is total of 16 numbers that is exactly how
+many numbers 4 bits can hold <code>16 = (2^4)</code></p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> <span class="fu">flip</span><span class="op">(</span><span class="dt">int</span> a<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> <span class="op">~</span>a <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
+</body>
+</html>

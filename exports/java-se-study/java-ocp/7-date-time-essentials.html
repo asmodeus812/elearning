@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>7-date-time-essentials</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#preface" id="toc-preface">Preface</a>
+<ul>
+<li><a href="#temporalaccessor"
+id="toc-temporalaccessor">TemporalAccessor</a></li>
+<li><a href="#temporal" id="toc-temporal">Temporal</a></li>
+<li><a href="#temporalamount"
+id="toc-temporalamount">TemporalAmount</a></li>
+<li><a href="#temporaladjuster"
+id="toc-temporaladjuster">TemporalAdjuster</a></li>
+<li><a href="#temporalunit" id="toc-temporalunit">TemporalUnit</a></li>
+<li><a href="#locadate" id="toc-locadate">LocaDate</a></li>
+<li><a href="#localtime" id="toc-localtime">LocalTime</a></li>
+<li><a href="#localdatetime"
+id="toc-localdatetime">LocalDateTime</a></li>
+<li><a href="#miscellaneous" id="toc-miscellaneous">Miscellaneous</a>
+<ul>
+<li><a href="#conversions" id="toc-conversions">Conversions</a></li>
+<li><a href="#isafter-isbefore" id="toc-isafter-isbefore">isAfter &amp;
+isBefore</a></li>
+</ul></li>
+<li><a href="#instant" id="toc-instant">Instant</a></li>
+<li><a href="#period" id="toc-period">Period</a></li>
+<li><a href="#duration" id="toc-duration">Duration</a></li>
+<li><a href="#zones" id="toc-zones">Zones</a>
+<ul>
+<li><a href="#zoneid" id="toc-zoneid">ZoneId</a></li>
+<li><a href="#zoneoffset" id="toc-zoneoffset">ZoneOffset</a></li>
+<li><a href="#zoneddatetime"
+id="toc-zoneddatetime">ZonedDateTime</a></li>
+<li><a href="#daylight-savings" id="toc-daylight-savings">Daylight
+savings</a></li>
+</ul></li>
+<li><a href="#formatting" id="toc-formatting">Formatting</a></li>
+</ul></li>
+<li><a href="#summary" id="toc-summary">Summary</a></li>
+</ul>
+</nav>
+<h1 id="preface">Preface</h1>
+<p><code>UTC (Coordinated Universal Time) is closely aligned with Greenwich Mean Time (GMT) in terms of timekeeping. Both are based on the time at the Prime Meridian (0ø longitude), which runs through Greenwich, London.</code></p>
+<p>The new Java date and time API is provided in the java.time package.
+This new API in Java 8 replaces the older classes supporting date and
+time related functionality such as the <code>Date</code>,
+<code>Calendar</code> and <code>TimeZone</code> classes provided as part
+of the <code>java.util.package</code></p>
+<p>Why did Java 8 introduce a new date and time API when it already had
+classes such as Date and Calendar from the early days of Java 8 ? The
+main reason was inconvenient API design. For example the Date class has
+both date and time components; if one wants to use only time information
+and not date-related information, then the date-related values have to
+be set to zero. Some aspects of the classes are unintuitive as well. For
+example in the Date constructor, the range of date values is 1 to 31 but
+the range of month values is 0 to 11 (not 1 to 12) Further, there are
+many concurrency-related issues with <code>java.util.Date</code> and
+<code>SimpleDateFormatter</code> because they are not thread-safe.</p>
+<p>Java 8 provides very good support for date and time related
+functionality in the newly introduced java.time package, Most of the
+classes in this package are immutable and thread-safe. This chapter
+explains how to use important classes in this package and interfaces.
+Including the <code>LocalDate</code> and <code>LocalTime</code>,
+<code>LocalDateTime</code>, <code>Instant</code>, <code>Period</code>
+and <code>Duration</code> as well as <code>TemporalUnit</code>. The
+java.time API incorporates the concept of fluent interfaces it is
+designed in such a way that the code is more readable and easier to use.
+For this reason classes in this package have numerous static methods
+(many of them factory methods). In addition the methods in the classes
+follow a common naming convention (for example they use the prefixes
+plus and minus to add or subtract date or time values).</p>
+<p>There are several important interfaces in the new java.time package,
+which are base interfaces to pretty much all the other date and time
+related implementations and classes.</p>
+<h2 id="temporalaccessor">TemporalAccessor</h2>
+<p>A read only interface for accessing temporal information such as
+fields or units from a temporal object. Focuses solely on querying with
+no modification capabilities, acts as a base interface for Temporal.</p>
+<h2 id="temporal">Temporal</h2>
+<p>This interface is meant to represent a point in time or an object in
+the date-time API that can be queries and adjusted, it does provide API
+methods such as plus,minus,with and get. The implementations of this
+class include
+<code>Instant, LocalDate, LocalTime, ZonedDateTime</code></p>
+<h2 id="temporalamount">TemporalAmount</h2>
+<p>Represents a relative amount of time such as a duration or a period,
+which ca nbe added to or subtracted from a Temporal, some implementation
+classes include <code>Duration and Period</code>.</p>
+<h2 id="temporaladjuster">TemporalAdjuster</h2>
+<p>Represents a strategy for adjusting a Temporal object, allows
+performing custom or pre defined adjustments such as setting the date to
+the next Monday or the first day of the month. Built-in examples the
+<code>TemporalAdjusters</code> utility class provides common
+implementations like next(), firstDayOfMonth() etc</p>
+<h2 id="temporalunit">TemporalUnit</h2>
+<p>The <code>TemporalUnit</code> interface is part of the temporal
+package. It represents date or time units such as seconds, hours, days,
+months, years, and so on. The enumeration <code>ChronoUnit</code>
+implements this interface. Instead of using constant values it is better
+to sue their equivalent enumeration values, this is due to the fact that
+the enumeration values in <code>ChronoUnit</code> results in more
+readable code, further it is less likely to make some logical mistakes
+in the implementation</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 54%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ChronoUnit</th>
+<th>DateBased</th>
+<th>TimeBased</th>
+<th>Duration</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Nanos</td>
+<td>false</td>
+<td>true</td>
+<td>PT0.000000001S</td>
+</tr>
+<tr class="even">
+<td>Micros</td>
+<td>false</td>
+<td>true</td>
+<td>PT0.000001S</td>
+</tr>
+<tr class="odd">
+<td>Millis</td>
+<td>false</td>
+<td>true</td>
+<td>PT0.001S</td>
+</tr>
+<tr class="even">
+<td>Seconds</td>
+<td>false</td>
+<td>true</td>
+<td>PT1S</td>
+</tr>
+<tr class="odd">
+<td>Minutes</td>
+<td>false</td>
+<td>true</td>
+<td>PT1M</td>
+</tr>
+<tr class="even">
+<td>Hours</td>
+<td>false</td>
+<td>true</td>
+<td>PT1H</td>
+</tr>
+<tr class="odd">
+<td>HalfDays</td>
+<td>false</td>
+<td>true</td>
+<td>PT12H</td>
+</tr>
+<tr class="even">
+<td>Days</td>
+<td>true</td>
+<td>false</td>
+<td>PT24H</td>
+</tr>
+<tr class="odd">
+<td>Weeks</td>
+<td>true</td>
+<td>false</td>
+<td>PT168H</td>
+</tr>
+<tr class="even">
+<td>Months</td>
+<td>true</td>
+<td>false</td>
+<td>PT730H29M6S</td>
+</tr>
+<tr class="odd">
+<td>Years</td>
+<td>true</td>
+<td>false</td>
+<td>PT8765H49M12S</td>
+</tr>
+<tr class="even">
+<td>Decades</td>
+<td>true</td>
+<td>false</td>
+<td>PT87658H12M</td>
+</tr>
+<tr class="odd">
+<td>Centuries</td>
+<td>true</td>
+<td>false</td>
+<td>PT876582H</td>
+</tr>
+<tr class="even">
+<td>Millennia</td>
+<td>true</td>
+<td>false</td>
+<td>PT8765820H</td>
+</tr>
+<tr class="odd">
+<td>Eras</td>
+<td>true</td>
+<td>false</td>
+<td>PT8765820000000H</td>
+</tr>
+<tr class="even">
+<td>Forever</td>
+<td>false</td>
+<td>false</td>
+<td>PT2562047788015215H30M7.999999999S</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 41%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Interface</th>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Temporal</strong></td>
+<td>plus(long amountToAdd, TemporalUnit unit)</td>
+<td>Adds an amount of time to this temporal object.</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>minus(long amountToSubtract, TemporalUnit unit)</td>
+<td>Subtracts an amount of time from this temporal object.</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>with(TemporalField field, long newValue)</td>
+<td>Returns a copy with the specified field set to a new value.</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>get(TemporalField field)</td>
+<td>Retrieves the value of the specified field as an int.</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>isSupported(TemporalField field)</td>
+<td>Checks if a field is supported by this temporal object.</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>until(Temporal endExclusive, TemporalUnit unit)</td>
+<td>Calculates the amount of time until another temporal object.</td>
+</tr>
+<tr class="odd">
+<td>———————-</td>
+<td>——————————————————————</td>
+<td>————————————————————————</td>
+</tr>
+<tr class="even">
+<td><strong>TemporalAccessor</strong></td>
+<td>get(TemporalField field)</td>
+<td>Gets the value of the specified field as an int.</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>getLong(TemporalField field)</td>
+<td>Gets the value of the specified field as a long.</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>isSupported(TemporalField field)</td>
+<td>Checks if the specified field is supported.</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>query(TemporalQuery<R> query)</td>
+<td>Queries this temporal object using a specified query strategy.</td>
+</tr>
+<tr class="even">
+<td>———————-</td>
+<td>——————————————————————</td>
+<td>————————————————————————</td>
+</tr>
+<tr class="odd">
+<td><strong>TemporalAdjuster</strong></td>
+<td>firstDayOfMonth()</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>lastDayOfMonth()</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>firstDayOfNextMonth()</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>firstDayOfYear()</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>lastDayOfYear()</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>firstDayOfNextYear()</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>firstInMonth(DayOfWeek)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>———————-</td>
+<td>——————————————————————</td>
+<td>————————————————————————</td>
+</tr>
+<tr class="odd">
+<td><strong>TemporalAmount</strong></td>
+<td>addTo(Temporal temporal)</td>
+<td>Adds this amount of time to the specified temporal object.</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>subtractFrom(Temporal temporal)</td>
+<td>Subtracts this amount of time from the specified temporal
+object.</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>getUnits()</td>
+<td>Returns the units of this temporal amount.</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>get(TemporalUnit unit)</td>
+<td>Gets the value of the specified unit.</td>
+</tr>
+<tr class="odd">
+<td>———————-</td>
+<td>——————————————————————</td>
+<td>————————————————————————</td>
+</tr>
+<tr class="even">
+<td><strong>TemporalField</strong></td>
+<td>getFrom(TemporalAccessor temporal)</td>
+<td>Retrieves the value of this field from the specified temporal
+object.</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>isSupportedBy(TemporalAccessor temporal)</td>
+<td>Checks if the field is supported by the specified temporal
+object.</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>rangeRefinedBy(TemporalAccessor temporal)</td>
+<td>Gets the range of valid values for this field in the specified
+temporal.</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>adjustInto(Temporal temporal, long newValue)</td>
+<td>Adjusts the specified temporal object with a new value for this
+field.</td>
+</tr>
+<tr class="even">
+<td>———————-</td>
+<td>——————————————————————</td>
+<td>————————————————————————</td>
+</tr>
+<tr class="odd">
+<td><strong>TemporalUnit</strong></td>
+<td>addTo(Temporal temporal, long amount)</td>
+<td>Adds the specified amount of this unit to the given temporal
+object.</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>between(Temporal temporal1Inclusive, Temporal
+temporal2Exclusive)</td>
+<td>Calculates the amount of time between two temporal objects in this
+unit.</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>isSupportedBy(Temporal temporal)</td>
+<td>Checks if this unit is supported by the specified temporal
+object.</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>getDuration()</td>
+<td>Gets the duration of this unit as a Duration.</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// because the ChronoUnit enumeration implements the TemporalUnit interface, you can pass ChronoUnit enumaration value</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">// as the second argument in this constructor</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="bu">Duration</span><span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> ChronoUnit<span class="op">.</span><span class="fu">MINUTES</span><span class="op">).</span><span class="fu">getSeconds</span><span class="op">());</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="bu">Duration</span><span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> ChronoUnit<span class="op">.</span><span class="fu">HOURS</span><span class="op">).</span><span class="fu">getSeconds</span><span class="op">());</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="bu">Duration</span><span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> ChronoUnit<span class="op">.</span><span class="fu">DAYS</span><span class="op">).</span><span class="fu">getSeconds</span><span class="op">());</span></span></code></pre></div>
+<h2 id="locadate">LocaDate</h2>
+<p>The <code>LocalDate</code> class represents a date without a time
+component. <code>LocalDate</code> is represented in the ISO-86011
+calendar system in a year-month-day format. The java 8 and time API uses
+the ISO 8601 standard as the default calendar format. In this
+internationally accepted format the date and time values are sorted from
+the largest to the smallest unit of time - year, month day, hour, minute
+second and millisecond</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>LocalDate today <span class="op">=</span> LocalDate<span class="op">.</span><span class="fu">now</span><span class="op">();</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Today&#39;s date is: &quot;</span> <span class="op">+</span> today<span class="op">);</span></span></code></pre></div>
+<p>The <code>LocalDate.now()</code> method gets the current date using
+the system clock, based on the default time zone of the JVM. You can get
+a <code>LocalDate</code> object by explicitly specifying the day, month
+and year components separately too</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>LocalDate newYear2016 <span class="op">=</span> LocalDate<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">2016</span><span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">plrintln</span><span class="op">(</span><span class="st">&quot;New year 2016: &quot;</span> <span class="op">+</span> newYear2016<span class="op">);</span></span></code></pre></div>
+<p>The input arguments to the local date of method are also properly
+validated as well, one can not simply pass just any value to those
+methods, for example passing an invalid year, month, or day would throw
+an exception, in this case a <code>DateTimeException</code></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// this however will throw an exception, due to the fact that the month and day are actually inverted as input arguments</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">// to this method, the 14, which is supposed to be the day, is actually passed to the second argument which is the month</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">// not the day, and the month is passed in as the third argument, which is actually the day</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>LocalDate valentinesDay <span class="op">=</span> LocalDate<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">2016</span><span class="op">,</span> <span class="dv">14</span><span class="op">,</span> <span class="dv">2</span> <span class="op">);</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Valentine&#39;s day is on: &quot;</span><span class="op">,</span> valentinesDay<span class="op">);</span></span></code></pre></div>
+<p>To avoid making this mistake, you can use the overloaded version of
+<code>LocalDate.of(int year, Month month, int day)</code>. The second
+argument being of type Month, is an enumeration that represents the 12
+months of the year. In that case it is not possible to interchange the
+arguments, otherwise the code will not compile.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>LocalDate valentinesDay <span class="op">=</span> LocalDate<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">2016</span><span class="op">,</span> Month<span class="op">.</span><span class="fu">FEBRUARY</span><span class="op">,</span> <span class="dv">14</span><span class="op">);</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Valentine&#39;s day is on: &quot;</span> <span class="op">+</span> valentinesDay<span class="op">);</span></span></code></pre></div>
+<p>The <code>LocalDate</code> class has methods with which you can add
+or subtract days, weeks months or years to or from the current
+<code>LocalDate</code> object. For example suppose your visa expires 180
+days from now. Here is code segment that shows the expiry date.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">long</span> visaValidityDays <span class="op">=</span> <span class="dv">180L</span><span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>LocalDate currDate <span class="op">=</span> LocalDate<span class="op">.</span><span class="fu">now</span><span class="op">();</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Expires on: &quot;</span> <span class="op">+</span> currDate<span class="op">.</span><span class="fu">plusDays</span><span class="op">(</span>visaValidityDays<span class="op">));</span></span></code></pre></div>
+<p>In addition to the <code>plusDays()</code> method,
+<code>LocalDate</code> also provides <code>plusWeeks()</code>,
+<code>plusMonths()</code>, and <code>plusYears()</code> methods as well
+as methods for subtracting the same - <code>minusDays()</code>,
+<code>minusWeeks()</code>, <code>minusMonths()</code> and
+<code>minusYears()</code>.</p>
+<h2 id="localtime">LocalTime</h2>
+<p>The <code>java.time.LocalTime</code> class is similar to the
+<code>LocalDate</code> except that LocalTime represents time without
+dates or any time zones. The time is in ISO-8601 as well, and the format
+is HH:MM:SS.nanoseconds. Both <code>LocalTime</code> and
+<code>LocalDate</code> use the system clock and the default time
+zone.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// the statement below can print something along the lines 12:23:05.072</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>LocalTime currTime <span class="op">=</span> LocalTime<span class="op">.</span><span class="fu">now</span><span class="op">();</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Current time is: &quot;</span> <span class="op">+</span> currTime<span class="op">);</span></span></code></pre></div>
+<p>As mentioned, <code>LocalTime</code> uses the system clock and its
+default time zone. To create different time objects based on the
+specific time values, you can use the overloaded of() method of the
+<code>LocalTime</code> class:</p>
+<p><code>LocalTime</code> provides many useful methods with which you
+can add or subtract hours, minutes, seconds and nanoseconds. For
+example, assume that you have a meeting in 6.5 hours from
+<code>now</code>, and you would like to find the exact meeting, or in
+other words the absolute meeting time. Here is how that can be
+achieved</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dt">long</span> hours <span class="op">=</span> <span class="dv">6</span><span class="op">;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="dt">long</span> minutes <span class="op">=</span> <span class="dv">30</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>LocalTime currTime <span class="op">=</span> LocalTime<span class="op">.</span><span class="fu">now</span><span class="op">();</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Current time is: &quot;</span> <span class="op">+</span> currTime<span class="op">);</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Meeting is at : &quot;</span> <span class="op">+</span> currTime<span class="op">.</span><span class="fu">plusHours</span><span class="op">(</span>hours<span class="op">).</span><span class="fu">plusMinutes</span><span class="op">(</span>minutes<span class="op">));</span></span></code></pre></div>
+<p>In addition to the methods shown above, like <code>plusHours</code>
+and <code>plusMinutes</code>, the <code>LocalTime</code> supports,
+<code>plusSeconds</code>, and <code>plusNanos</code>. The equivalent for
+subtracting also exist, such as <code>minusHours</code>,
+<code>minusMinutes</code>, <code>minusSeconds</code> and
+<code>minusNanos</code>.</p>
+<h2 id="localdatetime">LocalDateTime</h2>
+<p>The <code>LocalDateTime</code> represents both date and time without
+time zones. That class can be thought as a logical combination of the
+<code>LocalTime</code> and <code>LocalDate</code> classes. The date and
+time formats both are in the already mentioned ISO-8601 calendar format:
+<code>YYYY-MM-DD HH:MM:SS.nanoseconds</code></p>
+<p>The general <code>toString</code> format output for a given
+<code>LocalDateTime</code> can look something like the following:
+<code>2015-10-29T21:04:36.376</code>. In this output note that the
+character T stands for time, and it separates the date and time
+components of this <code>LocalDateTime</code> instance, it is also used
+to parse <code>LocalDateTime</code> instances from strings as well, that
+is part of the ISO-8601 format standard.</p>
+<p>Similar to both the <code>LocalDate</code> and <code>LocalTime</code>
+classes the <code>LocalDateTime</code> also provides means of
+subtracting and adding temporal elements to a given
+<code>LocalDateTime</code> instance, it does support the same types of
+methods such as - like <code>plusHours</code> and
+<code>plusMinutes</code>, the <code>LocalTime</code> supports,
+<code>plusSeconds</code>, and <code>plusNanos</code>. The equivalent for
+subtracting also exist, such as <code>minusHours</code>,
+<code>minusMinutes</code>, <code>minusSeconds</code> and
+<code>minusNanos</code></p>
+<h2 id="miscellaneous">Miscellaneous</h2>
+<p>There are several more methods which are shared, semantically between
+the different types of dates, methods such as</p>
+<h3 id="conversions">Conversions</h3>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>LocalDateTime dateTime <span class="op">=</span> LocalDateTime<span class="op">.</span><span class="fu">now</span><span class="op">();</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Today&#39;s date and current time: &quot;</span> <span class="op">+</span> dateTime<span class="op">);</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The date component is &quot;</span> <span class="op">+</span> dateTime<span class="op">.</span><span class="fu">toLocalDate</span><span class="op">());</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The date component is &quot;</span> <span class="op">+</span> dateTime<span class="op">.</span><span class="fu">toLocalTime</span><span class="op">());</span></span></code></pre></div>
+<p>The code above demonstrates how a <code>LocalDateTime</code> can be
+split into its constituent elements, such that the
+<code>LocalDate</code> and <code>LocalTime</code> can be extracted
+separately, from it.</p>
+<p>The whole package including the <code>LocalDate</code> and
+<code>LocalTime</code> and <code>LocalDateTime</code> classes, along
+with Instant, Period, Duration and so on, provide means of converting
+from one type to another, where reasonable.</p>
+<h3 id="isafter-isbefore">isAfter &amp; isBefore</h3>
+<p>These methods compare if a given instance of the class of the
+<code>Local*</code> type is after/before another one. What is important
+to note here is that those methods are non-inclusive, meaning that
+calling <code>isAfter</code> on two equal dates, or times, or date-time
+instances will yield false, for both <code>isAfter</code> or
+<code>isBefore</code>, they are not taking into account when the two
+instances are equal. To compare for equality one has to use the equals
+method instead</p>
+<h2 id="instant">Instant</h2>
+<p>This type of class deals with time and date values, and the instant
+values begin on <code>01.1970</code> at <code>00:00:00</code> hours,
+known as the UNIX epoch. The Instant class internally uses a long
+variable that holds the number of seconds since the start of the UNIX
+epoch, times that start before this epoch are treated as negative
+values. Instant uses an integer variable to store the number of
+nanoseconds elapsed for each second. The <code>Instant</code> class is
+meant to deal with both date and time components, it is semantically
+equivalent to the <code>LocalDateTime</code>. However internally the way
+the information is stored is not how <code>LocalDateTime</code> stores
+it, as already mentioned above, the instant stores absolute date and
+time in relation to UTC or the UNIX epoch.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> args<span class="op">[]){</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// prints the current timestamp with UTC as time zone</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    Instant currTimeStamp <span class="op">=</span> Instant<span class="op">.</span><span class="fu">now</span><span class="op">();</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Instant timestamp is: &quot;</span> <span class="op">+</span> currTimeStamp<span class="op">);</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// prints the number of seconds as Unix timestamp from epoch time</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Number of seconds elapsed: &quot;</span> <span class="op">+</span> currTimeStamp<span class="op">.</span><span class="fu">getEpochSecond</span><span class="op">());</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// prints the Unix timestamp in milliseconds</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Number of milliseconds elapsed: &quot;</span> <span class="op">+</span> currTimeStamp<span class="op">.</span><span class="fu">toEpochMilli</span><span class="op">());</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>When executed the above can print something along the lines of what
+is shown below, now notice that the format of Instant is pretty much
+identical to the one for LocalDateTime</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>Instant timestamp is: 2015-11-02T03:16:04.502Z</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>Number of seconds elapsed: 1446434164</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>Number of milliseconds elapsed: 1446434164502</span></code></pre></div>
+<p>So what is the difference between
+<code>Instant and LocalDateTime</code>. Well the example below shows
+that the LocalDateTime is based on the current system or JVM the time
+zone, along with the actual time and date components, however the
+Instant is an absolute value, which starts as mentioned from the UNIX
+epoch.</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>LocalDateTime localDateTime <span class="op">=</span> LocalDateTime<span class="op">.</span><span class="fu">now</span><span class="op">();</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>Instant instant <span class="op">=</span> Instant<span class="op">.</span><span class="fu">now</span><span class="op">();</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;LocalDateTime is: &quot;</span> <span class="op">+</span> localDateTime <span class="op">+</span> <span class="st">&quot; </span><span class="sc">\n</span><span class="st">Instant is: &quot;</span> <span class="op">+</span> instant<span class="op">);</span></span></code></pre></div>
+<p>The snippet above might print something along the lines of the
+example below, where it is clear that the Instant is not affected by the
+current system or user time zones. As mentioned the Instant is dealing
+with absolute date &amp; time values as compared to the
+<code>LocalDateTime</code> class type, and that starts from the UNIX
+epoch, so no matter on which machine the Instant is generated it will
+always print the absolute value regardless of the system time zone.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>LocalDateTime is: 2015-11-02T17:21:11.402</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>Instant is: 2015-11-02T11:51:11.404</span></code></pre></div>
+<h2 id="period">Period</h2>
+<p>The Period type is meant to deal with amounts of time in terms of
+years, months and days. It is semantically equivalent to the
+<code>LocalDate</code> class. However internally the way the information
+is stored about is very much different than the one in
+<code>LocalDate</code>, that is due to the requirements for what the
+Period is, even though when printed out with <code>toString</code> it
+might look like exactly <code>LocalDate</code> <code>toString</code>
+method format, the period stores absolute period of time from the UNIX
+epoch.</p>
+<p>Similarly to the other classes in this package one can subtract years
+months and days using the methods <code>plusYears</code>,
+<code>plusMonths</code> <code>plusDays</code>, <code>minusYears</code>
+<code>minusMonths</code> and <code>minusDays</code>.</p>
+<h2 id="duration">Duration</h2>
+<p>As discussed the Period class earlier, represents time in terms of
+years, months, and days. Duration is the time equivalent of Period. The
+Duration class represents time in terms of hours, minutes, seconds and
+so on. It is suitable for measuring machine time or when working with
+Instance objects, Similar to the Instance class, the Duration class
+stores the seconds component as a long value and nanoseconds using an
+int value.</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>LocaslDateeTime comingMidnight <span class="op">=</span> LocalDateTime<span class="op">.</span><span class="fu">of</span><span class="op">(</span>LocalDate<span class="op">.</span><span class="fu">now</span><span class="op">().</span><span class="fu">plusDays</span><span class="op">(</span><span class="dv">1</span><span class="op">),</span> LocalTime<span class="op">.</span><span class="fu">MIDNIGHT</span><span class="op">);</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>LocalDateTime now <span class="op">=</span> LocalDateTime<span class="op">.</span><span class="fu">now</span><span class="op">();</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Duration</span> between <span class="op">=</span> <span class="bu">Duration</span><span class="op">.</span><span class="fu">between</span><span class="op">(</span>now<span class="op">,</span> comingMidnight<span class="op">);</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>between<span class="op">);</span></span></code></pre></div>
+<p>The snippet above might print something like
+<code>PT7H13M42.003S</code>. This example uses the overloaded version of
+the of method in the <code>LocalDateTime</code> class, which is building
+<code>LocalDateTime</code> from a <code>LocalDate.now</code> combined
+with the time component of MIDNIGHT, which produces the final
+<code>LocalDateTime</code>, on the next day, in midnight</p>
+<p><code>The Java 8 date and time API differentiates how humans and computers use date and time related information. For example, the Instant class represents a Unix timestamp and internally uses long and int variables. Instant values are not very readable or usable by humans because the class does not support methods related to day, month, hours and so on, in contrast the Period class supports such methods.</code></p>
+<h2 id="zones">Zones</h2>
+<p>There are three important classes related to time zones that one
+needs to be aware of, in order to work with dates and times across time
+zones: <code>ZoneId, ZoneOffset and ZonedDateTime</code>.</p>
+<h3 id="zoneid">ZoneId</h3>
+<p>This class represents time zones. Time zones are typically identified
+using and offset from Greenwich Mean Time (GMT, also known as
+UTC/Greenwich). For instance given the example of the time zone
+Europe/Helsinki, one can print out the current system time zone by
+simply doing</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">// that would print out the current system time zone, based on what is configured by the user, system or even the JVM</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;My zone id is: &quot;</span> <span class="op">+</span> ZoneId<span class="op">.</span><span class="fu">systemDefault</span><span class="op">());</span></span></code></pre></div>
+<p>To obtain the list of all time zones by calling the static method
+<code>getAvailableZoneIds</code> in <code>ZoneId</code>, which returns
+<code>Set&lt;String&gt;</code>. The snippet below shows how to obtain
+the list of all zones.</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">// the snippet below would print something like the following</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Number of available time zones is: 589</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Asia/Aden</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">// America/Cuiaba</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">// .............</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="bu">Set</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> zones <span class="op">=</span> ZoneId<span class="op">.</span><span class="fu">getAvailableZoneIds</span><span class="op">();</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Numer of avaiilable time zones is: &quot;</span> <span class="op">+</span> zones<span class="op">.</span><span class="fu">size</span><span class="op">());</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>zones<span class="op">.</span><span class="fu">forEach</span><span class="op">(</span><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">::</span>println<span class="op">)</span></span></code></pre></div>
+<p>To parse or re-build a <code>ZoneId</code> from a String zone
+representation, one can use the <code>of</code> method, which can
+construct a <code>ZoneId</code> instance from a String, the format of
+the String has to match the time zone format shown above
+(region)/(zone)</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">// this will construct an instance of ZoneId, from the string representation of the zone, this representation format is</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">// specified in the ISO-8601</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>ZoneId europe <span class="op">=</span> ZoneId<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="st">&quot;Europe/Helsinki&quot;</span><span class="op">);</span></span></code></pre></div>
+<h3 id="zoneoffset">ZoneOffset</h3>
+<p><code>ZoneId</code> identifies a time zone, such as the example shown
+above, another companion class is the <code>ZoneOffset</code>, which
+represents the time-zone offset from UTC/Greenwich. Each different time
+zone has a different time offset compared to the UTC one.</p>
+<h3 id="zoneddatetime">ZonedDateTime</h3>
+<p>In Java if one desires to deal with date and time or time zone, it is
+better to use the <code>LocalDate</code> or <code>LocalTime</code> or
+<code>ZoneId</code> respectively. What if one wants all three date, time
+and time-zone. For that this is where the <code>ZonedDateTime</code>
+comes in</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>LocalDate currentDate <span class="op">=</span> LocalDate<span class="op">.</span><span class="fu">now</span><span class="op">();</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>LocalTime currentTime <span class="op">=</span> LocalTime<span class="op">.</span><span class="fu">now</span><span class="op">();</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>ZoneId zone <span class="op">=</span> ZoneId<span class="op">.</span><span class="fu">systemDefault</span><span class="op">();</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>ZonedDateTime zonedDateTime <span class="op">=</span> ZonedDateTime<span class="op">.</span><span class="fu">of</span><span class="op">(</span>currentDate<span class="op">,</span> currentTime<span class="op">,</span> zone<span class="op">);</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>zonedDateTime<span class="op">);</span></span></code></pre></div>
+<p>This code segment uses the overloaded static method of
+<code>ZonedDateTime</code> -
+<code>of(LocalDate, LocalTime, ZoneID)</code>. Given a
+<code>LocalDateTime</code> one can use a <code>ZoneId</code> to get a
+<code>ZonedDateTime</code>. But it is also possible to convert between
+the <code>LocalDateTime</code> and <code>ZonedDateTime</code></p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>LocalDateTime dateTime <span class="op">=</span> LocalDateTime<span class="op">.</span><span class="fu">now</span><span class="op">();</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>ZoneId myZone <span class="op">=</span> ZoneId<span class="op">.</span><span class="fu">systemDefault</span><span class="op">();</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>ZonedDateTime zonedDateTime <span class="op">=</span> dateTime<span class="op">.</span><span class="fu">atZone</span><span class="op">(</span>myZone<span class="op">);</span></span></code></pre></div>
+<h3 id="daylight-savings">Daylight savings</h3>
+<p>The amount of daylight does not remain the same throughout the year
+because the seasons change. There is more daylight in the summer than in
+the winter. With daylight savings time (DST) the clock is set one hour
+earlier or later to make the best use of the daylight. As the saying
+goes “Spring forward, fall back” - the clock is typically set on hour
+earlier when Spring begins and one hour later at the start of the
+Fall:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>ZoneId kolkataZone <span class="op">=</span> ZoneId<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="st">&quot;Asia/Kolkata&quot;</span><span class="op">);</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Duration</span> kolkataDST <span class="op">=</span> kolkataZone<span class="op">.</span><span class="fu">getRules</span><span class="op">().</span><span class="fu">getDaylightSavings</span><span class="op">(</span>Instant<span class="op">.</span><span class="fu">now</span><span class="op">());</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;Kolkata zone DST is: </span><span class="sc">%d</span><span class="st"> hours </span><span class="sc">%n</span><span class="st">&quot;</span><span class="op">,</span> kolkataDST<span class="op">.</span><span class="fu">toHours</span><span class="op">());</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>ZoneId aucklandZone <span class="op">=</span> ZoneId<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="st">&quot;Pacific/Auckland&quot;</span><span class="op">);</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="bu">Duration</span> aucklandDST <span class="op">=</span> aucklandZone<span class="op">.</span><span class="fu">getRules</span><span class="op">().</span><span class="fu">getDaylightSavings</span><span class="op">(</span>Instant<span class="op">.</span><span class="fu">now</span><span class="op">());</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;Auckland zone DST is: </span><span class="sc">%d</span><span class="st"> hours&quot;</span><span class="op">,</span> aucklandDST<span class="op">.</span><span class="fu">toHours</span><span class="op">());</span></span></code></pre></div>
+<p>The call to <code>getDaylightSavings</code> will make sure to print
+correctly if the given zone is within a daylight saving regime, so given
+the snippet above one can expect to see that since the First time zone
+is in the northern hemisphere where during November it is winter, and
+the other zone is in the southern hemisphere November is in the
+summer.</p>
+<ul>
+<li>if the duration is zero - DST it not in effect in that zone;</li>
+<li>if the duration is non-zero - DST is in effect in that zone;</li>
+</ul>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>Here is the result (when executed on November 5):</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>Kolkata zone DST is: 0 hours</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>Auckland zone DST is: 1 hours</span></code></pre></div>
+<h2 id="formatting">Formatting</h2>
+<p>When programming with dates and times one often desires to print them
+in a different formats that the ones specified by default from ISO-8601.
+Also one may have to read date time information given in different
+formats. To read or print date and time values in various formats one
+can use the <code>DateTimeFormatter</code> class from the
+java.time.format package. The <code>DateTimeFormatter</code> class
+provides many predefined constants for formatting date and time values.
+Here is a list of a few such predefined formatters</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>ISO_DATE (2015-11-05)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>ISO_TIME (11:25:47.624)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>RFC_1123_DATE_TIME (Thu, 5 Nov 2015 11:27:22 +0530)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>ISO_ZONED_DATE_TIME (2015-11-05T11:30:33.49+05:30[Asia/Kolkata])</span></code></pre></div>
+<p>To use these formatting constants, which are really simply an
+instance of the <code>DateTimeFormatter</code> itself, simply call the
+format method of the <code>DateTimeFormatter</code> with an argument,
+the argument to format is of type <code>TemporalAccessor</code> which is
+the base most interface, from which pretty much all entries in java.time
+implement from</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>LocalTime wakeupTime <span class="op">=</span> LocalTime<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">6</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">0</span><span class="op">);</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Wake up time: &quot;</span> <span class="op">+</span> DateTimeFormatter<span class="op">.</span><span class="fu">ISO_TIME</span><span class="op">.</span><span class="fu">format</span><span class="op">(</span>wakeupTime<span class="op">));</span></span></code></pre></div>
+<p><code>Note that in the format string, the upper and lower case letters might have different meanings, for example upper case M means month, however to express minutes one has to use lower case m, this is especially true, when the format is formatting a class type with date and time components such as LocalDateTime, and or ZonedDateTime</code></p>
+<p>Here is a list of important letters and their meanings for creating
+patterns for dates</p>
+<ul>
+<li>G (era: BC, AD)</li>
+<li>y (year of era: 2015, 15)</li>
+<li>Y (week-based year: 2015, 15)</li>
+<li>M (month: 11, Nov, November)</li>
+<li>w (week in year: 13)</li>
+<li>W (week in month: 2)</li>
+<li>E (day name in week: Sun, Sunday)</li>
+<li>D (day of year: 256)</li>
+<li>d (day of month: 13)</li>
+<li>a (marker for the text a.m./p.m. marker)</li>
+<li>H (hour: value range 0-23)</li>
+<li>k (hour: value range 1-24)</li>
+<li>K (hour in a.m./p.m.: value range 0-11)</li>
+<li>h (hour in a.m./p.m.: value range 1-12)</li>
+<li>m (minute</li>
+<li>s (second)</li>
+<li>S (fraction of a second)</li>
+<li>z (time zone: general time-zone format)</li>
+</ul>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">// the example simply shows how to create a new formatter for a given format string, note that the methods convention</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co">// here is the same as for the other classes in java.time, meaning that it follows the `of` pattern of method names, which</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co">// are static and produce an instance of the given class type, instead of relying on constructors, to be called by the</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co">// client code, which is less robust to future changes and more prone.</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> dateTimeFormat <span class="op">=</span> <span class="st">&quot;dd-mm-yyy &#39;(&#39;E&#39;)&#39;&quot;</span><span class="op">;</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>DateTimeFormatter<span class="op">.</span><span class="fu">ofPattern</span><span class="op">(</span>dateTimeFormat<span class="op">);</span></span></code></pre></div>
+<p><code>Note that if one wishes to print raw text inside the pattern, the text has to be surrounded by single quotes, for example having the following text inside the pattern '('E')', will print the day of the week which is the E, surrounded by plain brackets, which are not going to be interpreted as part of the pattern symbols internally by the formatter, in the end the final formatted string will look like that - 01.01.2000 (Wed)</code></p>
+<h1 id="summary">Summary</h1>
+<p>Create and manage dates</p>
+<ul>
+<li><p>The Java 8 date and time API uses ISO 8601 as the default
+calendar format, deprecating the old Calendar API</p></li>
+<li><p>The <code>LocalDate</code> class represents a date without time
+or time zones; the <code>LocalTime</code> class represents time without
+dates and time zones; the <code>LocalDateTime</code> class represents
+both date and time without time zones.</p></li>
+<li><p>The Instant class represents a Unix timestamp.</p></li>
+<li><p>The Period is used to measure the amount of time in terms of
+years, months, and days.</p></li>
+<li><p>The Duration class represents time in terms of hours, minutes,
+seconds, and fraction of seconds.</p></li>
+<li><p>The enumeration temporal.<code>ChronoUnit</code> implements the
+<code>TemporalUnit</code> interface.</p></li>
+<li><p>Both <code>TemporalUnit</code> and <code>ChronoUnit</code> deal
+with time unit values such as seconds, minutes, and hours and date
+values such as days, months, and years.</p></li>
+</ul>
+<p>Create and manage dates with zones</p>
+<ul>
+<li><p><code>ZoneId</code> identifies a time zone;
+<code>ZoneOffset</code> represents time zone offset from
+UTC/Greenwich.</p></li>
+<li><p><code>ZonedDateTime</code> provides support for all three
+aspects: date, time, and time zone.</p></li>
+<li><p>You have to account for daylight savings time (DST) when working
+with different time zones.</p></li>
+</ul>
+<p>Format date and time components</p>
+<ul>
+<li><p>The <code>DateTimeFormatter</code> class provides support for
+reading or printing date and time values in different formats.</p></li>
+<li><p>The <code>DateTimeFormatter</code> class provides predefined
+constants (such as ISO_DATE and ISO_TIME) for formatting date and time
+values.</p></li>
+<li><p>You encode the format of the date or time using case-sensitive
+letters to form a date or time pattern string with the
+<code>DateTimeFormatter</code> class.</p></li>
+</ul>
+</body>
+</html>

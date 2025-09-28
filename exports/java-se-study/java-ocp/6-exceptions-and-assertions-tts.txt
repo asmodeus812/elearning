@@ -1,0 +1,263 @@
+Throwable
+
+This is the top-level class used in almost all exception and error handling in the Java language. The Java Virtual Machine, or JVM, itself uses this class, and all exceptions—both checked and unchecked—are derived from it. Additionally, the special type called Error, which is mostly used internally by the JVM, also extends from Throwable.
+
+Every object that is thrown from Java code must be a subclass of the Throwable class, or one of its subclasses. Exception handling constructs in the language, such as throw statements, the throws clause, and the catch clause, all deal only with Throwable and its subclasses.
+
+There are three important subclasses of Throwable: Error, Exception, and RuntimeException.
+
+The general hierarchy of the Java exception model is as follows. At the top is Object, followed by Throwable, then Exception, and finally RuntimeException.
+
+Exceptions of type Exception in Java are known as checked exceptions. If code can throw an Exception, you must handle it using a catch block, or declare that the method throws that exception. This forces the caller of that method to handle the exception.
+
+RuntimeException is a derived class of the Exception class. Exceptions that derive from RuntimeException are known as unchecked exceptions. It is optional to handle unchecked exceptions. If a code segment in a method can throw an unchecked exception, it is not mandatory to catch that exception or declare it in the throws clause of that method.
+
+Error is another subclass. When the JVM detects a serious abnormal condition in the program, it raises an exception of type Error. Exceptions of this type indicate an abnormal condition in the program. There is no point in catching these exceptions and pretending nothing has happened. If an Error exception occurs, it is considered very bad practice to try to handle it. These errors signal that some irrecoverable state has been reached.
+
+Throwing
+
+Let’s look at an example of throwing an exception.
+
+The first code block defines a main method. If no arguments are passed to the program, it throws an IllegalArgumentException with a message indicating that no input was provided. This is a type of RuntimeException, which means it is not mandatory to handle it. If this exception is thrown, the program will simply exit, and the call stack will unwind accordingly. If arguments are provided, the program prints them out, separated by spaces.
+
+Since there is no explicit user-defined handler for the exception thrown above, the JVM itself will make sure that this exception is caught when the program terminates. The reason for this is to at least log the error, so the user can obtain some information about the invalid state that has occurred.
+
+The next example shows a main method that prompts the user to type an integer in the console. It uses a Scanner to read input from standard input, and then prints the integer value that was typed. The method nextInt, which tries to read the next integer from standard input, can throw an exception if the input is not a valid integer. This means that the method can throw an unchecked exception in that case. However, this is documented in the method’s documentation, so user code has the ability to catch the exception if desired, even though it is unchecked, and handle the case gracefully instead of completely terminating the program.
+
+Another useful feature in the try-catch block is that an exception can be wrapped in another one in the catch block and re-thrown, instead of handling it immediately. This is usually useful in practice, since swallowing an exception—leaving the catch block empty, or adding a generic print statement—simply loses information about the cause and reason for the exception, which is a bad idea. Wrapping an exception is a good way to preserve the initial cause if it cannot be handled at the time of the catch statement. It can be wrapped in a more generic exception that other layers in the program execution know how to handle.
+
+Chaining or translating exceptions is most often done to translate internal system exceptions, such as those coming from libraries or the Java runtime, to a more generic business-level exception that is easier to handle and control.
+
+Catching
+
+Besides creating exceptions, user code can also catch them. This is the companion action to throwing exceptions.
+
+The next example extends the previous one, which reads an integer from standard input, and tries to correctly handle the case when the input is not an integer, or when it is unable to parse a valid integer from standard input. In this case, the program simply prints a message to standard output. In a more robust solution, it could be put in a loop and require user entry until a valid integer is read.
+
+This code defines a main method that prompts the user to type an integer. It creates a Scanner to read from standard input. Inside a try block, it attempts to read the next integer and print it. If an InputMismatchException occurs—meaning the input was not an integer—the catch block prints an error message. This is a simple example, and in practice, it is not a good idea to swallow the exception or print a generic error, since information from the exception is lost.
+
+The try-catch block has two elements. The code in the try block is examined for exceptions. Once an exception occurs, the code in the catch block is triggered. If the exception matches the catch statement, that block is invoked. Multiple catch statements are allowed. It is also possible that no exception is caught if none of the catch statements match the exception being thrown. If, in the example above, something other than InputMismatchException is thrown, the catch block will not be triggered, and the exception will be handled by the JVM itself.
+
+Multi-catch catching
+
+The next example demonstrates catching multiple exceptions.
+
+This code defines a main method that initializes a string with a non-integer value. It creates a Scanner to read from this string. Inside a try block, it attempts to read the next integer from the string. There are three catch blocks: one for InputMismatchException, one for NoSuchElementException, and one for IllegalStateException. Each catch block prints an error message.
+
+In this example, calling nextInt will fail with NoSuchElementException. This happens because the scanner is initialized with an invalid string from which to parse an integer—in this case, the string "non-integral-type". This also shows that the order in which exceptions are caught matters. InputMismatchException will not trigger before NoSuchElementException. However, InputMismatchException extends from NoSuchElementException, so it is not possible to catch NoSuchElementException before InputMismatchException in the catch block order.
+
+The final code block demonstrates that the order of catch statements matters, especially when exceptions have a common hierarchy. In this case, NoSuchElementException is the parent class of InputMismatchException. If you try to catch NoSuchElementException before InputMismatchException, the InputMismatchException catch block will never be reached, because the parent class will catch it first.
+
+In summary, understanding the Throwable hierarchy, the difference between checked and unchecked exceptions, and the correct use of try-catch blocks—including the order of catch statements—is essential for robust exception handling in Java.
+
+
+Let’s start by discussing exception handling order in Java.
+
+When you write multiple catch blocks, you must catch more specific exceptions before more general ones. For example, NoSuchElementException is a parent class of InputMismatchException. If you try to catch NoSuchElementException first, and then InputMismatchException, the compiler will give you an error. This is because, if the parent exception is caught first, any child exceptions will also be caught by that block, making the later, more specific catch block unreachable. The compiler enforces this rule to help you avoid logical mistakes that would be hard to detect at runtime.
+
+In other words, if this were allowed, the catch block for NoSuchElementException would always handle both NoSuchElementException and InputMismatchException, so the catch block for InputMismatchException would never be executed. This is why the compiler checks for this logical error, not just for syntax.
+
+When you provide multiple catch handlers, always handle the most specific exceptions first, followed by more general ones. If you try to catch a derived class exception after a base class exception, the compiler will issue a compile-time error.
+
+Now, let’s talk about multi-catch blocks.
+
+Java allows you to catch multiple unrelated exceptions in a single catch block using the pipe symbol. This is called a multi-catch block. However, you cannot combine exceptions that have a parent-child relationship in a multi-catch. For example, you cannot catch both NoSuchElementException and InputMismatchException together in a multi-catch, because one is a subclass of the other. The compiler will flag this as an error.
+
+Here’s what a problematic multi-catch might look like: The code tries to scan an integer from the console, and attempts to catch both NoSuchElementException and IllegalStateException in a single catch block. However, if these exceptions are related by inheritance, this is not allowed. The compiler will reject it.
+
+In summary, in a multi-catch block, you can only combine exceptions that are unrelated by inheritance. If two exceptions share a base or derived class relationship, you cannot list them together in a multi-catch.
+
+You might notice that both multiple catch statements and multi-catch statements serve similar purposes. Which one you use depends on your needs. If the exceptions are thrown for the same or similar reasons, a multi-catch block makes the code more readable and maintainable. If you need to handle different exceptions in different ways, use separate catch blocks.
+
+Let’s move on to general exception catching.
+
+All exceptions in Java extend from the Throwable class, and more specifically from the Exception class. This means you can catch a higher-level exception type, such as Exception or even Throwable, to handle any exception that might be thrown in a try-catch block. While this is not always the best idea, it can be useful in situations where many different exceptions might be thrown, such as when working with input and output operations.
+
+If you try to handle every possible exception individually, your code can quickly become unreadable and hard to maintain. In these cases, it’s often better to catch Exception for less important cases, and report a general error.
+
+For example, consider a block of code that reads an integer from the console. The most important exception to handle is InputMismatchException, which occurs if the input is not a valid integer. You can catch this exception specifically, and then use a general catch block for Exception to handle anything else that might go wrong. This approach keeps the code focused and readable.
+
+Now, let’s talk about finalizing resources.
+
+In all the examples above, there’s a common issue: the Scanner object is not closed after use. This can be fixed by calling the close method on the Scanner. Java provides two main ways to ensure resources are closed properly: the finally block, and the try-with-resources statement introduced in Java 8.
+
+Let’s start with the finally block.
+
+The finally block is always executed after the try and catch blocks, regardless of whether an exception was thrown or caught. This makes it a safe place to clean up resources, such as closing files or network connections.
+
+For example, you might prompt the user to type an integer, create a Scanner to read from the console, and then use a try-catch-finally structure. In the try block, you read the integer. In the catch block, you handle any exceptions that occur. In the finally block, you close the Scanner. However, be aware that calling close on a Scanner can itself throw an IllegalStateException if you try to close it more than once. If this happens, any code after the close call in the finally block will not be executed. For this reason, it’s not always recommended to use the old-fashioned finally block to close resources, as it could still lead to resource leaks in some cases.
+
+It’s also possible to have a try-catch inside a finally block. This was the traditional way to close file streams, since their close method can throw a checked exception that must be handled.
+
+One important caveat: if you call System.exit inside a method, the program will terminate immediately, and any finally blocks will not be executed. This can lead to resource leaks, so it’s considered bad practice to use System.exit to exit a program.
+
+Here’s a quirky example involving finally blocks. If you return a value from both the try and finally blocks, the value from the finally block will override the one from the try block. For instance, if you return true from the try block, but return false from the finally block, the method will always return false. This is why it’s not recommended to return values from finally blocks.
+
+Now, let’s discuss try-with-resources.
+
+Try-with-resources is a feature introduced in Java 8 to simplify resource management and avoid the pitfalls of the finally block. It works with any resource that implements the AutoCloseable interface, which signals to the Java Virtual Machine that the resource can be closed automatically.
+
+With try-with-resources, you declare and initialize resources inside the parentheses of the try statement. When the try block finishes, whether normally or due to an exception, the resources are automatically closed. This eliminates the need for a finally block to close resources, and ensures that resources are always released properly.
+
+For example, you can declare a Scanner inside a try-with-resources statement, read an integer from the console, and handle any exceptions in a catch block. There’s no need for a finally block, because the Scanner will be closed automatically.
+
+Internally, the compiler translates try-with-resources into a try-catch-finally structure during code generation. Try-with-resources is mostly syntactic sugar, but it ensures that your code is functionally correct and free from common resource management errors.
+
+If you need to declare more than one resource in a try-with-resources statement, you can separate them with a semicolon. All resources declared this way are effectively final, meaning they cannot be reassigned within the block.
+
+In summary, use try-with-resources whenever possible for managing resources like files, streams, or scanners. It makes your code cleaner, safer, and easier to maintain.
+
+
+Let’s begin with an explanation of the try-with-resources statement in Java.
+
+In the first example, two resources are declared within the try-with-resources statement: a ZipOutputStream, which is used to write to a zip file, and a FileInputStream, which is used to read from an input file. The key point here is that both resources are separated by a semicolon within the try statement. Inside the try block, the code puts a new entry into the zip file, then reads from the input file in a loop, writing each chunk of data into the zip file. The important detail is that both reading and writing operations can throw input or output exceptions. However, because these resources are managed by the try-with-resources statement, they will be closed automatically at the end of the block, even if an exception occurs. This greatly reduces the risk of resource leaks.
+
+It’s important to note that all resources declared within the try-with-resources block are effectively final. This means you cannot reassign them within the block, because doing so would lose the original reference and potentially leak resources. However, you can declare and initialize a resource outside the try block, then capture its reference inside the try-with-resources statement. For example, you might create a Scanner for console input outside the try block, then use it within the try-with-resources statement by assigning it to another variable. This is allowed and not considered an error.
+
+The main benefit of the try-with-resources statement is that it simplifies code and makes it less verbose. It also ensures correctness, since you don’t have to manually write finally blocks to close resources—something that can be easily forgotten or implemented incorrectly. It’s also possible to use a try-with-resources block without a catch statement. While this is allowed by the language, it’s generally not recommended.
+
+For example, you might create a Scanner for console input within a try-with-resources block, then read an integer from the user and print it. In this case, the resource is still closed automatically at the end of the block.
+
+If you use both a finally block and a try-with-resources statement together, the resources inside the try-with-resources statement will be closed before the finally block is executed. This means you should not attempt to close those resources again in the finally block, as doing so will likely throw an exception since the resources are already closed. Instead, the finally block can be used for logging or notifying that all resources have been cleaned up and finalized.
+
+Now, let’s move on to the throws clause in Java.
+
+The throws clause is another important part of Java’s exception framework. This clause is used to declare that a method might throw certain exceptions. If a method throws an unchecked exception, using the throws clause is optional. However, if a method throws a checked exception, the throws clause is required, and you must declare all checked exceptions that the method might throw.
+
+It’s considered good practice to document which exceptions a method can throw, and under what conditions. For example, you might have a main method that reads an integer from a file. If the file does not exist, a FileNotFoundException is thrown. In this case, the main method must declare that it throws FileNotFoundException, otherwise the code will not compile.
+
+When a method declares that it throws a checked exception, any method that calls it must either handle the exception or declare that it also throws the exception. This creates a chain of responsibility for handling exceptions.
+
+There are some important rules regarding the throws clause and method overriding. If a base method declares a throws clause, any overriding method in a subclass must adhere to that contract. Specifically, the overriding method cannot throw more general checked exceptions, nor can it add new checked exceptions that are not part of the original method’s throws clause. However, the overriding method can declare a more specific checked exception, as long as it is a subtype of the exception declared in the base method.
+
+For example, consider an interface called IntReader with a method that throws an IOException. A class implementing this interface can override the method and declare that it throws a FileNotFoundException, which is a subtype of IOException. This is allowed. However, if the overriding method tries to throw a completely different checked exception that is not a subtype, the code will not compile.
+
+The throws declaration in an overridden method can only be changed to add unchecked exceptions, such as those that extend RuntimeException. Any attempt to add unrelated checked exceptions will result in a compiler error.
+
+Let’s talk about documentation.
+
+It’s good practice to use the at-throws JavaDoc tag to document the specific situations or causes in which an exception—whether checked or unchecked—might be thrown from a method. For example, the nextInt method from the Scanner class includes documentation that lists the possible exceptions it can throw, such as InputMismatchException, NoSuchElementException, and IllegalStateException. These exceptions are listed in alphabetical order, not by severity or class hierarchy.
+
+Now, let’s cover some miscellaneous points about exceptions in Java.
+
+First, if a method does not have a throws clause, it does not mean it cannot throw any exceptions. It simply means it cannot throw any checked exceptions.
+
+Second, static block initializers cannot throw checked exceptions. This is because static initialization blocks are executed when the class is loaded, and there is no way to handle exceptions at that point. Furthermore, you cannot declare checked exceptions in a throws clause for static initializers.
+
+Third, non-static initializer blocks can throw checked exceptions, but all constructors must declare those exceptions in their throws clause. This is because the compiler merges the code from non-static initializer blocks and constructors during code generation, so the constructor’s throws clause is used to declare any checked exceptions that might be thrown.
+
+Fourth, an overriding method cannot declare more checked exceptions in its throws clause than the base method. However, it can declare more specific exceptions, meaning it can list derived exceptions in the throws clause.
+
+Fifth, if a method is declared in two or more interfaces, and each interface declares different exceptions in the throws clause, the implementing method must declare all of these exceptions in its own throws clause. In other words, the throws clauses are merged together.
+
+Finally, let’s discuss user-defined exceptions.
+
+Custom exceptions can be declared by extending either the Exception class or the RuntimeException class. It is considered bad practice to extend from the Throwable or Error classes. As mentioned earlier, if you want to create a checked exception, you should extend from Exception. If you want to create an unchecked exception, you should extend from RuntimeException.
+
+
+The Exception class, and by extension the RuntimeException class, provide several constructors for creating exception objects in Java.
+
+First, there is the default constructor, which creates an Exception object without any additional information. This means no detailed message is provided about the exception.
+
+Next, there is a constructor that takes a string argument. This allows you to provide a detailed message describing the exception when you create it.
+
+There is also a constructor that takes both a string message and another exception as arguments. This lets you specify a detailed message and also indicate the cause of the exception, which is another throwable object.
+
+Finally, there is a constructor that takes only a throwable cause as an argument. This is useful when you want to wrap another exception as the cause of the current exception.
+
+In addition to these constructors, the Exception class provides several important methods.
+
+The getMessage method returns the detailed message that was passed when the exception was created.
+
+The getCause method returns the cause of the exception, if any. If there is no cause, it returns null.
+
+The getSuppressed method returns an array of suppressed exceptions. These are typically exceptions that were suppressed when using a try-with-resources statement.
+
+The printStackTrace method prints the stack trace to the console. This includes the list of method calls and relevant line numbers that led to the exception. If the exception has a cause or any suppressed exceptions, those are also printed.
+
+Now, let's look at an example of a custom user exception.
+
+This example defines a class called InvalidInputException, which extends RuntimeException. Because it extends RuntimeException, it is an unchecked exception. The class provides three constructors: a default constructor, one that takes a message, and one that takes both a message and a throwable cause. This allows you to create InvalidInputException objects with varying levels of detail, depending on your needs.
+
+Assertions
+
+The assert statement in Java is used to check or test your assumptions about the program. The assert keyword provides support for assertions. Each assertion statement contains a Boolean expression. If the expression evaluates to true, nothing happens. However, if it evaluates to false, an AssertionError is thrown.
+
+It is important to remember that the Error class and its derived classes, such as AssertionError, indicate serious runtime errors and are not meant to be handled. If an AssertionError is thrown, the best course of action is to let the program terminate and then examine the assertion to understand why it failed.
+
+Assertions are a useful tool because they allow you to make certain assumptions in your code and quickly discover when those assumptions are violated.
+
+A very important detail is that assertions are disabled by default at runtime. To enable them, you use the dash E A switch, or its longer form, dash enable asserts. To disable assertions at runtime, use the dash D A switch.
+
+You might wonder why you would need the dash D A switch if assertions are disabled by default. There are several use cases. For example, you might want to enable assertions for all classes within a given package, but disable them for a specific class in that package. In this case, the dash D A switch is useful.
+
+Here are some common command-line arguments for controlling assertions:
+
+The dash E A switch enables assertions by default, except for system classes.
+
+The dash E A colon, followed by a class name, enables assertions for a specific class.
+
+The dash E A colon, followed by a package name and three dots, enables assertions for all members of a given package.
+
+The dash E A colon, followed by three dots, enables assertions in the unnamed package.
+
+The dash E S A switch, which stands for enable systems assertions, enables assertions in system classes. This option is rarely used.
+
+The dash D A switch disables assertions by default, except for system classes.
+
+The dash D A colon, followed by a class name, disables assertions for a specific class.
+
+The dash D A colon, followed by a package name and three dots, disables assertions for all members of a given package.
+
+The dash D A colon, followed by three dots, disables assertions in the unnamed package.
+
+The dash D S A switch, which stands for disable systems assertions, disables assertions in system classes. This option is also rarely used.
+
+Summary
+
+Let’s review the key points about exception handling and assertions in Java.
+
+When an exception is thrown from a try block, the Java Virtual Machine looks for a matching catch handler in the method call chain. If no matching handler is found, the unhandled exception will cause the application to crash.
+
+When providing multiple exception handlers, you should list specific exception handlers before general ones.
+
+You can programmatically access the stack trace using methods like printStackTrace and getStackTrace, which can be called on any exception object.
+
+A try block can have multiple catch handlers. If two or more exceptions have similar causes and handling code, you can combine them into a multi-catch block.
+
+A catch block should either handle the exception or rethrow it. Catching an exception and doing nothing is considered bad practice.
+
+You can wrap one exception and throw it as another, creating chained exceptions. From the thrown exception, you can retrieve the cause.
+
+The code inside a finally block will always execute, regardless of whether the try block completed successfully or threw an exception.
+
+Forgetting to release resources by explicitly calling the close method is a common mistake. You can use a try-with-resources statement to simplify your code and automatically close resources.
+
+You can also auto-close multiple resources within a try-with-resources statement. These resources should be separated by semicolons in the statement header.
+
+
+Exception Handling and Suppressed Exceptions
+
+If a try block throws an exception, and the finally block also throws one or more exceptions, the exceptions from the finally block will be added as suppressed exceptions to the original exception from the try block. This means that the exception from the try block is the main one that gets thrown to the caller, but any exceptions from the finally block are not lost—they are attached as additional context.
+
+Custom Exceptions
+
+When creating your own exceptions, it is recommended to derive them from either the Exception class or the RuntimeException class. This ensures that your custom exceptions fit naturally into Java’s exception hierarchy.
+
+Throws Clause in Methods
+
+A method’s throws clause is part of its contract. Any overriding methods in derived classes must respect this contract. An overriding method can declare the same exceptions in its throws clause as the base method, or it can declare more specific exceptions. However, it cannot declare a more general throws clause, nor can it add new checked exceptions that were not present in the base method’s throws clause.
+
+Try-with-Resources and AutoCloseable
+
+For a resource to be used in a try-with-resources statement, its class must implement the java dot lang dot AutoCloseable interface and define a close method. This allows the resource to be closed automatically when the try block finishes, whether it completes normally or with an exception.
+
+Assertions and Invariants
+
+Assertions are used to check conditions in your program and are meant for explicitly verifying the assumptions you make during development. The assert statement comes in two forms: one that takes a Boolean argument, and another that also takes a string argument for additional context.
+
+If the Boolean condition in the assert statement fails, meaning it evaluates to false, the program will terminate by throwing an AssertionError. It is not advisable to catch and recover from an AssertionError, as these are meant to signal programming errors.
+
+By default, assertions are disabled at runtime. You can enable them using the dash e a command-line argument, or disable them with dash d a and their variants when you start the Java Virtual Machine.
+
+

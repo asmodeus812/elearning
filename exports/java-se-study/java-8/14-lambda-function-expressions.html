@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>14-lambda-function-expressions</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#lambda" id="toc-lambda">Lambda</a>
+<ul>
+<li><a href="#structure" id="toc-structure">Structure</a></li>
+<li><a href="#interfaces" id="toc-interfaces">Interfaces</a></li>
+<li><a href="#declaration" id="toc-declaration">Declaration</a></li>
+<li><a href="#syntax" id="toc-syntax">Syntax</a></li>
+<li><a href="#generics" id="toc-generics">Generics</a></li>
+<li><a href="#exceptions" id="toc-exceptions">Exceptions</a></li>
+<li><a href="#captures" id="toc-captures">Captures</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
+<li><a href="#predefined" id="toc-predefined">Predefined</a></li>
+</ul></li>
+</ul>
+</nav>
+<h2 id="lambda">Lambda</h2>
+<p>The lambda expression is a form of an annonymous class or another
+form of a functional interface - in other words a unit which represents
+an executable action, lambda expressions are also called closures, the
+closure term comes from the fact that they enclose some sort of state,
+they are a special case of callback functions, which usually do not have
+the capability to operate on anything else but the state passed in to
+them through the function parameters (arguments)</p>
+<h3 id="structure">Structure</h3>
+<p>The lambda expression is consisting of two main components, one is
+the argument definition list, and the other is the lambda body, this is
+very similar to a way one would define a callback, however as already
+mentioned lambda’s are not the same as callbacks, lambdas have the
+ability to capture state that is not explicitly provided to them from
+the outer scope through arguments, the two structural objects
+<code>(arg-list)</code> and the <code>{ lambda-body }</code> are
+connected with the <code>-&gt;</code> operator which is only used to
+construct lambda expression in the java language</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">(</span><span class="co">/* lambda arguments */</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a> <span class="co">// body of the lambda</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="interfaces">Interfaces</h3>
+<p>As already mentioned in java 8, the spec has introduced a new
+functional interface, that is an interface which has only one method,
+that is not a <code>default</code> interface method, i.e only one method
+that has no implementation. This feature ties real nice with the
+introduction of lambda expression as already mentioned lambda expression
+are really an anonymous class which has only one function, that is the
+lambda expression itself, meaning that functional interfaces are not too
+far off</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> Functional <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">method</span><span class="op">();</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>Functional instance <span class="op">=</span> <span class="op">()</span> <span class="op">-&gt;</span> <span class="dv">5</span><span class="op">;</span> <span class="co">// create a lambda and assign it to a type of Functional</span></span></code></pre></div>
+<p>Interfaces which have only one function without an implementation are
+by default treated as Functional type interfaces by the java
+compiler</p>
+<p><code>When a lambda expression occurs in a target type context, an instance of a class is automatically created that implements the functional interface</code></p>
+<h3 id="declaration">Declaration</h3>
+<p>As already mentioned when in a context of a target type, the lambda
+expression has to be of well defined type, what this means is that the
+lambda has to be assigned to a known type always</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> func <span class="op">=</span> <span class="op">()</span> <span class="op">-&gt;</span> <span class="dv">5</span><span class="op">;</span> <span class="co">// compiler error, even though java 11 introduced the auto-type var, the compiler can not resolve this</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>Functional func <span class="op">=</span> <span class="op">()</span> <span class="op">-&gt;</span> <span class="dv">5</span><span class="op">;</span> <span class="co">// this is valid, a correct, explicit type is defined for the lambda</span></span></code></pre></div>
+<h3 id="syntax">Syntax</h3>
+<p>There are several rules which govern the syntax form of a lambda
+definition and declaration</p>
+<ul>
+<li>When the lambda has only one parameter it need no be enclosed in
+brackets</li>
+<li>There is no need to explicitly define the argument types they are
+deduced from the functional interface signature</li>
+<li>The body of the lambda need not be surrounded by curly brackets when
+it is representing one single statement</li>
+<li>When the lambda body statement is not surrounded by curly brackets
+an implicit return is provided by the compiler</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// implicit functional interface</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> Functional <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">method</span><span class="op">(</span><span class="dt">int</span> n<span class="op">);</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">// no need to surround body with {}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">// an implicit return is added,</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">// arguments not enclosed in ()</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">// a single statement body</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>Functional func <span class="op">=</span> n <span class="op">-&gt;</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>func<span class="op">.</span><span class="fu">method</span><span class="op">(</span><span class="dv">5</span><span class="op">);</span> <span class="co">// invocation</span></span></code></pre></div>
+<p><code>When one has to explicitly provide the type of one of the lambda arguments, then all arguments have to have their type provided, otherwise it is compiler error</code></p>
+<h3 id="generics">Generics</h3>
+<p>One important point, lambda expression can not be generic, however
+the functional interface they are created from can be. This is easy to
+see why, the functional interface is the contract, while the lambda
+expression or definition is the actual implementation, therefore the
+type has to be defined when the lambda expression is created or
+defined</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> Functional<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    T <span class="fu">method</span><span class="op">(</span>T n<span class="op">);</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>Functional<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> lambdaOne <span class="op">=</span> n <span class="op">-&gt;</span> n<span class="op">.</span><span class="fu">intValue</span><span class="op">();</span> <span class="co">// valid, the interface is generic, the implementation is specialized</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>Functional<span class="op">&lt;</span><span class="bu">Double</span><span class="op">&gt;</span> lambdaTwo <span class="op">=</span> n <span class="op">-&gt;</span> n<span class="op">.</span><span class="fu">doubleValue</span><span class="op">();</span> <span class="co">// valid, the interface is generic, the implementation is specialized</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>lambdaOne<span class="op">.</span><span class="fu">method</span><span class="op">(</span><span class="dv">5</span><span class="op">);</span> <span class="co">// invoke the first lambda instance with an integer</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>lambdaTwo<span class="op">.</span><span class="fu">method</span><span class="op">(</span><span class="fl">5.5</span><span class="op">);</span> <span class="co">// invoke the first lambda instance with an double</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>lambdaTwo<span class="op">.</span><span class="fu">method</span><span class="op">(</span><span class="dv">5</span><span class="op">);</span> <span class="co">// that is not valid, auto-promotion is not valid for lambda expressions, must match signature exactly</span></span></code></pre></div>
+<p><code>Automatic promotion does not work with lambda expression, the signature of the lambda must match exactly with the argument types</code></p>
+<h3 id="exceptions">Exceptions</h3>
+<p>Since lambdas can throw an exception, if the exception is of checked
+type, it has to be defined in the <code>throws</code> clause of the
+functional interface, therefore one can define a functional interface
+such as</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> Functional<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    T <span class="fu">method</span><span class="op">(</span>T n<span class="op">)</span> <span class="kw">throws</span> <span class="bu">IllegalStateException</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>Functional<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> lambdaOne <span class="op">=</span> n <span class="op">-&gt;</span> n<span class="op">.</span><span class="fu">intValue</span><span class="op">();</span> <span class="co">// valid, only an instance of the functional interface is defined</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    lambdaOne<span class="op">.</span><span class="fu">method</span><span class="op">(</span><span class="dv">5</span><span class="op">);</span> <span class="co">// correctly invoke the method and catch the exception it has declared it might throw</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// do something if exception is caught</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="captures">Captures</h3>
+<p>There are strict rules as to what the lambda can use and capture from
+the outer scope, while a lambda expression can capture local and
+enclosing class member variables, there are some exceptions as to how
+one can use those.</p>
+<ul>
+<li>lambdas can capture local variables, but those have to be
+effectively final, meaning that they can not be re-assigned in the body
+of the lambda</li>
+<li>lambdas can capture the <code>this</code> of the enclosing class and
+mutate non-final member variables</li>
+<li>lambda defined in a static context (i.e static method) has no access
+to <code>this</code> of the enclosing class</li>
+<li>lambdas can reference static member variables of the enclosing or
+other classes</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> Clazz <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="bu">Double</span> PI <span class="op">=</span> <span class="fl">3.14</span><span class="op">;</span> <span class="co">// accessible from the lambda expression</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> value <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// accessible in a lambda instance created inside non-static method</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="bu">Integer</span> boxed <span class="op">=</span> <span class="dv">12</span><span class="op">;</span> <span class="co">// accessible in a lambda instance created inside non-static method</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">method</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> value <span class="op">=</span> <span class="dv">5</span><span class="op">;</span> <span class="co">// not declared final, but it is assumed to be by the compiler, modifications to this local are compile time error</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Integer</span> inner <span class="op">=</span> <span class="kw">new</span> <span class="bu">Integer</span><span class="op">(</span><span class="dv">5</span><span class="op">);</span> <span class="co">// not declared final, but it is assumed to be by the compiler, modifications to this local are compile time error</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        Functional<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> lambda <span class="op">=</span> n <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>            value <span class="op">=</span> value <span class="op">+</span> inner <span class="op">+</span> <span class="kw">this</span><span class="op">.</span><span class="fu">boxed</span><span class="op">.</span><span class="fu">intValue</span><span class="op">();</span> <span class="co">// compile time error, `value` refers to the local variable, which always final, but is modified</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            <span class="kw">this</span><span class="op">.</span><span class="fu">value</span> <span class="op">=</span> <span class="dv">12</span><span class="op">;</span> <span class="co">// this is valid assign to the enclosing class member variable `value`</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            <span class="kw">this</span><span class="op">.</span><span class="fu">boxed</span> <span class="op">=</span> <span class="kw">this</span><span class="op">.</span><span class="fu">value</span> <span class="op">+</span> n<span class="op">;</span> <span class="co">// this is valid, `boxed` can be re-assigned, new reference</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="kw">this</span><span class="op">.</span><span class="fu">value</span> <span class="op">+</span> n <span class="op">+</span> PI<span class="op">;</span> <span class="co">// also valid expression in the return statement of the lambda</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        lambda<span class="op">.</span><span class="fu">method</span><span class="op">(</span><span class="dv">3</span><span class="op">);</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="references">References</h3>
+<p>There is another related feature to lambda expression which allows
+one to capture a <code>reference</code> to an existing method which is
+compatible with the
+<code>lambda's functional interface declaration</code>. What that means
+is that java run-time will automatically create an anonymous class
+instance and lambda from a method reference to a static or non static
+method. Java uses a special reference operator <code>::</code> where on
+the left is defined the target or instance reference - either an class
+instance variable, or a class type</p>
+<h4 id="instance">Instance</h4>
+<p>To obtain an instance method reference one has to use the instance
+variable itself as a prefix to the <code>::</code> reference operator,
+as shown below, the function reference refers to the specific variable
+instance, and the <code>this</code> argument to the lambda is the actual
+instance itself</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> Functional <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> <span class="fu">get</span><span class="op">(</span><span class="dt">int</span> i<span class="op">);</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> string <span class="op">=</span> <span class="st">&quot;hello-world&quot;</span><span class="op">;</span> <span class="co">// create an instance of a String type</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>Functional ref <span class="op">=</span> string<span class="op">::</span>charAt<span class="op">;</span> <span class="co">// reference of an `instance` method of String.charAt</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">// this lambda reference, has internally captured `this` as the `string` instance itself</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">// therefore internally it would invoke this.charAt(n), where `this` is the `string` var</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>ref<span class="op">.</span><span class="fu">get</span><span class="op">(</span><span class="dv">0</span><span class="op">);</span> <span class="co">// will return the character at 0-th position in the `string` variable</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>ref<span class="op">.</span><span class="fu">get</span><span class="op">(</span><span class="dv">1</span><span class="op">);</span> <span class="co">// will return the character at 1-th position in the `string` variable</span></span></code></pre></div>
+<h4 id="static">Static</h4>
+<p>Another way to use method reference is to use a reference to a static
+method, in this case the <code>join</code> method in the
+<code>String</code> class is used which accepts the delimiter and
+elements to be joined. Note that the signature of the <code>join</code>
+does not specify <code>String</code> as arguments but rather
+<code>CharSequence</code> however <code>CharSequence</code> is a super
+class of <code>String</code> which means that, lambda signature
+definitions can specify the sub-class and the correct reference will be
+resolved, and that is not a compile time error</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="bu">String</span> <span class="fu">join</span><span class="op">(</span><span class="bu">CharSequence</span> delimiter<span class="op">,</span> <span class="bu">CharSequence</span><span class="kw">...</span> elements<span class="op">)</span> <span class="co">// The original function signature for `join` from `String`</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> Functional <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> <span class="fu">concat</span><span class="op">(</span><span class="bu">String</span> delim<span class="op">,</span> <span class="bu">String</span><span class="kw">...</span> elements<span class="op">);</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> string <span class="op">=</span> <span class="st">&quot;hello-world&quot;</span><span class="op">;</span> <span class="co">// create an instance of a String type</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>Functional ref <span class="op">=</span> <span class="bu">String</span><span class="op">::</span>join<span class="op">;</span> <span class="co">// reference of an `instance` method of String.charAt</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">// this lambda reference, has internally captured `this` as the `string` instance itself</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">// therefore internally it would invoke this.charAt(n), where `this` is the `string` var</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>ref<span class="op">.</span><span class="fu">concat</span><span class="op">(</span><span class="st">&quot;,&quot;</span><span class="op">,</span> string<span class="op">);</span> <span class="co">// will use the String.join to concat the entries</span></span></code></pre></div>
+<h4 id="generics-1">Generics</h4>
+<p>It is also possible to provide a generic reference to a method, the
+syntax remains mostly the same however there is a small caveat where the
+type argument of the generic needs to be specified as well. Below is the
+original functional interface provided by <code>java.lang</code> used to
+compare any two values of the same type, returns an <code>int</code> to
+signify the status of <code>a compared to b</code> - is greater
+(negative), equal (zero) or greater (positive)</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">interface</span> <span class="bu">Comparator</span><span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">compare</span><span class="op">(</span>T o1<span class="op">,</span> T o2<span class="op">);</span> <span class="co">// the actual functional interface being used and it&#39;s only compare function</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CustomComparator <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="op">&lt;</span>T <span class="kw">extends</span> <span class="bu">Number</span><span class="op">&gt;</span> <span class="dt">int</span> <span class="fu">comp</span><span class="op">(</span>T a<span class="op">,</span> T b<span class="op">)</span> <span class="op">{</span> <span class="co">// custom implementation matching the functional signature</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> a<span class="op">.</span><span class="fu">intValue</span><span class="op">()</span> <span class="op">-</span> b<span class="op">.</span><span class="fu">intValue</span><span class="op">();</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> list <span class="op">=</span> <span class="bu">List</span><span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">,</span> <span class="dv">6</span><span class="op">);</span> <span class="co">// create a list of integers, to find the max entry from</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> max <span class="op">=</span> <span class="bu">Collections</span><span class="op">.</span><span class="fu">max</span><span class="op">(</span>list<span class="op">,</span> CustomComparator<span class="op">::&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span>comp<span class="op">);</span> <span class="co">// compare using the custom implementation</span></span></code></pre></div>
+<p>In the example above, the <code>max</code> method of the
+<code>Collections</code> library is used, which is a generic method that
+takes a reference to the functional interface <code>Comparator</code>
+having a single function compare with <code>a</code> and <code>b</code>
+and returns an <code>int</code>, in the <code>CustomComparator</code>
+class above the method signature matches the one in
+<code>Comparator</code> which allows one to pass the function reference
+of <code>CustomComparator::comp</code> as a parameter to the
+<code>max</code> method of <code>Collections</code>.</p>
+<h4 id="constructors">Constructors</h4>
+<p>It is also possible to create references to class’ constructors, the
+premise and idea is the same for regular methods, however there are
+small differences. When referencing constructor as a functional
+interface, the signature that needs to be matched is very specific, the
+return type of a constructor reference is obviously the
+<code>class type</code>, the input is the list of arguments the
+constructor accepts.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">interface</span> Functional <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Integer</span> <span class="fu">create</span><span class="op">(</span><span class="dt">int</span> n<span class="op">);</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>Functional creator <span class="op">=</span> <span class="bu">Integer</span><span class="op">::</span><span class="kw">new</span><span class="op">;</span> <span class="co">// reference the constructor of Integer</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="bu">Integer</span> one <span class="op">=</span> creator<span class="op">.</span><span class="fu">create</span><span class="op">(</span><span class="dv">1</span><span class="op">);</span> <span class="co">// create an instance of the integer class</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="bu">Integer</span> two <span class="op">=</span> creator<span class="op">.</span><span class="fu">create</span><span class="op">(</span><span class="dv">2</span><span class="op">);</span> <span class="co">// create an instance of the integer class</span></span></code></pre></div>
+<h3 id="predefined">Predefined</h3>
+<p>In the core library in Java, there are several functional interfaces
+which are already defined, that for the most part handle pretty much all
+the cases and patterns one might expect to use in a lambda context. The
+list below shows the different combinations of lambda function
+references that can be built with the default functional interfaces
+provided by the java core</p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 87%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Interface</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>UnaryOperator&lt;T&gt;</td>
+<td>Apply a unary operation to an object of type T and return the
+result, which is also of type T. Its method is called apply().</td>
+</tr>
+<tr class="even">
+<td>BinaryOperator&lt;T&gt;</td>
+<td>Apply an operation to two objects of type T and return the result,
+which is also of type T. Its method is called apply().</td>
+</tr>
+<tr class="odd">
+<td>Consumer&lt;T&gt;</td>
+<td>Apply an operation on an object of type T. Its method is called
+accept().</td>
+</tr>
+<tr class="even">
+<td>Supplier&lt;T&gt;</td>
+<td>Return an object of type T. Its method is called get().</td>
+</tr>
+<tr class="odd">
+<td>Function&lt;T, R&gt;</td>
+<td>Apply an operation to an object of type T and return the result as
+an object of type R. Its method is called apply().</td>
+</tr>
+<tr class="even">
+<td>Predicate&lt;T&gt;</td>
+<td>Determine if an object of type T fulfills some constraint. Return a
+boolean value that indicates the outcome. Its method is called
+test().</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

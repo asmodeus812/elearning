@@ -1,0 +1,327 @@
+Thread Model
+
+Concurrency is becoming increasingly important as multi-core processors become more common. The word concurrency comes from the Latin root meaning “running together.” In programming, concurrency means that multiple threads can run in parallel within a program, each executing different tasks at the same time. When used properly, concurrency can significantly improve the performance and responsiveness of an application, making it a powerful and valuable feature.
+
+From its earliest versions, Java has supported concurrency through low-level thread management, locks, and synchronization. Starting with version five, Java introduced a high-level concurrency API in the concurrent package. With version eight, Java’s support for concurrency improved further, thanks to the introduction of parallel streams.
+
+Terms
+
+Let’s clarify some important terms related to concurrency.
+
+A critical section is a user-level object that allows only one active thread to execute a particular section of code within a single process. Other threads that try to enter this section are put to sleep until it becomes available.
+
+A mutex, or mutual exclusion object, is managed by the operating system’s kernel. It ensures that only one active thread among different processes can execute a particular section of code. Threads that do not acquire the mutex are put to sleep.
+
+A lock is similar to a mutex, but it is used within the same process. It allows only one active thread to proceed, while others wait.
+
+A semaphore is a kernel object that allows a group of active threads to execute, while others are put to sleep. Semaphores can be used for interprocess or shared actions, but they are not always safe and lack some of the properties of shared mutexes.
+
+Monitors are special objects that combine a mutex and a conditional variable. They are synchronization constructs that control access to shared resources. Monitors provide mutual exclusion, ensuring that only one thread can execute a critical section at a time, and they also allow threads to wait for specific conditions to be met. In Java, every object has an intrinsic monitor associated with it. This monitor can be used to synchronize access to the object’s methods or code blocks. It consists of intrinsic monitor locks—either a mutex or a lock—and a wait-notify mechanism for conditional synchronization.
+
+Creation
+
+Java provides the Thread class, the Object class, and the Runnable interface to support concurrency. The Thread class includes methods such as run, start, and sleep, which are essential for multi-threading. The Object class provides methods like wait and notify, which are specifically designed to support concurrency. Since every class in Java inherits from Object, all objects have basic multi-threading capabilities. Acquiring a lock on an object or instance is straightforward using the synchronized keyword.
+
+Let’s review some key methods related to threads in Java.
+
+The currentThread method is a static method that returns a reference to the currently executing thread.
+
+The getName method is an instance method that returns the name of the current thread.
+
+The getPriority method is an instance method that returns the priority value of the current thread.
+
+The join methods are overloaded instance methods. When one thread calls join on another thread, it waits until the other thread completes. You can also specify a timeout in milliseconds, or in both milliseconds and nanoseconds.
+
+The run method is an instance method. When you start a thread using the start method, the run method is called when the thread is ready to execute.
+
+The setName method is an instance method that changes the thread’s name to the value provided.
+
+The setPriority method is an instance method that sets the thread’s priority to the specified value.
+
+The sleep methods are overloaded static methods. They make the current thread sleep for a specified number of milliseconds, or for a combination of milliseconds and nanoseconds.
+
+The start method is an instance method that starts the thread. The Java Virtual Machine then calls the run method of the thread.
+
+The toString method is an instance method that returns a string representation of the thread, including its name, priority, and group.
+
+Creating Threads
+
+To create thread objects in Java, you can extend the Thread class and override the run method. If you do not override the run method, the default implementation does nothing. To override the run method, declare it as public, with no arguments and a void return type.
+
+Here’s what the example does:
+
+A class called MyThread extends the Thread class and overrides the run method. Inside run, the thread sleeps for one second, then prints the current thread’s name. If the thread is interrupted during sleep, it catches the InterruptedException and prints the stack trace, but otherwise ignores the exception, since there is little that can be done from user space. After handling the exception, it prints the thread’s name again.
+
+In the main method, a new instance of MyThread is created. This is a software thread obtained directly from the operating system. The start method is called to begin execution, which invokes the run method in a new thread. Meanwhile, the main thread immediately prints its own name, demonstrating that start is non-blocking and both threads can run concurrently.
+
+
+Creating Threads with Runnable
+
+There is another way to create a thread in Java, besides extending the Thread class. You can implement the Runnable interface, often using an anonymous class. The Thread class itself implements Runnable, and the Runnable interface declares a single method called run. When you implement Runnable, you must provide an implementation for the run method.
+
+The Thread class provides a constructor that accepts a Runnable argument. This allows you to create a new thread with a Runnable target.
+
+In the following example, a class called RunnableImpl implements the Runnable interface. Its run method sleeps the current thread for one second, then prints out the current thread’s name. In the main method, a new Thread object is created using RunnableImpl as its target. The thread is started, which invokes the run method. Meanwhile, the main thread prints its own name immediately, since the start method is non-blocking.
+
+This example demonstrates how to create a Thread object from a Runnable instead of extending the Thread class. This approach is generally simpler and easier to manage. It also allows threads to be more reusable and less exposed to user code.
+
+Synchronization
+
+Threads share memory and can modify data at the same time. Without safeguards, this can lead to unexpected results. When two or more threads try to access a variable and at least one wants to modify it, you encounter a problem known as a race condition, data race, or race hazard.
+
+To solve this, data modification must be atomic—meaning only one thread can change the data at a time. This is achieved through locks and mutexes. In Java, these are called synchronized blocks. Synchronized blocks prevent race conditions by locking the data being modified, ensuring that only one thread at a time can enter the modification block. Once a thread exits the block, other threads are allowed to modify the data. This protected area is called a critical section.
+
+A synchronized block in Java is written by specifying the object to lock on. The code inside the block is guarded by the mutex lock for that object.
+
+Synchronized blocks are designed so that the lock is always released, even if an exception is thrown or the block does not complete fully. This prevents deadlocks where other threads would wait indefinitely for a lock to be released.
+
+You can also synchronize entire methods by placing the synchronized keyword at the front of the method declaration. In this case, when the method is called, a lock is obtained on the object instance, and it is released when the method exits. This is similar to using a synchronized block with this as the lock target.
+
+Static methods can also be declared synchronized. In this case, the lock is obtained on the class type itself, not on an instance. In Java, the class type is treated as an object, so the lock is acquired on the class object.
+
+Constructors cannot be declared synchronized, because there is no instance to lock on during construction. Attempting to do so will result in a compiler error. However, you can have a synchronized block inside the constructor that locks on specific data members or input arguments.
+
+The reason you cannot declare constructors as synchronized is that the Java Virtual Machine ensures that only one thread can invoke a constructor call for a specific constructor at a given time. Therefore, there is no need to declare a constructor as synchronized.
+
+It is a common misconception that a synchronized block obtains a lock for a block of code. In reality, the lock is obtained for an object, not for the code itself. The lock is held until all statements in the block complete execution.
+
+Deadlocks
+
+A deadlock arises when locking threads result in a situation where they cannot proceed and wait indefinitely for others to terminate. For example, imagine one thread acquires a lock on resource r1 and waits to acquire another lock on resource r2. At the same time, another thread has already acquired a lock on r2 and is waiting to obtain a lock on r1. Neither thread can proceed until the other releases its lock, which never happens. As a result, both threads are stuck in a deadlock.
+
+In the following example, there are two classes, Balls and Runs, each with a static data member. Two Runnable implementations, CounterOne and CounterTwo, increment these variables but acquire locks in different orders. CounterOne locks Runs first, then Balls. CounterTwo locks Balls first, then Runs. In the main method, two threads are created and started at the same time, each running one of the counters. The program waits for both threads to finish.
+
+This example shows that depending on which thread starts first, one may acquire the lock on Runs while the other acquires the lock on Balls. If this happens, neither thread can obtain the second lock it needs, resulting in a deadlock. It is not guaranteed that this program will deadlock every time it runs, but the possibility exists. The sequence in which threads execute, the order in which locks are acquired and released, and the timing all play a role in whether a deadlock occurs.
+
+Livelocks
+
+Now, let’s consider livelocks. Imagine two robotic cars programmed to drive automatically on a road. They both reach opposite ends of a narrow bridge that only allows one car to pass at a time. The cars are programmed to wait for the other to go first. If both cars attempt to enter the bridge at the same time, they notice the other and both reverse. They keep moving forward and backward, appearing to do a lot of work, but neither makes progress. This is called a livelock.
+
+In the context of threads, imagine two threads, t1 and t2. Thread t1 makes a change, and thread t2 undoes that change. When both threads work, it appears as though a lot of work is being done, but no real progress is made. This situation is called a livelock in threads.
+
+
+Let’s consider a situation where multiple threads have different priorities assigned to them. In Java, thread priorities can range from the lowest, which is one, to the highest, which is ten. When a lock becomes available, the thread scheduler will generally give preference to threads with higher priority over those with lower priority.
+
+Now, imagine there are many high-priority threads that want to obtain the lock, and they also tend to hold the lock for long periods of time. In this scenario, low-priority threads may have to wait a very long time before they get a chance to acquire the lock. This situation, where low-priority threads are left waiting indefinitely while trying to obtain a lock, is known as lock starvation.
+
+There are several techniques available for detecting or avoiding threading problems such as livelocks and starvation. However, these techniques are beyond the scope of our current discussion.
+
+As previously mentioned, monitors in Java provide a way to make the locking mechanism more flexible and allow threads to cooperate with each other. Let’s look at an example that demonstrates this concept.
+
+In the example, there is a class called SharedResource. This class manages a queue with a fixed capacity. It provides two synchronized methods: produce and consume. The produce method allows a producer thread to add a value to the queue, but if the queue is full, the producer waits. Once a value is added, it notifies all waiting threads. The consume method allows a consumer thread to remove a value from the queue, but if the queue is empty, the consumer waits. After removing a value, it also notifies all waiting threads.
+
+In the main method, an instance of SharedResource is created. Two threads are started: one producer and one consumer. The producer thread adds ten values to the shared resource, simulating a delay after each addition. The consumer thread removes ten values, also simulating a delay after each removal. Both threads are started and the main thread waits for them to finish. Once both threads complete, a message is printed indicating that the producer and consumer have finished.
+
+This example demonstrates how Java’s monitor mechanism, using synchronized methods and wait-notify, allows threads to coordinate access to shared resources in a safe and flexible way.
+
+Now, let’s move on to the topic of atomics.
+
+The java.util.concurrent package contains two important sub-packages: atomic and locks. Here, we’ll focus on atomic variables provided in the atomic package.
+
+Often, you may need to perform simple operations like incrementing or decrementing a variable in a thread-safe way. Using locks for such primitive operations is not efficient. For these cases, Java provides atomic variables, which offer a more efficient alternative.
+
+Some of the key classes in the atomic package include AtomicBoolean, which allows atomic updates to a boolean value; AtomicInteger, which allows atomic updates to an integer value and inherits from the Number class; AtomicIntegerArray, which provides an integer array with atomic updates to its elements; AtomicLong, which allows atomic updates to a long value and also inherits from the Number class; AtomicLongArray, which provides a long array with atomic updates; AtomicReference, which allows atomic updates to an object reference of a specified type; and AtomicReferenceArray, which provides an array that can hold object references and allows atomic updates to its elements.
+
+It’s important to note that only AtomicInteger and AtomicLong extend from the Number class. AtomicBoolean and the other classes inherit directly from the Object class.
+
+Among these, AtomicInteger and AtomicLong are the most commonly used. They provide several important methods. For example, you can create an instance with an initial value, get or set the current value, and perform atomic operations such as get-and-set, compare-and-set, get-and-increment, get-and-decrement, get-and-add, increment-and-get, decrement-and-get, and add-and-get. These methods allow you to perform thread-safe updates without explicit locking.
+
+Additionally, you can cast the current value to different primitive types, such as int, long, float, or double.
+
+Next, let’s discuss classes and interfaces in the concurrent package.
+
+The concurrent package provides many classes and interfaces that offer high-level APIs for concurrent programming. When you use the synchronized keyword, Java employs mutexes to synchronize access between threads, ensuring safe shared access to resources.
+
+However, threads often need to coordinate their execution to complete more complex, higher-level tasks. To facilitate this, Java provides higher-level abstractions for thread synchronization, known as synchronizers. These synchronizers are built on top of the existing low-level APIs for thread coordination, making it easier to manage complex interactions between multiple threads.
+
+
+Semaphore, CountdownLatch, Exchanger, CyclicBarrier, and Phaser
+
+Let’s begin with a quick overview of several important concurrency utilities in Java.
+
+A semaphore is used to control access to a shared resource. It maintains a counter that specifies how many resources it controls, allowing only a certain number of threads to access the resource at the same time.
+
+A countdown latch allows one or more threads to wait until a countdown is completed. This is useful when you want threads to wait for some operations to finish before proceeding.
+
+The Exchanger class is designed for exchanging data between two threads. It is particularly useful when two threads need to synchronize with each other and continuously exchange data.
+
+A cyclic barrier provides a synchronization point where threads can wait until all other threads reach that point. This is helpful when you need multiple threads to perform their tasks independently, but then synchronize at a certain point before moving on to the next phase.
+
+Finally, the Phaser class is useful when several independent threads need to work in phases to complete a task.
+
+CyclicBarrier
+
+Now, let’s focus on the CyclicBarrier class.
+
+In many concurrent programming scenarios, threads need to wait at a predefined execution point until all other threads reach that same point. The CyclicBarrier class provides such a synchronization point. In other words, it allows a set of threads to wait for each other at a common barrier before continuing execution.
+
+This is especially useful when you want multiple threads to perform their tasks independently, but then synchronize at a certain point before proceeding to the next phase.
+
+When you create a CyclicBarrier, you specify the number of threads that must reach the barrier point. You can also specify an optional barrier action, which is a task executed by one of the threads when all have reached the barrier. The barrier is reusable after the threads are released, which is why it is called “cyclic.” Threads that call the await method are blocked until the required number of threads have called it.
+
+Here’s how it works: Each thread calls the await method when it reaches the barrier. At this point, the thread can perform no more work and must wait for the other threads to finish their work. Once the required number of threads, as specified in the constructor, have called await, the barrier is broken and all waiting threads are released. If a barrier action is specified, it is executed by one of the threads just before the barrier is broken.
+
+Key Methods of CyclicBarrier
+
+Let’s go over the main methods of the CyclicBarrier class.
+
+First, the constructor CyclicBarrier, which takes the number of threads as an argument, creates a CyclicBarrier object with the specified number of threads waiting on it. If the number of threads is negative or zero, it throws an IllegalArgumentException.
+
+There is another constructor that takes both the number of threads and a Runnable barrier action. This allows you to specify a task to run when the barrier is reached.
+
+The await method blocks until the specified number of threads have called await on this barrier. It returns the arrival index of the thread. This method can throw an InterruptedException if the thread is interrupted while waiting, or a BrokenBarrierException if the barrier was broken for some reason, such as another thread being interrupted or timing out. There is also an overloaded version of await that takes a timeout period. If all threads do not reach the barrier within the timeout, it throws a TimeoutException.
+
+The isBroken method returns true if the barrier is broken. A barrier is considered broken if at least one thread in that barrier was interrupted or timed out, or if a barrier action failed by throwing an exception.
+
+Finally, the reset method resets the barrier to its initial state. If there are any threads waiting on that barrier, they will throw a BrokenBarrierException.
+
+Example: Tennis Game with CyclicBarrier
+
+Let’s look at an example to see how CyclicBarrier works in practice.
+
+In this example, we simulate a mixed doubles tennis game that requires four players. The game cannot start until all four players are present. The MixedDoubleTennisGame class represents the action that should be executed when all four threads, representing the players, call the await method on the CyclicBarrier object.
+
+The Player class simulates the arrival of a player. When a player arrives, the thread prints a message and then calls await on the barrier, waiting for the other players to arrive. If an exception occurs while waiting, it prints an error message.
+
+The CyclicBarrierTest class creates a CyclicBarrier object, specifying four as the number of threads and passing a new MixedDoubleTennisGame as the barrier action. It then creates four Player threads, each representing a different player.
+
+In summary, the code sets up a scenario where the tennis game cannot start until all four players have arrived. Once all four threads call the await method, the run method of MixedDoubleTennisGame is executed, and the game starts.
+
+Sample Output
+
+Here’s what the output might look like:
+
+Reserving tennis court
+
+As soon as four players arrive, game will start
+
+Player Dora is ready
+
+Player G I Joe is ready
+
+Player Tintin is ready
+
+Player Barbie is ready
+
+All four players ready, game starts
+
+Love all...
+
+This demonstrates how CyclicBarrier can be used to coordinate multiple threads, ensuring that a group of threads reaches a common point before any of them proceed.
+
+
+An example output from the program above might look like this. Notice that until all four players have registered—that is, until the await methods are triggered—the game will not start. This simple example demonstrates how a set of threads can be interlinked, or rather, how their work or actions can be coordinated. Only when all threads finish their work can another thread’s action be initiated.
+
+Collections
+
+The concurrent package in Java provides several classes that are thread-safe versions of the standard collection framework classes found in the java util package. For example, ConcurrentHashMap is a concurrent equivalent of HashMap. The main difference between these two containers is that with HashMap, you need to explicitly synchronize insertions and deletions, whereas ConcurrentHashMap has this synchronization built in. If you are familiar with the interface of HashMap, then using ConcurrentHashMap is no different.
+
+Let’s briefly discuss some of the key concurrent collection classes and their purposes.
+
+BlockingQueue is an interface that extends the standard Queue interface. In a BlockingQueue, if the queue is empty, any attempt to remove an element will wait, or block, until an element is inserted. Similarly, if the queue is full, any attempt to add an element will wait until space becomes available.
+
+ArrayBlockingQueue provides a fixed-size, array-based implementation of the BlockingQueue interface.
+
+LinkedBlockingQueue offers a linked-list-based implementation of BlockingQueue.
+
+DelayQueue is a special kind of BlockingQueue where elements can only be retrieved after a certain delay period has passed.
+
+PriorityBlockingQueue is similar to the standard PriorityQueue, but it implements the BlockingQueue interface, allowing for thread-safe, prioritized access.
+
+SynchronousQueue is a BlockingQueue where each insert operation by a thread waits for a corresponding remove operation by another thread, and vice versa.
+
+LinkedBlockingDeque implements BlockingDeque, allowing insert and remove operations that can block, and uses a linked-list for its internal structure.
+
+ConcurrentHashMap is analogous to Hashtable, but it provides safe concurrent access and updates.
+
+ConcurrentSkipListMap is similar to TreeMap, but it is designed for safe concurrent access and updates.
+
+ConcurrentSkipListSet is the concurrent equivalent of TreeSet, also providing safe concurrent access.
+
+CopyOnWriteArrayList is similar to ArrayList, but it is thread-safe. When the container is modified, it creates a fresh copy of the underlying array.
+
+CopyOnWriteArraySet is a Set implementation that is thread-safe and is built using CopyOnWriteArrayList. When modified, it also creates a fresh copy of the underlying array.
+
+CopyOnWriteArrayList
+
+Both ArrayList and CopyOnWriteArrayList implement the List interface. There are three main differences between these two classes when used in a concurrent context.
+
+First, ArrayList is not thread-safe, but CopyOnWriteArrayList is. This means it is unsafe to use ArrayList in situations where multiple threads are operating on the same instance, especially when modifications are being made.
+
+Second, methods in ArrayList such as remove, add, and set can throw a ConcurrentModificationException if another thread modifies the ArrayList while it is being accessed. In contrast, it is safe to perform these operations from multiple threads on a CopyOnWriteArrayList. Methods like remove, add, and set do not throw this exception. All active iterators will still have access to the unmodified version of the container and remain unaffected. If you create an iterator after a modification, you will get an iterator for the modified container.
+
+Third, you can obtain an iterator by calling the iterator method on a List object. If you call remove on the iterator when the underlying container has been modified, an exception can be thrown. However, you cannot call the remove method on an iterator of a CopyOnWriteArrayList—it always throws an UnsupportedOperationException.
+
+Here is an example in Java. The code defines a class called ModifyingList. In the main method, it creates an ArrayList of strings, adds three elements—"one", "two", and "three"—and then obtains an iterator. While iterating, it prints each element and tries to add a new element, "four", to the list during iteration.
+
+This example demonstrates that modifying an ArrayList while iterating over it will throw a ConcurrentModificationException. In this scenario, you might want to replace the ArrayList with a CopyOnWriteArrayList. The way CopyOnWriteArrayList works is by creating a copy of the container data whenever a new element is added. This means that if you obtain an iterator before calling add or any other modifying method, the iterator will still point to the original, unmodified array. As a result, no exception is thrown, but the iterator will only iterate over the original array. Any new elements added will not be printed out in this example.
+
+Executors
+
+Threads can be managed directly by creating Thread objects in your application. However, this approach can be cumbersome. If you want to abstract away the low-level details of multithreaded programming, executor services are a good choice. The Executor interface declares only one method, which is execute, taking a Runnable as its argument. Derived interfaces and classes such as ExecutorService, ThreadPoolExecutor, and ForkJoinPool provide additional useful functionality that extends the base interface.
+
+The basic idea behind the Executor class hierarchy is to provide reusable containers for Thread objects. These containers help with the creation, destruction, reuse, and running of threads.
+
+Callable
+
+Callable is an interface that declares a single method called call, which returns a value. It represents a task that needs to be completed by a thread. Once the task completes, it returns a value. If the call method cannot execute or fails, it throws an Exception. To execute a task using a Callable object, you first need to create a thread pool. A thread pool is a collection of threads that can execute tasks.
+
+ExecutorService
+
+The ExecutorService interface extends the Executor interface and provides additional services, such as thread termination and the production of Future objects. Some tasks may take a considerable amount of time to complete. When you submit a task to the executor service, a Future object is returned. A Future represents an object that will contain the value returned by a thread in the future. In other words, the Future is the result of an action that will be executed by a thread at some point.
+
+The Future object has methods like isDone, which checks if the task is complete, and get, which can be used to obtain the result of the task. Note that the get method is blocking. If it is called before the task is done, it will block the current thread until the task completes.
+
+
+Let’s walk through the concepts and code examples provided, focusing on how Java’s concurrency utilities work, and how the Fork/Join framework enables parallel computation.
+
+First, we have a class called Factorial, which implements the Callable interface. This design allows the Factorial task to be submitted to an ExecutorService and executed asynchronously. The Factorial class takes a number, N, and computes its factorial. If N is less than or equal to zero, it throws an exception, since factorial is only defined for positive numbers. The computation itself is performed in a loop, multiplying each integer from one up to N, and returning the result as a long value.
+
+Next, there is a demonstration class called CallableTest. In its main method, it sets up a single-threaded executor service using the Executors.newSingleThreadExecutor method. It then creates a Factorial task for the number twenty, submits it to the executor, and waits for the result using the Future object’s get method. Once the computation is complete, it prints the result and shuts down the executor service. This example shows how Callable, ExecutorService, and Future work together to execute tasks that return results.
+
+It’s important to note that the Executors class provides several factory methods for creating different types of executor services. For example, newFixedThreadPool creates a pool with a fixed number of threads, allowing for greater parallelism if needed. The Executors class is designed to simplify the creation and management of thread pools, abstracting away the details of native thread management.
+
+Now, let’s shift focus to the Fork/Join framework, which is part of Java’s concurrent package. The Fork/Join framework is an implementation of the ExecutorService interface, designed to make it easier to write parallelized code that takes advantage of multiple processors. It is especially useful for divide-and-conquer problems, where a large task can be broken down recursively into smaller, independent subtasks. These subtasks are then computed in parallel, and their results are combined to produce the final outcome.
+
+In the Fork/Join framework, dividing a task into smaller pieces is called forking, and combining the results is called joining. The framework uses a work-stealing algorithm, which means that when a worker thread finishes its tasks, it can steal tasks from other threads’ queues to stay busy. This helps balance the workload across all available threads.
+
+The most important class in the Fork/Join framework is ForkJoinPool, which manages a pool of worker threads and executes instances of ForkJoinTask. The ForkJoinPool is responsible for running tasks and managing their lifecycle.
+
+The general structure of a Fork/Join algorithm involves forking the task, joining the results, and composing the final outcome. The algorithm checks if a task is small enough to be handled by a single thread. If so, it computes the result directly. Otherwise, it divides the task into two parts, computes each part recursively, and then combines the results.
+
+There are two main types of tasks in the Fork/Join framework. The first is RecursiveTask, which represents a task that returns a result. The second is RecursiveAction, which represents a task that does not return a result. Both types inherit from ForkJoinTask.
+
+To use the Fork/Join framework effectively, you should first determine if your problem is suitable for this approach. The problem should be recursive in nature, allowing it to be broken down into smaller, independent tasks whose results can be combined. The subtasks should not need to communicate with each other during computation, although their results will be merged at the end.
+
+If your problem fits this model, you define a task class that extends either RecursiveTask or RecursiveAction, depending on whether you need to return a result. You then override the compute method, which either performs the computation directly if the task is small enough, or splits the task into subtasks and invokes them. Subtasks can be started using the invokeAll or fork methods, and their results can be retrieved using the join method. Finally, you merge the results as needed.
+
+To execute the computation, you instantiate a ForkJoinPool, create an instance of your task class, and start the execution using the pool’s invoke method. Once the computation is complete, you have your result.
+
+Let’s look at an example that computes the sum of numbers from one to one million using the Fork/Join framework. The range of numbers is divided in half recursively until each range is small enough to be handled by a single thread. Once each subrange is summed, the results are combined to produce the final sum.
+
+In this example, there is a class called SumOfNUsingForkJoin. It defines a constant N, set to one million, representing the upper limit of the range to sum. It also defines the number of threads to use, set to ten.
+
+Inside this class, there is a static inner class called RecursiveSumOfN, which extends RecursiveTask with a result type of Long. This class takes a range of numbers, from a starting value to an ending value. In its compute method, it checks if the range is small enough to be handled by a single thread. If so, it sums the numbers in that range using a simple loop and returns the result. If the range is too large, it splits the range in half, creates two new RecursiveSumOfN tasks for each half, and processes them recursively. One half is forked off as a new task, while the other half is computed directly. The results from both halves are then joined and summed.
+
+In the main method, a ForkJoinPool is created with the specified number of threads. The computation is started by invoking a new RecursiveSumOfN task covering the entire range from zero to N. The result is the sum of all numbers in that range, computed in parallel using the Fork/Join framework.
+
+This approach demonstrates how the Fork/Join framework can efficiently solve problems that can be broken down into independent, recursive subtasks, making full use of available processor cores.
+
+
+Analyzing how this program works.
+
+In this program, the goal is to compute the sum of all values in the range from one to one million. To make the computation efficient, the program uses ten threads to execute the tasks in parallel.
+
+The class used for this computation is called RecursiveSumOfN. It extends a class named RecursiveTask, which is parameterized with the type Long. This means that each subtask will return a long value, which is necessary because the sum of numbers in each sub-range can be quite large.
+
+The program chooses RecursiveTask instead of RecursiveAction because RecursiveTask is designed for tasks that return a result. If a subtask does not need to return a value, RecursiveAction would be the appropriate choice.
+
+Within the compute method of RecursiveSumOfN, the program decides whether to compute the sum directly or to split the task into smaller subtasks. This decision is based on the condition: if the difference between the upper and lower bounds of the range is less than or equal to the total range divided by the number of threads, then the task is small enough to be handled directly. In this case, the sum is computed using a simple for loop over the specified range.
+
+If the range is larger than the threshold, the task is split recursively. The program finds the middle of the current range and creates two new subtasks, each responsible for half of the range. These subtasks are then processed in parallel, and their results are combined to produce the final sum.
+
+At the end of the computation, the program compares the sum computed by the threads with the sum calculated using the mathematical formula for the sum of the first N natural numbers. This formula is N times N plus one, divided by two. The program prints both the computed sum and the formula sum for comparison.
+
+This approach demonstrates how recursive task splitting and parallel execution can be used to efficiently compute large sums, and how to choose between direct computation and further task division based on a threshold.
+
+

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>0-language-and-features</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#release" id="toc-release">Release</a>
+<ul>
+<li><a href="#language" id="toc-language">Language</a>
+<ul>
+<li><a href="#patterns" id="toc-patterns">Patterns</a></li>
+<li><a href="#switch" id="toc-switch">Switch</a></li>
+<li><a href="#templates" id="toc-templates">Templates</a></li>
+</ul></li>
+<li><a href="#platform" id="toc-platform">Platform</a>
+<ul>
+<li><a href="#virtual-threads" id="toc-virtual-threads">Virtual
+Threads</a></li>
+<li><a href="#ffm" id="toc-ffm">FFM</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="release">Release</h1>
+<p>In the following document are reflected the most recent java
+releases, Java 19 - Released on September 15, 2022 Java 20 - Released on
+March 21, 2023 Java 21 - Released on September 12, 2023. These dates
+reflect the typical six-month release cadence that Oracle has
+established for Java, with feature releases occurring in March and
+September of each year.</p>
+<h2 id="language">Language</h2>
+<h3 id="patterns">Patterns</h3>
+<p>There are several improvements in the pattern matching feature of the
+<code>instanceOf</code> keyword, for records. It is now possible to
+deconstruct and reference the fields of a record in a
+logical/conditional block which uses instanceOf operation. This gives
+the ability to access record’s fields without needing to first reference
+the instance variable itself, collisions are not handled (meaning that
+two records which have the same fields can not be deconstructed, it will
+yield compiler error)</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">record</span> <span class="bu">Point</span><span class="op">(</span><span class="dt">int</span> x<span class="op">,</span> <span class="dt">int</span> y<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Point</span> point <span class="op">=</span> <span class="kw">new</span> <span class="bu">Point</span><span class="op">(</span><span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">);</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>point <span class="kw">instanceof</span> <span class="bu">Point</span><span class="op">(</span><span class="dt">int</span> x<span class="op">,</span> <span class="dt">int</span> y<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>            <span class="co">// The fields of the record are accessed without having to use the instance variable itself, note that if</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>            <span class="co">// two Records have the same field names, this might produce a compiler error</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;X: &quot;</span> <span class="op">+</span> x <span class="op">+</span> <span class="st">&quot;, Y: &quot;</span> <span class="op">+</span> y<span class="op">);</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h3 id="switch">Switch</h3>
+<p>The switch statement match is also extended to match based on type
+patterns and conditional expressions. This however is not only
+applicable for <code>record</code> types, but it is very useful, since
+it avoids having different types</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="bu">String</span> <span class="fu">formatShape</span><span class="op">(</span><span class="bu">Object</span> shape<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="cf">switch</span> <span class="op">(</span>shape<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="fu">Circle</span><span class="op">(</span><span class="dt">double</span> radius<span class="op">)</span> <span class="op">-&gt;</span> <span class="st">&quot;Circle with radius &quot;</span> <span class="op">+</span> radius<span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="bu">Rectangle</span><span class="op">(</span><span class="dt">double</span> length<span class="op">,</span> <span class="dt">double</span> width<span class="op">)</span> <span class="op">-&gt;</span> <span class="st">&quot;Rectangle with length &quot;</span> <span class="op">+</span> length <span class="op">+</span> <span class="st">&quot; and width &quot;</span> <span class="op">+</span> width<span class="op">;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="fu">Triangle</span><span class="op">(</span><span class="dt">double</span> base<span class="op">,</span> <span class="dt">double</span> height<span class="op">)</span> <span class="op">-&gt;</span> <span class="st">&quot;Triangle with base &quot;</span> <span class="op">+</span> base <span class="op">+</span> <span class="st">&quot; and height &quot;</span> <span class="op">+</span> height<span class="op">;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">default</span> <span class="op">-&gt;</span> <span class="st">&quot;Unknown shape&quot;</span><span class="op">;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">record</span> <span class="fu">Circle</span><span class="op">(</span><span class="dt">double</span> radius<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">record</span> <span class="bu">Rectangle</span><span class="op">(</span><span class="dt">double</span> length<span class="op">,</span> <span class="dt">double</span> width<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">record</span> <span class="fu">Triangle</span><span class="op">(</span><span class="dt">double</span> base<span class="op">,</span> <span class="dt">double</span> height<span class="op">)</span> <span class="op">{}</span></span></code></pre></div>
+<p>The extended form of the switch expression matching also shown below,
+allows one to not only match on the type pattern, but also on the value
+of a property, in this case the radius of the Circle, when positive, the
+returned <code>string</code> message is different than the default
+<code>circle</code> type pattern match. Obviously <code>switch</code>
+expressions are still evaluated top-down, meaning that the specialized
+cases must come before the general ones</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="bu">String</span> <span class="fu">describeShape</span><span class="op">(</span><span class="bu">Object</span> shape<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="cf">switch</span> <span class="op">(</span>shape<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="fu">Circle</span><span class="op">(</span><span class="dt">double</span> radius<span class="op">)</span> when radius <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">-&gt;</span> <span class="st">&quot;Circle with positive radius: &quot;</span> <span class="op">+</span> radius<span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="fu">Circle</span><span class="op">(</span><span class="dt">double</span> radius<span class="op">)</span> <span class="op">-&gt;</span> <span class="st">&quot;Circle with radius: &quot;</span> <span class="op">+</span> radius<span class="op">;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="bu">Rectangle</span><span class="op">(</span><span class="dt">double</span> length<span class="op">,</span> <span class="dt">double</span> width<span class="op">)</span> <span class="op">-&gt;</span> <span class="st">&quot;Rectangle of &quot;</span> <span class="op">+</span> length <span class="op">+</span> <span class="st">&quot; x &quot;</span> <span class="op">+</span> width<span class="op">;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">default</span> <span class="op">-&gt;</span> <span class="st">&quot;Unknown shape&quot;</span><span class="op">;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The example below shows how the type pattern matching can be applied
+to a regular class hierarchy structure, instead of a record, however the
+class hierarchy has to have a well defined structure, and no ambiguity,
+otherwise compile time error will occur. The when keyword is also
+applicable for type pattern class matching as well, allowing for a more
+refined checks and bounds</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">abstract</span> <span class="kw">class</span> <span class="bu">Shape</span> <span class="op">{}</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> Circle <span class="kw">extends</span> <span class="bu">Shape</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">final</span> <span class="dt">double</span> radius<span class="op">;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">Circle</span><span class="op">(</span><span class="dt">double</span> radius<span class="op">)</span> <span class="op">{</span> <span class="kw">this</span><span class="op">.</span><span class="fu">radius</span> <span class="op">=</span> radius<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> <span class="bu">Rectangle</span> <span class="kw">extends</span> <span class="bu">Shape</span> <span class="op">{</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">final</span> <span class="dt">double</span> length<span class="op">;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">final</span> <span class="dt">double</span> width<span class="op">;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="bu">Rectangle</span><span class="op">(</span><span class="dt">double</span> length<span class="op">,</span> <span class="dt">double</span> width<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">length</span> <span class="op">=</span> length<span class="op">;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">width</span> <span class="op">=</span> width<span class="op">;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="bu">String</span> <span class="fu">describeShape</span><span class="op">(</span><span class="bu">Shape</span> shape<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="cf">switch</span> <span class="op">(</span>shape<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> Circle c when c<span class="op">.</span><span class="fu">radius</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">-&gt;</span> <span class="st">&quot;Circle with positive radius: &quot;</span> <span class="op">+</span> c<span class="op">.</span><span class="fu">radius</span><span class="op">;</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="bu">Rectangle</span> r when r<span class="op">.</span><span class="fu">length</span> <span class="op">==</span> r<span class="op">.</span><span class="fu">width</span> <span class="op">-&gt;</span> <span class="st">&quot;Square with side: &quot;</span> <span class="op">+</span> r<span class="op">.</span><span class="fu">length</span><span class="op">;</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> Circle c <span class="op">-&gt;</span> <span class="st">&quot;Circle with radius: &quot;</span> <span class="op">+</span> c<span class="op">.</span><span class="fu">radius</span><span class="op">;</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="bu">Rectangle</span> r <span class="op">-&gt;</span> <span class="st">&quot;Rectangle with dimensions: &quot;</span> <span class="op">+</span> r<span class="op">.</span><span class="fu">length</span> <span class="op">+</span> <span class="st">&quot; x &quot;</span> <span class="op">+</span> r<span class="op">.</span><span class="fu">width</span><span class="op">;</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="kw">default</span> <span class="op">-&gt;</span> <span class="st">&quot;Unknown shape&quot;</span><span class="op">;</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>If you think about that, the example above is really two nested
+switch statements, which are flattened within a single one, the first
+top level switch matches on the type, the old java 8 traditional way
+would be to match on a property called <code>type</code> then in the
+nested switch statement one can match on the <code>properties</code> of
+the instance (either the circle’s radius or the rectangle’s side length
+etc), the new syntax simply flattens this multi level switch
+representation into a single level statement</p>
+<p>The multi-level equivalent of the switch expression block above will
+look something like that.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="bu">String</span> <span class="fu">describeShape</span><span class="op">(</span><span class="bu">Shape</span> shape<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> <span class="op">(</span>shape<span class="op">.</span><span class="fu">getClass</span><span class="op">().</span><span class="fu">getSimpleName</span><span class="op">())</span> <span class="op">{</span>  <span class="co">// Outer switch on type</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="st">&quot;Circle&quot;</span> <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>            Circle c <span class="op">=</span> <span class="op">(</span>Circle<span class="op">)</span> shape<span class="op">;</span>  <span class="co">// Manual casting required</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">switch</span> <span class="op">(</span>c<span class="op">.</span><span class="fu">radius</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">?</span> <span class="st">&quot;positive&quot;</span> <span class="op">:</span> <span class="st">&quot;non-positive&quot;</span><span class="op">)</span> <span class="op">{</span>  <span class="co">// Inner switch on radius condition</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                <span class="cf">case</span> <span class="st">&quot;positive&quot;</span> <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span> <span class="st">&quot;Circle with positive radius: &quot;</span> <span class="op">+</span> c<span class="op">.</span><span class="fu">radius</span><span class="op">;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                <span class="kw">default</span> <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span> <span class="st">&quot;Circle with radius: &quot;</span> <span class="op">+</span> c<span class="op">.</span><span class="fu">radius</span><span class="op">;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="st">&quot;Rectangle&quot;</span> <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>            <span class="bu">Rectangle</span> r <span class="op">=</span> <span class="op">(</span><span class="bu">Rectangle</span><span class="op">)</span> shape<span class="op">;</span>  <span class="co">// Manual casting required</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">switch</span> <span class="op">(</span>r<span class="op">.</span><span class="fu">length</span> <span class="op">==</span> r<span class="op">.</span><span class="fu">width</span> <span class="op">?</span> <span class="st">&quot;square&quot;</span> <span class="op">:</span> <span class="st">&quot;rectangle&quot;</span><span class="op">)</span> <span class="op">{</span>  <span class="co">// Inner switch for square vs rectangle</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>                <span class="cf">case</span> <span class="st">&quot;square&quot;</span> <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span> <span class="st">&quot;Square with side: &quot;</span> <span class="op">+</span> r<span class="op">.</span><span class="fu">length</span><span class="op">;</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>                <span class="kw">default</span> <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span> <span class="st">&quot;Rectangle with dimensions: &quot;</span> <span class="op">+</span> r<span class="op">.</span><span class="fu">length</span> <span class="op">+</span> <span class="st">&quot; x &quot;</span> <span class="op">+</span> r<span class="op">.</span><span class="fu">width</span><span class="op">;</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="kw">default</span> <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="st">&quot;Unknown shape&quot;</span><span class="op">;</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>The new pattern matching for switch in Java effectively flattens what would traditionally require a multi-level switch or nested if-else structure. This flattening makes it much easier to write, read, and maintain branching logic that involves both type-checking and value-based conditions.</code></p>
+<h3 id="templates">Templates</h3>
+<p>While still preview feature in Java 21, this is a general
+implementation in the <code>jdk</code>, which provides alternative of
+<code>String.format</code> method to support common template syntax such
+as <code>${varable}</code> that is done to avoid the usual concatenation
+which can occur if one needs to embed variables within a string. The
+example below demonstrates how the Traditional way is replaced by the
+new approach which uses the variables which are correctly parsed and
+bound into the string template after calling. Any variable, method or
+field accessible to the scope of the string template at the time of
+definition is allowed to be used within a templated string.</p>
+<p><code>Note that any runtime value can be evaluated within the expression, but the returned value will not, never be treated as a template, meaning that there is no way for external variables to randomly inject dangerous template within another template, every value that is within the template will be evaluated as literal string, even if it contains template keywords/symbols, this prevents the misuse of templates for by bad actors.</code></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> age <span class="op">=</span> <span class="dv">30</span><span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> name <span class="op">=</span> <span class="st">&quot;Alice&quot;</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Traditional way</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> message <span class="op">=</span> <span class="st">&quot;Hello, &quot;</span> <span class="op">+</span> name <span class="op">+</span> <span class="st">&quot;! You are &quot;</span> <span class="op">+</span> age <span class="op">+</span> <span class="st">&quot; years old.&quot;</span><span class="op">;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Using string templates (Java 21)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> messageTemplate <span class="op">=</span> STR<span class="op">.</span><span class="st">&quot;Hello, ${name}! You are ${age} years old.&quot;</span><span class="op">;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>messageTemplate<span class="op">);</span>  <span class="co">// Output: Hello, Alice! You are 30 years old.</span></span></code></pre></div>
+<p><code>The new STR. syntax allows the string to reference variables from the local context, in the example above the String variables name and age are referenced within the template, this is a syntax sugar, which gets compiled to a String.format type of expression but it provides an easy way to construct strings with embeded varialbes.</code></p>
+<h2 id="platform">Platform</h2>
+<p>There are several small improvements on the platform level, listed
+below, the biggest one of which is the introduction of lightweight
+platform thread alternative - virtual threads. Which provide seamless
+integration with existing code, with very few small adjustments. Mostly
+using different implementations of the <code>ExecutorService</code>
+which spawns and works with virtual threads instead of the native
+platform ones</p>
+<h3 id="virtual-threads">Virtual Threads</h3>
+<p>One of the most major additions to the language in general is the new
+virtual thread model, which provides means of creating very lightweight
+fast threads, which are much less resource intensive than the regular
+platform OS level threads, which have been the de-facto standard in java
+thus far. The new virtual threads, work and are manged by the virtual
+machine (<code>JVM</code>) itself. How does that work ? Instead of
+creating dedicated platform threads, the <code>JVM</code> instead
+creates internal threads which it manages, the <code>JVM</code> acts in
+a way like an operating system scheduler for each virtual thread. The
+virtual threads themselves are executed on actual platform OS threads,
+however the <code>JVM</code> has much more control over the virtual
+threads, allowing it to run multiple virtual threads on a single
+platform thread, which was thus far not possible. Each virtual thread is
+run for a specific amount of time and it can yield control over to
+another virtual thread running on the same platform thread in case the
+first virtual thread blocks for I/O input or takes too much time, the
+<code>JVM</code> distributes execution time to all virtual threads
+running on the same platform thread, scheduling them (just as the
+operating system would schedule platform threads). This allows the
+<code>JVM</code> to create much less platform threads, and many virtual
+threads, to run on these platform threads. Effectively introducing a 3rd
+level of threading.</p>
+<ul>
+<li><code>CPU multi core threading</code> - true multi threading</li>
+<li><code>platform/os system threading</code> - operating system
+schedules tasks on per CPU core level</li>
+<li><code>java virtual threads</code> - the java virtual machine
+schedules tasks on platform/system threads</li>
+</ul>
+<p>The example below demonstrates how the existing API, can be used to
+create the familiar <code>ExecutorService</code> implementations already
+mentioned, with a new parameter providing a different factory for the
+internal threads, since the new virtual threading model is, at least on
+a user level, indistinguishable from the platform threads, that allows
+for no friction in the use of virtual threads</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">ExecutorService</span><span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">Executors</span><span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> FixedThreadPoolWithVirtualThreads <span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">// The new executor factory methods are extended with a factory parameter allowing one to specify the type of</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">// thread to create, in this case by default the executors would default to platform threads, unless specified</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// otherwise, below virtual thread factory is provided instead</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">ExecutorService</span> executor <span class="op">=</span> <span class="bu">Executors</span><span class="op">.</span><span class="fu">newFixedThreadPool</span><span class="op">(</span><span class="dv">4</span><span class="op">,</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">ofVirtual</span><span class="op">().</span><span class="fu">factory</span><span class="op">());</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">10</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> taskId <span class="op">=</span> i<span class="op">;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Submit task to the pool, the submit would immediately trigger the task, and start its execution</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            executor<span class="op">.</span><span class="fu">submit</span><span class="op">(()</span> <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Running task &quot;</span> <span class="op">+</span> taskId <span class="op">+</span> <span class="st">&quot; in virtual thread: &quot;</span> <span class="op">+</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">());</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>                <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// Simulating some blocking work, the java virtual machine would yield control to over virtual</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// threads when a specific thread starts blocking, to evenly distribute and schedule all currently</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// requested concurrent tasks</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">Thread</span><span class="op">.</span><span class="fu">sleep</span><span class="op">(</span><span class="dv">100</span><span class="op">);</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">interrupt</span><span class="op">();</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>            <span class="op">});</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Shutdown will make sure that all the pending tasks are finished, however no new tasks are allowed to be</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">// accepted/submitted</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>        executor<span class="op">.</span><span class="fu">shutdown</span><span class="op">();</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="ffm">FFM</h3>
+<p>With the latest releases Java is aiming at deprecating the old
+<code>JNI</code> and <code>RMI</code> interfaces, in favor of more
+modern approach which is the Foreign Function &amp; Memory interface.
+This is also known as <code>FFI</code> - foreign function interface in
+other languages, allowing one to interact with functions implemented in
+other languages - primarily C and C++.</p>
+<p>Having the following example below, which demonstrates how one can
+call and manage memory from Java into an external static or dynamic
+library written in c</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// defined in the .h file</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">typedef</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> age<span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> name<span class="op">[</span><span class="dv">20</span><span class="op">];</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> Person<span class="op">;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> print_person<span class="op">(</span>Person<span class="op">*</span> p<span class="op">);</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">// defined in the .c file</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&quot;person.h&quot;</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> print_person<span class="op">(</span>Person<span class="op">*</span> p<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Name: </span><span class="sc">%s</span><span class="st">, Age: </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> p<span class="op">-&gt;</span>name<span class="op">,</span> p<span class="op">-&gt;</span>age<span class="op">);</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Compile the code above into a static library, that has to be located
+on the classpath when the java application is invoked</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gcc</span> <span class="at">-shared</span> <span class="at">-o</span> libperson.so <span class="at">-fPIC</span> person.c</span></code></pre></div>
+<p>The java application which interacts with the static library built
+above. The implementation manages the memory, creating the data required
+for the <code>struct</code> to be populated. Note that the
+<code>struct</code> memory layout matches exactly the one defined in the
+C API, it is also allocated on the heap. The address of it obtained and
+passed to the method to invoke it. It is important to note that Java
+itself does not manage dynamic structures when interacting with FFM -
+meaning that the dynamic structures (such as char arrays or strings)
+have to be appropriately sized, otherwise all kinds of overflow issues
+will occur, similarly to how they would if using plain C, there are some
+guardrails put in place, but in general the FFM itself does not really
+protect against such scenarios, it just provides means of interacting
+with external libraries written in other languages.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">jdk</span><span class="op">.</span><span class="im">incubator</span><span class="op">.</span><span class="im">foreign</span><span class="op">.*;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="kw">static</span><span class="im"> jdk</span><span class="op">.</span><span class="im">incubator</span><span class="op">.</span><span class="im">foreign</span><span class="op">.</span><span class="im">CLinker</span><span class="op">.*;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="kw">static</span><span class="im"> jdk</span><span class="op">.</span><span class="im">incubator</span><span class="op">.</span><span class="im">foreign</span><span class="op">.</span><span class="im">MemoryLayout</span><span class="op">.*;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="kw">static</span><span class="im"> jdk</span><span class="op">.</span><span class="im">incubator</span><span class="op">.</span><span class="im">foreign</span><span class="op">.</span><span class="im">MemorySegment</span><span class="op">.*;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> StructExample <span class="op">{</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Define the layout of the Person struct</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        MemoryLayout personLayout <span class="op">=</span> MemoryLayout<span class="op">.</span><span class="fu">structLayout</span><span class="op">(</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>            ValueLayout<span class="op">.</span><span class="fu">JAVA_INT</span><span class="op">.</span><span class="fu">withName</span><span class="op">(</span><span class="st">&quot;age&quot;</span><span class="op">),</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>            MemoryLayout<span class="op">.</span><span class="fu">ofArray</span><span class="op">(</span>ValueLayout<span class="op">.</span><span class="fu">JAVA_BYTE</span><span class="op">.</span><span class="fu">withName</span><span class="op">(</span><span class="st">&quot;name&quot;</span><span class="op">).</span><span class="fu">withSize</span><span class="op">(</span><span class="dv">20</span><span class="op">))</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">);</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">(</span>MemorySession session <span class="op">=</span> MemorySession<span class="op">.</span><span class="fu">openConfined</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Allocate memory for the struct</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>            MemorySegment personSegment <span class="op">=</span> session<span class="op">.</span><span class="fu">allocate</span><span class="op">(</span>personLayout<span class="op">);</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Set values</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>            personSegment<span class="op">.</span><span class="fu">set</span><span class="op">(</span>ValueLayout<span class="op">.</span><span class="fu">JAVA_INT</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">30</span><span class="op">);</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>            personSegment<span class="op">.</span><span class="fu">set</span><span class="op">(</span>MemoryLayout<span class="op">.</span><span class="fu">ofArray</span><span class="op">(</span>ValueLayout<span class="op">.</span><span class="fu">JAVA_BYTE</span><span class="op">.</span><span class="fu">withName</span><span class="op">(</span><span class="st">&quot;name&quot;</span><span class="op">).</span><span class="fu">withSize</span><span class="op">(</span><span class="dv">20</span><span class="op">)),</span> <span class="dv">4</span><span class="op">,</span> <span class="st">&quot;Alice&quot;</span><span class="op">.</span><span class="fu">getBytes</span><span class="op">());</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Call the native function to print the person</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>            LibraryLookup library <span class="op">=</span> LibraryLookup<span class="op">.</span><span class="fu">ofLibrary</span><span class="op">(</span><span class="st">&quot;person&quot;</span><span class="op">);</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>            SymbolLookup lookup <span class="op">=</span> library<span class="op">.</span><span class="fu">lookup</span><span class="op">(</span><span class="st">&quot;print_person&quot;</span><span class="op">).</span><span class="fu">orElseThrow</span><span class="op">();</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>            VarHandle printPersonHandle <span class="op">=</span> lookup<span class="op">.</span><span class="fu">get</span><span class="op">(</span><span class="st">&quot;print_person&quot;</span><span class="op">).</span><span class="fu">get</span><span class="op">();</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>            printPersonHandle<span class="op">.</span><span class="fu">invoke</span><span class="op">(</span>personSegment<span class="op">.</span><span class="fu">address</span><span class="op">());</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2-big-o-notation</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#introduction" id="toc-introduction">Introduction</a></li>
+<li><a href="#what-is-it" id="toc-what-is-it">What is it</a></li>
+<li><a href="#big-theta-and-omega" id="toc-big-theta-and-omega">Big
+theta and omega</a></li>
+<li><a href="#common-complexities" id="toc-common-complexities">Common
+complexities</a></li>
+<li><a href="#best-worst" id="toc-best-worst">Best &amp; worst</a></li>
+<li><a href="#space-complexity" id="toc-space-complexity">Space
+complexity</a></li>
+<li><a href="#drop-the-constants" id="toc-drop-the-constants">Drop the
+constants</a></li>
+<li><a href="#drop-non-dominant-terms"
+id="toc-drop-non-dominant-terms">Drop non-dominant terms</a></li>
+<li><a href="#add-vs-multiply-of-complexities"
+id="toc-add-vs-multiply-of-complexities">Add vs Multiply of
+complexities</a></li>
+<li><a href="#amortized-time" id="toc-amortized-time">Amortized
+time</a></li>
+<li><a href="#log-n-run-times" id="toc-log-n-run-times">Log N run
+times</a></li>
+<li><a href="#recursive-run-times"
+id="toc-recursive-run-times">Recursive run times</a></li>
+</ul>
+</nav>
+<h1 id="introduction">Introduction</h1>
+<p>One of the most important concepts to get right, and understand, it
+is used to describe the efficiency of algorithms. Not understanding it
+can really hurt you, and might be judged harshly.</p>
+<h1 id="what-is-it">What is it</h1>
+<p>Big O is also called asymptotic run time. In very crude terms, no
+matter how big the constant is, and how slow the linear increase is,
+linear will at some point surpass the constant progression.</p>
+<ul>
+<li>O(1) - constant complexity, meaning that no matter the input
+parameters, the run time will always take a given constant amount of
+time</li>
+<li>O(n) - non-constant complexity, meaning that the complexity of the
+run time is directly correlated to the input arguments or
+parameters</li>
+</ul>
+<p>There are many types of complexity such as <code>log(n)</code> or
+<code>n^2</code>, or <code>2^n</code>. Each of which describes
+non-constant run time complexity. There is a non-fixed list of possible
+non-constant complexity run times.</p>
+<p>The run time could also have a dependency on multiple variables,
+instead of just n, which represents one of the input parameters, we
+could have n*m, where m is another input parameter, which is in play.
+The dependent arguments might also be indirectly connected to the input,
+and be a function of the input instead.</p>
+<p><code>Big O allows us to describe how the run or space complexity scales, and not to measure absolute units of time or space.</code></p>
+<h1 id="big-theta-and-omega">Big theta and omega</h1>
+<p>In academia, there is - big O, big theta, and big omega. Three
+different complexities describing different ranges of run times</p>
+<ul>
+<li><p><code>big O</code> - in academia that describes an upper bound on
+the run time. Something prints values of an array of N items, can be
+described as O(N), but it could also be described as O(N^2), O(N^3),
+O(N^4). The printing is at least as fast as each of these run times, it
+will however never be less than, the lowest complexity run time, in the
+example above that is O(N).</p></li>
+<li><p><code>big theta</code> - is the same concept but for a lower
+bound. Where the inverse is true, meaning that an algorithm would not be
+slower than than O(N)</p></li>
+<li><p><code>big omega</code> - is when big O and big theta, give a
+tight bound on the run time, meaning when they converge to the same run
+time complexity. This is what the industry means by big O, and not the
+academic, big O, which only describes an upper boundary, as mentioned
+above.</p></li>
+</ul>
+<h1 id="common-complexities">Common complexities</h1>
+<p>In practice we have the following 7 most commonly occurring
+complexities, each worse than the other, they are listed in order of the
+fastest to the slowest</p>
+<ol type="1">
+<li>Constant - <code>O(1)</code> - array access</li>
+<li>Logarithmic - <code>O(log(n))</code> - binary search</li>
+<li>Linear - <code>O(N)</code> - array print</li>
+<li>N*Logarithmic - <code>O(N*log(n))</code> - quick sort</li>
+<li>Quadratic - <code>O(N^2)</code> - bubble sort</li>
+<li>Exponential - <code>O(2^N)</code> - Fibonacci sequence</li>
+<li>Factorial = <code>O(n!)</code> - string permutations</li>
+</ol>
+<h1 id="best-worst">Best &amp; worst</h1>
+<p>Generally when talking best, worst and expected run times, in the
+industry we focus on the expected and worst, where usually the expected
+is the worst, or in other words the worst case is not a case where the
+algorithm fails totally. There are some cases where the worst case for a
+given algorithms differs significantly from the expected one.</p>
+<p>Take quick sort, based on the pivot element we choose, and the
+direction of the sorting, descending or ascending, if we always take the
+first element for a pivot, and we sort in reverse order the array won’t
+be divided in half by the pivot, rather it will be shrunk down only by a
+single element, making the algorithm effectively of linear run time.</p>
+<h1 id="space-complexity">Space complexity</h1>
+<p>The space complexity is a parallel concept to the run time
+complexity, meaning that each algorithm, requires a specific amount of
+memory or space to execute in, based on the type of algorithm, that
+could be constant, or non-constant space, for example take a regular
+loop and a recursive print of an array of N elements, the loop variant
+will take constant space for the entire execution, however it would take
+<code>O(N)</code> space if we use recursion since the call stack, and
+stack frame function will constantly grow on each call for the next
+element.</p>
+<h1 id="drop-the-constants">Drop the constants</h1>
+<p>It is possible for an O(N) to be faster than O(1), since the big O
+describes the rate of increase, however a constant run time does not
+mean instant execution. For this reason we drop the constants in run
+time meaning that the following are equivalent -
+<code>O(1*N) == O(2*N) == O(3*N) == O(4*N) == etc</code>. That is
+because the constant time no matter how big in absolute units of time or
+space, will/is always constant, and is not correlated to the input
+parameters.</p>
+<p>Take for example, an algorithm, that finds the max and min element in
+an array, you could go about this two different ways</p>
+<ol type="1">
+<li>Two for loops, one for the max and one for the min element -
+<code>O(2N)</code></li>
+<li>One loop to find both the max and min element -
+<code>O(N)</code></li>
+</ol>
+<p>Well in either case the complexity here is O(N) for time and O(1) for
+space, both of these algorithms, scale the same way with N. Having one
+combined for loop that does both tasks or two different ones does not
+change the run time complexity.</p>
+<h1 id="drop-non-dominant-terms">Drop non-dominant terms</h1>
+<p>Since we can drop the constants, we could also take into account that
+some complexities might have multiple terms dependent on the input
+arguments, where one of them is so much more dominant / bigger than the
+other could be simply removed, since it will not affect the complexity
+scaling in any significant way</p>
+<ol type="1">
+<li>O(N^2 + N) - O(N^2)</li>
+<li>O(N^2 + 10*N) - O(N^2)</li>
+<li>O(N^3 + log2(N)) - O(N^3)</li>
+<li>O(2^N + 1000*N) - O(2^N)</li>
+</ol>
+<p>Now this is only relevant when we talk about the same input parameter
+correlation, we cannot reduce a complexity of two different terms, for
+example the following <code>O(A + B)</code>, cannot be reduced without
+having some information about the parameters beforehand, if we know that
+A is significantly more dominant than B, then yes, but that requires
+additional data or information about our input.</p>
+<h1 id="add-vs-multiply-of-complexities">Add vs Multiply of
+complexities</h1>
+<p>When would one add two complexities or multiply them. The rules are
+as follows</p>
+<ul>
+<li><p>if for
+<code>each A chunks of work, we do B chunks of work</code>, then we
+multiply, this is mostly expressed as nested loops or similar loop like
+actions.</p></li>
+<li><p>if however the work done for
+<code>each chunk of A and each chunk of B,</code> then we add the run
+times, this is similar to have loops executed one after the other for
+example.</p></li>
+</ul>
+<h1 id="amortized-time">Amortized time</h1>
+<p>What this term describes, is complexities where once in a while,
+worst case scenario will occur for sure, and we cannot avoid it. Think
+about a self re sizing array, where once the array is full, the internal
+implementation doubles the old size into a new array and copies the old
+elements into the new one. For this algorithm the regular complexity in
+time is O(1), but, once in a while it will degrade to O(N), which is
+what amortized time describes.</p>
+<h1 id="log-n-run-times">Log N run times</h1>
+<p>In most algorithms we usually deal with log with base 2, since the
+results we have to go through, halve by two each time we visit them. So
+taking a sorted array, to which we apply binary search, where each
+iteration we halve the array we have to look through. Taking as an
+example array with 16 elements, to find the element we are looking for
+we have to make at most 4 comparisons. The run time still scales with
+the input, but it is not linear, it is faster, instead of 16 comparisons
+we do 4.</p>
+<p><code>log2(n) = k == 2^k = n</code> - the general log formula, 2
+raised to what power would result in n.</p>
+<p><code>log2(16) = 4 == 2^4 = 16</code> - the example above will look
+like this, expressed as a log of base 2 of 16, which is 4.</p>
+<p>Why 4, we start with 16 elements, take the mid point, compare and
+sub-divide into 2, until we have only 1 element, or have found the
+element being search</p>
+<ol start="0" type="1">
+<li>16 -&gt; divide by 2</li>
+<li>8 -&gt; divide by 2</li>
+<li>4 -&gt; divide by 2</li>
+<li>2 -&gt; divide by 2</li>
+<li>1 -&gt; found target</li>
+</ol>
+<p>When we see a problem space where the solution space divides the data
+by two, it is more often than not a base two log of the input n -
+<code>log(n)</code></p>
+<p>If the problem space was divided by 4 or 8 or 16 times instead on
+each step, then our log base would be either 4, 8 or 16. For example
+<code>log4(16)</code> will be 2, meaning that we can find solution in 2
+steps instead of 4 (see example above)</p>
+<p>Note that the base of the log, does not matter, the complexity will
+still be log of some base of the number of input arguments, could be
+<code>log10(n) or log4(10)</code> etc. The reason it does not matter, is
+because the curve described by log, is still the same, no matter the
+base of the logarithm, remember that big O does not evaluate absolute
+run time &amp; space complexity, rather it describes scaling</p>
+<p>What the log describes is the type of scaling in relation to the
+input, we are not looking for which log base produces a smaller / better
+absolute value of steps being executed, instead we are looking at the
+overall scaling of the input in relation to the solution we have</p>
+<h1 id="recursive-run-times">Recursive run times</h1>
+<p>Given the following example, we have to find out what is the run-time
+and space complexity of the provided function</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">f</span><span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>n <span class="op">&lt;=</span> <span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="fu">f</span><span class="op">(</span>n <span class="op">-</span> <span class="dv">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu">f</span><span class="op">(</span>n <span class="op">-</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<p>Calling the above function with f(4), what is the complexity of this
+function. Well for f(4), the function would call f(3) twice, then f(3),
+would call f(2) twice, and so forth, so with each level we double the
+calls, until we reach the bottom or f(1).</p>
+<p>The number of calls would then be 2^D (where D is the depth of the
+recursion tree formed by the call stack). In our case, the depth D is 4,
+the bottom most level is 3, the level above it is 2, the one above it is
+1, and the final one with the root node, where we start f(4) is 0.
+Therefore at most <code>2^4 - 1 = 15</code> function calls. Note that
+each level (in this specific example, which is a perfectly balanced
+binary tree) has exactly <code>2^(current-depth)</code> number of
+nodes</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>                  f(4)                         2^0 = 1</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>            /              \</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>         f(3)              f(3)                2^1 = 2</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>       /     \           /      \</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>   f(2)     f(2)       f(2)      f(2)          2^2 = 4</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>   /  \     /   \      /   \     /   \</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a> f(1) f(1) f(1) f(1)  f(1) f(1) f(1) f(1)      2^3 = 8</span></code></pre></div>
+<p>What is important to note here is what N is, it is not a number of
+elements of an array, or the size of the binary tree, nor is it the
+depth, what N is, in this case is simply a number, but that number
+governs our algorithm and how it scales, so the algorithm scales with an
+absolute number N (an integer, such as 1,2,3…N). To calculate N we do 2
+recursive calls to calculate N-1. With each increase in N, the number of
+calls doubles. The branching factor of our algorithm is 2 (we have 2
+function calls per invocation of f)</p>
+<p>Note that, by coincidence, the depth (D) of the tree (formed by the
+call stack) and the input here match, so <code>N == D</code>, levels,
+but do not confuse the depth of the tree, and the input N. The depth
+does not express the run-time complexity, or in other words the
+<code>run-time complexity is not governed by the depth</code>. The
+generated call stack tree, and its depth is a bi product of the input
+and algorithm itself The algorithm scales with the input
+<code>number N</code> and <code>N</code> alone.</p>
+<p>Changes in <code>N</code> and the algorithm will produce different
+depth, different scaling and different run- time and space complexities
+(e.g, we had 3 recursive calls to N-1 to calculate N)</p>
+</body>
+</html>

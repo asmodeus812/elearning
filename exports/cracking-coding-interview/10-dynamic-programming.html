@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>10-dynamic-programming</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#introduction" id="toc-introduction">Introduction</a></li>
+<li><a href="#principles" id="toc-principles">Principles</a>
+<ul>
+<li><a href="#approach" id="toc-approach">Approach</a></li>
+<li><a href="#types" id="toc-types">Types</a></li>
+<li><a href="#optimizations"
+id="toc-optimizations">Optimizations</a></li>
+</ul></li>
+<li><a href="#steps" id="toc-steps">Steps</a>
+<ul>
+<li><a href="#recursive-approach" id="toc-recursive-approach">Recursive
+approach</a></li>
+<li><a href="#iterative-approach" id="toc-iterative-approach">Iterative
+approach</a></li>
+</ul></li>
+<li><a href="#recursive-problems" id="toc-recursive-problems">Recursive
+problems</a>
+<ul>
+<li><a href="#fibonacci-sequence" id="toc-fibonacci-sequence">Fibonacci
+sequence</a></li>
+<li><a href="#can-sum" id="toc-can-sum">Can sum</a></li>
+<li><a href="#best-sequence" id="toc-best-sequence">Best
+sequence</a></li>
+<li><a href="#can-construct" id="toc-can-construct">Can
+construct</a></li>
+<li><a href="#all-words" id="toc-all-words">All words</a></li>
+<li><a href="#grid-counter" id="toc-grid-counter">Grid counter</a></li>
+</ul></li>
+<li><a href="#iterative-problems" id="toc-iterative-problems">Iterative
+problems</a>
+<ul>
+<li><a href="#fibonacci" id="toc-fibonacci">Fibonacci</a></li>
+<li><a href="#can-sum-1" id="toc-can-sum-1">Can sum</a></li>
+<li><a href="#best-sequence-1" id="toc-best-sequence-1">Best
+sequence</a></li>
+<li><a href="#can-construct-1" id="toc-can-construct-1">Can
+construct</a></li>
+<li><a href="#count-construct" id="toc-count-construct">Count
+construct</a></li>
+<li><a href="#grid-counter-1" id="toc-grid-counter-1">Grid
+counter</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="introduction">Introduction</h1>
+<p>Dynamic programming problems usually are all about finding a non
+analytical solutions to problems. What does that mean ? Well with most
+other algorithms we find at most one single solution to a specific
+problem - sorting an array, finding an element in an array, swapping
+array elements, finding tree nodes by value, on and on. We can see how
+many of those problems often have one analytical solution and that is
+it. However dynamic programming problems are all about finding
+<code>all</code> possible solutions to a given problem. Or in other
+words, dynamic programming is involved when a solution does not have one
+analytical solution, or one solution only is not possible</p>
+<h1 id="principles">Principles</h1>
+<p>The major principles here are as follows</p>
+<h2 id="approach">Approach</h2>
+<ul>
+<li><p>recursion - very often the most dynamic programming problems are
+solved by leveraging recursion, since it is an easy way to explore many
+permutations of a given set of inputs, it is very useful if we want to
+solve the problem in a top down approach, where the recursion calls will
+drill down from top to the bottom, base cases first, and then ascend the
+recursive call stack.</p></li>
+<li><p>iterative - very similar to the recursive approach, however it
+often uses a table to store results, and build future results off of
+this table, usually the table is initialized with one positive case, the
+base case, and everything else is initialized with the negative case,
+the size of the array is usually based on the argument which will be
+mutated, and that same argument is used to <code>key</code> into the
+table/array</p></li>
+</ul>
+<h2 id="types">Types</h2>
+<ul>
+<li>bottom up - this is when we start the problem solving from the base
+case, for example to solve the Fibonacci sequence we will start from the
+two base cases, in this case the first two numbers of the Fibonacci
+sequence are 1 and 1, from this we built the solution from
+<code>the bottom to the top</code></li>
+<li>top down - this is the inverse of the bottom up approach where we
+build the solution by starting with some final
+<code>end paramter</code>, and is mostly used with recursive approach,
+where the recursive calls drill down to the base cases first, then
+ascend the call stack. Using Fibonacci as an example, we start with the
+target number N from the sequence and drill down to N - 1 and N - 2 and
+so on, until we reach the base cases for
+<code>N = 1 and N = 2</code></li>
+</ul>
+<h2 id="optimizations">Optimizations</h2>
+<ul>
+<li><p>memoization - very often when using the recursive approach, the
+same input might be visited in subsequent branches of the recursion, it
+is quite normal to store the result of this specific input and when / if
+it is visited again, to reuse the already computed value. When computing
+Fibonacci sequence, many of the numbers are going to be re-computed and
+overlapping in different branches of the recursive descent, we can
+remember them and re-use them</p></li>
+<li><p>minimization - reducing the number of input arguments to our
+function, can greatly help reduce the space complexity of the call stack
+frames themselves.</p></li>
+</ul>
+<h1 id="steps">Steps</h1>
+<h2 id="recursive-approach">Recursive approach</h2>
+<ul>
+<li><p>identify the input arguments</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the primary input arguments to the function</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> target<span class="op">;</span> <span class="dt">int</span><span class="op">[]</span> sequence</span></code></pre></div></li>
+<li><p>identify which input arguments will mutate, and which will not,
+remain constant</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// will be mutated on each call to the function, target is reduced on each call</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the main sequence of numbers remains `unchanged`, across all function calls</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    target</span></code></pre></div></li>
+<li><p>use a simple example to find the base cases, the negative and
+positive ones</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// negative base case, when target reaches negative value</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>target <span class="op">&lt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// positive, affirmation base case when target is equal/reaches to 0</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>target <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div></li>
+<li><p>write the main body of the function which will recurse and reduce
+the input</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the main body which decides to recurse or stop, based on the return value of the `sub` problem</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">:</span> sequence<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">// mutate the target, reduce the current target by the current number `i` from the sequence</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> newTarget <span class="op">=</span> target <span class="op">-</span> i<span class="op">;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// call with mutated target sum, and see if way to generate newTarget from the sequence exists</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span><span class="fu">recurse</span><span class="op">(</span>newTarget<span class="op">,</span> sequence<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>            <span class="co">// stop on the first positive result</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div></li>
+<li><p>make sure to propagate the return value, correctly accordingly to
+the task</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// stop on the first positive result</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span><span class="fu">recurse</span><span class="op">(</span>newTarget<span class="op">,</span> sequence<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div></li>
+<li><p>add default return value if needed at the end of the main
+function body</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the base cases</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// main loop body</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// if no positive return value is returned inside and after the loop, we</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// return `false`, at the end of the function body</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span></code></pre></div></li>
+<li><p>memoize it, to optimize the solution, select a key, usually the
+one we mutate, locate return statements, but not the base cases, and
+store the results of the calls to the recursive calls</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// first somewhere at the top of the recursive function check if we have the key in the memo table</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>MEMO<span class="op">.</span><span class="fu">containsKey</span><span class="op">(</span>key<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> MEMO<span class="op">.</span><span class="fu">get</span><span class="op">(</span>key<span class="op">);</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">...............</span><span class="op">..</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// in the actual implementation, not the base cases, memo the results, including the negative/false ones too</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>condition<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        MEMO<span class="op">.</span><span class="fu">put</span><span class="op">(</span>key<span class="op">,</span> <span class="kw">true</span><span class="op">);</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">...............</span><span class="op">..</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// at the end of the recursive function after the main code body, as a fallback default value memoize the negative case too</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    MEMO<span class="op">.</span><span class="fu">put</span><span class="op">(</span>key<span class="op">,</span> <span class="kw">false</span><span class="op">);</span></span></code></pre></div></li>
+<li><p>go through the problem and execution flow by drawing a stack call
+tree</p></li>
+</ul>
+<h2 id="iterative-approach">Iterative approach</h2>
+<ul>
+<li><p>identify the input arguments</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the primary input arguments to the function</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> target<span class="op">;</span> <span class="dt">int</span><span class="op">[]</span> sequence</span></code></pre></div></li>
+<li><p>identify which are the main input arguments that are going to
+‘mutate’</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the main input argument which will be used to develop the main algorithm body</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// based on this input argument, we will key into the tabulation table</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    target</span></code></pre></div></li>
+<li><p>create the tabulation table, size is usually based on the
+mutating argument + 1</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span><span class="op">[]</span> table <span class="op">=</span> <span class="kw">new</span> <span class="dt">int</span><span class="op">[</span>target <span class="op">+</span> <span class="dv">1</span><span class="op">];</span></span></code></pre></div></li>
+<li><p>initialize the table with correct positive and negative cases</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// init the base positive case which we use to build off off</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    table<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// all other cases default to the negative value, to start with</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Arrays</span><span class="op">.</span><span class="fu">fill</span><span class="op">(</span>table<span class="op">,</span> <span class="op">-</span><span class="dv">1</span><span class="op">);</span></span></code></pre></div></li>
+<li><p>implementation of the main algorithm body accumulating data into
+the tabulation table</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// loop through all states in the tabulation table</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">// when we meet a positive case, we can build off of it</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>table<span class="op">[</span>i<span class="op">]</span> <span class="op">==</span> <span class="kw">true</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>            <span class="co">// we are in a positive case, meaning the sum to target[i] can be generated</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> num <span class="op">:</span> sequence<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                <span class="co">// sums `i + num` can be generated if the array has enough space to fit the number, remember that the tabulation table</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                <span class="co">// is created with at most target + 1 elements, meaning that we have to check our bounds first</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="op">(</span>i <span class="op">+</span> num <span class="op">&lt;</span> table<span class="op">.</span><span class="fu">length</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// i + num is in range and we mark this sum target as possible</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>                    table<span class="op">[</span>i <span class="op">+</span> num<span class="op">]</span> <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div></li>
+<li><p>go through the problem and execution flow by drawing out the
+states of the tabulation table</p></li>
+</ul>
+<h1 id="recursive-problems">Recursive problems</h1>
+<h2 id="fibonacci-sequence">Fibonacci sequence</h2>
+<p>One of the most prolific and common examples, to demonstrate what
+dynamic programming is about, is the Fibonacci sequence. We want to
+generate the first N numbers of the Fibonacci sequence, and we are given
+only the number N, the final position / index of the number we are
+looking for of the sequence</p>
+<p>The most common solution is to use dynamic programming, the approach
+is based on two approaches</p>
+<ul>
+<li>recursively find the current Fibonacci number based on the previous
+ones.</li>
+<li>memorization of the already computed numbers, so we do not recompute
+them again.</li>
+</ul>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">final</span> <span class="kw">class</span> Fibonacci <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">final</span> <span class="dt">int</span><span class="op">[]</span> MEMO <span class="op">=</span> <span class="kw">new</span> <span class="dt">int</span><span class="op">[</span><span class="dv">100</span><span class="op">];</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Fibonacci</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">// initialize the memoization array to be some invalid number that can not exist in a valid Fibonacci sequence, we are going to</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">// use this as a flag to check if the number stored at this position or index is already computed</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Arrays</span><span class="op">.</span><span class="fu">setAll</span><span class="op">(</span>MEMO<span class="op">,</span> operand <span class="op">-&gt;</span> <span class="op">-</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">fibonacci</span><span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the first two numbers of the Fibonacci sequence are both 1, so for N less than or equal to 2 we return 1</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>n <span class="op">&lt;=</span> <span class="dv">2</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">// when the number is already computed, we can simply return whatever value is stored at this position in the memo array</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>MEMO<span class="op">[</span>n<span class="op">]</span> <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> MEMO<span class="op">[</span>n<span class="op">];</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// compute the current Fibonacci number n, by computing the previous two numbers of the sequence, remember the current number in</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the memo array, for future reuse</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>        MEMO<span class="op">[</span>n<span class="op">]</span> <span class="op">=</span> <span class="fu">fibonacci</span><span class="op">(</span>n <span class="op">-</span> <span class="dv">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu">fibonacci</span><span class="op">(</span>n <span class="op">-</span> <span class="dv">2</span><span class="op">);</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">// return the stored value at the position N, it contains the current value of the number at position N in the Fibonacci</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">// sequence</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> MEMO<span class="op">[</span>n<span class="op">];</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The complexity of this algorithm is defined for both time and space.
+For the non optimized version without memoization is as follows</p>
+<ul>
+<li>Without memoization table, each number of the sequence has to be
+evaluated every time</li>
+</ul>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>              5</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>           /     \</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>         4        3</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>       /   \    /   \</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>     3      2  2     1</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    / \</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>   2   1</span></code></pre></div>
+<pre><code>-   _time complexity_ - O(2^d) - this is defined as the branching factor to
+    the power of the depth of the tree formed by the recursive calls, technically we
+    have exactly 1.6^d recursive calls but for simplicity we can say - 2^d.
+    Therefore for the example above, the number of calls for N = 5, assuming 2^d,
+    will be 2^5 = 32, however the exact calls are actually less, as mentioned, it is
+    closer to 1.6, in this casethe calls are ~10.
+
+-   _space complexity_ - O(d) - the space complexity is based on the number
+    of call stack frames occupied during execution, remember that we do not evaluate
+    all numbers of the sequence at once, the recursive call stack is at most N deep,
+    where N is the target number position from the fib sequence. Meaning we make at
+    most N number of recursive calls for each given number from the sequence, where
+    N is the position or the index of the number from the Fibonacci sequence.</code></pre>
+<ul>
+<li>With memoization table, which stores already computed numbers from
+the sequence, they are reused</li>
+</ul>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>              5</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>           /     \</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>         4        3</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>       /   \</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>     3      2</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    / \</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>   2   1</span></code></pre></div>
+<ul>
+<li><p><em>time complexity</em> - O(d) - with memoization each number of
+the sequence is calculated exactly once, since we have a top down
+approach, the recursive calls will drill down to N = 1 and N = 2, and
+calculate upwards, to the target N, meaning that older, smaller numbers
+will be cached in the memo table, and this is how we get O(n) complexity
+in run time</p></li>
+<li><p><em>space complexity</em> - O(d) - the space complexity is based
+on the number of call stack frames occupied during execution, this will
+not improve even with the memo table, since the recursive calls will
+still reach the very bottom, base case and then ascend, unwind the call
+stack, the depth of the stack will be N here too. We can be pedantic and
+say that the comp</p></li>
+</ul>
+<p>We can clearly see from the call stack representation that a lot of
+the numbers from the sequence are getting re-computed constantly, we it
+is easy to see that they can be cached. For example given our
+implementation the first branch that will be computed immediately is
+<code>5 -&gt; 4 -&gt; 3 -&gt; ( 2 + 1 )</code>. Meaning that the first
+number of the sequence that is going to be computed is <code>3</code>
+the next is going to be <code>4</code>, the next <code>5</code> Since
+the recursive approach is top down, we first drill down to the base case
+and then unwind the recursion, meaning we can easily cache each value we
+find to re-use later on when the recursion stack unwinds.</p>
+<p>To see why the space complexity is O(d) - we can see that once we
+reach the bottom of the recursion in the following call path -
+<code>5 -&gt; 4 -&gt; 3 -&gt; ( 2 + 1)</code>, stack has at this point
+consists of 5 calls to the fib function. Then the recursion stack
+unwinds, and it will never be deeper than N.</p>
+<h2 id="can-sum">Can sum</h2>
+<p>Another very common problem is to check if a sequence or array of
+<code>positive</code> numbers sums up to a given target sum. Given a
+target array of numbers, allowing number reuse from the array, find if
+there is at least one combination of the given numbers that sums up to
+the given target sum, note that the same number from the array can be
+repeated multiple times. To solve this task we have to come up with the
+basic base cases, where</p>
+<ul>
+<li>a target sum of 0, would always produce a result of
+<code>true</code>, this is because we can always reach a target sum of 0
+with any sequence of numbers, by not taking any numbers</li>
+<li>a negative target sum is invalid, meaning that it will always return
+<code>false</code>, when the target sum is negative, there is no way to
+<code>sum</code> a sequence of positive numbers to reach the target
+negative sum</li>
+</ul>
+<p>Let us take a few examples first</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>target - 5</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>numbers - [2, 3, 1, 4, 5]</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>sequences - [2,3], [5, 1], [4, 3], [1, 1, 1, 1, 1] ... etc.</span></code></pre></div>
+<p>As we can see from this example above, there are many ways to sum
+these numbers to <code>5</code>, note that as mentioned above the
+numbers can be repeated, take a good note of the last example -
+<code>1,1,1,1,1</code> - this is a worse case scenario and will help us
+later to correctly compute the complexity of space and time for this
+algorithm</p>
+<p>To evaluate the runtime complexity we have to consider two things</p>
+<ul>
+<li><p>the height of the recursive call stack - if we imagine that our
+sequence is composed of only <code>ones</code> that means that we will
+have exactly target number of function calls, this is because we can
+imagine taking <code>target - 1</code>, <code>target</code> number of
+times, if we subtract <code>1</code> from the target,
+<code>target</code> number of times we will get 0, meaning that at worst
+we will make <code>target</code> number of function calls</p></li>
+<li><p>the branching factor - this is how many recursive calls do we
+make inside each singular recursive call, or in other words, how many
+times we branch out on each recursive call, and in our case this is
+exactly expressed by the <code>sequence.length</code>, we loop, and for
+each item in the sequence we call the function again</p></li>
+</ul>
+<p>To evaluate the space complexity we have to consider that</p>
+<ul>
+<li><p>without memoization, the complexity is exactly the depth of the
+tree, meaning that we will not make more than M number of calls, meaning
+that it is therefore <code>O(m)</code></p></li>
+<li><p>with memoization, the complexity is also modified, we still make
+at most <code>O(m)</code> number of calls however, we have to add the
+extra space occupied by the items in the memo table, now worse case
+scenario if we have a sequence of all ones, meaning that we will also
+store at most <code>target</code> number of keys and values in the memo
+table, what does that mean for our complexity is that it is actually
+<code>O(m^2)</code></p></li>
+</ul>
+<p>To put everything together we now can conclude that the complexity is
+the branching factor N to the power of function calls M or in other
+words <code>O(n^m)</code></p>
+<p>To approach this solution let us draw a tree first, which will
+represent the call tree of our dynamic solution approach</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>                                        5</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>       -2 /           -3 /           -1 |            -4 \             -5 \</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>        3               2               4                1               (0)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>-2/ -3/ -1\ -4\ -5\ -2/ -3| -1\ -4\ -5\</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a> 1   (0)   2    -1  2   0  -1  1  -2  -3</span></code></pre></div>
+<p>Each node in the tree is the current target sum, each edge /
+connection to the child, is by how much we reduce that target when we go
+down the recursive calls, we can see that for the top-down approach we
+will drill down into the left most branching of the tree. When we reach
+a node that is negative we know that base case is <code>negative</code>
+we return <code>false</code>, when we reach a target node that is
+exactly 0 we know that base case is the <code>positive</code> we return
+<code>true</code>, anything greater than zero, we keep recursing. From
+this example we see that we first hit the sequence of <code>2 3</code>,
+that is correct, <code>2 + 3</code> does indeed sum up to
+<code>5</code>, another sequence is <code>5</code> itself, another one
+is <code>3 2</code> or <code>1 4</code> or <code>4 1</code>, if we do
+not early return we will infect find all of them. But for this target
+task we are asked to find
+<code>if there is at least one sequence, if yes return true and bail</code></p>
+<p>Below is a simple explanation and implementation of the problem, we
+can see that again we employ a top-down approach. Where the recursive
+calls first drill down until the base cases and then up the stack we
+unwind. The main take away here is to see the base cases, we can have
+the target become negative, which is no good, since our sequence by
+design is of only positive numbers, meaning we have overshot with the
+subtraction, or we can have the target be exactly zero, which means we
+have found the sequence of numbers that sums up to the initial target
+with the <code>summable</code> was initially called. We return and
+unwind the stack, propagating the result as long as we have at least one
+positive hit meaning a base case which hit <code>true</code> we can
+return that one.</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="dt">boolean</span> <span class="fu">summable</span><span class="op">(</span><span class="dt">int</span> target<span class="op">,</span> <span class="dt">int</span><span class="op">[]</span> sequence<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// optimization case, first check if the target sum is already in the memo, this means that there was at least one call to</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// canSum, that reached this target sum, and computed the result, before we reach this again, we do not need to re-compute it</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// since the sequence is always the same, if we reach this target sum again, we can simply return the cached result value</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// instead.</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>MEMO<span class="op">.</span><span class="fu">containsKey</span><span class="op">(</span>target<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> MEMO<span class="op">.</span><span class="fu">get</span><span class="op">(</span>target<span class="op">);</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the first base case where the target is negative, meaning that there is no way to sum to the target, since the sequence is</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// only composed of positive numbers.</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>target <span class="op">&lt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// when the target is 0, that means that at this point the sum was reached, therefore we can early return true for this target</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// sum.</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>target <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// go through each number in the sequence, and find the new target sum</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">:</span> sequence<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the new target sum is the original - the current number, meaning that with each call our target sum will reduce by each</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// number in the sequence, eventually it will reach 0, or be negative, hitting the 2 base cases, when that happens, we will</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// receive a return of false or true if the sum can be generated from the target sequence</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> newTarget <span class="op">=</span> target <span class="op">-</span> i<span class="op">;</span></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the first call which returns true, can short circuit this loop and return early, we care only about if there is at least</span></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">// one combination in the sequence which sums up to the target, we do not care about the actual sequence of numbers, the</span></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">// first one that was found will suffice</span></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span><span class="fu">summable</span><span class="op">(</span>newTarget<span class="op">,</span> sequence<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>            <span class="co">// before we early return, we also cache the current newTarget, into the memo object, meaning that we know that for this</span></span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>            <span class="co">// target sum there is a sequence of numbers, that will sum/reach this newTarget sum</span></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>            MEMO<span class="op">.</span><span class="fu">put</span><span class="op">(</span>target<span class="op">,</span> <span class="kw">true</span><span class="op">);</span></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we have gone through all numbers in the sequence for the current target sum, and none of them returned true, this is the</span></span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>    <span class="co">// final base case where we can say that there is no number in the sequence that sums up to the target number, on top of that</span></span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we also mark that target sum as &#39;unreachable&#39; for this given input of sequence numbers</span></span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>    MEMO<span class="op">.</span><span class="fu">put</span><span class="op">(</span>target<span class="op">,</span> <span class="kw">false</span><span class="op">);</span></span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="best-sequence">Best sequence</h2>
+<p>An extension of the can sum task, could be to find the best sequence
+which means, the sequence with the least amount of numbers that makes up
+the target sum. This task is not much different from the
+<code>cansum</code> problem, with a few minor changes. We still keep
+reducing the target sum, then drill down, top - down. The call stack
+will first reach bottom, then start unwinding, during the unwinding
+process each call to <code>best</code> will either return an
+<code>null or empty list</code> from the base cases, or the shortest
+list, produced in the body of the <code>for loop</code>. Note that we
+employ a clone, this is purely language specific, ideally we actually
+copy all elements of the current result to <code>best</code> and append
+the current number from the for loop iteration. The clone is done to
+avoid messing up with references (potentially).</p>
+<ul>
+<li><p>we adjust the base case returns - instead of <code>boolean</code>
+we return empty list or <code>null</code>. Empty list is returned when
+we reach a positive base case, meaning the sum has reached
+<code>zero</code>, a <code>null</code> is returned when the target sub
+overshot, and is negative.</p></li>
+<li><p>when we call the recursive function we have to now check if the
+return of the call to <code>best</code> returned a valid value, if it is
+not <code>null</code>, we clone the return value (the sequence thus far)
+append the current value <code>i</code> to the end of the
+sequence</p></li>
+<li><p>we have to find the min length, meaning we have to go through all
+numbers in the sequence, and find the one call stack that produced the
+smallest list of numbers which sums up to the target</p></li>
+<li><p><code>bestSequence</code> is initially <code>null</code>, and can
+remain null in case there is actually no sequence that sums up to the
+target, however if we have found the at least one or the one with
+<code>min</code> length that is what the value of
+<code>bestSequence</code> will be after the for loop.</p></li>
+</ul>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> <span class="fu">best</span><span class="op">(</span><span class="dt">int</span> target<span class="op">,</span> <span class="dt">int</span><span class="op">[]</span> sequence<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// optimization case, first check if the target sum is already in the memo, this means that there was at least one call to</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// canSum, that reached this target sum, and computed the result, before we reach this again, we do not need to re-compute it</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// since the sequence is always the same, if we reach this target sum again, we can simply return the cached result value</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// instead.</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>MEMO<span class="op">.</span><span class="fu">containsKey</span><span class="op">(</span>target<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> MEMO<span class="op">.</span><span class="fu">get</span><span class="op">(</span>target<span class="op">);</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the first base case where the target is negative, meaning that there is no way to sum to the target, since the sequence is</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// only composed of positive numbers. Note that we here return a null, which means this is a negative base case, similar to</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// `false`,</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// however we can not return `false` here, so null will suffice.</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>target <span class="op">&lt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// when the target is 0, that means that at this point the sum was reached, therefore we can early return true for this target</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// sum. Note we return an empty array which can be later used to easily identify the positive base case, versus the negative</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>target <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> bestSequence <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// go through each number in the sequence, and find the new target sum</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">:</span> sequence<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the new target sum is the original minus the current number, meaning that with each call our target sum will reduce by</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">// each</span></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">// number in the sequence, eventually it will reach 0, or be negative, hitting the 2 base cases, when that happens, we will</span></span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">// receive a return of false or true if the sum can be generated from the target sequence</span></span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> newTarget <span class="op">=</span> target <span class="op">-</span> i<span class="op">;</span></span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the first call which returns a non-null list, can short circuit this loop and return early, we care only about if there</span></span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">// is at least one combination in the sequence which sums up to the target, the first found current sequence returned below,</span></span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">// is for newTarget</span></span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>        <span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> currentSequence <span class="op">=</span> <span class="fu">best</span><span class="op">(</span>newTarget<span class="op">,</span> sequence<span class="op">);</span></span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(!</span>Objects<span class="op">.</span><span class="fu">isNull</span><span class="op">(</span>currentSequence<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>            <span class="co">// the actual result here of currentSequence is for newTarget, however to find the final result sequence for the input</span></span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>            <span class="co">// argument of `target`, we have to add the current number `i` too. We extend the currentSequence with the current</span></span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>            <span class="co">// number `i`. What that means is newTarget can be reached with `currentSequence`, therefore target can be reached with</span></span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>            <span class="co">// a result sequence of (...currentSequence, i). We clone the currentSequence to avoid reference assignment, this is</span></span>
+<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>            <span class="co">// purely implementation detail, but good to know</span></span>
+<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>            <span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> resultSequence <span class="op">=</span> <span class="op">(</span><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;)</span> <span class="op">((</span><span class="bu">ArrayList</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;)</span> currentSequence<span class="op">).</span><span class="fu">clone</span><span class="op">();</span></span>
+<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a>            resultSequence<span class="op">.</span><span class="fu">add</span><span class="op">(</span>i<span class="op">);</span></span>
+<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a>            <span class="co">// make sure to remember the shortest sequence in the bestSequence variable, this way at the end of the function we will</span></span>
+<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>            <span class="co">// have either the shortest sequence that can sum up to the target, or nil if no sequence exists that sums up to target</span></span>
+<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>Objects<span class="op">.</span><span class="fu">isNull</span><span class="op">(</span>bestSequence<span class="op">)</span> <span class="op">||</span> resultSequence<span class="op">.</span><span class="fu">size</span><span class="op">()</span> <span class="op">&lt;</span> bestSequence<span class="op">.</span><span class="fu">size</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>                bestSequence <span class="op">=</span> resultSequence<span class="op">;</span></span>
+<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a>            <span class="co">// memo the extended resultSequence, remember we memo here for `target` as key, since the resultSequence is for</span></span>
+<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a>            <span class="co">// newTarget + i or in other words = `target`</span></span>
+<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a>            MEMO<span class="op">.</span><span class="fu">put</span><span class="op">(</span>target<span class="op">,</span> resultSequence<span class="op">);</span></span>
+<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-55"><a href="#cb20-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-56"><a href="#cb20-56" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we have gone through all numbers in the sequence for the current target sum, and none of them returned true, this is the</span></span>
+<span id="cb20-57"><a href="#cb20-57" aria-hidden="true" tabindex="-1"></a>    <span class="co">// final base case where we can say that there is no number in the sequence that sums up to the target number, on top of that</span></span>
+<span id="cb20-58"><a href="#cb20-58" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we also mark that target sum as &#39;unreacheable&#39; for this given input of sequence numbers by storing `null` for the sequence</span></span>
+<span id="cb20-59"><a href="#cb20-59" aria-hidden="true" tabindex="-1"></a>    MEMO<span class="op">.</span><span class="fu">put</span><span class="op">(</span>target<span class="op">,</span> bestSequence<span class="op">);</span></span>
+<span id="cb20-60"><a href="#cb20-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> bestSequence<span class="op">;</span></span>
+<span id="cb20-61"><a href="#cb20-61" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="can-construct">Can construct</h2>
+<p>A variation of the <code>cansum</code> problem where we have to now
+find if a <code>target word</code> can be constructed by taking
+<code>words from a dictionary</code> passed in as input arguments. You
+must immediately notice that this is practically the same problem, we
+have the <code>target</code> and <code>sequence</code>. The dictionary
+of words is not mutable, we can take the same word from it as many times
+as we want, there is no limit, the target word is going to be the one to
+be mutated.</p>
+<p>The base cases for this problem, are basically only one. If the
+target word is empty i.e. the emtpy string <code>""</code> we return
+<code>true</code>, any dictionary of any words, even the empty
+dictionary can construct an empty target word.</p>
+<p>The way we solve this issue, is by taking away from the target word,
+until it becomes empty, if it does, that means we can construct from the
+given dictionary of words, otherwise if we end up with the target word
+being shorter than all words in the dictionary, we know that this case
+must return <code>false</code>.</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>target - abcdef</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>dictionary - [&quot;ab&quot;, &quot;abc&quot;, &quot;cd&quot;, &quot;ef&quot;, &quot;def&quot;, &quot;abcd&quot;]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>combinations - [&quot;abc&quot;, &quot;def&quot;], [&quot;ab&quot;, &quot;cd&quot;, &quot;ef&quot;], [&quot;abcd&quot;, &quot;ef&quot;].</span></code></pre></div>
+<p>From the example above we can see that at most we have two different
+combinations from the dictionary which can make up the word, they need
+not be in order of appearance in the dictionary array, however, when we
+take an item from the dictionary and compare against a sub-string from
+the target word, we must <code>always</code> start from the beginning of
+the string / target word, we can not simply take any
+<code>substring</code>, which actually makes the task somewhat easier
+too.</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="dt">boolean</span> <span class="fu">constructible</span><span class="op">(</span><span class="bu">String</span> target<span class="op">,</span> <span class="bu">String</span><span class="op">[]</span> dictionary<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the main base case here, every empty word, can be &quot;built&quot; from an array of any words, by simply not picking anything from the</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// array in the first place, this base case is a bit weird, but it helps us work with the string, for example below we leverage</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// a `substring` property, where if the `substring` method is called with beginIndex equal to the length of the string, the</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// returned string is empty &quot;&quot;, it is not an exception, or out of bounds error.</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>target<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// check if the target string is already in the map, if it is we already have gone through it once, during the top-down recursion, since we drill down first, and then unwind, it is possible to meet the same suffx/target word multiple times, depending on the initial target word and dictionary of words, if it is in the map we will have the result, either we can (true) or we can not (false) construct that particular key/suffix from the dictionary of words.</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>MEMO<span class="op">.</span><span class="fu">containsKey</span><span class="op">(</span>target<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="bu">String</span> word <span class="op">:</span> dictionary<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// in case the main word is smaller than the current item from words, then simply skip this one, there is no way the build</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the shorter main word from a longer word from the words dictionary</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>target<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">&lt;</span> word<span class="op">.</span><span class="fu">length</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span><span class="op">;</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// pull the same number of characters from the main word, as our prefix, when this prefix matches</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> prefix <span class="op">=</span> target<span class="op">.</span><span class="fu">substring</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> word<span class="op">.</span><span class="fu">length</span><span class="op">());</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// compare the prefix characters with the actual current item word, if they match, call recursively the function with the</span></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">// left of suffix, the rest of the string note, there is a trick here, String.substring when invoked with a value for</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">// beginIndex of exactly the string.length, will return emtpy string &quot;&quot;, our base case this is how we keep pulling prefixes</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">// from the main word, until the main word becomes empty string - &quot;&quot;. We can also check if the current item.length is equal</span></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">// to the main word.length, and if yes simply stop there, but we use this special property if String.substring instead</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>prefix<span class="op">.</span><span class="fu">equalsIgnoreCase</span><span class="op">(</span>word<span class="op">)</span> <span class="op">||</span> <span class="fu">constructible</span><span class="op">(</span>target<span class="op">.</span><span class="fu">substring</span><span class="op">(</span>word<span class="op">.</span><span class="fu">length</span><span class="op">()),</span> dictionary<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>            <span class="co">// if we hit this point that means the prefix was exactly equal to the word, and the recursive call also returned `true`</span></span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>            <span class="co">// for the `suffix` part of the main word</span></span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>            MEMO<span class="op">.</span><span class="fu">put</span><span class="op">(</span>target<span class="op">,</span> <span class="kw">true</span><span class="op">);</span></span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">// in case we do not enter the true branch above, this means we could not build anytning from the words dictionary, therefore</span></span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">// return false</span></span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>    MEMO<span class="op">.</span><span class="fu">put</span><span class="op">(</span>target<span class="op">,</span> <span class="kw">false</span><span class="op">);</span></span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Things to note from the implementation above.</p>
+<ul>
+<li><p>we do not have a <code>false</code> base case exactly, we can add
+one where if the target word is <code>null</code> but for the sake of
+this task let us assume the user will not pipe in a <code>null</code>
+into the function call</p></li>
+<li><p>we have a guard case in the for loop body, which makes sure the
+current word from the dictionary is not bigger, than the actual target
+word, since we reduce the target word, on each recursive call.</p></li>
+<li><p>we pull a <code>prefix</code> i.e. always from the start of the
+target word, from the target word, which is the same length as the
+current word from the dictionary, and we then compare that prefix, to
+the current word from the dictionary, to make sure the current word
+actually can ’construct` the word from the start.</p></li>
+<li><p>we use a special case of the substring function, which when
+invoked exactly with the length of the string as first argument (which
+should be an index), returns an empty string</p></li>
+<li><p>in case we do not enter the positive branch in the
+<code>if</code> inside the for loop, we simply return <code>false</code>
+at the end of the function, meaning none of the words in the dictionary
+actually matched up during the <code>for</code> loop.</p></li>
+</ul>
+<p>Evaluating the complexity of the solution</p>
+<ul>
+<li><p>without memoization, the complexity is exactly the branching
+factor to the power of the depth of the tree, meaning that we will not
+make more than M number of calls and we branch at most N times, meaning
+that it is therefore <code>O(n^m)</code></p></li>
+<li><p>with memoization, the complexity is also modified, we now make at
+most <code>O(m)</code> number of calls however, we have to add the extra
+space occupied by the items in the memo table, now worse case scenario
+if we have a sequence of all ones, meaning that we will also store at
+most <code>target</code> number of keys and values in the memo table,
+there is something more to add to this complexity, and that is the
+actual memory occupied by the <code>prefix</code> string we construct
+which at worse can be of length <code>m</code>, so the final complexity
+has to account for that and actually it ends up being
+<code>O(m^2)</code>.</p></li>
+</ul>
+<p>Therefore we can conclude that</p>
+<ul>
+<li>runtime complexity is O(n^m) without memo or O(m) with memo</li>
+<li>space complexity is O(m) without memo or O(m^2) with memo</li>
+</ul>
+<h2 id="all-words">All words</h2>
+<p>A variation of the previous problem is to collect all combinations
+from the dictionary that make up the target word, if any exist, we will
+try to collect the sequences in a list of strings, where each item in
+the list will be one of the words from the dictionary which makes up the
+final target word, they will be separated by coma, this is the same
+problem which basically needs a few small modifications, to make it
+work, and here is the implementation</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> <span class="fu">allwords</span><span class="op">(</span><span class="bu">String</span> target<span class="op">,</span> <span class="bu">String</span><span class="op">[]</span> dictionary<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this is the positive base case, reaching this point means that we have truncated the target string or word, to be empty, if</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// it is empty that means we have found a sequence to exist that constructs the intial word, kind of</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>target<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>MEMO<span class="op">.</span><span class="fu">containsKey</span><span class="op">(</span>target<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> MEMO<span class="op">.</span><span class="fu">get</span><span class="op">(</span>target<span class="op">);</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this is in a way the negative case, if none of the branches below suffice, we will return nil, which means there is no way to</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// build the target string / word, from any words in the dictionary, provided above.</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> result <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="bu">String</span> word <span class="op">:</span> dictionary<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// in case the main word is smaller than the current item from words, then simply skip this one, there is no way the build</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the shorter main word from a longer word from the words dictionary</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>target<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">&lt;</span> word<span class="op">.</span><span class="fu">length</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span><span class="op">;</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// pull the prefix, the size of the prefix is exactly the size of the current word from the dictionary</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> prefix <span class="op">=</span> target<span class="op">.</span><span class="fu">substring</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> word<span class="op">.</span><span class="fu">length</span><span class="op">());</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// only in case the prefix matches, can we continue with the rest of the main target word, or to be more precise, the suffix</span></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">// is what we use to drill down</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>prefix<span class="op">.</span><span class="fu">equalsIgnoreCase</span><span class="op">(</span>word<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>            <span class="co">// construct the rest of the word, calling the function recursively, in case this returns a non nil result we know that</span></span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>            <span class="co">// for the current prefix and suffix we can construct the target word, note we do this again top-down, we drill down to</span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>            <span class="co">// the base case, we unwind, and only then can we make the decision if we can construct the word, this is very important</span></span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>            <span class="co">// observation</span></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>            <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> current <span class="op">=</span> <span class="fu">allwords</span><span class="op">(</span>target<span class="op">.</span><span class="fu">substring</span><span class="op">(</span>word<span class="op">.</span><span class="fu">length</span><span class="op">()),</span> dictionary<span class="op">);</span></span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(!</span>Objects<span class="op">.</span><span class="fu">isNull</span><span class="op">(</span>current<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>                <span class="co">// from the result of the recursive call construct the string of words from the dictionary that can be combined to</span></span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>                <span class="co">// make the word</span></span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>                <span class="bu">StringBuilder</span> builder <span class="op">=</span> <span class="kw">new</span> <span class="bu">StringBuilder</span><span class="op">(</span>word<span class="op">);</span></span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a>                <span class="co">// simply construct the string with some delimiter easily identify the words from the dictionary which were used to</span></span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a>                <span class="co">// construct the target word.</span></span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> <span class="op">(</span><span class="bu">String</span> string <span class="op">:</span> current<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a>                    builder<span class="op">.</span><span class="fu">append</span><span class="op">(</span><span class="st">&quot;,&quot;</span><span class="op">);</span></span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a>                    builder<span class="op">.</span><span class="fu">append</span><span class="op">(</span>string<span class="op">);</span></span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>                <span class="co">// the first time we see the result, it might be nil, meaning we have to initialize it first, with an empty array</span></span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="op">(</span>Objects<span class="op">.</span><span class="fu">isNull</span><span class="op">(</span>result<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a>                    result <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a>                <span class="co">// add the built string of combinations to the final result which we then return eventually, after the body of the</span></span>
+<span id="cb23-50"><a href="#cb23-50" aria-hidden="true" tabindex="-1"></a>                <span class="co">// for loop</span></span>
+<span id="cb23-51"><a href="#cb23-51" aria-hidden="true" tabindex="-1"></a>                result<span class="op">.</span><span class="fu">add</span><span class="op">(</span>builder<span class="op">.</span><span class="fu">toString</span><span class="op">());</span></span>
+<span id="cb23-52"><a href="#cb23-52" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb23-53"><a href="#cb23-53" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb23-54"><a href="#cb23-54" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-55"><a href="#cb23-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-56"><a href="#cb23-56" aria-hidden="true" tabindex="-1"></a>    <span class="co">// at this point, result will either be initialized, or nil, if it was initialized, that means we have found at least one, but</span></span>
+<span id="cb23-57"><a href="#cb23-57" aria-hidden="true" tabindex="-1"></a>    <span class="co">// maybe more, combinations from word dictionary that make up the target word</span></span>
+<span id="cb23-58"><a href="#cb23-58" aria-hidden="true" tabindex="-1"></a>    MEMO<span class="op">.</span><span class="fu">put</span><span class="op">(</span>target<span class="op">,</span> result<span class="op">);</span></span>
+<span id="cb23-59"><a href="#cb23-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-60"><a href="#cb23-60" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this return serves as both a positive and negative case, if we never entered any true branch in the for loop above, it will</span></span>
+<span id="cb23-61"><a href="#cb23-61" aria-hidden="true" tabindex="-1"></a>    <span class="co">// be nil, otherwise initialized</span></span>
+<span id="cb23-62"><a href="#cb23-62" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result<span class="op">;</span></span>
+<span id="cb23-63"><a href="#cb23-63" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The implementation is very similar to previous approaches, and here
+is where we can see how a very familiar pattern emerges, the general
+difference is how we mutate and mold the result, the way we collect and
+return it. In the implementation above we have again two base cases</p>
+<ul>
+<li>positive case - when the target word length is 0, we return a valid
+empty list, after all we already know that a target word that is empty,
+we can create the target empty word, by simply not taking anything from
+the dictionary in the first place</li>
+<li>negative case - here we have to make sure we can distinguish between
+the positive case and another case, we have to choose a return value for
+our list, that makes sense in an invalid case, the invalid case here,
+signifies that there is no sequence in the dictionary that makes up the
+target word, the most obvious solution is to make sure in a negative
+case we return null for the list</li>
+</ul>
+<p>In the example above, the challenging step is to realize that we
+actually flatten the results of the calls to the recursive calls before
+we add them to the final result, this is important since the final
+result returned from the recursive function has to always be a one
+dimensional array with entries, however the call to the function itself
+also returns one dimensional array of entries too, we can not simply
+concatenate those two results, we have to flatten the return value of
+the call then add it to the final result. This is the main difference as
+far as this task goes, the rest of the task and solution follows the
+already well established pattern, of</p>
+<ul>
+<li>creating the base cases - negative and positive</li>
+<li>building the actual body of the function</li>
+<li>adding to the final result of the function</li>
+<li>returning the result of the computation</li>
+<li>memoization of the results</li>
+</ul>
+<h2 id="grid-counter">Grid counter</h2>
+<p>Another common task is, given a grid of NxM cells. Where N is the
+number of rows, and M is the number of cols, find all possible ways to
+get from the top left corner (start) to the bot right one (end).</p>
+<p>This one, similarly to Fibonacci, is also leveraging recursion and
+memoization, in this task we are required to basically compute all
+possible ways to go from one start position to another, while we can
+move only in two directions, which are right and down, to reach the
+bottom right (end) coordinates.</p>
+<p>In the example below the grid coordinates start from 1,1 and the end
+coordinates and size of the grid is defined by the input arguments to
+the <code>count</code> function R,C</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">final</span> <span class="kw">class</span> GridPathCounter <span class="op">{</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// hold a string key which represents the count for the specific coordinates of the current row and col, [r,c]. The reason we can</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// use memo here is that once a given coordinate position of row,col is visited, we do not have to visit it again, all paths</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="bu">Map</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">,</span> <span class="bu">Integer</span><span class="op">&gt;</span> MEMO <span class="op">=</span> <span class="kw">new</span> <span class="bu">HashMap</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">count</span><span class="op">(</span><span class="dt">int</span> r<span class="op">,</span> <span class="dt">int</span> c<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// when either of the coordinates points at an invalid position, then there are no valid paths to reach the end goal, there is</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// no grid where the row or columns can be 0, remember the rows and cols here are defined positions, therefore they must be</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// greater or equal to 1</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>r <span class="op">==</span> <span class="dv">0</span> <span class="op">||</span> c <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// in a grid of 1x1, there is only 1 path between the start, top left, and the end, bot right, and both are exactly the same</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// grid cell</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>r <span class="op">==</span> <span class="dv">1</span> <span class="op">&amp;&amp;</span> c <span class="op">==</span> <span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// build a unique key, from the current pair of coordinates, this will ensure we can key the map, correctly and have a unique</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// key - value relation between the coordinates and the count of paths to these specific coordinates</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> key <span class="op">=</span> <span class="bu">String</span><span class="op">.</span><span class="fu">format</span><span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st">,</span><span class="sc">%d</span><span class="st">&quot;</span><span class="op">,</span> r<span class="op">,</span> c<span class="op">);</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>MEMO<span class="op">.</span><span class="fu">containsKey</span><span class="op">(</span>key<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> MEMO<span class="op">.</span><span class="fu">get</span><span class="op">(</span>key<span class="op">);</span></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">// calculate the count paths, from the current position to the previous, possible positions, from the current position of</span></span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">// [row,col] we can either go up a row, or to the left in the col coordinates.</span></span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> count <span class="op">=</span> <span class="fu">count</span><span class="op">(</span>r <span class="op">-</span> <span class="dv">1</span><span class="op">,</span> c<span class="op">)</span> <span class="op">+</span> <span class="fu">count</span><span class="op">(</span>r<span class="op">,</span> c <span class="op">-</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">// remember the count for this specific combination of rows and cols using the unique key, note the key is delimiting the</span></span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">// coordinates with a coma, which is a good idea, to ensure uniqueness of pairs. Why does remembering the key work, well since</span></span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">// we go in both directions, in this case first in the row the col, it is possible for one branch of these two, to each a</span></span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">// specific path first, meaning that when the second branch goes through, and sees the same path i.e coordinates they have been</span></span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">// already visisted and computed, this ONLY works, because we are doing a top down approach, where the recursive calls drill</span></span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a>        <span class="co">// down to the bottom, to the base cases and then ascends up, accumulating the count for specific paths.</span></span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a>        MEMO<span class="op">.</span><span class="fu">put</span><span class="op">(</span>key<span class="op">,</span> count<span class="op">);</span></span>
+<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> count<span class="op">;</span></span>
+<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The memo approach in this task is rather important, first the key has
+to be unique, to make sure we can correctly distinguish between the
+combination of row x col pairs, secondly we can not swap those since
+those coordinates represent specific unique position pairs.</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// call the path grid counter with a grid of 2 rows and 3 columns</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    gridCounter<span class="op">.</span><span class="fu">count</span><span class="op">(</span><span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>          (2, 3)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>        /        \</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    (1, 3)       (2, 2)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>   /     \       /     \</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>(0, 3)  (1, 2) (1, 2) (2, 1)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>        /    \        /     \</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>     (0, 2) (1, 1)  (1, 1) (2, 0)</span></code></pre></div>
+<p>If we have a look at an example of 2x3 grid below, we can notice a
+few nice properties and make several observations by just looking at the
+tree representing the call stack</p>
+<ul>
+<li>the <code>count</code> function is called with the max coordinates
+(NxM), the recursive approach is top down</li>
+<li>going to the left in the tree means we go up a row (row - 1)</li>
+<li>going to the right in the tree means we go left a col (col - 1)</li>
+<li>the pair branch root pair of <code>(1, 2)</code>, is contained
+twice, this is where memo will store the first time (coming from the row
+sub-path) it was visisted and simply reference it from the memo table
+the second time (coming from the col sub-path)</li>
+<li>nodes that contain <code>0</code> in one of their pairs are invalid,
+and indeed grids with 0 dimensions are not valid according to our
+task</li>
+</ul>
+<h1 id="iterative-problems">Iterative problems</h1>
+<p>In this chapter we are going to solve the same issue as above,
+however taking the iterative approach, or the tabulation approach in
+dynamic programming, where instead of starting from the top, drilling
+down to the bottom, we take the inverse approach and we start from the
+bottom and build up to the top to find the solution. Usually these
+implementations involve us using iterative approach, where the values
+are being accumuated into a table or array of some sort, be it a one or
+n-dimensional array</p>
+<h2 id="fibonacci">Fibonacci</h2>
+<p>In the solution provided below, we can make a few observations,
+mainly that the table that is used to create the sequence is of length
+<code>n + 1</code>, why is that, this is because we have to account for
+the positive base case, in our example that is
+<code>n[0] and n[1]</code>, usually in dynamic programming solutions
+with iterative approach, the <code>0-th</code> case is used to
+initialize the table with the positive base case, while the rest of the
+table is initialized with the negative case values</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="fu">fibonacci</span><span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this is a good idea overall, we can add a basic guard case first, to make sure we do not receive an invalid input, and we</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// know that there is no 0-th Fibonacci sequence number</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>n <span class="op">&lt;=</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we first create our tabulation table, which is going to store all values of the Fibonacci sequence, this is a common approach</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// when solving these issues, with iterative dynamic programming</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span><span class="op">[]</span> table <span class="op">=</span> <span class="kw">new</span> <span class="dt">int</span><span class="op">[</span>n <span class="op">+</span> <span class="dv">1</span><span class="op">];</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// by default we have to fill it up with some invalid, negative case values, in this case -1 is a good candidate since we know</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// that the Fibonacci sequence has no negative numbers</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Arrays</span><span class="op">.</span><span class="fu">fill</span><span class="op">(</span>table<span class="op">,</span> <span class="op">-</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we have to initialize our base case, we know that the first two numbers of the sequence are 0 and 1, and every other number</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// in the sequence can be built on top of those two initial values</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>    table<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>    table<span class="op">[</span><span class="dv">1</span><span class="op">]</span> <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// start form the 2-nd fib number and calculate up until we reach n, note that the size of the array here is actually n + 1,</span></span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this is because the base case of n[0]</span></span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">2</span><span class="op">;</span> i <span class="op">&lt;</span> table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>        table<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> table<span class="op">[</span>i <span class="op">-</span> <span class="dv">1</span><span class="op">]</span> <span class="op">+</span> table<span class="op">[</span>i <span class="op">-</span> <span class="dv">2</span><span class="op">];</span></span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// return the value at position n in the array, our array is holding n + 1 elements, and the last element is at index n, since</span></span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we already have a base case value at index 0</span></span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> table<span class="op">[</span>n<span class="op">];</span></span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="can-sum-1">Can sum</h2>
+<p>Given a target array of numbers, allowing number reuse from the
+array, find if there is at least one combination of the given numbers
+that sums up to the given target sum, note that the same number from the
+array can be repeated multiple times. To solve this task we have to come
+up with the basic base cases, where</p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="dt">boolean</span> <span class="fu">summable</span><span class="op">(</span><span class="dt">int</span> target<span class="op">,</span> <span class="dt">int</span><span class="op">[]</span> sequence<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we can put a small base case boundary on our input, to make sure that the function would operate correctly, after all if we</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// have a target sum of 0, we can easily assume that it can be generated by simply not taking any element from the sequence</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>target <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// start with a pre-defined array of boolean statuses, note that we again generate an array which is filled with all negative</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// cases, by default</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">boolean</span><span class="op">[]</span> table <span class="op">=</span> <span class="kw">new</span> <span class="dt">boolean</span><span class="op">[</span>target <span class="op">+</span> <span class="dv">1</span><span class="op">];</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Arrays</span><span class="op">.</span><span class="fu">fill</span><span class="op">(</span>table<span class="op">,</span> <span class="kw">false</span><span class="op">);</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// set the base postive case as we know, for a target sum of 0, we can say that there can be a sequence of numbers, by simply</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// taking no numbers, we start off from this initial value and build from it</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>    table<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// loop through all states in the tabulation table</span></span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">// when we meet a positive case, we can build off of it</span></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>table<span class="op">[</span>i<span class="op">]</span> <span class="op">==</span> <span class="kw">true</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>            <span class="co">// we are in a positive case, meaning the sum to target[i] can be generated, below we check starting from `i` which</span></span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>            <span class="co">// other sums can be generated by adding `num` to `i`</span></span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> num <span class="op">:</span> sequence<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>                <span class="co">// sums `i + num` can be generated if the array has enough space to fit the number, remember that the array / table</span></span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>                <span class="co">// is created with at most target + 1 elements, meaning that we have to check our bounds first</span></span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="op">(</span>i <span class="op">+</span> num <span class="op">&lt;</span> table<span class="op">.</span><span class="fu">length</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// i + num is in range and we mark this sum target as possible</span></span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a>                    table<span class="op">[</span>i <span class="op">+</span> num<span class="op">]</span> <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">// return the state at the target sum position, remember that we will have one of three cases for this position</span></span>
+<span id="cb28-35"><a href="#cb28-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">// - nothing ever summed up to target - meaning it will remain `false` from the initialization above</span></span>
+<span id="cb28-36"><a href="#cb28-36" aria-hidden="true" tabindex="-1"></a>    <span class="co">// - there was no pair of `i + num` that summed up to target, we either overshot or undershot</span></span>
+<span id="cb28-37"><a href="#cb28-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">// - there was a pair of `i + num` that exactly summed up to target and the cell was marked true</span></span>
+<span id="cb28-38"><a href="#cb28-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> table<span class="op">[</span>target<span class="op">];</span></span>
+<span id="cb28-39"><a href="#cb28-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="best-sequence-1">Best sequence</h2>
+<p>An extension of the can sum task, could be to find the best sequence
+which means, the sequence with the least amount of numbers that makes up
+the target sum.</p>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> <span class="fu">best</span><span class="op">(</span><span class="dt">int</span> target<span class="op">,</span> <span class="dt">int</span><span class="op">[]</span> sequence<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we can put a small base case boundary on our input, to make sure that the function would operate correctly, after all if we</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// have a target sum of 0, we can easily assume that it can be generated by simply not taking any element from the sequence</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>target <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// start with a pre-defined array of negative states, note that we again generate an array which is filled with all negative</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// values, by default</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">[]</span> table <span class="op">=</span> <span class="kw">new</span> <span class="bu">List</span><span class="op">[</span>target <span class="op">+</span> <span class="dv">1</span><span class="op">];</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Arrays</span><span class="op">.</span><span class="fu">fill</span><span class="op">(</span>table<span class="op">,</span> <span class="kw">null</span><span class="op">);</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// set the base positive case as we know, for a target sum of 0, we can say that there can be a sequence of numbers, by simply</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// taking no numbers, we start off from this initial value and build from it</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    table<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// loop through all states in the tabulation table</span></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">// when we meet a positive case, we can build off of it</span></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(!</span>Objects<span class="op">.</span><span class="fu">isNull</span><span class="op">(</span>table<span class="op">[</span>i<span class="op">]))</span> <span class="op">{</span></span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>            <span class="co">// we are in a positive case, meaning the sum to target[i] can be generated, below we check starting from `i` which</span></span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>            <span class="co">// other sums can be generated by adding `num` to `i`</span></span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> num <span class="op">:</span> sequence<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>                <span class="co">// sums `i + num` can be generated if the array has enough space to fit the number, remember that the array / table</span></span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>                <span class="co">// is created with at most target + 1 elements, meaning that we have to check our bounds first</span></span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="op">(</span>i <span class="op">+</span> num <span class="op">&lt;</span> table<span class="op">.</span><span class="fu">length</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// i + num is in range what we do is clone the sequence already at table[i] and append the new number that we</span></span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// have used to generate `i + num`</span></span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> seq <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;(</span>table<span class="op">[</span>i<span class="op">]);</span></span>
+<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a>                    seq<span class="op">.</span><span class="fu">add</span><span class="op">(</span>num<span class="op">);</span></span>
+<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// note that this will override sequences that are already in place, we can optimize this a bit by first</span></span>
+<span id="cb29-32"><a href="#cb29-32" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// checking if there is already something in table[i + sum] and skip it, to find the first, instead of the last</span></span>
+<span id="cb29-33"><a href="#cb29-33" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// sequence, but that is implementation detail</span></span>
+<span id="cb29-34"><a href="#cb29-34" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> current <span class="op">=</span> <span class="op">(</span><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;)</span> table<span class="op">[</span>i <span class="op">+</span> num<span class="op">];</span></span>
+<span id="cb29-35"><a href="#cb29-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-36"><a href="#cb29-36" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// before we can replace the sequence with the new one, we have to check if there is already something there, or</span></span>
+<span id="cb29-37"><a href="#cb29-37" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// if the new sequence is &#39;better&#39;, or in other words have less elements than the one currently being there</span></span>
+<span id="cb29-38"><a href="#cb29-38" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> <span class="op">(</span>Objects<span class="op">.</span><span class="fu">isNull</span><span class="op">(</span>current<span class="op">)</span> <span class="op">||</span> current<span class="op">.</span><span class="fu">size</span><span class="op">()</span> <span class="op">&gt;</span> seq<span class="op">.</span><span class="fu">size</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb29-39"><a href="#cb29-39" aria-hidden="true" tabindex="-1"></a>                        table<span class="op">[</span>i <span class="op">+</span> num<span class="op">]</span> <span class="op">=</span> seq<span class="op">;</span></span>
+<span id="cb29-40"><a href="#cb29-40" aria-hidden="true" tabindex="-1"></a>                    <span class="op">}</span></span>
+<span id="cb29-41"><a href="#cb29-41" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb29-42"><a href="#cb29-42" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb29-43"><a href="#cb29-43" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb29-44"><a href="#cb29-44" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb29-45"><a href="#cb29-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-46"><a href="#cb29-46" aria-hidden="true" tabindex="-1"></a>    <span class="co">// return the value at the position for target, remember again we can either have valid list here, or nil, if we never managed</span></span>
+<span id="cb29-47"><a href="#cb29-47" aria-hidden="true" tabindex="-1"></a>    <span class="co">// to generate the target sum whatsoever</span></span>
+<span id="cb29-48"><a href="#cb29-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">(</span><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;)</span> table<span class="op">[</span>target<span class="op">];</span></span>
+<span id="cb29-49"><a href="#cb29-49" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="can-construct-1">Can construct</h2>
+<p>A variation of the <code>cansum</code> problem where we have to now
+find if a <code>target word</code> can be constructed by taking
+<code>words from a dictionary</code> passed in as input arguments.</p>
+<p>The way this is solved by using iteration approach is a bit
+different, the key thing to note here is how to “encode” the characters
+of the target word, into the <code>boolean</code> table array we use.
+What we do here is first to make the boolean array of size
+<code>target.length + 1</code></p>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="dt">boolean</span> <span class="fu">constructible</span><span class="op">(</span><span class="bu">String</span> target<span class="op">,</span> <span class="bu">String</span><span class="op">[]</span> dictionary<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this is a generally good idea, overall, we can add this basic fallback case since we know that if the target word is empty,</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we can simply return true, we can build the empty string by not taking anything from the dictionary in the first place</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>target<span class="op">.</span><span class="fu">isEmpty</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we create the table here, which has to be of at least length + 1 size, this is explained below, on how the indices are mapped</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// to represent substrings from the main target word</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">boolean</span><span class="op">[]</span> table <span class="op">=</span> <span class="kw">new</span> <span class="dt">boolean</span><span class="op">[</span>target<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">+</span> <span class="dv">1</span><span class="op">];</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// fill the array by default with false, we assume that we can not build the target word from the words in the dictionary first</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Arrays</span><span class="op">.</span><span class="fu">fill</span><span class="op">(</span>table<span class="op">,</span> <span class="kw">false</span><span class="op">);</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>    table<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> target<span class="op">.</span><span class="fu">length</span><span class="op">();</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">// we loop over the main target word, and update the table of boolean values, whenever we find a prefix taken from the</span></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// current position `i` up until `i + word.length` from the string, that matches up with any of the words in the dictionary.</span></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="bu">String</span> word <span class="op">:</span> dictionary<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>            <span class="co">// for each word from the dictionary we check first if we can pull a prefix from the target word.</span></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>i <span class="op">+</span> word<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">&gt;</span> word<span class="op">.</span><span class="fu">length</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span><span class="op">;</span></span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a>            <span class="co">// we pull a prefix, based on the current position we are at `i` and the length of the current word from the dictionary.</span></span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>            <span class="bu">String</span> prefix <span class="op">=</span> target<span class="op">.</span><span class="fu">substring</span><span class="op">(</span>i<span class="op">,</span> i <span class="op">+</span> word<span class="op">.</span><span class="fu">length</span><span class="op">());</span></span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a>            <span class="co">// if the prefix we pulled from the target word matches with the word from the dictionary, we can mark this position in</span></span>
+<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a>            <span class="co">// the boolean table array as true</span></span>
+<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>prefix<span class="op">.</span><span class="fu">equalsIgnoreCase</span><span class="op">(</span>word<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a>                <span class="co">// now note what is going on here, the index we mark is actually not an index, it is a length or position, this is</span></span>
+<span id="cb30-30"><a href="#cb30-30" aria-hidden="true" tabindex="-1"></a>                <span class="co">// why we create the array to be target.length + 1, take the following example here, which follows the table updates</span></span>
+<span id="cb30-31"><a href="#cb30-31" aria-hidden="true" tabindex="-1"></a>                <span class="co">// target word - abcdef, dictionary - [&quot;abc&quot;, &quot;ab&quot;, &quot;ef&quot;, &quot;def&quot;], table - [(a)t, (b)f, (c)f, (d)f, (e)f, (f)f, (-)f]</span></span>
+<span id="cb30-32"><a href="#cb30-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-33"><a href="#cb30-33" aria-hidden="true" tabindex="-1"></a>                <span class="co">// i = 0 prefix is &quot;abc&quot;, word &quot;abc&quot; from the dictionary table of booleans will become - [(a)t, (b)f, (c)f, (d)t, (e)f, (f)f, (-)f]</span></span>
+<span id="cb30-34"><a href="#cb30-34" aria-hidden="true" tabindex="-1"></a>                <span class="co">// i = 0 prefix is &quot;ab&quot;, word &quot;ab&quot;, from the dictionary table of booleans will become - [(a)t, (b)f, (c)t, (d)t, (e)f, (f)f, (-)f]</span></span>
+<span id="cb30-35"><a href="#cb30-35" aria-hidden="true" tabindex="-1"></a>                <span class="co">// i = 0 prefix is &quot;ef&quot;, word &quot;ef&quot; from the dictionary table of booleans unchanged, there is no &quot;ef&quot; prefix starting from i = 0</span></span>
+<span id="cb30-36"><a href="#cb30-36" aria-hidden="true" tabindex="-1"></a>                <span class="co">// i = 1 prefix is &quot;bcd&quot; word is &quot;abc&quot; from the dictionary table of booleans unchanged, there is no &quot;abc&quot; prefix starting from i = 1</span></span>
+<span id="cb30-37"><a href="#cb30-37" aria-hidden="true" tabindex="-1"></a>                <span class="co">// i - keeps increasing table will change when i becomes equal to 3, where we find another prefix match, against word in the dictionary</span></span>
+<span id="cb30-38"><a href="#cb30-38" aria-hidden="true" tabindex="-1"></a>                <span class="co">// i = 3 prefix is &quot;def&quot; word is &quot;abc&quot; from the dictionary table of booleans unchanged, there is no &quot;abc&quot; prefix starting from i = 3</span></span>
+<span id="cb30-39"><a href="#cb30-39" aria-hidden="true" tabindex="-1"></a>                <span class="co">// i = 3 prefix is &quot;def&quot; word is &quot;ab&quot; from the dictionary table of booleans unchanged, there is no &quot;ab&quot; prefix starting from i = 3</span></span>
+<span id="cb30-40"><a href="#cb30-40" aria-hidden="true" tabindex="-1"></a>                <span class="co">// i = 3 prefix is &quot;def&quot; word is &quot;ef&quot; from the dictionary table of booleans unchanged, there is no &quot;ef&quot; prefix starting from i = 3</span></span>
+<span id="cb30-41"><a href="#cb30-41" aria-hidden="true" tabindex="-1"></a>                <span class="co">// i = 3 prefix is &quot;def&quot; word is &quot;def&quot; from the dictionary table of booleans will become - [(a)t, (b)f, (c)f, (d)t, (e)f, (f)f, (-)t]</span></span>
+<span id="cb30-42"><a href="#cb30-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-43"><a href="#cb30-43" aria-hidden="true" tabindex="-1"></a>                <span class="co">// we can see that for the first prefix match of &quot;abc&quot;, we marked at index / position i = 0, &quot;abc&quot;.length = 3, target[3] = true</span></span>
+<span id="cb30-44"><a href="#cb30-44" aria-hidden="true" tabindex="-1"></a>                <span class="co">// we can see that for the second prefix match of &quot;def&quot;, we marked at index / position i = 3, &quot;def&quot;.length = 6, target[6] = true</span></span>
+<span id="cb30-45"><a href="#cb30-45" aria-hidden="true" tabindex="-1"></a>                table<span class="op">[</span>i <span class="op">+</span> word<span class="op">.</span><span class="fu">length</span><span class="op">()]</span> <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb30-46"><a href="#cb30-46" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb30-47"><a href="#cb30-47" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb30-48"><a href="#cb30-48" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb30-49"><a href="#cb30-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-50"><a href="#cb30-50" aria-hidden="true" tabindex="-1"></a>    <span class="co">// return whatever value is stored at the last position available, remember that the table array is of target.length + 1,</span></span>
+<span id="cb30-51"><a href="#cb30-51" aria-hidden="true" tabindex="-1"></a>    <span class="co">// meaning that at index target.length we will hold the actual answer, if we can build the target word from the dictionary of</span></span>
+<span id="cb30-52"><a href="#cb30-52" aria-hidden="true" tabindex="-1"></a>    <span class="co">// words.</span></span>
+<span id="cb30-53"><a href="#cb30-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> table<span class="op">[</span>target<span class="op">.</span><span class="fu">length</span><span class="op">()];</span></span>
+<span id="cb30-54"><a href="#cb30-54" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>If we go through the implementation above, we can track how the
+<code>boolean</code> table will change, remember we go through the
+length of the target word, and for each <code>char</code> from the
+target word, we go through each word of the dictionary. We then take a
+prefix starting from the current character we are at <code>i</code> and
+the prefix is from <code>i</code> to <code>i + word.length</code>. If
+the prefix from the target word matches the current word from the
+dictionary we can set that position in the <code>boolean</code> table to
+true, <code>table[i + word.length] = true</code></p>
+<p>Take a good note at the index that is being set above, it is actually
+taken from the current index <code>i</code> position we are at in the
+target word plus the length of the current word from the dictionary,
+this means that if we find that there are words that can build up the
+target word, the final position in the <code>boolean</code> table that
+will be set to true and that we need to check is actually
+<code>table[target.length]</code>, if we have a <code>true</code> value
+at that position in the <code>boolean</code> table we can conclude that
+there were words from the dictionary which make up the target word</p>
+<p>Taking the following example for the given words, we can see which
+ones can up the target word immediately, there are a few options</p>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>target - abcdef</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>dictionary - [&quot;ab&quot;, &quot;abc&quot;, &quot;cd&quot;, &quot;ef&quot;, &quot;def&quot;, &quot;abcd&quot;]</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>combinations - [&quot;abc&quot;, &quot;def&quot;], [&quot;ab&quot;, &quot;cd&quot;, &quot;ef&quot;], [&quot;abcd&quot;, &quot;ef&quot;].</span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>i = 0 prefix is &quot;ab&quot;, word &quot;ab&quot; from the dictionary table of booleans - [2] = true &lt;&gt; [(a)t, (b)f, (c)t, (d)f, (e)f, (f)f, (-)f]</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>i = 0 prefix is &quot;abc&quot;, word &quot;abc&quot; from the dictionary table of booleans - [3] = true &lt;&gt; [(a)t, (b)f, (c)t, (d)t, (e)f, (f)f, (-)f]</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>i = 0 prefix is &quot;ab&quot;, word &quot;cd&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>i = 0 prefix is &quot;ab&quot;, word &quot;ef&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>i = 0 prefix is &quot;abcd&quot;, word &quot;abcd&quot; from the dictionary table of booleans - [4] = true &lt;&gt; [(a)t, (b)f, (c)t, (d)t, (e)t, (f)f, (-)f]</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>i = 1 prefix is &quot;bc&quot;, word &quot;ab&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>i = 1 prefix is &quot;bcd&quot;, word &quot;abc&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>i = 1 prefix is &quot;bc&quot;, word &quot;cd&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>i = 1 prefix is &quot;bc&quot;, word &quot;ef&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>i = 1 prefix is &quot;bcde&quot;, word &quot;abcd&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>i = 2 prefix is &quot;cd&quot;, word &quot;ab&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>i = 2 prefix is &quot;cde&quot;, word &quot;abc&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>i = 2 prefix is &quot;cd&quot;, word &quot;cd&quot; from the dictionary table of booleans - [4] = true &lt;&gt; [(a)t, (b)f, (c)t, (d)t, (e)t, (f)f, (-)f]</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>i = 2 prefix is &quot;cd&quot;, word &quot;ef&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>i = 2 prefix is &quot;cdef&quot;, word &quot;abcd&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>i = 3 prefix is &quot;de&quot;, word &quot;ab&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>i = 3 prefix is &quot;def&quot;, word &quot;abc&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>i = 3 prefix is &quot;de&quot;, word &quot;cd&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>i = 3 prefix is &quot;de&quot;, word &quot;ef&quot; from the dictionary table of booleans - unchanged, prefix != current word (string.equals is false)</span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>i = 3 prefix is &quot;def&quot;, word &quot;def&quot; from the dictionary table of booleans - [6] = true &lt;&gt; [(a)t, (b)f, (c)t, (d)t, (e)t, (f)f, (-)t]</span></code></pre></div>
+<p>We can already see that by the time we go through <code>i = 3</code>,
+the position <code>tbl[6]</code> in the <code>boolean</code> table, has
+already become true, which means that there are certainly words in the
+dictionary which build up to the target word, we can keep going here,
+but we can also early bail from the iterations, since we have found what
+we need to know.</p>
+<h2 id="count-construct">Count construct</h2>
+<p>A variation of the task above which aims at counting the total number
+of times the target string can be constructed from a set of words in a
+dictionary, needs a few small changes, but follows the same recipe.</p>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="fu">count</span><span class="op">(</span><span class="bu">String</span> target<span class="op">,</span> <span class="bu">String</span><span class="op">[]</span> dictionary<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this is a generally good idea, overall, we can add this basic fallback case since we know that if the target word is empty,</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we can simply return 1, we can build the empty string by not taking anything from the dictionary in the first place</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>target<span class="op">.</span><span class="fu">isEmpty</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we create the table here, which has to be of at least length + 1 size, this is explained below, on how the indices are mapped</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// to represent substrings from the main target word</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span><span class="op">[]</span> table <span class="op">=</span> <span class="kw">new</span> <span class="dt">int</span><span class="op">[</span>target<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">+</span> <span class="dv">1</span><span class="op">];</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// fill the array by default with 0, we assume that we can not build the target word from the words in the dictionary first</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Arrays</span><span class="op">.</span><span class="fu">fill</span><span class="op">(</span>table<span class="op">,</span> <span class="dv">0</span><span class="op">);</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// default value, which will be used to start the accumulation of the total count</span></span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>    table<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> target<span class="op">.</span><span class="fu">length</span><span class="op">();</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// we loop over the main target word, and update the table of boolean values, whenever we find a prefix taken from the</span></span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">// current position `i` up until `i + word.length` from the string, that matches up with any of the words in the dictionary.</span></span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="bu">String</span> word <span class="op">:</span> dictionary<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a>            <span class="co">// for each word from the dictionary we check first if we can pull a prefix from the target word.</span></span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>i <span class="op">+</span> word<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">&gt;</span> target<span class="op">.</span><span class="fu">length</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span><span class="op">;</span></span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a>            <span class="co">// we pull a prefix, based on the current position we are at `i` and the length of the current word from the dictionary.</span></span>
+<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a>            <span class="bu">String</span> prefix <span class="op">=</span> target<span class="op">.</span><span class="fu">substring</span><span class="op">(</span>i<span class="op">,</span> i <span class="op">+</span> word<span class="op">.</span><span class="fu">length</span><span class="op">());</span></span>
+<span id="cb33-27"><a href="#cb33-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>prefix<span class="op">.</span><span class="fu">equalsIgnoreCase</span><span class="op">(</span>word<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb33-28"><a href="#cb33-28" aria-hidden="true" tabindex="-1"></a>                <span class="co">// each time we reach this index, e will increment the count here, this position can be reached multiple times from</span></span>
+<span id="cb33-29"><a href="#cb33-29" aria-hidden="true" tabindex="-1"></a>                <span class="co">// multiple dictionary words, in the end we will have the table containing all possible combinations, remember that</span></span>
+<span id="cb33-30"><a href="#cb33-30" aria-hidden="true" tabindex="-1"></a>                <span class="co">// we have a default value of 1 for i = 0, each time we hit this branch we will accumulate the current count at [i]</span></span>
+<span id="cb33-31"><a href="#cb33-31" aria-hidden="true" tabindex="-1"></a>                <span class="co">// at the [i + w.len].</span></span>
+<span id="cb33-32"><a href="#cb33-32" aria-hidden="true" tabindex="-1"></a>                table<span class="op">[</span>i <span class="op">+</span> word<span class="op">.</span><span class="fu">length</span><span class="op">()]</span> <span class="op">+=</span> table<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb33-33"><a href="#cb33-33" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb33-34"><a href="#cb33-34" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb33-35"><a href="#cb33-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb33-36"><a href="#cb33-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-37"><a href="#cb33-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">// return whatever value is stored at the last position available, remember that the table array is of target.length + 1,</span></span>
+<span id="cb33-38"><a href="#cb33-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">// meaning that at index target.length we will hold the actual answer, if we can build the target count</span></span>
+<span id="cb33-39"><a href="#cb33-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> table<span class="op">[</span>target<span class="op">.</span><span class="fu">length</span><span class="op">()];</span></span>
+<span id="cb33-40"><a href="#cb33-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>You will note that the general algorithm follows the same idea,
+however here we are accumulating the current count to the next, each
+time we find a new prefix match at <code>table[i + w.len]</code> we
+accumulate to that value the current count at <code>table[i]</code>. Why
+is that ? Well if we can construct at [i + w.len] that means that we
+have already constructed at [i], therefore we take the current count at
+[i] and accumulate it. The idea is very much the same as the example
+above, each time we reach a certain string state, for example</p>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>target - abcdef</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>dictionary - [&quot;ab&quot;, &quot;abc&quot;, &quot;cd&quot;, &quot;ef&quot;, &quot;def&quot;, &quot;abcd&quot;]</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>combinations - [&quot;abc&quot;, &quot;def&quot;], [&quot;ab&quot;, &quot;cd&quot;, &quot;ef&quot;], [&quot;abcd&quot;, &quot;ef&quot;].</span></code></pre></div>
+<p>Here is a very brief flow of how the accumulation happens when we go
+through the string and the words, below we are only looking for the
+positive <code>true</code> branch cases where the <code>prefix</code>
+matches the current word from the dictionary, the most important things
+to note is the current value if <code>i</code> as well as the current
+value stored at <code>table[i]</code>, which will be used to accumulate
+at <code>table[i + w.len</code>]. We accumulate only when the current
+prefix taken from the main target word matches the current word from the
+dictionary, and we also loop through each character in the target
+word</p>
+<p>We reach the word from dictionary <code>ab</code> only once, so the
+count in the table at <code>ab</code> position (which is table[2] +=
+table[0]) will be one, <code>i = 0</code></p>
+<p>We reach the word from dictionary <code>abc</code> only once, so the
+count in the table at <code>abc</code> position (which is table[3] +=
+table[0]) will be one, <code>i = 0</code></p>
+<p>We reach the word from dictionary <code>abcd</code> only once, so the
+count in the table at <code>abcd</code> position (which is table[4] +=
+table[0]) will be one, <code>i = 0</code></p>
+<p>Eventually here is where the interesting part comes in, when
+<code>i &gt; 0</code> and we find a sub-prefix, like the ones presented
+below, is how the accumulation works</p>
+<p>We reach the word from dictionary <code>cd</code> twice, so at this
+point after we have processed over <code>cd</code> the count at that
+index will be 2, (which is <code>table[2 + 2]</code>, since
+<code>cd</code> starts at index 2, and is of length 2, therefore it ends
+at position <code>4</code>, due to the formula of
+<code>table[i + word.length]</code>. The first time we go through it is
+actually when <code>[i] = 0</code>, and the word is <code>abcd</code>,
+then we will set <code>table[0 + 4] += table[0]</code> (table[0] is
+actually the default, base value 1, always). The second time is when we
+are at <code>[i] = 2</code>, and the current words is <code>cd</code>,
+then we will set <code>table[2 + 2] += table[2]</code> (table[2] is
+actually the count for <code>ab</code>). At the end we therefore have a
+value of <code>2</code> at the <code>table[4]</code> position, and that
+is indeed true, we can reach <code>abcd</code> from two routes.</p>
+<p>We reach the word from dictionary <code>def</code> only once,
+<code>i = 3</code>. This is because to reach <code>def</code> the
+current <code>i = 3</code>, with the length of <code>def = 3</code>,
+therefore the value at <code>table[3 + 3] += table[3]</code>, remember
+that at <code>table[3]</code> we have a count of 1 already, that is
+<code>abc</code></p>
+<p>We reach the word from dictionary <code>ef</code> only once,
+<code>i = 4</code>. This is because to reach <code>ef</code> the current
+<code>i = 4</code>, with the length of <code>ef = 2</code>, therefore
+the value at <code>table[4 + 2] += table[4]</code>, remember that at
+<code>table[4]</code> we have a count of 2 already, that is
+<code>abcd</code> and <code>ab cd</code>. Now since at table[6] we
+already had <code>1</code> from the step above, when we reached
+<code>def</code>, we add to that the value at <code>table[4]</code>
+which is 2 at this point, meaning at now at <code>table[6] = 3</code>.
+And that is indeed the actual total number of ways to build
+<code>abcdef</code> from the given dictionary of words.</p>
+<h2 id="grid-counter-1">Grid counter</h2>
+<p>Another common task is, given a grid of NxM cells. Where N is the
+number of rows, and M is the number of cols, find all possible ways to
+get from the top left corner (start) to the bot right one (end).</p>
+<p>To solve this problem iteratively we have to change the way we
+inspect the</p>
+</body>
+</html>

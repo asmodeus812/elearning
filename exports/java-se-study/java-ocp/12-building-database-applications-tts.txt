@@ -1,0 +1,228 @@
+Preface
+
+The Java Database Connectivity API, commonly known as JDBC, is a crucial Java interface that defines how a client application can access a database. Because of this, JDBC is a key component in building large-scale enterprise Java solutions.
+
+At a high level, working with a database using JDBC involves three main steps. First, you establish a connection to the database. Next, you execute SQL queries to retrieve, create, or modify tables within the database. Finally, you close the connection to the database.
+
+Java provides a set of APIs to perform these activities. JDBC allows you to establish a connection, execute SQL queries, and then close the connection when finished. One of the main benefits of JDBC is that it is not tied to any specific database. Instead, JDBC creates a loose coupling between your Java program and the type of database you use. For example, different databases may have their own unique ways of establishing a connection, but JDBC hides these differences and offers a single, unified API for interacting with all types of relational databases.
+
+It is important to note that JDBC supports only relational databases, such as MySQL, Oracle, Microsoft SQL Server, and DB2. It does not support newer types of databases, such as NoSQL databases.
+
+JDBC
+
+There are several vital components that make up JDBC, and understanding how these components work is essential. The architecture of JDBC is built around the concepts of database drivers and the driver manager.
+
+JDBC drivers are specifically designed to interact with their respective database management systems. The driver manager acts as a directory of JDBC drivers. It maintains a list of available data sources and their drivers, and it chooses the appropriate driver to communicate with the target database management system. The driver manager can handle multiple drivers at the same time, each connected to its own data source.
+
+Connection
+
+The Connection interface represents the link between your application and the database. It serves as the communication channel between the two. Some of the most important methods in the Connection interface include the following.
+
+The createStatement method creates a Statement object, which you can use to send SQL statements to the database.
+
+The prepareStatement method creates a PreparedStatement object that can contain SQL statements. These statements can have input parameters, represented by question mark symbols, which act as placeholders for actual values that you can provide later.
+
+The prepareCall method creates a CallableStatement object for calling stored procedures in the database. These statements can have input or output parameters, also represented by question marks as placeholders.
+
+The getMetaData method retrieves a DatabaseMetaData object. This metadata contains information about the database schema, tables, and more. It is especially useful when you do not know the details of the underlying database.
+
+The createClob method returns a Clob object, which stands for Character Large Object. This is a built-in SQL type used to store large text values in a database table.
+
+The createBlob method returns a Blob object, which stands for Binary Large Object. This is another built-in SQL type, used to store large binary data, such as images or files, in a database table.
+
+The setSchema method allows you to set the schema for the current connection by passing the schema name.
+
+The getSchema method returns the schema name associated with the current connection. If no schema is associated, it returns null.
+
+Driver
+
+The first step in communicating with a database is to set up a connection between your application and the database server. Establishing this connection requires understanding the database URL format.
+
+The general format for a database connection URL string is as follows: jdbc, followed by a subprotocol, then a subname. In other words, jdbc, colon, subprotocol, colon, subname.
+
+Each of these components has a specific meaning and provides information needed by the driver manager to establish the connection.
+
+The jdbc part is the same for all relational database management systems. This part of the connection string is different only if you are using a non-relational database, such as NoSQL.
+
+The subprotocol differs for each database management system. It specifies the vendor and database type, helping the driver manager identify which database vendor the connection string is describing.
+
+The subname depends on the database, but its general format is server, colon, port, slash, database name. The server refers to the location where the database is deployed. Each database management system uses a specific port number. For example, the default port for MySQL is thirty-three zero six. Finally, the database name to which you want to connect is provided.
+
+Here are some example connection URLs. The first one connects to a PostgreSQL database running on localhost, with the database name test. The second connects to an Oracle database at the IP address one twenty-seven dot zero dot zero dot one, on port forty-four thousand, with the database name test. The third connects to a Microsoft SQL Server database running on a server named Himalaya, on port fourteen thirty-three.
+
+Now, let’s look at a Java class that demonstrates how to establish a connection to a MySQL database.
+
+This code defines a class called JdbcExample. Inside the main method, it sets up the URL for the database connection, specifying the JDBC protocol, the MySQL subprotocol, the server address as localhost, and the port as thirty-three zero six. It then specifies the database name as addressBook, and sets the username to root and the password to mysql one two three.
+
+The code attempts to establish a connection using the DriverManager.getConnection method, passing in the URL, database name, username, and password. If the connection is successful, it prints a message indicating success. If there is an error, it prints a failure message and outputs the exception’s stack trace. The connection is managed using a try-with-resources statement, so it is automatically closed when the block finishes.
+
+The URL in this example indicates that JDBC is the protocol and MySQL is the sub-protocol. Localhost is the address of the server where the database service is running. In this case, it is on the local machine, but it could be any valid IP address or fully qualified domain name. The connection object is obtained by calling the DriverManager.getConnection method, which expects the database URL, database name, username, and password.
+
+It is important to close the connection before exiting the program. In this example, the try-with-resources statement ensures that the connection is closed automatically. If anything goes wrong, an exception will be thrown, and the program will print the exception’s stack trace.
+
+If you try to run this program as it is, it will print an exception. This is because the connection will fail due to missing drivers. By default, the Java Virtual Machine does not include any database drivers. In this case, you need a driver for connecting to MySQL. To resolve this, you must download the appropriate driver from the official vendor, usually as a JAR file, and add it to your classpath when compiling and running the application.
+
+To do this, you append the full path to the JAR file containing the drivers to the dash cp argument when compiling, and again when running the application. For example, you would use javac dash cp dot colon path to mysql connector java, followed by the version number, then JdbcExample dot java. When running, you use java dash cp dot colon path to mysql connector java, followed by the version number, then JdbcExample.
+
+This process ensures that your application can find and use the necessary database drivers at runtime.
+
+
+Usually, when a connection to the database fails and throws an exception, there is little that can be done to recover from it. These errors are often unrecoverable, even though they are checked exceptions. In most cases, the best approach is to log the exception and gracefully notify the user about the issue. Such exceptions typically occur if the host is not reachable, the credentials are incorrect, or the database is protected in unexpected ways. All of these situations cannot be resolved during the application's runtime.
+
+Manager
+
+The DriverManager class is responsible for establishing the connection between your program and the JDBC drivers. It keeps track of different data sources and JDBC drivers, so you do not need to explicitly load drivers yourself. When you call the getConnection method, DriverManager searches for a suitable driver and, if found, loads it automatically. It also manages multiple concurrent drivers, each connected to their respective data sources.
+
+For example, when you use the getConnection method with a URL, database name, username, and password, DriverManager attempts to establish a connection to the specified database.
+
+In another example, you can obtain the driver for a specific connection string. The code retrieves the driver for a MySQL database and prints out the fully qualified name of the MySQL JDBC driver. This demonstrates that DriverManager was able to load the appropriate driver. From the Driver object, you can establish a connection by calling its connect method, passing in the database URL and, optionally, a properties file. This properties file can include the username, password, and other connection details.
+
+Querying
+
+Once a connection to the desired database is established, you can perform various operations. The most common operations are known by the acronym CRUD, which stands for create, read, update, and delete.
+
+Statement
+
+A statement is an SQL command that allows you to communicate with the database and receive results. The Statement interface sits above the PreparedStatement and CallableStatement interfaces.
+
+The Statement interface is used to send basic SQL statements to the database without any parameters. It is typically created using the createStatement method from the Connection interface.
+
+The PreparedStatement interface represents a pre-compiled statement that can be customized using input parameters. It is usually more efficient than a raw Statement object, especially if the same SQL statement is executed multiple times. You can obtain a PreparedStatement instance by calling the prepareStatement method on the Connection interface.
+
+The CallableStatement interface is used to execute stored procedures. CallableStatement instances can handle input, output, and input-output parameters. To get an instance, you simply call the prepareCall method on the Connection interface.
+
+Once you have created a Statement instance, it is ready to be executed. The Statement interface provides three main execute methods: executeQuery, executeUpdate, and execute. The method you choose depends on the type of SQL statement.
+
+If the statement is a SELECT query, you should use the executeQuery method. This method is intended for retrieving data and is not destructive. It returns a ResultSet.
+
+If the statement is an INSERT, UPDATE, or DELETE operation, you should use the executeUpdate method. This method is used for statements that modify the database and returns an integer reflecting the number of rows affected.
+
+If the type of statement is unknown, or if the instance was not produced by the caller of the execute methods, you may use the execute method. This method can return multiple ResultSets, multiple update counts, or a combination of both.
+
+ResultSet
+
+Relational databases store data in tables, each with a set of attributes. When you query a database, the results are returned as a ResultSet. A ResultSet is essentially a table with column headings and the associated values requested by your query.
+
+A ResultSet maintains a cursor that points to the current row. Only one row can be read at a time, so you must move the cursor to access different rows. Initially, the cursor is positioned just before the first row. You need to call the next method to advance the cursor to the first row. This method returns a boolean value, so it is commonly used in a while loop to iterate over all rows in the ResultSet.
+
+There are several methods available to navigate the ResultSet. The beforeFirst method sets the cursor just before the first row. The afterLast method sets the cursor just after the last row. The absolute method moves the cursor to a specific row number, using an absolute position in the table. The relative method moves the cursor relative to its current position, either forward or backward. The next method advances the cursor to the next row, while the previous method moves it to the previous row.
+
+Extraction
+
+Now that we have covered the necessary interfaces, let’s look at how to execute a simple SQL query on the database using Connection, Statement, and ResultSet. The general high-level steps to extract information from the database are as follows.
+
+First, obtain a Connection object. Then, create a Statement, which is used to obtain the ResultSet. This pattern of actions is common in all database-related applications.
+
+In the provided example, there are two classes. The first class, DbConnector, defines a method called connectToDb. This method returns a Connection object by using DriverManager to connect to a MySQL database called addressBook, with the username root and the password mysql one two three.
+
+The second class, DbQuery, contains the main method. Inside the main method, it establishes a connection to the database using the connectToDb method. It then creates a Statement and executes a SELECT query to retrieve all records from the contact table. The results are stored in a ResultSet. The code then prints out the column headers, followed by each row in the ResultSet, displaying the ID, first name, last name, email, and phone number for each contact.
+
+If an SQL exception occurs at any point, the exception is printed to the console, and the program exits with an error code.
+
+This example demonstrates the typical workflow for connecting to a database, executing a query, and processing the results in a Java application using JDBC.
+
+
+In the example above, the column names are used to extract information from the query results. However, you can also use column indices instead. It’s important to remember that these indices are defined by the query itself, not by the absolute number of columns in the underlying table. 
+
+For instance, if your select statement retrieves all columns, then the order and number of columns in the table and the query will match. But this is not always the case—sometimes your query selects only a subset of columns, or arranges them differently.
+
+To extract column information using indices, you can use a loop that iterates over the result set. In this approach, the column index in the ResultSet object starts from one, not zero. For example, you might see a loop that prints out each column’s value by calling methods like getInt or getString with the appropriate index.
+
+If you try to access a column by an index that exceeds the total number of columns in the result set, an exception will be thrown. For example, if you attempt to retrieve the value of the sixth column when only five columns are present, you’ll get a SQL exception indicating that the column index is out of range. This behavior is different from accessing rows outside the valid range using methods like absolute or relative, which simply wrap around the result set instead of throwing an error.
+
+Now, suppose you don’t know the number or types of columns in advance. In that case, you can use the getMetaData method on the ResultSet object. This returns a ResultSetMetaData object, which provides methods such as getColumnCount to determine how many columns are present. When you don’t know the data type of a column, you can use the getObject method to retrieve its value in a generic way.
+
+For example, you might first determine the number of columns using getMetaData and getColumnCount. Then, as you iterate through each row, you loop from one to the number of columns, calling getObject for each column index. This approach allows you to print out all columns and their values without worrying about their specific data types. While it’s common to know the columns at the time you write your query, it’s useful to remember that you can always access the metadata for the current result set if needed.
+
+Let’s look at another example. Suppose you want to extract only the first name and email columns for all contacts whose first name is Michael. You would write a select query that retrieves just those two columns. When you process the result set, you can refer to the columns by name or by index. In this case, since only two columns are selected, the valid indices are one and two.
+
+Updating
+
+Updating the database can be done in two main ways. You can use standard SQL update queries to modify the database directly, or you can fetch a result set using a select query and then make changes through the ResultSet interface itself. Both methods are supported, and the choice depends on your application’s needs.
+
+To modify both the result set and the underlying database, the ResultSet class provides a set of update methods for each data type. There are also supporting methods like updateRow and deleteRow to help manage changes.
+
+For example, you might connect to the database and create a statement that allows for both scrolling and updating. You then execute a select query to retrieve all contacts with the first name Michael. First, you print out the data as it exists before any updates. Next, you move the cursor to the first entry, update the phone number for that entry, and call updateRow to commit the change to the database. Finally, you reset the cursor and print out the updated data.
+
+It’s important to note two key points here. First, to make a ResultSet updatable, you must create the statement with the appropriate options—specifically, TYPE_SCROLL_SENSITIVE and CONCUR_UPDATABLE. Second, after making changes to a row, you must call updateRow to actually persist those changes in the database. Otherwise, the changes remain only in memory.
+
+Inserting
+
+Inserting a new row into the database using a ResultSet is similar to updating a row. The main difference is that you need to move the cursor to a special insert row before setting the values for the new entry. Once you’ve set the values for each column using the appropriate update methods, you call insertRow to commit the new row to the database.
+
+For example, you might first print out all existing rows in the contact table. Then, you move the cursor to the insert row, set the values for the first name, last name, email, and phone number, and call insertRow to add the new entry. Afterward, you print out the table again to show the updated data.
+
+Just as with updates, it’s essential to provide the correct data type for each column value. You also cannot leave any required column blank—doing so will result in a SQL exception.
+
+Deleting
+
+Now, let’s move on to deleting rows from the database.
+
+
+Deleting
+
+Deleting records in a database follows a similar pattern to inserting and updating. In all these cases, a special method must be called to actually perform the operation and commit the changes to the database. For deletions, the method used is called deleteRow. Unlike insert or update operations, there is nothing more to be done after calling this method—no columns to update or insert. Simply calling deleteRow is enough to commit the deletion to the database.
+
+In the provided example, a connection to the database is established, and a statement is created that allows for both scrolling and updating the result set. The code then queries for all contacts with the first name “John.” If such a record exists, it moves the cursor to the first matching row and deletes it using the deleteRow method. After closing the first result set, the code fetches all remaining contacts from the database and prints them out, showing the updated state after the deletion. If any SQL exception occurs, the error is printed and the program exits.
+
+Creation
+
+It is also possible to run update statements directly from the statement object. Previously, we saw how a result set can be used to modify the database. Here, we see how the executeUpdate method can be used to alter the state of the database, specifically to create a new table.
+
+In this example, a connection is established and a statement is created. The code then executes a SQL statement to create a table called familyGroup, which has an auto-incrementing integer ID and a nickname column. If the table is created successfully, a message is printed. If there is an error, such as a syntax issue or an inaccessible database, the exception is printed and the program exits. The key point here is that executeUpdate is used for actions that modify the database, such as creating tables. If the SQL statement is incorrect, a syntax exception will be raised. It is the responsibility of the application developer to ensure the statement is correct.
+
+Caveats
+
+There are several important details to keep in mind when working with Statement and ResultSet objects.
+
+First, the absolute method of ResultSet moves the cursor to a specific row number. If the row number is positive, it moves from the beginning of the result set. If the row number is negative, it moves from the end. For example, if there are ten entries, calling absolute three moves to the third row, while absolute negative two moves to the eighth row. If the value is out of range, the cursor moves to either the start or the end of the result set.
+
+Calling absolute one is equivalent to calling first, and absolute negative one is equivalent to calling last.
+
+You can use either a column name or a column index with ResultSet methods. The index refers to the position in the result set, not the column number in the database table.
+
+A Statement object will close the current ResultSet if the statement itself is closed, re-executed, or used to retrieve a new set of results. This means you do not need to explicitly close the ResultSet, since it is bound to the Statement object that created it.
+
+If you have two columns in a ResultSet with the same name, retrieving a value by column name will always return the value from the first matching column. To access the other column, you must use the column index.
+
+Column names in ResultSet methods are case-insensitive. Methods like getString and getObject accept column names without regard to case.
+
+The PreparedStatement interface inherits from Statement, but it overrides all versions of the execute methods. For example, the behavior of executeUpdate may differ from the base method.
+
+Any update can be canceled using the cancelRowUpdates method, but this must be called before updateRow. In all other cases, it has no effect.
+
+When connecting to the database, you must specify the correct username and password. Otherwise, an SQL exception will be thrown.
+
+The insertRow, updateRow, and deleteRow methods act on the current row selected by the cursor in the ResultSet. This means they operate on the row where the cursor was last moved, whether by moveToInsertRow, absolute, relative, or other cursor movement methods.
+
+Summary
+
+Let’s review the key components required to connect to a database.
+
+JDBC, or Java Database Connectivity, hides the differences between various database management systems and provides a single set of application programming interfaces to interact with all types of databases. The complexity of handling different databases is managed by the JDBC driver manager and the JDBC drivers themselves.
+
+The getConnection method in the DriverManager class takes three arguments: a URL string, a username, and a password.
+
+The URL syntax required to obtain a Connection object is: jdbc, followed by a subprotocol, then a subname.
+
+If the JDBC API cannot locate the JDBC driver, it throws an SQL exception. If the necessary driver jars are available, they must be included in the classpath so the JDBC API can find the driver.
+
+Now, let’s describe the interfaces that make up the core of JDBC.
+
+The java.sql.Connection interface provides a communication channel between the application and the database.
+
+JDBC supports two main classes for querying and updating: Statement and ResultSet.
+
+A Statement represents a SQL statement that can be sent to the database to receive results. There are three types of statements. The basic Statement sends a SQL statement without parameters. The PreparedStatement represents a pre-compiled SQL statement that can be customized using input parameters. The CallableStatement executes stored procedures and can handle input, output, and input-output parameters.
+
+A ResultSet is a table with column headings and associated values returned by a query.
+
+To submit queries and read results from the database, a ResultSet object maintains a cursor pointing to the current row. Initially, the cursor is positioned just before the first row. Calling the next method advances the cursor by one row.
+
+The column index in a ResultSet starts from one, not zero.
+
+After modifying the contents of a row in a ResultSet, you must call updateRow to save the changes. Otherwise, any changes made to the ResultSet are lost.
+
+You can use a try-with-resources statement to automatically close resources such as Connection, ResultSet, and Statement. It is not an error to close a ResultSet multiple times, even before the try-with-resources statement closes it at the end of the block. If the ResultSet is no longer needed, it can be closed as soon as possible.
+
+

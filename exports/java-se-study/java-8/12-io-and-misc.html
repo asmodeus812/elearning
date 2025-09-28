@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>12-io-and-misc</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#io" id="toc-io">IO</a>
+<ul>
+<li><a href="#byte-streams" id="toc-byte-streams">Byte streams</a></li>
+<li><a href="#char-streams" id="toc-char-streams">Char streams</a></li>
+<li><a href="#predefined" id="toc-predefined">Predefined</a></li>
+<li><a href="#reading" id="toc-reading">Reading</a></li>
+<li><a href="#writing" id="toc-writing">Writing</a></li>
+<li><a href="#files" id="toc-files">Files</a></li>
+<li><a href="#serialization"
+id="toc-serialization">Serialization</a></li>
+</ul></li>
+</ul>
+</nav>
+<h2 id="io">IO</h2>
+<p>All input and output operations in java are performed by streams,
+these stream are usually defined by two major types of data - Byte and
+Character streams. Rembmer that in Java byte is of size 8bits or 1 byte,
+while character is usually 2 bytes wide to be able to represent utf-16
+character and text encoding. Thus when reading a text file, it is more
+likely we would like to use the Character stream api instead of the Byte
+one, however if we are reading output from a device or something that is
+not really a text content one must use the Byte stream.</p>
+<h3 id="byte-streams">Byte streams</h3>
+<p>At the very top of the class hierarchy one can find the two major
+classes representing the input and output streams which are -
+<code>InputStream</code> and <code>OutputStream</code>, these are the
+two base classes from which all byte streams extend off of.</p>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 84%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Class</th>
+<th>Applicaton</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>InputStream</td>
+<td>Abstract class that describes stream input</td>
+</tr>
+<tr class="even">
+<td>OutputStream</td>
+<td>Abstract class that describes stream output</td>
+</tr>
+<tr class="odd">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="even">
+<td>BufferedInputStream</td>
+<td>Buffered input stream, wraps around other stream objects and buffers
+their content</td>
+</tr>
+<tr class="odd">
+<td>BufferedOutputStream</td>
+<td>Buffered output stream, wraps around other stream objects and
+buffers their content</td>
+</tr>
+<tr class="even">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="odd">
+<td>ByteArrayInputStream</td>
+<td>Input stream that reads from a byte array</td>
+</tr>
+<tr class="even">
+<td>ByteArrayOutputStream</td>
+<td>Output stream that writes to a byte array</td>
+</tr>
+<tr class="odd">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="even">
+<td>DataInputStream</td>
+<td>An input stream that contains methods for reading the Java standard
+data primitive types</td>
+</tr>
+<tr class="odd">
+<td>DataOutputStream</td>
+<td>An output stream that contains methods for writing the Java standard
+data primitive types</td>
+</tr>
+<tr class="even">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="odd">
+<td>FileInputStream</td>
+<td>Input stream that reads from a file</td>
+</tr>
+<tr class="even">
+<td>FileOutputStream</td>
+<td>Output stream that writes to a file</td>
+</tr>
+<tr class="odd">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="even">
+<td>FilterInputStream</td>
+<td>Used to wrap other stream objects and proxy all calls to the wrapped
+stream</td>
+</tr>
+<tr class="odd">
+<td>FilterOutputStream</td>
+<td>Used to wrap other stream objects and proxy all calls to the wrapped
+stream</td>
+</tr>
+<tr class="even">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="odd">
+<td>ObjectInputStream</td>
+<td>Input stream for objects</td>
+</tr>
+<tr class="even">
+<td>ObjectOutputStream</td>
+<td>Output stream for objects</td>
+</tr>
+<tr class="odd">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="even">
+<td>PipedInputStream</td>
+<td>Input pipe</td>
+</tr>
+<tr class="odd">
+<td>PipedOutputStream</td>
+<td>Output pipe</td>
+</tr>
+<tr class="even">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="odd">
+<td>PushbackInputStream</td>
+<td>Input stream that supports one-byte “unget,” which returns a byte to
+the input stream</td>
+</tr>
+<tr class="even">
+<td>SequenceInputStream</td>
+<td>Input stream that is a combination of two or more input streams that
+will be read sequentially, one after the other</td>
+</tr>
+</tbody>
+</table>
+<h3 id="char-streams">Char streams</h3>
+<p>At the very top of this class hierarchy stay the two major classes
+representing the input and output streams which are -
+<code>Reader</code> and <code>Writer</code>, these are the two base
+classes from which all char streams extend off of.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 79%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Class</th>
+<th>Applicaton</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Reader</td>
+<td>Abstract class that describes character stream input</td>
+</tr>
+<tr class="even">
+<td>Writer</td>
+<td>Abstract class that describes character stream output</td>
+</tr>
+<tr class="odd">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="even">
+<td>BufferedReader</td>
+<td>Buffered input, wraps around other stream objects and buffers their
+content</td>
+</tr>
+<tr class="odd">
+<td>BufferedWriter</td>
+<td>Buffered output, wraps around other stream objects and buffers their
+content</td>
+</tr>
+<tr class="even">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="odd">
+<td>CharArrayReader</td>
+<td>Input stream that reads from a character array</td>
+</tr>
+<tr class="even">
+<td>CharArrayWriter</td>
+<td>Output stream that writes to a character array</td>
+</tr>
+<tr class="odd">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="even">
+<td>FileReader</td>
+<td>Input stream that reads from a file</td>
+</tr>
+<tr class="odd">
+<td>FileWriter</td>
+<td>Output stream that writes to a file</td>
+</tr>
+<tr class="even">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="odd">
+<td>FilterReader</td>
+<td>Used to wrap other stream objects and proxy all calls to the wrapped
+stream</td>
+</tr>
+<tr class="even">
+<td>FilterWriter</td>
+<td>Used to wrap other stream objects and proxy all calls to the wrapped
+stream</td>
+</tr>
+<tr class="odd">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="even">
+<td>InputStreamReader</td>
+<td>Input stream that translates bytes to characters</td>
+</tr>
+<tr class="odd">
+<td>OutputStreamWriter</td>
+<td>Output stream that translates characters to bytes</td>
+</tr>
+<tr class="even">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="odd">
+<td>PipedReader</td>
+<td>Input pipe</td>
+</tr>
+<tr class="even">
+<td>PipedWriter</td>
+<td>Output pipe</td>
+</tr>
+<tr class="odd">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="even">
+<td>StringReader</td>
+<td>Input stream that reads from a string</td>
+</tr>
+<tr class="odd">
+<td>StringWriter</td>
+<td>Output stream that writes to a string</td>
+</tr>
+<tr class="even">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="odd">
+<td>PrintWriter</td>
+<td>Output stream that contains print( ) and println( )</td>
+</tr>
+<tr class="even">
+<td>PushbackReader</td>
+<td>Input stream that allows characters to be returned to the input
+stream</td>
+</tr>
+<tr class="odd">
+<td>*<strong>*******</strong></td>
+<td>****</td>
+</tr>
+<tr class="even">
+<td>LineNumberReader</td>
+<td>Input stream that counts lines</td>
+</tr>
+</tbody>
+</table>
+<h3 id="predefined">Predefined</h3>
+<p>By default the language provides some predefined instantiated streams
+which are coming from the <code>System</code> object which is located in
+<code>java.lang</code> which is imported by default implicitly, these
+are the <code>in, out and err</code> streams on the System object, these
+represent the input, output and error streams which are by default
+linked to the For a lower level understanding of how this works, is a
+list of how the JVM links these streams to an actual file descriptor
+controlled and managed by the OS, which takes care to actually interact
+with the output and input devices</p>
+<h4 id="mapping">Mapping</h4>
+<ul>
+<li>System.in: Is mapped to the underlying standard input stream (stdin)
+of the OS (like reading from the terminal).</li>
+<li>System.out: Is mapped to the underlying standard output stream
+(stdout) of the OS (like writing to the terminal).</li>
+<li>System.err: Is mapped to the underlying standard error stream
+(stderr) of the OS (like writing error messages to the terminal).</li>
+</ul>
+<h4 id="interaction">Interaction</h4>
+<ul>
+<li>On Linux/Unix, the JVM uses native system calls like read() and
+write() to interact with file descriptors for stdin (0), stdout (1), and
+stderr (2).</li>
+<li>On Windows, the JVM uses the ReadFile and WriteFile using in the
+default os file descriptor handles - STD_INPUT_HANDLE and
+STD_OUTPUT_HANDLE</li>
+</ul>
+<p>In the system class the in, out and err streams are defined like
+that</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// these static variables defined in the System class are automatically initialized by the JVM, when it starts, ready to be used immediately</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">final</span> <span class="bu">InputStream</span> in<span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">final</span> <span class="bu">PrintStream</span> out<span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">final</span> <span class="bu">PrintStream</span> err<span class="op">;</span></span></code></pre></div>
+<h3 id="reading">Reading</h3>
+<p>To read characters from the standard input one can use the System.in
+stream wrapped around/in <code>BufferedReader</code>, the reason behind
+this is that, the <code>BufferedReader</code> represents a character
+stream, while <code>System.in</code> is simple byte stream</p>
+<ul>
+<li>it is <code>InputStream</code>, remember. For example calling
+<code>readLine</code> on the <code>BufferedReader</code> will buffer
+read chunks from the <code>System.in</code> until it reads a new line or
+at most 8KB of data, further more it will make sure that while it reads
+bytes from the <code>System.in</code> stream, will convert them to
+readable <code>2-byte</code> wide characters with <code>UTF</code>
+encoding.</li>
+</ul>
+<p>Nothing is really stopping somebody from directly reading from
+System.in however one will be reading plain bytes, meaning that one has
+to correctly convert these to a readable String as well as correctly
+parse line feeds and so on, wrapping one stream into another helps us
+<code>translate</code> one type of data to another easily, and also
+bridge the gap between a byte stream and a character stream, which is no
+small feat</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">BufferedReader</span> br <span class="op">=</span> <span class="kw">new</span> <span class="bu">BufferedReader</span><span class="op">(</span><span class="kw">new</span> <span class="bu">InputStreamReader</span><span class="op">(</span><span class="bu">System</span><span class="op">.</span><span class="fu">in</span><span class="op">));</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>br<span class="op">.</span><span class="fu">readLine</span><span class="op">();</span> <span class="co">// blocking the program until a new line is read from stdin</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>br<span class="op">.</span><span class="fu">read</span><span class="op">();</span> <span class="co">// read a single char, 2-byte wide from stdin instead of newline</span></span></code></pre></div>
+<p><code>System.in is buffered on new lines, this is done to prevent too many sys calls between the JVM and operating systems, it would not be very good if on each new byte the OS was polled to write to the System.in stream</code></p>
+<h3 id="writing">Writing</h3>
+<p>To write characters or text the easiest way is to use the default
+System.out, which is of type <code>PrintStream</code>, directly
+connected to <code>stdout</code>. The <code>PrintStream</code> in this
+case is directly connected to he OS file descriptor which represents the
+standard output, the reason Java is not using plain
+<code>OutputStream</code>, is again due to buffering, the run time does
+not want to write each byte to the output issuing system calls to the
+operating system on every byte, rather the implementation is using
+<code>PrintStream</code> to wrap the <code>OutputStream</code> linked to
+std out, to buffer the input, usually it is buffered on line feed
+character/bytes or on some maximum capacity of the buffer (8KB)</p>
+<p>Keep in mind that <code>PrintStream</code> can be used to wrap around
+a <code>FileOutputStream</code>, meaning that one can instead write to a
+file, which is what some of the logging frameworks actually do, instead
+of attaching to <code>STDOUT</code>, or in addition to
+<code>stdout</code> they route the same logs to files too, those logs
+could be routed over pipes and so on, the interface JAVA provides is
+quite flexible in that regard</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Enter lines of text.&quot;</span><span class="op">);</span> <span class="co">// write an entire line along with a new-line</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Enter &#39;stop&#39; to quit.&quot;</span><span class="op">);</span> <span class="co">// write an entire line along with a new-line</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">write</span><span class="op">(</span>b<span class="op">);</span> <span class="co">// write a single byte to output</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">write</span><span class="op">(</span><span class="ch">&#39;\n&#39;</span><span class="op">);</span> <span class="co">// trigger flushing of the stdout</span></span></code></pre></div>
+<p><code>When creating an instance of PrintStream, one can also specify the autoFlush strategy, which basically forces flush on new line characters by default otherwise flushing is performed when the buffer reaches a certain size, then the contents of the internal buffer stored in the java run-time are sent down to the underling operating system</code></p>
+<h3 id="files">Files</h3>
+<p>To read and write and overall interact with files on a very basic
+level java exposes the two byte stream based classes -
+<code>FileInputStream</code> and <code>FileOutputStream</code>. Both of
+which by default have a constructor which takes the file name of the
+file to be opened. What java does internally is to obtain the file
+descriptor which used to issue native or in other words system calls to
+the operating system to read or write bytes to the file</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// hold the result byte of of reading from the file</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span><span class="op">(</span><span class="bu">FileInputStream</span> fin <span class="op">=</span> <span class="kw">new</span> <span class="bu">FileInputStream</span><span class="op">(</span><span class="st">&quot;file.txt&quot;</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">do</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        i <span class="op">=</span> fin<span class="op">.</span><span class="fu">read</span><span class="op">();</span> <span class="co">// read will return negative if the read failed or EOF was reached</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span>i <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span><span class="op">)</span>  <span class="op">{</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">print</span><span class="op">((</span><span class="dt">char</span><span class="op">)</span> i<span class="op">);</span> <span class="co">// print out all valid output to the stdout</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">while</span><span class="op">(</span>i <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span><span class="op">);</span> <span class="co">// means the reading probably reached the end of the file</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">IOException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Error Reading File&quot;</span><span class="op">);</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Notice that the return type of <code>read</code> is
+<code>integer</code>, not <code>byte</code>, this is because all
+positive values from <code>0-255</code> are valid bytes which the file
+might contain, however the return type still needs to have a way to
+identify reaching end of file or if the file is not able to be read
+further for whatever reason, where the return type is <code>-1</code>,
+if the return of <code>read</code> was byte, there is no way for java to
+represent <code>EOF</code>.</p>
+<p><code>When you are done with a file, you must close it. This is done by calling the close() method, which is implemented by both FileInputStream and FileOutputStream.</code></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span><span class="op">(</span><span class="bu">FileOutputStream</span> fout <span class="op">=</span> <span class="kw">new</span> <span class="bu">FileOutputStream</span><span class="op">(</span><span class="st">&quot;file.txt&quot;</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    fout<span class="op">.</span><span class="fu">write</span><span class="op">(</span><span class="bn">0xff</span><span class="op">);</span> <span class="co">// write a single byte to the file</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    fout<span class="op">.</span><span class="fu">write</span><span class="op">(</span><span class="bn">0xad</span><span class="op">);</span> <span class="co">// write another byte to the file</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">IOException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Error Reading File&quot;</span><span class="op">);</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>When opening a file for writing one can also specify additional
+boolean argument <code>append</code> after the file name, which tells
+the run-time to open the file in write-append mode, meaning the cursor
+is positioned at the end of the file, and that is the position from
+where the writing starts, if no append flag is provided the cursor is
+put at the start of the file effectively deleting the original content.
+The <code>fout</code> output stream can be manually flushed based on the
+use case, however it is pretty much guaranteed that the stream will be
+flushed when the stream is closed, in the example above using
+try-with-resources, the stream will be closed once the flow exits the
+try block</p>
+<h3 id="serialization">Serialization</h3>
+<p>In java by default all types of classes and their data can be
+serialized, however one might wish to serialize only part of the class,
+in that case the usage of transient is required, marking a member field
+in a class type as transient will make sure that when that class is
+serialized then all transient fields will NOT be written out, or if
+reading object from a file, they will NOT be read in.</p>
+</body>
+</html>

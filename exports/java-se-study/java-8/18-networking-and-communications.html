@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>18-networking-and-communications</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#net.io" id="toc-net.io">Net.io</a>
+<ul>
+<li><a href="#networking" id="toc-networking">Networking</a></li>
+<li><a href="#inetaddress" id="toc-inetaddress">InetAddress</a></li>
+<li><a href="#byte-order---endianness"
+id="toc-byte-order---endianness">Byte order - Endianness</a></li>
+<li><a href="#sockets" id="toc-sockets">Sockets</a></li>
+<li><a href="#url" id="toc-url">URL</a></li>
+<li><a href="#uri" id="toc-uri">URI</a></li>
+<li><a href="#cookie" id="toc-cookie">Cookie</a></li>
+<li><a href="#datagram" id="toc-datagram">Datagram</a></li>
+</ul></li>
+</ul>
+</nav>
+<h2 id="net.io">Net.io</h2>
+<h3 id="networking">Networking</h3>
+<p>The basics of networking consist of something called Sockets, the
+socket is a cornerstone element of the networking world, each machine
+can expose any number of socket connections to itself to allow for other
+machines to connect to it, or receive information from it. The Socket or
+also called <code>Berlkey</code> Socket was invented in the UNIX days
+back in the 1970s. The purpose of a Socket is to represent and endpoint
+for receiving and sending information (duplex, mode, allows it to do
+both at the same time). A Socket is defined by two main components - IP
+Address - provides a unique address for the device on the network, and a
+Port number - identifies a specific process or service running on that
+device.</p>
+<p>The IP address of a machine is usually defined by the
+<code>IPv4</code> or <code>IPv6</code> versions, which are mostly the
+same with the only main difference being the range of addresses each can
+represent, while the <code>v4</code> can only represent 4 octets of -
+for a total of 32 bytes, or about 4 billion combinations, the
+<code>IPv6</code> can represent many more or about 126 bytes of
+information, ranging up to the trillions of unique addresses.</p>
+<p>The basic socket lifetime starts with an application creating a
+socket, for example a web server, creates a socket on a specific port,
+meaning that this process or application will be listening to this port,
+for incoming connections and information, it can also send information
+on the same socket, which is usually the case for web servers. When a
+socket is created it is <code>bound</code> meaning that the underlying
+<code>operating system</code> starts to listen for incoming connections
+on that port.</p>
+<p>When a client desires to connect to the serving application it has to
+create its own socket with the server’s unique ip address and the port
+defining the underlying application on the server machine that the
+client wants to listen to for data. The operating system where the
+server runs then might accept or deny the connection to itself, further
+more the process running on that port (the web server) might itself deny
+the connection to that port unless some sort of condition is met. When
+the connection is established between the client and server sockets,
+then the communication process can start</p>
+<p>There are two types of Sockets on the internet in wide use, both use
+different types of protocols to transmit data, while the IP protocol is
+used to transmit data on a lower level, it does not guarantee any data
+integrity it simply streams the data from one socket (server) to the
+other (client) or vice versa. To guarantee data transmission two types
+of protocols exist in wide spread use.</p>
+<ul>
+<li><p>TCP - Transmission Control Protocol to provide reliable, ordered
+and error checked delivery of a stream of bytes. This is mostly used in
+applications where the delivery of the information is crucial, web
+browsing, file transfers etc.</p></li>
+<li><p>UDP - User Datagram Protocol - unlike TCP the UDP is not
+streaming based protocol it is sending messages without establishing a
+connection, resulting in lower overhead, it is suitable for applications
+that require fast real-time communication like video streaming, or
+online gaming, where data loss is acceptable.</p></li>
+</ul>
+<p><code>TCP/IP sockets are used to implement reliable, bidirectional, persistent, point-to-point, stream-based connections between hosts on the Internet. A socket can be used to connect Java's I/O system to other programs that may reside either on the local machine or on any other machine on the Internet.</code></p>
+<h3 id="inetaddress">InetAddress</h3>
+<p>That class is used to encapsulate both the numerical IP address and
+the domain name for that address. One can interact with the class by
+using the name of the IP host, which is more convinient and
+understandable than its IP addresss, The InetAddress can handle both
+IPv4 and IPv6. To create an instance of the InetAddress one can use one
+of the factory methods for that purpose, since the InetAddress has no
+exposed public constructor</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="bu">InetAddress</span> <span class="fu">getLocalHost</span><span class="op">()</span> <span class="kw">throws</span> <span class="bu">UnknownHostException</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="bu">InetAddress</span> <span class="fu">getByName</span><span class="op">(</span><span class="bu">String</span> hostName<span class="op">)</span> <span class="kw">throws</span> <span class="bu">UnknownHostException</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="bu">InetAddress</span><span class="op">[]</span> <span class="fu">getAllByName</span><span class="op">(</span><span class="bu">String</span> hostName<span class="op">)</span> <span class="kw">throws</span> <span class="bu">UnknownHostException</span></span></code></pre></div>
+<p>The static methods provide a way to create an instance from a given
+host name, or domain name. The internal implementation will use DNS
+lookup to make sure the actual IP address is discovered, for the given
+host, the way this works is that Java in this case is using the
+underlying operating system and requests it to resolve the given domain
+name to an IP address. The operating system is using the configured DNS
+server to contact the server and try to resolve the actual address.</p>
+<p>How that works, is usually the ISP (internet service provider) will
+have default DNS servers which are automatically configured to a given
+machine when it is connected to the internet, this is done through DHCP
+(dynamic host configuration protocol). DHCP is a networking management
+protocol, it is the first exchange that a machine does when it is
+connected to the internet, it requests an IP address, and other
+configuration settings from the network, one of which is also the
+default DNS server address. This DNS is usually the one configured and
+owned by the ISP, which itself is configured to look up in the global
+DNS servers, but also might provide some specific features for the
+customer (like parental control, internet control panel server etc)</p>
+<ol type="1">
+<li><p><code>Connection</code>: When you connect your device (like a
+computer, smartphone, or tablet) to a network (wired or wireless), it
+sends a broadcast message to the local network, requesting an IP address
+and other configuration settings.</p></li>
+<li><p><code>Discover</code>: The device sends a DHCP Discover message
+to find available DHCP servers on the network.</p></li>
+<li><p><code>Offer</code>: Any DHCP server on the network that receives
+the Discover message responds with a DHCP Offer message. This offer
+includes an available IP address, subnet mask, default gateway, and DNS
+server information.</p></li>
+<li><p><code>Request</code>: The device receives one or more DHCP offers
+and selects one of them. It then sends a DHCP Request message back to
+the selected server, indicating that it has accepted the offer.</p></li>
+<li><p><code>Acknowledgment</code>: The DHCP server acknowledges the
+request with a DHCP Acknowledgment (ACK) message, confirming that the
+device can use the provided IP address and other settings, including the
+DNS server information.</p></li>
+<li><p><code>Completion</code>: Once the DHCP ACK is received, the
+device configures itself with the IP address, subnet mask, default
+gateway, and DNS server(s) as specified by the DHCP server. The DNS
+server address is now set for use in resolving domain names to IP
+addresses.</p></li>
+</ol>
+<p><code>Java includes support for both IPv4 and IPv6 addresses. Because of this, two subclasses of InetAddress were created: Inet4Address and Inet6Address. Inet4Address represents a traditional-style IPv4 address. Inet6Address encapsulates a newer IPv6 address. Because they are subclasses of InetAddress, an InetAddress reference can refer to either. This is one way that Java was able to add IPv6 functionality without breaking existing code or adding many more classes. For the most part, you can simply use InetAddress when working with IP addresses because it can accommodate both styles.</code></p>
+<h3 id="byte-order---endianness">Byte order - Endianness</h3>
+<p>The order of the bytes which are transmitted on a network, is also
+well defined, in the world of computing there are two ways to order
+bytes. Note that certain types of processors have different byte order
+representation internally, however this is often not exposed to the user
+and the operating system takes care of being consistent about this.</p>
+<ul>
+<li><p><code>Big Endianness</code> - a multi byte value or data is
+ordered from the lowest to the highest bytes, in other words, the lower
+bytes of a multi byte value are put at a lower address than the higher
+ones meaning that the hex value of 0x123456 will be represented as the
+following 3 bytes - 12 34 56</p></li>
+<li><p><code>Little Endianness</code> - a multi byte value or data is
+ordered from the highest to the lowest bytes, in other words, the higher
+bytes of a multi byte value are put at a lower address than the lower
+ones, meaning that the hex value of 0x123456 will be represented as the
+following 3 bytes 56 34 12</p></li>
+</ul>
+<p><code>In the networking world the Big Endianness approach is used always, meaning that the order of the bytes in multi byte values is the same as its actual representation</code></p>
+<h3 id="sockets">Sockets</h3>
+<p>In java there are two types of sockets, meant for different purposes
+one is the <code>ServerSocket</code>, the other is the
+<code>Socket</code> class for clients. The main difference is that the
+<code>ServerSocket</code> is blocking since it is a listener, it is
+waiting for clients to connect to it, otherwise there is nobody to serve
+information to.</p>
+<p>When a <code>Socket</code> (read client socket) is created, it
+implicitly establishes connection to the server socket on the provided
+address, meaning that there are no explicit methods that expose a
+<code>connect</code> action, one can start sending information on that
+socket if the creation is successful immediately.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Socket</span> <span class="bu">Socket</span><span class="op">(</span><span class="bu">InetAddress</span> host<span class="op">,</span> <span class="dt">int</span> port<span class="op">,</span> <span class="dt">boolean</span> stream<span class="op">)</span> <span class="kw">throws</span> <span class="bu">IOException</span> <span class="co">// create a socket to the given inet address and port</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Socket</span> <span class="bu">Socket</span><span class="op">(</span><span class="bu">String</span> hostName<span class="op">,</span> <span class="dt">int</span> port<span class="op">)</span> <span class="kw">throws</span> <span class="bu">UnknownHostException</span><span class="op">,</span> <span class="bu">IOException</span> <span class="co">// create a socket to the named host and port</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Socket</span> <span class="bu">Socket</span><span class="op">(</span><span class="bu">InetAddress</span> ipAddress<span class="op">,</span> <span class="dt">int</span> port<span class="op">)</span> <span class="kw">throws</span> <span class="bu">IOException</span> <span class="co">// create a socket to the address and port</span></span></code></pre></div>
+<p>The example below provides a very minimal code snippet which connects
+to the public <code>whois</code> host/domain on port 43, then obtains
+the input and output streams from the socket which are used to send and
+then read back the information written back from the server. Note that
+the code below is using the output stream to write to the socket, and
+the input stream to read information back from the socket.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Whois <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> args<span class="op">[])</span> <span class="kw">throws</span> <span class="bu">Exception</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> c<span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Create a socket connected to internic.net, port 43.</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Socket</span> s <span class="op">=</span> <span class="kw">new</span> <span class="bu">Socket</span><span class="op">(</span><span class="st">&quot;whois.internic.net&quot;</span><span class="op">,</span> <span class="dv">43</span><span class="op">);</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Obtain input and output streams.</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">InputStream</span> in <span class="op">=</span> s<span class="op">.</span><span class="fu">getInputStream</span><span class="op">();</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">OutputStream</span> out <span class="op">=</span> s<span class="op">.</span><span class="fu">getOutputStream</span><span class="op">();</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Construct a request string.</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> str <span class="op">=</span> <span class="op">(</span>args<span class="op">.</span><span class="fu">length</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">?</span> <span class="st">&quot;MHProfessional.com&quot;</span> <span class="op">:</span> args<span class="op">[</span><span class="dv">0</span><span class="op">])</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Convert to bytes.</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">byte</span> buf<span class="op">[]</span> <span class="op">=</span> str<span class="op">.</span><span class="fu">getBytes</span><span class="op">();</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Send request.</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        out<span class="op">.</span><span class="fu">write</span><span class="op">(</span>buf<span class="op">);</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Read and display response.</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="op">((</span>c <span class="op">=</span> in<span class="op">.</span><span class="fu">read</span><span class="op">())</span> <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">print</span><span class="op">((</span><span class="dt">char</span><span class="op">)</span> c<span class="op">);</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the output of this call might look something like that</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Domain Name: MHPROFESSIONAL.COM</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Registry Domain ID: 479181747_DOMAIN_COM-VRSN</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Registrar WHOIS Server: whois.corporatedomains.com</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Registrar URL: http://cscdbs.com</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Updated Date: 2024-06-05T05:13:49Z</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Creation Date: 2006-06-09T16:44:39Z</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Registry Expiry Date: 2025-06-09T16:44:39Z</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Registrar: CSC Corporate Domains, Inc.</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Registrar IANA ID: 299</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Registrar Abuse Contact Email: domainabuse@cscglobal.com</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Registrar Abuse Contact Phone: 8887802723</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Domain Status: clientTransferProhibited https://icann.org/epp#clientTransferProhibited</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Name Server: PDNS85.ULTRADNS.BIZ</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Name Server: PDNS85.ULTRADNS.COM</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Name Server: PDNS85.ULTRADNS.NET</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Name Server: PDNS85.ULTRADNS.ORG</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">// DNSSEC: unsigned</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>        <span class="co">// URL of the ICANN Whois Inaccuracy Complaint Form: https://www.icann.org/wicf/</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>        s<span class="op">.</span><span class="fu">close</span><span class="op">();</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>WHOIS is a protocol used for querying databases that store registered domain names and IP addresses. It allows you to retrieve information about who owns a domain or an IP address, as well as registration dates, contact details, and the registrar responsible for the domain.</code></p>
+<h3 id="url">URL</h3>
+<p>The uniform resource locator is a way to locate a given resource on
+the internet as well as provide means to interact with that resource.
+The URL consists of a few components which are described below</p>
+<ul>
+<li><p>the scheme - the first part of the URL, specifies which protocol
+is to be used when the resource is accessed, there are many, but the
+ones in wide use such as http, https, file, gopher and ftp are well
+familiar to most people</p></li>
+<li><p>the host - this component is in the middle, it specifies the host
+or domain name where the resource can be found, this is usually then
+passed down to the operating system through a DNS service to resole the
+actual ip address of the domain, but one can also include an IP directly
+in the URL instead of a domain name.</p></li>
+<li><p>the port - this one is optional, and is usually deduced, if
+omitted, based on the protocol that is used, for example the HTTP
+protocol or scheme reserves port 80 by default, HTTPS - reserves port
+443, FTP reserves 23 and so on. That is why the very first 1024 ports
+are reserved for special purposes, like that</p></li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th>Protocol</th>
+<th>Default Port</th>
+<th>Example URL with Default Port</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>HTTP</td>
+<td>80</td>
+<td><code>http://example.com</code></td>
+</tr>
+<tr class="even">
+<td>HTTPS</td>
+<td>443</td>
+<td><code>https://example.com</code></td>
+</tr>
+<tr class="odd">
+<td>FTP</td>
+<td>21</td>
+<td><code>ftp://ftp.example.com</code></td>
+</tr>
+<tr class="even">
+<td>File</td>
+<td>N/A</td>
+<td><code>file:///C:/example.txt</code></td>
+</tr>
+<tr class="odd">
+<td>SFTP</td>
+<td>22</td>
+<td><code>sftp://sftp.example.com</code></td>
+</tr>
+<tr class="even">
+<td>SMTP</td>
+<td>25, 587</td>
+<td><code>smtp://mail.example.com</code></td>
+</tr>
+<tr class="odd">
+<td>Telnet</td>
+<td>23</td>
+<td><code>telnet://telnet.example.com</code></td>
+</tr>
+<tr class="even">
+<td>WebSocket</td>
+<td>80, 443</td>
+<td><code>ws://example.com</code></td>
+</tr>
+</tbody>
+</table>
+<p>The java networking package provides means of constructing URL
+objects and instances, to help one work with them, the base class is
+called URL, the class has overloaded constructors to create an url from
+a variety of sources, mostly strings.</p>
+<table>
+<colgroup>
+<col style="width: 36%" />
+<col style="width: 63%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Constructor</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>URL(String spec)</td>
+<td>Creates a <code>URL</code> object from a string representing the
+full URL (e.g., “<a href="https://www.example.com"
+class="uri">https://www.example.com</a>”).</td>
+</tr>
+<tr class="even">
+<td>URL(String protocol, String host, String path)</td>
+<td>Creates a <code>URL</code> from a protocol, host, and path (the path
+includes the path and query string).</td>
+</tr>
+<tr class="odd">
+<td>URL(String protocol, String host, int port, String path)</td>
+<td>Creates a <code>URL</code> by specifying the protocol, host, port,
+and path.</td>
+</tr>
+<tr class="even">
+<td>URL(URL context, String spec)</td>
+<td>Creates a <code>URL</code> by resolving a relative URL spec within a
+base URL context.</td>
+</tr>
+<tr class="odd">
+<td>URL(URL context, String spec, URLStreamHandler handler)</td>
+<td>Creates a <code>URL</code> object with a base context and custom
+stream handler for managing protocols.</td>
+</tr>
+</tbody>
+</table>
+<p><code>Note that all of those constructor calls might throw MalformedURLException, which might occur when an invalid url format string was provided to the constructor arguments</code></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> URLDemo <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> args<span class="op">[])</span> <span class="kw">throws</span> <span class="bu">MalformedURLException</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">URL</span> hp <span class="op">=</span> <span class="kw">new</span> <span class="bu">URL</span><span class="op">(</span><span class="st">&quot;http://www.HerbSchildt.com/WhatsNew&quot;</span><span class="op">);</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Protocol: &quot;</span> <span class="op">+</span> hp<span class="op">.</span><span class="fu">getProtocol</span><span class="op">());</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Port: &quot;</span> <span class="op">+</span> hp<span class="op">.</span><span class="fu">getPort</span><span class="op">());</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Host: &quot;</span> <span class="op">+</span> hp<span class="op">.</span><span class="fu">getHost</span><span class="op">());</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Path: &quot;</span> <span class="op">+</span> hp<span class="op">.</span><span class="fu">getFile</span><span class="op">());</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Ext:&quot;</span> <span class="op">+</span> hp<span class="op">.</span><span class="fu">toExternalForm</span><span class="op">());</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>When you run this, you will get the following output.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode md"><code class="sourceCode markdown"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="an">Protocol:</span><span class="co"> http</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="an">Port:</span><span class="co"> -1</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="an">Host:</span><span class="co"> www.HerbSchildt.com</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="an">Path:</span><span class="co"> /WhatsNew</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>Ext:http://www.HerbSchildt.com/WhatsNew</span></code></pre></div>
+<p>The <code>URLConnection</code> is a special type of object that can
+be obtained from an URL instance object, by calling the
+<code>openConnection</code> method, which will create an instance of
+<code>URLConnection</code> object/instance to actually establish a
+proper connection internally, this method initiates the process of
+establishing a connection to the URL, often by creating a socket
+connection (especially for HTTP/HTTPS, FTP, etc.). The socket is
+responsible for sending and receiving data to and from the resource’s
+server.</p>
+<p><code>Based on the type of protocol used URLConnection is a high level abstraction layer which uses protocol handlers for example for basic HTTP and HTTPS requests a wrapper around the Socket API is used, for other schemes and protocols different handlers are used, in essence it allows one to abstract away most of the cruft when trying to communicate with a resource server which requires the communication to be done through the use of specific protocol such as http, https, ftp and so on.</code></p>
+<p>Connection Establishment happens when the socket is created when you
+call <code>connect()</code>, <code>getInputStream()</code>, or
+<code>getOutputStream()</code> on the <code>URLConnection</code>. This
+establishes a communication link between your application and the remote
+server.</p>
+<p>Making a regular get request, fetching data from the target URL</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">URL</span> url <span class="op">=</span> <span class="kw">new</span> <span class="bu">URL</span><span class="op">(</span><span class="st">&quot;http://www.example.com&quot;</span><span class="op">);</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">URLConnection</span> urlConnection <span class="op">=</span> url<span class="op">.</span><span class="fu">openConnection</span><span class="op">();</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="bu">InputStream</span> inputStream <span class="op">=</span> urlConnection<span class="op">.</span><span class="fu">getInputStream</span><span class="op">();</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="bu">BufferedReader</span> reader <span class="op">=</span> <span class="kw">new</span> <span class="bu">BufferedReader</span><span class="op">(</span><span class="kw">new</span> <span class="bu">InputStreamReader</span><span class="op">(</span>inputStream<span class="op">));</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> line<span class="op">;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="op">((</span>line <span class="op">=</span> reader<span class="op">.</span><span class="fu">readLine</span><span class="op">())</span> <span class="op">!=</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>line<span class="op">);</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>reader<span class="op">.</span><span class="fu">close</span><span class="op">();</span></span></code></pre></div>
+<p>Making a POST request, sending data to the target URL</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">URL</span> url <span class="op">=</span> <span class="kw">new</span> <span class="bu">URL</span><span class="op">(</span><span class="st">&quot;http://www.example.com/login&quot;</span><span class="op">);</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">HttpURLConnection</span> httpURLConnection <span class="op">=</span> <span class="op">(</span><span class="bu">HttpURLConnection</span><span class="op">)</span> url<span class="op">.</span><span class="fu">openConnection</span><span class="op">();</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>httpURLConnection<span class="op">.</span><span class="fu">setRequestMethod</span><span class="op">(</span><span class="st">&quot;POST&quot;</span><span class="op">);</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>httpURLConnection<span class="op">.</span><span class="fu">setDoOutput</span><span class="op">(</span><span class="kw">true</span><span class="op">);</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>httpURLConnection<span class="op">.</span><span class="fu">setRequestProperty</span><span class="op">(</span><span class="st">&quot;Content-Type&quot;</span><span class="op">,</span> <span class="st">&quot;application/x-www-form-urlencoded&quot;</span><span class="op">);</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> postData <span class="op">=</span> <span class="st">&quot;username=user&amp;password=pass&quot;</span><span class="op">;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">OutputStream</span> os <span class="op">=</span> httpURLConnection<span class="op">.</span><span class="fu">getOutputStream</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">byte</span><span class="op">[]</span> input <span class="op">=</span> postData<span class="op">.</span><span class="fu">getBytes</span><span class="op">(</span><span class="st">&quot;utf-8&quot;</span><span class="op">);</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    os<span class="op">.</span><span class="fu">write</span><span class="op">(</span>input<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> input<span class="op">.</span><span class="fu">length</span><span class="op">);</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Below are listed some of the classes which implement the
+<code>URLConnection</code>, each of which takes care of knowing how to
+communicate and connect to URLs with different schemes and communication
+protocols.</p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 85%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Class Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>HttpURLConnection</td>
+<td>allows for HTTP-specific features, such as handling different HTTP
+methods (GET, POST, etc.) and managing HTTP headers and responses.</td>
+</tr>
+<tr class="even">
+<td>HttpsURLConnection</td>
+<td>extends off of HttpURLConnection and supports secure HTTPS
+connections, enabling SSL/TLS communication.</td>
+</tr>
+<tr class="odd">
+<td>JarURLConnection</td>
+<td>for accessing resources in JAR files, providing a way to read
+entries from a JAR file.</td>
+</tr>
+<tr class="even">
+<td>FileURLConnection</td>
+<td>for accessing local files via the <code>file://</code> protocol,
+allowing file reading.</td>
+</tr>
+<tr class="odd">
+<td>FtpURLConnection</td>
+<td>for accessing resources via the FTP protocol, enabling file
+transfers over FTP.</td>
+</tr>
+<tr class="even">
+<td>DataSourceURLConnection</td>
+<td>designed for reading data from <code>DataSource</code> objects,
+commonly used in JavaMail for reading resources.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="uri">URI</h3>
+<p>The URI class or type is actually a super-type, to the URL type. The
+URI describes a unique resource identifier alone. While the URL
+describes not only the unique resource identifier or locator but also
+how to access this resource. That can also be seen in the name of both
+types. While the URI - is identifier, the URL - is locator. The
+difference is quite is that URLs provide information such as the schema
+for example, which tells the clients using an URL how (the locator) to
+access the given resource, not just where (the identifier)</p>
+<p><code>An URI that contains a scheme locator is by definition classified as an URL, https://www.example.com a URI that contains a name identifier is called URN or unique resource name, urn:isbn:12345</code></p>
+<h3 id="cookie">Cookie</h3>
+<p>Cookies provide a way to establish a <code>stateful</code> connection
+between a server and a client, a cookie is usually send over on each
+request, and it represents some sort of unique identifier which the
+server can use to identify a client by. On each request/response cycle
+between the server and the client, the server would send a cookie header
+along with the response, and the client will send back the same cookie
+with the requests to the server, that way the server can identify
+different clients uniquely</p>
+<p>Besides regular cookies, there usually companion cookies such as
+<code>CSRF</code> tokens which are used to secure the cookies making
+sure that a cookie that is sent back to the server is coming from the
+actual client, instead of malicious actions or actors.</p>
+<p>The Cookie class is under the java class called
+<code>HttpCookie</code> which contains the implementation for a generic
+<code>http</code> cookie that can be used along with the
+<code>CookieStore</code> interface and the <code>CookieManager</code>
+which serves as a bridge between <code>HttpURLConnection</code> and an
+<code>HttpCookie</code>, the <code>CookieManager</code> does use a
+<code>CookieStore</code> implementation internally to store and manage
+the cookies for many <code>HttpURLConnection</code> responses and
+requests. One would typically set a default <code>CookieHandler</code>,
+like so <code>CookieHandler.setDefault(new CookieManager())</code> this
+would make sure that all requests and responses by default are routed to
+the target <code>CookieManger</code> instance.</p>
+<p>The actual link between the <code>HttpURLConnection</code> is done in
+it’s actual default platform specific implementation under
+<code>sun.net.www.protocol.http.HttpURLConnection</code>, which is
+internally using the <code>CookieHandler.getDefault()</code> to extract
+the default <code>CookieManager</code>, this is the bridge / glue that
+makes sure that each <code>HttpURLConnection</code> is correctly being
+populated with cookies</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">HttpCookie</span> <span class="bu">HttpCookie</span><span class="op">(</span><span class="bu">String</span> name<span class="op">,</span> <span class="bu">String</span> value<span class="op">,</span> <span class="bu">String</span> header<span class="op">,</span> <span class="dt">long</span> creationTime<span class="op">)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">HttpCookie</span> <span class="bu">HttpCookie</span><span class="op">(</span><span class="bu">String</span> name<span class="op">,</span> <span class="bu">String</span> value<span class="op">,</span> <span class="bu">String</span> header<span class="op">)</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">HttpCookie</span> <span class="bu">HttpCookie</span><span class="op">(</span><span class="bu">String</span> name<span class="op">,</span> <span class="bu">String</span> value<span class="op">);</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">HttpURLConnection</span> <span class="bu">HttpURLConnection</span><span class="op">(</span><span class="bu">URL</span> u<span class="op">,</span> <span class="bu">String</span> host<span class="op">,</span> <span class="dt">int</span> port<span class="op">)</span> <span class="kw">throws</span> <span class="bu">IOException</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">HttpURLConnection</span> <span class="bu">HttpURLConnection</span> <span class="op">(</span><span class="bu">URL</span> u<span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>                  use</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span> <span class="bu">CookieHandler</span> <span class="op">&lt;-------</span> <span class="bu">HttpURLConnection</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>       <span class="op">^</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>       <span class="op">|</span> impl</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>       <span class="op">|</span>         use</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span> <span class="bu">CookieManager</span> <span class="op">-------&gt;</span> <span class="bu">CookiePolicy</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>             <span class="op">|</span>   use</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>             <span class="op">|--------&gt;</span> <span class="bu">HttpCookie</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>             <span class="op">|</span>              <span class="op">^</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>             <span class="op">|</span>              <span class="op">|</span> use</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>             <span class="op">|</span>   use        <span class="op">|</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>             <span class="op">|--------&gt;</span> <span class="bu">CookieStore</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>                            <span class="op">^</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>                            <span class="op">|</span> impl</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>                            <span class="op">|</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a> <span class="op">*</span>                  Internal in<span class="op">-</span>memory implementation</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Set up a CookieManager with a default CookieStore</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">CookieManager</span> cookieManager <span class="op">=</span> <span class="kw">new</span> <span class="bu">CookieManager</span><span class="op">();</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">CookieHandler</span><span class="op">.</span><span class="fu">setDefault</span><span class="op">(</span>cookieManager<span class="op">);</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Make an HTTP connection</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">URL</span> url <span class="op">=</span> <span class="kw">new</span> <span class="bu">URL</span><span class="op">(</span><span class="st">&quot;https://example.com&quot;</span><span class="op">);</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="bu">HttpURLConnection</span> connection <span class="op">=</span> <span class="op">(</span><span class="bu">HttpURLConnection</span><span class="op">)</span> url<span class="op">.</span><span class="fu">openConnection</span><span class="op">();</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">// Send a request (cookies from the store are automatically added if applicable)</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>connection<span class="op">.</span><span class="fu">setRequestMethod</span><span class="op">(</span><span class="st">&quot;GET&quot;</span><span class="op">);</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Receive the response</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> responseCode <span class="op">=</span> connection<span class="op">.</span><span class="fu">getResponseCode</span><span class="op">();</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co">// Check for any cookies sent by the server (they are automatically added to the store)</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="bu">Map</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">,</span> <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;&gt;</span> headers <span class="op">=</span> connection<span class="op">.</span><span class="fu">getHeaderFields</span><span class="op">();</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="bu">String</span> header <span class="op">:</span> headers<span class="op">.</span><span class="fu">keySet</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span><span class="st">&quot;Set-Cookie&quot;</span><span class="op">.</span><span class="fu">equalsIgnoreCase</span><span class="op">(</span>header<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>        <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> cookies <span class="op">=</span> headers<span class="op">.</span><span class="fu">get</span><span class="op">(</span>header<span class="op">);</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="bu">String</span> cookie <span class="op">:</span> cookies<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Received cookie: &quot;</span> <span class="op">+</span> cookie<span class="op">);</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="co">// Retrieve cookies from the store for the same URL</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="bu">URI</span> uri <span class="op">=</span> url<span class="op">.</span><span class="fu">toURI</span><span class="op">();</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="bu">CookieStore</span> store <span class="op">=</span> cookieManager<span class="op">.</span><span class="fu">getCookieStore</span><span class="op">();</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span><span class="bu">HttpCookie</span><span class="op">&gt;</span> storedCookies <span class="op">=</span> store<span class="op">.</span><span class="fu">get</span><span class="op">(</span>uri<span class="op">);</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="bu">HttpCookie</span> storedCookie <span class="op">:</span> storedCookies<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Stored cookie: &quot;</span> <span class="op">+</span> storedCookie<span class="op">);</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="csrf">CSRF</h4>
+<p>Those special types of tokens are an essential security mechanism to
+protect web applications from unauthorized, malicious actions initiated
+by third-party sites. By embedding a unique, unpredictable token in each
+state-changing request and validating it on the server side, web
+applications can ensure that only legitimate actions performed by the
+authenticated user are allowed. CSRF tokens work because they are tied
+to both the user’s session and the specific site from which the form is
+sent. Since an attacker’s website cannot access the legitimate site’s
+CSRF token, they cannot include the correct token in any malicious
+request they try to initiate.</p>
+<ol type="1">
+<li><p>When the user loads the page, the server sets two cookies: one
+HTTP-only cookie for the session, and one HTTP-only cookie for the CSRF
+token.</p></li>
+<li><p>When the user makes an API call (via fetch() or XHR), the Browser
+itself reads the HTTP-only CSRF token cookie and includes it in a header
+(X-CSRF-Token).</p></li>
+<li><p>The server verifies both the session (via the regular HTTP-only
+cookie) and the CSRF token (via X-CSRF-Token header) to ensure that the
+request is legitimate.</p></li>
+</ol>
+<h4 id="cors">CORS</h4>
+<p>Is a security feature built on top of the Same-Origin Policy, and it
+allows web servers to explicitly permit cross-origin requests. When a
+website needs to make a request to another domain, the browser uses CORS
+to check whether the server hosting the resource allows that request to
+be made. The browser automatically determines if a request is
+cross-origin based on the origin (protocol, domain, and port) of the
+requesting page and the requested resource. If the server doesn’t
+respond with the proper CORS headers or explicitly denies cross-origin
+access, the browser blocks the response from being made available to
+JavaScript. The request might still be sent, but the browser will refuse
+to pass the response data back to the page’s JavaScript if the CORS
+policy isn’t met.</p>
+<ol type="1">
+<li><p>When a script (like an AJAX call or a fetch() request) on a web
+page tries to request a resource from a different origin, the browser
+first checks if the request adheres to the Same-Origin Policy.</p></li>
+<li><p>If the request is cross-origin, the browser sends a special HTTP
+request known as a preflight request (for certain methods) to the
+server, asking if the actual request is allowed.</p>
+<pre class="http"><code>OPTIONS /resource HTTP/1.1
+Host: http://original.com
+Origin: https://example.com
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: X-PINGOTHER, Content-Type</code></pre></li>
+<li><p>The preflight request asks the server if it allows cross-origin
+requests by sending headers like Access-Control-Request-Method and
+Access-Control-Request-Headers.</p></li>
+<li><p>If the server is configured to allow cross-origin requests, it
+responds with CORS headers like Access-Control-Allow-Origin,
+Access-Control-Allow-Methods, and Access-Control-Allow-Headers.</p>
+<pre class="http"><code>HTTP/1.1 204 No Content
+Access-Control-Allow-Origin: https://example.com
+Access-Control-Allow-Methods: POST, GET, OPTIONS
+Access-Control-Allow-Headers: X-PINGOTHER, Content-Type</code></pre></li>
+<li><p>The browser checks the CORS headers returned by the server to
+ensure the request is allowed. If the headers are missing or don’t match
+the request (e.g., the origin isn’t allowed), the browser will block the
+response and not allow the JavaScript on the page to read the
+response.</p></li>
+</ol>
+<h3 id="datagram">Datagram</h3>
+<p>Unlike the regular <code>Socket</code> which is meant for regular
+<code>TCP</code> packet communication in java, the <code>Datagram</code>
+socket implementation is meant to be used with <code>UDP</code> style
+packets, the <code>Datagram</code> <code>api</code> provides multiple
+ways to construct a <code>datagram</code> socket, but the gist is that
+the constructors are pretty much the same as for the regular
+<code>TCP</code> sockets, which either can accept a port or/and host
+address, the <code>Datagram</code> socket can also be created without
+any constructor arguments which would bind to the first available socket
+on the machine that is not reserved</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">DatagramSocket</span> <span class="bu">DatagramSocket</span><span class="op">(</span> <span class="op">)</span> <span class="kw">throws</span> <span class="bu">SocketException</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="bu">DatagramSocket</span> <span class="bu">DatagramSocket</span><span class="op">(</span><span class="dt">int</span> port<span class="op">)</span> <span class="kw">throws</span> <span class="bu">SocketException</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="bu">DatagramSocket</span> <span class="bu">DatagramSocket</span><span class="op">(</span><span class="dt">int</span> port<span class="op">,</span> <span class="bu">InetAddress</span> ipAddress<span class="op">)</span> <span class="kw">throws</span> <span class="bu">SocketException</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="bu">DatagramSocket</span> <span class="bu">DatagramSocket</span><span class="op">(</span><span class="bu">SocketAddress</span> address<span class="op">)</span> <span class="kw">throws</span> <span class="bu">SocketException</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="fu">send</span><span class="op">(</span><span class="bu">DatagramPacket</span> packet<span class="op">)</span> <span class="kw">throws</span> <span class="bu">IOException</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="fu">receive</span><span class="op">(</span><span class="bu">DatagramPacket</span> packet<span class="op">)</span> <span class="kw">throws</span> <span class="bu">IOException</span></span></code></pre></div>
+<p>The <code>DatagramPacket</code> is meant to receive information from
+a DatagramSocket, from the constructor of the DatagramPacket below one
+can see that the information must be stored in a temporary buffer which
+is filled when a packet is either sent or received.</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">DatagramPacket</span> <span class="bu">DatagramPacket</span><span class="op">(</span><span class="dt">byte</span> data <span class="op">[],</span> <span class="dt">int</span> size<span class="op">)</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">DatagramPacket</span> <span class="bu">DatagramPacket</span><span class="op">(</span><span class="dt">byte</span> data <span class="op">[],</span> <span class="dt">int</span> offset<span class="op">,</span> <span class="dt">int</span> size<span class="op">)</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="bu">DatagramPacket</span> <span class="bu">DatagramPacket</span><span class="op">(</span><span class="dt">byte</span> data <span class="op">[],</span> <span class="dt">int</span> size<span class="op">,</span> <span class="bu">InetAddress</span> ipAddress<span class="op">,</span> <span class="dt">int</span> port<span class="op">)</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="bu">DatagramPacket</span> <span class="bu">DatagramPacket</span><span class="op">(</span><span class="dt">byte</span> data <span class="op">[],</span> <span class="dt">int</span> offset<span class="op">,</span> <span class="dt">int</span> size<span class="op">,</span> <span class="bu">InetAddress</span> ipAddress<span class="op">,</span> <span class="dt">int</span> port<span class="op">)</span></span></code></pre></div>
+<p><code>From the constructors above, the first two constructors are used when receiving information from a</code>DatagramSocket<code>, while the last two are used when sending, since the recipient has to be known host, therefore a correct</code>InetAddresss<code>has to be provided otherwise there would be no way to know where to send the information to</code></p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> WriteServer <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">int</span> serverPort <span class="op">=</span> <span class="dv">998</span><span class="op">;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">int</span> clientPort <span class="op">=</span> <span class="dv">999</span><span class="op">;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">int</span> bufferSize <span class="op">=</span> <span class="dv">1024</span><span class="op">;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="bu">DatagramSocket</span> ds<span class="op">;</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">byte</span> buffer<span class="op">[]</span> <span class="op">=</span> <span class="kw">new</span> <span class="dt">byte</span><span class="op">[</span>bufferSize<span class="op">];</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">TheServer</span><span class="op">()</span> <span class="kw">throws</span> <span class="bu">Exception</span> <span class="op">{</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> pos<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="op">(</span><span class="kw">true</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>            <span class="co">// collect input from the server on stdin</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> c <span class="op">=</span> <span class="bu">System</span><span class="op">.</span><span class="fu">in</span><span class="op">.</span><span class="fu">read</span><span class="op">();</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">switch</span> <span class="op">(</span>c<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>                <span class="cf">case</span> <span class="op">-</span><span class="dv">1</span><span class="op">:</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Server Quits.&quot;</span><span class="op">);</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>                    ds<span class="op">.</span><span class="fu">close</span><span class="op">();</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>                <span class="cf">case</span> <span class="ch">&#39;\r&#39;</span><span class="op">:</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>                <span class="cf">case</span> <span class="ch">&#39;\n&#39;</span><span class="op">:</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// send whatever was accumulated in the buffer to the client</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>                    ds<span class="op">.</span><span class="fu">send</span><span class="op">(</span><span class="kw">new</span> <span class="bu">DatagramPacket</span><span class="op">(</span>buffer<span class="op">,</span>pos<span class="op">,</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">InetAddress</span><span class="op">.</span><span class="fu">getLocalHost</span><span class="op">(),</span>clientPort<span class="op">));</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// reset the pointer, back to 0, no data is in the buffer</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>                    pos<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>                <span class="kw">default</span><span class="op">:</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// write each byte to the buffer from stdid, and increment the pointer</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>                    buffer<span class="op">[</span>pos<span class="op">++]</span> <span class="op">=</span> <span class="op">(</span><span class="dt">byte</span><span class="op">)</span> c<span class="op">;</span></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">TheClient</span><span class="op">()</span> <span class="kw">throws</span> <span class="bu">Exception</span> <span class="op">{</span></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span><span class="op">(</span><span class="kw">true</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>            <span class="co">// receive from the server, into the buffer, at most `bufferSize`</span></span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>            <span class="bu">DatagramPacket</span> p <span class="op">=</span> <span class="kw">new</span> <span class="bu">DatagramPacket</span><span class="op">(</span>buffer<span class="op">,</span> buffer<span class="op">.</span><span class="fu">length</span><span class="op">);</span></span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>            ds<span class="op">.</span><span class="fu">receive</span><span class="op">(</span>p<span class="op">);</span></span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>            <span class="co">// print the received information to the screen, that would be whatever was entered on the server side</span></span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="kw">new</span> <span class="bu">String</span><span class="op">(</span>p<span class="op">.</span><span class="fu">getData</span><span class="op">(),</span> <span class="dv">0</span><span class="op">,</span> p<span class="op">.</span><span class="fu">getLength</span><span class="op">()));</span></span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> args<span class="op">[])</span> <span class="kw">throws</span> <span class="bu">Exception</span> <span class="op">{</span></span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>        <span class="co">// based on the passed in number arguments start either a server emitting packets or a client receiving them</span></span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span>args<span class="op">.</span><span class="fu">length</span> <span class="op">==</span> <span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a>            <span class="co">// start a server type of application</span></span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a>            ds <span class="op">=</span> <span class="kw">new</span> <span class="bu">DatagramSocket</span><span class="op">(</span>serverPort<span class="op">);</span></span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>            <span class="fu">TheServer</span><span class="op">();</span></span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a>            <span class="co">// start a client type of application</span></span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a>            ds <span class="op">=</span> <span class="kw">new</span> <span class="bu">DatagramSocket</span><span class="op">(</span>clientPort<span class="op">);</span></span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a>            <span class="fu">TheClient</span><span class="op">();</span></span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>To use the same application as both the server and client, just pass
+in a dummy argument to the execution</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode sh"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> WriteServer   <span class="co"># to start a client</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> WriteServer 1 <span class="co"># to start a server</span></span></code></pre></div>
+</body>
+</html>

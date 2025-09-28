@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>6-exceptions-and-assertions</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#throwable" id="toc-throwable">Throwable</a>
+<ul>
+<li><a href="#throwing" id="toc-throwing">Throwing</a></li>
+<li><a href="#catching" id="toc-catching">Catching</a>
+<ul>
+<li><a href="#multi-catch-catching"
+id="toc-multi-catch-catching">Multi-catch catching</a></li>
+<li><a href="#general-catching" id="toc-general-catching">General
+catching</a></li>
+</ul></li>
+<li><a href="#finalizing" id="toc-finalizing">Finalizing</a>
+<ul>
+<li><a href="#finally" id="toc-finally">Finally</a></li>
+<li><a href="#try-with-resources"
+id="toc-try-with-resources">Try-with-resources</a></li>
+</ul></li>
+<li><a href="#throws" id="toc-throws">Throws</a></li>
+<li><a href="#documentation"
+id="toc-documentation">Documentation</a></li>
+<li><a href="#miscellaneous"
+id="toc-miscellaneous">Miscellaneous</a></li>
+<li><a href="#user-exceptions"
+id="toc-user-exceptions">User-exceptions</a></li>
+<li><a href="#assertions" id="toc-assertions">Assertions</a></li>
+</ul></li>
+<li><a href="#summary" id="toc-summary">Summary</a></li>
+</ul>
+</nav>
+<h1 id="throwable">Throwable</h1>
+<p>This is the top level class which is used in pretty much all
+exception handling and error handling in the Java language, used by the
+<code>JVM</code> itself, and all exceptions - checked and unchecked
+extend off of it. Further more the special type of Error, which is
+mostly used by the <code>JVM</code>, internally, is also extending off
+of it.</p>
+<p>Every thrown object from java Code must be a subclass of the
+<code>Throwable</code> class, or one of its sub-classes, exception
+handling constructs in the language such as throw statements, throws
+clause, and the catch clause, deal only with <code>Throwable</code> and
+its sub-classes. There are three important sub-classes of
+<code>Throwable</code> - <code>Error</code>, <code>Exception</code> and
+<code>RuntimeException</code>.</p>
+<p>The general hierarchy of the java exception model is such that:
+<code>Object -&gt; Throwable -&gt; Excetpion -&gt; RuntimeException</code></p>
+<ul>
+<li><p><code>Exceptions</code> of type Exception in Java are known as
+check exceptions. If code can throw an Exception you must handle it
+using a catch block or declare that the method throws that exception
+forcing the caller of that method to handle that exception</p></li>
+<li><p><code>RuntimeException</code> is a derived class of the Exception
+class. The exceptions deriving from <code>RuntimeException</code> are
+known as unchecked exceptions. It is optional to handle unchecked
+exceptions. If a code segment in a method can throw an unchecked
+exception, it is not mandatory to catch that exception or declare that
+exception in the throws clause of that method.</p></li>
+<li><p><code>Error</code> - when the <code>JVM</code> detects a serious
+abnormal condition in the program, it raises an exception of type Error.
+Exception of type Error indicate an abnormal condition, in the program.
+There is no point in catching these exceptions and pretend nothing has
+happened. At this point if an Error exception occurs it is a really bad
+practice to do so! These errors signal that some irrecoverable state has
+been reached.</p></li>
+</ul>
+<h2 id="throwing">Throwing</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> <span class="op">[]</span>args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="op">(</span>args<span class="op">.</span><span class="fu">length</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">// this branch of the code declares that a RuntimeException exception is thrown, as mentioned above these types</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// of exceptions are not mandatory to be handled, and the program will simply exit and the call stack will unwind</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// accordingly.</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">IllegalArgumentException</span><span class="op">(</span><span class="st">&quot;No input passed to echo command&quot;</span><span class="op">);</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span><span class="op">(</span><span class="bu">String</span> str <span class="op">:</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>            <span class="co">// command-line arguments are separated and passed as an array</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>            <span class="co">// print them by adding a space between the array elements</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">print</span><span class="op">(</span>str <span class="op">+</span> <span class="st">&quot; &quot;</span><span class="op">);</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<p>Since there is no explicit user defined handler for the exception
+thrown above, the <code>JVM</code> will itself make sure that this
+exception is caught at the moment the program terminates, the reason
+being, to at the very least log out the error, so the user can obtain
+some sort of information about the invalid state that has occurred.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> <span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Type an integer in the console: &quot;</span><span class="op">);</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Scanner</span> consoleScanner <span class="op">=</span> <span class="kw">new</span> <span class="bu">Scanner</span><span class="op">(</span><span class="bu">System</span><span class="op">.</span><span class="fu">in</span><span class="op">);</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;You typed the integer value: &quot;</span> <span class="op">+</span> consoleScanner<span class="op">.</span><span class="fu">nextInt</span><span class="op">());</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Here is another example with an unchecked exception which is possible
+to occur in user code, the method <code>nextInt</code> which tries to
+read the next integer from <code>stdin</code>, can throw an exception if
+the input is not a valid integral type, this means that the method can
+throw an unchecked exception in that case. However this is also
+documented in the method documentation, therefore the user code has the
+ability to, if desired, catch the exception, even though it is unchecked
+and handle that case gracefully, instead of completely killing the
+program.</p>
+<p>Another useful feature in the try-catch block is that an exception
+can be wrapped in another one in the catch block and re-thrown, instead
+of handling it immediately in the catch block this is usually useful in
+practice, since swallowing an exception (leaving the catch block empty,
+or adding some generic print statement which simply loses information
+about the cause and reason for the exception is a bad idea). Wrapping an
+exception is a good way to preserve the initial cause, if it can not be
+handled at the time of the catch statement. And can be used to be
+wrapped in a more generic exception which other layers in the program
+execution know how to handle.</p>
+<p>Chain throwing exceptions is most usually done to do what is called
+exception translation - translating internal system exceptions coming
+from libraries or the java ones, to a more generic business level
+exception which is easier to handle and control.</p>
+<h2 id="catching">Catching</h2>
+<p>Besides creating exceptions the user code can also catch them, this
+is the companion action to throwing exceptions. The example below
+extends the example from above, which reads integer from
+<code>stdin</code>, and tries to correctly handle the case when the
+integer is not an integer, or it is unable to parse a valid integer from
+<code>stdin</code>. In this case the program will simply just print some
+message on <code>stdout</code>, but in a more robust solution, it can be
+put in a <code>while(true)</code> loop and require a user entry until a
+valid integral type is read from <code>stdin</code>.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> <span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Type an integer in the console: &quot;</span><span class="op">);</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Scanner</span> consoleScanner <span class="op">=</span> <span class="kw">new</span> <span class="bu">Scanner</span><span class="op">(</span><span class="bu">System</span><span class="op">.</span><span class="fu">in</span><span class="op">);</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;You typed the integer value: &quot;</span> <span class="op">+</span> consoleScanner<span class="op">.</span><span class="fu">nextInt</span><span class="op">());</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">InputMismatchException</span> ime<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">// nextInt() throws InputMismatchException in case anything other than an integer is typed in the console; so</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// handle it, this is crude example since the exception is swallowed, and some very generic error is printed out</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// in practice this is not a good idea, since information is being lost, namely the information from the</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// exception, or that an exception is occurred</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Error: You typed some text that is not an integer value...&quot;</span><span class="op">);</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The try-catch block has two elements to it, the code in the try block
+will be the one which will be examined for exceptions, once an exception
+occurs, the code in the catch block will be triggered, and if the
+exception in the catch block matches the catch exception statements,
+then whichever matches will be invoked. Note that multiple catch
+statements are allowed, it is also possible that no exception is caught,
+if none of the catch statements match the exception being thrown. If in
+the example above, something else than
+<code>InputMismatchException</code> then the catch block will not be
+triggered, and the exception will be handled by the <code>JVM</code>
+itself</p>
+<h3 id="multi-catch-catching">Multi-catch catching</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> <span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> integerStr <span class="op">=</span> <span class="st">&quot;non-integral-type&quot;</span><span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The string to scan integer from it is: &quot;</span> <span class="op">+</span> integerStr<span class="op">);</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Scanner</span> consoleScanner <span class="op">=</span> <span class="kw">new</span> <span class="bu">Scanner</span><span class="op">(</span>integerStr<span class="op">);</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The integer value scanned from string is: &quot;</span> <span class="op">+</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>            consoleScanner<span class="op">.</span><span class="fu">nextInt</span><span class="op">());</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">InputMismatchException</span> ime<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Error: Cannot scan an integer from the given string&quot;</span><span class="op">);</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">NoSuchElementException</span> nsee<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Error: Cannot scan an integer from the given string&quot;</span><span class="op">);</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">IllegalStateException</span> ise<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Error: nextInt() called on a closed Scanner object&quot;</span><span class="op">);</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In the example above, calling <code>nextInt</code>, will fail with
+<code>NoSuchElementException</code>, why is that ? Simple, because the
+scanner is initialized with an invalid string from which to read/parse
+int, in this case a string <code>"non-integral-type"</code>. This also
+shows that the order in which the exceptions are caught also matters, in
+this case the <code>InputMismatchException</code> will not trigger
+before the <code>NoSuchElementException</code>, however
+<code>InputMismatchException</code> extends from
+<code>NoSuchElementException</code>, therefore it is not possible two do
+the following</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// note that the catch statement order matters, especially when the exceptions are such that they have intersecting and</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">// common hierarchy, in this case the NoSuchElementException is parent class of the InputMismatchException</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The integer value scanned from string is: &quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> consoleScanner<span class="op">.</span><span class="fu">nextInt</span><span class="op">());</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">NoSuchElementException</span> nsee<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Error: Cannot scan an integer from the given string&quot;</span><span class="op">);</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">InputMismatchException</span> ime<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Error: Cannot scan an integer from the given string&quot;</span><span class="op">);</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Note that the <code>NoSuchElementException</code> which is a super
+class of the <code>InputMismatchException</code> is caught first, that
+is not possible, the child / sub classes must come first, otherwise this
+is considered a compile time error, why is that ? If that was not an
+error during run-time the exception that will be caught will always be
+<code>NoSuchElementException</code>, even if the actual instance is
+<code>InputMismatchException</code>, meaning that this is potentially a
+logical error, and there is no way to catch that during run-time, that
+is why the compiler is helpful, and prompts with an error during
+compilation, suggesting something is logically wrong, not
+syntactically.</p>
+<p><code>When providing multiple catch handlers, handle specific exceptions before handling general exceptions. If you provide a derived class exception, catch handler after a base class exception handler, the compiler will issue a compile time error.</code></p>
+<p>The language also provides something known as multi catch blocks,
+which allows one to express the catch statement such that it matches
+multiple exception in a single catch statement.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// note that a binary or operator (pipe) is used, however, this is technically, a compiler error because in multi-catch</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">// block the exceptions can not be of related types, in this case one is a parent of the other</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The integer value scanned from string is: &quot;</span> <span class="op">+</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        consoleScanner<span class="op">.</span><span class="fu">nextInt</span><span class="op">());</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">NoSuchElementException</span> <span class="op">|</span> <span class="bu">IllegalStateException</span> multie<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this is not a valid multi-catch, since the two exceptions are related,</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Error: An error occured while attempting to scan the integer&quot;</span><span class="op">);</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>In multi-catch block, one cannot combine catch handlers for two exceptions that share a base - derived class relationship. Only unrelated exceptions can be listed and combined in a multi-catch.</code></p>
+<p>One might notice that both multiple catch statements and multi-catch
+statements fill a very similar role, which one makes more sense, depends
+on the situation. If the exceptions are thrown for the same or similar
+reason, then a multi-catch makes more sense, makes code more readable
+and maintainable. However if the different exceptions are handled very
+differently in their catch blocks, then a multiple catch statements
+approach is required</p>
+<h3 id="general-catching">General catching</h3>
+<p>As already discussed all exceptions extend from the
+<code>Throwable</code> class, and further more from the Exception class
+as well, that means that in the catch statement one can specify a higher
+level Exception type, <code>Throwable</code> even, to make sure all
+types of exceptions which a given statement can emit within a try-catch
+block are caught, not the best idea, but sometimes it can be useful. For
+example many types of different exceptions are being thrown when one
+interacts with the I/O API operations. If one tries to handle each and
+every case, trying to be as pedantic as possible, the code will quickly
+become unreadable and non really maintainable, in in such general
+situations, it is simply better to catch <code>Exception</code> type
+instead, for the cases that are not as important, and a general error
+can be reported.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;You typed the integer value: &quot;</span> <span class="op">+</span> consoleScanner<span class="op">.</span><span class="fu">nextInt</span><span class="op">());</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">InputMismatchException</span> ime<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// if something other than integer is typed, we&#39;ll get this exception, so handle it</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Error: You typed some text that is not an integer value...&quot;</span><span class="op">);</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// catch IllegalStateException, and anything else here which is unlikely to occur...</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Error: Encountered an exception and could not read an integer from</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        the console<span class="kw">...</span> <span class="st">&quot;);</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>So in the example above the most important exception is being
+handled, exclusively, which is the <code>InputMismatchException</code>,
+which will occur in case the scanner can not read a valid integral type
+on the input, however everything else, is relegated to just the
+<code>catch(Exception)</code> block</p>
+<h2 id="finalizing">Finalizing</h2>
+<p>All of the examples above have one big issue, that is the fact that
+the Scanner object is not closed, however this can be mitigated by
+calling the close method on the scanner object, this can be done in
+several ways, but the try-catch block in java have two main methods to
+achieve this - try-with-resources (introduced in Java 8) and finally
+(the classic approach)</p>
+<h3 id="finally">Finally</h3>
+<p>The finally block is a block which is executed, regardless of the
+fact that an exception is occurred. The code inside the finally block
+will be executed AFTER the code in both the try and catch, even if an
+exception is not caught, the finally block will always be executed. This
+provides a deferred safe way to clean up resources after their usage has
+expired</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Type an integer in the console: &quot;</span><span class="op">);</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Scanner</span> consoleScanner <span class="op">=</span> <span class="kw">new</span> <span class="bu">Scanner</span><span class="op">(</span><span class="bu">System</span><span class="op">.</span><span class="fu">in</span><span class="op">);</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;You typed the integer value: &quot;</span> <span class="op">+</span> consoleScanner<span class="op">.</span><span class="fu">nextInt</span><span class="op">());</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// call all other exceptions here ...</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Error: Encountered an exception and could not read an</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        integer from the console<span class="kw">...</span> <span class="st">&quot;);</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Exiting the program - restart and try the program again!&quot;</span><span class="op">);</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">finally</span> <span class="op">{</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// note that close itself, as documented can throw an IllegalStateException, in case one tries to call close</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// multiple times on the same scanner object</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Done reading the integer... closing the Scanner&quot;</span><span class="op">);</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    consoleScanner<span class="op">.</span><span class="fu">close</span><span class="op">();</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// if the call to close above, throws, anything below it will not be executed, that is why it is not recommended to</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// use the old fashioned finally block to close, closeable objects, since that could still cause a resource leak in</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// some cases</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Will not be called in caes close() above throws an exception&quot;</span><span class="op">);</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>It is also possible to have internal try-catch inside a finally
+block, that is actually the old school way of closing file stream
+objects, since their close method, does in fact throw a checked
+exception and it has to be handled, it is not optional. Note that
+however</p>
+<p><code>If a call to System.exit() is done inside a method, it will abnormally terminate the program. So if the calling method has any finally blocks, they will not be called, and resources may leak. For this reason it is a bad practice to call System.exit(), to terminate or exit from a program</code></p>
+<p>Some very weird caveats that can occur within the usage of finally
+block</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// since the finally block is always executed, this will `always` return false, therefore it is not really advised to</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">// return anything from finally blocks</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="dt">boolean</span> <span class="fu">returnTest</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">finally</span> <span class="op">{</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="try-with-resources">Try-with-resources</h3>
+<p>This is a new feature in Java 8, which is meant to circumvent all the
+usual boilerplate and possible issues that might occur using the usual
+finally syntax, the try-with-resources used to close all resources which
+extend from the <code>AutoCloseable</code> interface, also introduced in
+Java 8, this interface signals to the <code>JVM</code>, that a resource
+is <code>auto-closeable</code>, and the resource is declared within the
+try-with-resources statement block the close method of that resource
+will be automatically closed.</p>
+<p>The syntax of the try-with-resources is quite simple, the resources
+are declared and initialized in the try block, multiple ones can be
+declared by using a semi colon to split them up.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span><span class="op">(</span><span class="bu">Scanner</span> consoleScanner <span class="op">=</span> <span class="kw">new</span> <span class="bu">Scanner</span><span class="op">(</span><span class="bu">System</span><span class="op">.</span><span class="fu">in</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;You typed the integer value: &quot;</span> <span class="op">+</span> consoleScanner<span class="op">.</span><span class="fu">nextInt</span><span class="op">());</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// catch all other exceptions here ...</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Error: Encountered an exception and could not read an</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        integer from the console<span class="kw">...</span> <span class="st">&quot;);</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Exiting the program - restart and try the program again!&quot;</span><span class="op">);</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Note the way the resource is being declared, in the example above
+there is no finally block, however internally the compiler will
+translate this into an actual try-catch-finally block when during the
+code generation phase, the try-with-resources is mostly a syntax sugar
+for a regular finally block, this however makes sure that the code is
+functionally correct, and there is no logical issues.</p>
+<p>To declare more than one resources within the try-with-resource
+statement as mentioned above one can use a <code>;</code> to separate
+them, all of them are explicitly defined as effectively final</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// note that the two declarations are split with a semi-colon, in the try-with-resources statement</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">ZipOutputStream</span> zipFile <span class="op">=</span> <span class="kw">new</span> <span class="bu">ZipOutputStream</span><span class="op">(</span><span class="kw">new</span> <span class="bu">FileOutputStream</span><span class="op">(</span>zipFileName<span class="op">));</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                                <span class="bu">FileInputStream</span> fileIn <span class="op">=</span> <span class="kw">new</span> <span class="bu">FileInputStream</span><span class="op">(</span>fileName<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// putNextEntry can throw IOException</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    zipFile<span class="op">.</span><span class="fu">putNextEntry</span><span class="op">(</span><span class="kw">new</span> <span class="bu">ZipEntry</span><span class="op">(</span>fileName<span class="op">));</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the variable to keep track of number of bytes sucessfully read</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// copy the contents of the input file into the zip file</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> lenRead <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span><span class="op">((</span>lenRead <span class="op">=</span> fileIn<span class="op">.</span><span class="fu">read</span><span class="op">(</span>buffer<span class="op">))</span> <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span> <span class="co">// read can throw IOException</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        zipFile<span class="op">.</span><span class="fu">write</span><span class="op">(</span>buffer<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> lenRead<span class="op">);</span> <span class="co">// write can throw IOException</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the streams will be closed automatically because they are within try-with-</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// resources statement</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Note that all resources declared within the try-with-resources block
+are effectively final, meaning that they can not be re-assigned, this is
+because the original reference will be lost, and the resources would
+effectively leak. However what is possible is the following</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// note that in this example  the console scanner is declared and initialized outside the try-with-resources block,</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">// however another variable captures the original reference in the try-with-resources block effectively doing the same as</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">// the example above, but it does show that something like that is possible and not considered an error.</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="bu">Scanner</span> consoleScanner <span class="op">=</span> <span class="kw">new</span> <span class="bu">Scanner</span><span class="op">(</span><span class="bu">System</span><span class="op">.</span><span class="fu">in</span><span class="op">);</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">Scanner</span> scan <span class="op">=</span> consoleScanner<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// use the scan instance</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// do some catching</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The main benefit of the try-with-resources statement is that it
+simplifies the code and makes it less verbose, however it also ensures
+correctness, by not having to manually provide finally blocks which can
+be either forgotten or functionally or logically wrong.</p>
+<p>Note that it is also possible to provide a try-with-resources block
+that has no catch statement, this is not really recommended however it
+is allowed in the language</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span><span class="op">(</span><span class="bu">Scanner</span> consoleScanner <span class="op">=</span> <span class="kw">new</span> <span class="bu">Scanner</span><span class="op">(</span><span class="bu">System</span><span class="op">.</span><span class="fu">in</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;You typed the integer value: &quot;</span> <span class="op">+</span> consoleScanner<span class="op">.</span><span class="fu">nextInt</span><span class="op">());</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>If a finally and try-with-resources are used together, the resources inside the try-with-resource statement will be closed BEFORE the finally block is called, meaning that closing them again in the finally block is most definitely wrong and undefined behavior, they will likely throw since the close method is already closed, in that case the finally block can be used to log or notify the outside world that all resources are cleaned up correctly and finalized.</code></p>
+<h2 id="throws">Throws</h2>
+<p>The other component of the Exception framework model in Java, is the
+throws clause, this clause defines that a certain method throws an
+exception, if a method throws an unchecked exception using the throws
+clause is optional, however if a method is throwing a checked exception
+the throws clause is not optional, and it has to declare all the checked
+exceptions that this method might throw. It is usually a good practice
+to also document which exception is thrown from a method, based on which
+condition or erroneous state.</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// this demonstrates how a checked exception is declared with the throws clause, the exception is propagated from the</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">// new File() method, which itself declares throws clause, in this case the exception is not handled in the main method,</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">// therefore it is propagated outisde of the main method, however it has to be declared that the main method throws,</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">// otherwise a compiler error will occur</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> <span class="op">[]</span>args<span class="op">)</span> <span class="kw">throws</span> <span class="bu">FileNotFoundException</span> <span class="op">{</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Reading an integer from the file &#39;integer.txt&#39;: &quot;</span><span class="op">);</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Scanner</span> consoleScanner <span class="op">=</span> <span class="kw">new</span> <span class="bu">Scanner</span><span class="op">(</span><span class="kw">new</span> <span class="bu">File</span><span class="op">(</span><span class="st">&quot;integer.txt&quot;</span><span class="op">));</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;You typed the integer value: &quot;</span> <span class="op">+</span> consoleScanner<span class="op">.</span><span class="fu">nextInt</span><span class="op">());</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>`When a method which declares at least one checked exception is used
+through the throws clause, within an outer method, the outer method has
+only two possibilities - either handle the exception or simply
+re-declare the throws clause so another method which invokes it will
+handle it or re-throw it.</p>
+<p>The throws clause has some additional properties which need to be
+considered, one of which is what happens if a base method declares
+throws clause, and a method in a sub-class has to override it. The rule
+of thumb, and generally the accepted approach is that the contract from
+the base class HAS to be adhered to, it is the contract after all, so if
+a sub-class overrides a method, it can NOT change the throws clause such
+that more general checked exceptions are thrown from the overridden
+method, and it can not add more checked exceptions to be thrown form the
+overridden method, both of these actions result in compiler error
+(however a checked exception can be changed from the base method, only
+if the checked exception defined in the overriding method is part of the
+hierarchy, or in other words is a sub-type of the one defined in the
+base method)</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> IntReader <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">readIntFromFile</span><span class="op">()</span> <span class="kw">throws</span> <span class="bu">IOException</span><span class="op">;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> InvalidThrowsClause <span class="kw">implements</span> IntReader <span class="op">{</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this is allowed, changing the type of the checked exception with another checked exception, only if it is</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// part of the type hierarchy is possible, in this case FileNotFoundException extends from IOException</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">readIntFromFile</span><span class="op">()</span> <span class="kw">throws</span> <span class="bu">FileNotFoundException</span> <span class="op">{</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Scanner</span> consoleScanner <span class="op">=</span> <span class="kw">new</span> <span class="bu">Scanner</span><span class="op">(</span><span class="kw">new</span> <span class="bu">File</span><span class="op">(</span><span class="st">&quot;integer.txt&quot;</span><span class="op">));</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> consoleScanner<span class="op">.</span><span class="fu">nextInt</span><span class="op">();</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>The throws declaration in an overridden method can only be changed or modified to add unchecked exception to the list of exceptions being thrown, any modification to the list of the checked exception where the checked exception is not a sub-type of the original one being thrown will result in a compiler error</code></p>
+<h2 id="documentation">Documentation</h2>
+<p>It is as mentioned already a good practice to use the <span
+class="citation" data-cites="throws">@throws</span> <code>JavaDoc</code>
+tag, to document the specific situations or causes in which an exception
+- checked or unchecked exception might be thrown from a method. Here is
+an actual example from the actual implementation of the
+<code>nextInt</code> method form Scanner</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">*</span> Scans the next token of the input as an int<span class="co">.</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">*</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">*</span> <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span> An invocation of this method of the form</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">*</span> nextInt<span class="co">()</span> behaves in exactly the same way as the</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co">*</span> invocation nextInt<span class="co">(</span>radix<span class="co">),</span> where radix</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">*</span> is the default radix of this scanner<span class="co">.</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">*</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">*</span> <span class="co">@</span>return the int scanned from the input</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">*</span> <span class="co">@</span>throws InputMismatchException</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">*</span> if the next token does not match the Integer</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="co">*</span> regular expression<span class="co">,</span> or is out of range</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co">*</span> <span class="co">@</span>throws NoSuchElementException if input is exhausted</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co">*</span> <span class="co">@</span>throws IllegalStateException if this scanner is closed</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="co">*/</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">int</span> <span class="fu">nextInt</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fu">nextInt</span><span class="op">(</span>defaultRadix<span class="op">);</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The way the exceptions are listed, by convention is in alphabetical
+order, when a method can throw more than one exception in the
+documentation. They are not listed by severity or in base - child class
+relationship</p>
+<h2 id="miscellaneous">Miscellaneous</h2>
+<ul>
+<li><p>If a method does not have a throws clause, ti does not mean it
+cannot throw any exceptions; it just means it cannot throw any checked
+exceptions.</p></li>
+<li><p>Static block initializers cannot throw any check exceptions, this
+is because static initialization blocks are invoked when the class is
+loaded, so there is no way to handle the thrown exceptions in the
+caller. Further more there is no way to declare the checked exceptions
+in a throws clause using static initializer</p></li>
+<li><p>Non-static initializer blocks can throw checked exceptions
+however all the constructors should declare those exceptions, in their
+throws clause. This is because the compiler merges the code in the
+non-static initalizer block and the constructors during the code
+generation phase, hence the throws clause of the constructor can be used
+for declaring the checked exceptions that a non-static init block can
+throw.</p></li>
+<li><p>An overriding method cannot declare more checked exceptions in
+the throws clause than the list of exceptions declared in the throws
+clause of the base method</p></li>
+<li><p>An overriding method can declare more specific exceptions than
+the exception listed in the throws clause of the base method; in other
+words, one can still declare derived exception in the throws clause of
+the overriding method.</p></li>
+<li><p>If a method is declared in two or more interfaces, and if that
+method declares to throw different exceptions in the throws clause, the
+method implementations must declare and list all of these exception in
+their throws clause, the methods throws clauses are effectively merged
+together</p></li>
+</ul>
+<h2 id="user-exceptions">User-exceptions</h2>
+<p>Custom exceptions can be declared by users by extending either from
+the <code>Exception</code> class or the <code>RuntimeException</code>,
+it is bad practice to extend from the <code>Throwable</code> or
+<code>Error</code> classes. As already mentioned, based on the type of
+exception - checked or unchecked, one extends from
+<code>Exception</code> or <code>RuntimeException</code> respectively</p>
+<p>The Exception class and by proxy the <code>RuntimeException</code>
+provide the following constructors</p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 85%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Exception()</td>
+<td>Default constructor of the Exception class with no additional (or
+detailed) information on the exception.</td>
+</tr>
+<tr class="even">
+<td>Exception(String)</td>
+<td>Constructor that takes a detailed information string about the
+constructor as an argument.</td>
+</tr>
+<tr class="odd">
+<td>Exception(String, Throwable)</td>
+<td>In addition to a detailed information string as an argument, this
+exception constructor takes the cause of the exception (which is another
+exception) as an argument.</td>
+</tr>
+<tr class="even">
+<td>Exception(Throwable)</td>
+<td>Constructor that takes the cause of the exception as an
+argument.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 92%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>String getMessage()</td>
+<td>Returns the detailed message (passed as a string when the exception
+was created).</td>
+</tr>
+<tr class="even">
+<td>Throwable getCause()</td>
+<td>Returns the cause of the exception (if any, or else returns
+null).</td>
+</tr>
+<tr class="odd">
+<td>Throwable[] getSuppressed()</td>
+<td>Returns the list of suppressed exceptions (typically caused when
+using a try-with-resources statement) as an array.</td>
+</tr>
+<tr class="even">
+<td>void printStackTrace()</td>
+<td>Prints the stack trace (i.e., the list of method calls with relevant
+line numbers) to the console (standard error stream). If the cause of an
+exception (which is another exception object) is available in the
+exception, then that information will also be printed. Further, if there
+are any suppressed exceptions, they are also printed.</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">// the class declaration is an example of a custom user exception, which is in this case unchecked one, since it extends</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">// from the RuntimeException, by default the custom user exceptions are not required to provide any body, since the parent</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">// class RuntimeException and Exception in this case have default non-arg constructors</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> InvalidInputException <span class="kw">extends</span> <span class="bu">RuntimeException</span> <span class="op">{</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">InvalidInputException</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">InvalidInputException</span><span class="op">(</span><span class="bu">String</span> message<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">super</span><span class="op">(</span>message<span class="op">);</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">InvalidInputException</span><span class="op">(</span><span class="bu">String</span> message<span class="op">,</span> <span class="bu">Throwable</span> throwable<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">super</span><span class="op">(</span>message<span class="op">,</span> throwable<span class="op">);</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="assertions">Assertions</h2>
+<p>The assert statement is used to check or test your assumptions about
+the program. The keyword, assert provides support for assertions in
+Java. Each assertion statement contains a Boolean expression. If the
+result of the Boolean expression is true, it means the assumption is
+true, so nothing happens. However if the Boolean result is false, then
+the assumption you had about the program holds no more, and the
+<code>AssertionError</code> is thrown. Remember that the Error class and
+its derived classes indicate serious <code>runtime</code> errors and are
+not meant to be handled. In the same way, if an
+<code>AssertionError</code> is thrown the best course of action is not
+to catch the exception and to allow the program to terminate. After that
+the assertion has to be examined, for the reason it failed.</p>
+<p>Asserts are quite useful tool for ones program, it allows users to
+make certain assumptions in the code, and that is quite helpful to
+discover when these assumptions fail.</p>
+<p>A very important detail to remember is that assertions are by default
+disabled in the run-time. To enable them use the <code>-ea</code> switch
+(or its longer form of <code>-enableasserts</code>). To disable
+assertions at <code>runtime</code> use a <code>-da</code> switch. If
+assertions are disabled by default at runtime then what is the use of
+<code>-da</code> switch ? There are many uses. For example, if you want
+to enable assertions for all classes within a given package and want to
+disable asserts in a specific class in that package. Then a -da switch
+is useful.</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 83%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Command-Line Argument</th>
+<th>Short Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>-ea</td>
+<td>Enables assertions by default (except system classes).</td>
+</tr>
+<tr class="even">
+<td>-ea:<class name></td>
+<td>Enables assertions for the given class name.</td>
+</tr>
+<tr class="odd">
+<td>-ea:<package name>…</td>
+<td>Enables assertions in all the members of the given package
+<package name>.</td>
+</tr>
+<tr class="even">
+<td>-ea:…</td>
+<td>Enable assertions in the given unnamed package.</td>
+</tr>
+<tr class="odd">
+<td>-esa</td>
+<td>Short for -enablesystemsassertions; enables assertions in system
+classes. This option is rarely used.</td>
+</tr>
+<tr class="even">
+<td>-da</td>
+<td>Disable assertions by default (except system classes).</td>
+</tr>
+<tr class="odd">
+<td>-da:<class name></td>
+<td>Disable assertions for the given class name.</td>
+</tr>
+<tr class="even">
+<td>-da:<package name>…</td>
+<td>Disables assertions in all the members of the given package
+<package name>.</td>
+</tr>
+<tr class="odd">
+<td>-da:…</td>
+<td>Disable assertions in the given unnamed package.</td>
+</tr>
+<tr class="even">
+<td>-dsa</td>
+<td>Short for -disablesystemsassertions; disables assertions in system
+classes. This option is rarely used.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="summary">Summary</h1>
+<p>Try-catch and throw statements</p>
+<ul>
+<li><p>When an exception is thrown from a try block, the
+<code>JVM</code> looks for a matching catch handler from the list of
+catch handlers in the method call-chain. If no matching handler is
+found, that unhandled exception will result in crashing the
+application.</p></li>
+<li><p>While providing multiple exception handlers (stacked catch
+handlers), specific exception handlers should be provided before general
+exception handlers.</p></li>
+<li><p>You can programatically access the stack trace using the methods
+such as <code>printStackTrace()</code> and <code>getStackTrace()</code>,
+which can be called on any exception object.</p></li>
+</ul>
+<p>Catch, multi-catch, and finally</p>
+<ul>
+<li><p>A try block can have multiple catch handlers. If the cause of two
+or more exceptions is similar, and the handling code is also similar,
+you can consider combining the handlers and make it into a multi-catch
+block.</p></li>
+<li><p>A catch block should either handle the exception or
+<code>rethrow</code> it. To hide or swallow an exception by catching an
+exception and doing nothing is really a bad practice.</p></li>
+<li><p>You can wrap one exception and throw it as another exception.
+These two exceptions become chained exceptions. From the thrown
+exception, you can get the cause of the exception.</p></li>
+<li><p>The code inside a finally block will be executed irrespective of
+whether a try block has successfully executed or resulted in an
+exception.</p></li>
+</ul>
+<p>Try-with-resources statement</p>
+<ul>
+<li><p>Forgetting to release resources by explicitly calling the
+<code>close()</code> method is a common mistake. You can use a
+try-with-resources statement to simplify your code and auto-close
+resources.</p></li>
+<li><p>You can auto-close multiple resources within a try-with-resources
+statement. These resources need to be separated by semicolons in the
+try-with-resources statement header.</p></li>
+<li><p>If a try block throws an exception, and a finally block also
+throws exception(s), then the exceptions thrown in the finally block
+will be added as suppressed exceptions to the exception that gets thrown
+out of the try block to the caller.</p></li>
+</ul>
+<p>Custom exceptions</p>
+<ul>
+<li><p>It is recommended that you derive custom exceptions from either
+the Exception or <code>RuntimeException</code> class.</p></li>
+<li><p>A method’s throws clause is part of the contract that its
+overriding methods in derived classes should obey.</p></li>
+<li><p>An overriding method can provide the same throw clause as the
+base method’s throws clause or a more specific throws clause than the
+base method’s throws clause.</p></li>
+<li><p>The overriding method cannot provide a more general throws clause
+or declare to throw additional checked exceptions when compared to the
+base method’s throws clause.</p></li>
+<li><p>For a resource to be usable in a try-with-resources statement,
+the class of that resource must implement the
+<code>java.lang.AutoCloseable</code> interface and define the
+<code>close()</code> method.</p></li>
+</ul>
+<p>Invariant with asserts</p>
+<ul>
+<li><p>Assertions are condition checks in the program and should be used
+for explicitly checking the assumptions you make while writing
+programs.</p></li>
+<li><p>The assert statement is of two forms: one that takes a Boolean
+argument and one that takes an additional string argument.</p></li>
+<li><p>If the Boolean condition given in the assert argument fails
+(i.e., evaluates to false), the program will terminate after throwing an
+<code>AssertionError</code>. It is not advisable to catch and recover
+from when an <code>AssertionError</code> is thrown by the
+program.</p></li>
+<li><p>By default, assertions are disabled at runtime. You can use the
+command-line arguments of -ea (for enabling asserts) and
+<code>-da</code> (for disabling asserts) and their variants when you
+invoke the <code>JVM</code>.</p></li>
+</ul>
+</body>
+</html>

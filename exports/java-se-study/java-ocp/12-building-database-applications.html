@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>12-building-database-applications</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#preface" id="toc-preface">Preface</a>
+<ul>
+<li><a href="#jdbc" id="toc-jdbc">JDBC</a></li>
+<li><a href="#connection" id="toc-connection">Connection</a></li>
+<li><a href="#driver" id="toc-driver">Driver</a></li>
+<li><a href="#manager" id="toc-manager">Manager</a></li>
+<li><a href="#querying" id="toc-querying">Querying</a>
+<ul>
+<li><a href="#statement" id="toc-statement">Statement</a></li>
+<li><a href="#resultset" id="toc-resultset">ResultSet</a></li>
+<li><a href="#extraction" id="toc-extraction">Extraction</a></li>
+<li><a href="#updating" id="toc-updating">Updating</a></li>
+<li><a href="#inserting" id="toc-inserting">Inserting</a></li>
+<li><a href="#deleting" id="toc-deleting">Deleting</a></li>
+<li><a href="#creation" id="toc-creation">Creation</a></li>
+</ul></li>
+<li><a href="#caveats" id="toc-caveats">Caveats</a></li>
+</ul></li>
+<li><a href="#summary" id="toc-summary">Summary</a></li>
+</ul>
+</nav>
+<h1 id="preface">Preface</h1>
+<p>The Java Database Connectivity (JDBC) is an important Java API that
+defines how a client accesses a database. As such it is a critical
+component in building large-scale enterprise Java solutions. At a high
+level, interacting with a database involves the following steps:</p>
+<ol type="1">
+<li>Establish a connection to the database</li>
+<li>Execute SQL queries to retrieve create or modify tables in the
+database</li>
+<li>Close the connection to the database</li>
+</ol>
+<p>Java provides a set of API to carry out these activities with
+databases. <code>JDBC</code> can be used to establish a connection to a
+database, execute SQL query and close the connection with the database.
+The benefit of <code>JDBC</code> is that it is not writing a program for
+a specific database. <code>JDBC</code> creates a loose coupling between
+your Java program and the type of database used. For instance, databases
+may differ in how they establish a connection, <code>JDBC</code> hides
+all that heterogeneity of these databases and offers a single set to API
+you can use to interact with all types of databases. Note that
+<code>JDBC</code> supports only relational databases such as
+<code>MySQL</code>, <code>Oracle</code>, <code>MSSQL</code> and
+<code>DB2</code>. It does not support new-generation databases such as
+<code>NoSQL</code> databases.</p>
+<h2 id="jdbc">JDBC</h2>
+<p>There are several vital components which comprise the
+<code>JDBC</code> and how these components work is described below. A
+simplified architecture of <code>JDBC</code> is represented below</p>
+<p>The database drivers and the driver manager play a key role in
+realizing the objective of the <code>JDBC</code>. <code>JDBC</code>
+drivers are specifically designed to interact with their respective
+DBMS. The driver manager works as a directory of <code>JDBC</code>
+drivers - it maintains a list of available data sources and their
+drivers. The driver manager chooses an appropriate driver to communicate
+with the respective DBMS. It can manage multiple concurrent drivers
+connected to their respective data sources.</p>
+<h2 id="connection">Connection</h2>
+<p>The connection interface represents a connection from application to
+the database. It is a channel through which the application and the
+database communicate. Below are listed some of the most important
+methods in the Connection interface.</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 82%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Statement createStatement()</td>
+<td>Creates a Statement object that can be used to send SQL statements
+to the database.</td>
+</tr>
+<tr class="even">
+<td>PreparedStatement prepareStatement(String sql)</td>
+<td>Creates a PreparedStatement object that can contain SQL statements.
+The SQL statement can have IN parameters; they may contain ? symbol(s),
+which are used as placeholders for passing actual values later.</td>
+</tr>
+<tr class="odd">
+<td>CallableStatement prepareCall(String sql)</td>
+<td>Creates a CallableStatement object for calling stored procedures in
+the database. The SQL statement can have IN or OUT parameters; they may
+contain ? symbol(s), which are used as placeholders for passing actual
+values later.</td>
+</tr>
+<tr class="even">
+<td>DatabaseMetaData getMetaData()</td>
+<td>Gets the DataBaseMetaData object. This metadata contains database
+schema information, table information, and so on, which is especially
+useful when you don’t know the underlying database.</td>
+</tr>
+<tr class="odd">
+<td>Clob createClob()</td>
+<td>Returns a Clob object (Clob is the name of the interface). Character
+Large Object (CLOB) is a built-in type in SQL; it can be used to store a
+column value in a row of a database table.</td>
+</tr>
+<tr class="even">
+<td>Blob createBlob()</td>
+<td>Returns a Blob object (Blob is the name of the interface). Binary
+Large Object (BLOB) is a built-in type in SQL; it can be used to store a
+column value in a row of a database table.</td>
+</tr>
+<tr class="odd">
+<td>void setSchema(String schema)</td>
+<td>When passed the schema name, sets this Connection object to the
+database schema to access.</td>
+</tr>
+<tr class="even">
+<td>String getSchema()</td>
+<td>Returns the schema name of the database associated with this
+Connection object; returns null if no schema is associated with it.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="driver">Driver</h2>
+<p>The first step to communicate with the database is to setup a
+connection between your application and the database server.
+Establishing a connection requires understanding the database URL, below
+is presented the base layout and format of a database connection URL
+string. The general format is as follows -
+<code>jdbc:&lt;subprotocol&gt;:&lt;subname&gt;</code></p>
+<p>Each of those components means something specific, and carries
+information for the database connection and driver manager, so it can
+establish the connection between the database and the java
+application</p>
+<ul>
+<li><p><code>jdbc</code> - is the same for all DBMS, this is true only
+for relational type databases. That part of the connection string is
+different based on the type of the database provider - nosql, relational
+and so on</p></li>
+<li><p><code>&lt;subprotocol&gt;</code> - differs for each DBMS, it
+specifies the vendor and database type, this is based on the type of the
+database, it helps the driver manager to identify what is the database
+vendor the connection string is describing</p></li>
+<li><p><code>&lt;subname&gt;</code> - depends on the database, but its
+general format is <code>&lt;server&gt;:&lt;port&gt;/database</code>. The
+server depends on the location in which the database is deployed. Each
+DBMS uses specific <code>&lt;port&gt;</code> number (3306 is for example
+the default one for MySQL). Finally the database name to which to
+connect to is provided</p></li>
+</ul>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>jdbc:postgresql://localhost/test</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>jdbc:oracle://127.0.0.1:44000/test</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>jdbc:microsoft:sqlserver://himalaya:1433</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> JdbcExample <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">// URL points to JDBC protocol: mysql subprotocol;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// localhost is the address of the server where we installed our</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// DBMS (i.e. on local machine) and 3306 is the port on which</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">// we need to contact our DBMS</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> url <span class="op">=</span> <span class="st">&quot;jdbc:mysql://localhost:3306/&quot;</span><span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// we are connecting to the addressBook database we created earlier</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> database <span class="op">=</span> <span class="st">&quot;addressBook&quot;</span><span class="op">;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// we login as &quot;root&quot; user with password &quot;mysql123&quot;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> userName <span class="op">=</span> <span class="st">&quot;root&quot;</span><span class="op">;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> password <span class="op">=</span> <span class="st">&quot;mysql123&quot;</span><span class="op">;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> connection <span class="op">=</span> <span class="bu">DriverManager</span><span class="op">.</span><span class="fu">getConnection</span><span class="op">(</span>url <span class="op">+</span> database<span class="op">,</span> userName<span class="op">,</span> password<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Database connection: Successful&quot;</span><span class="op">);</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Database connection: Failed&quot;</span><span class="op">);</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>            e<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The URL indicates that <code>JDBC</code> is the protocol and
+<code>MySQL</code> is the sub-protocol; <code>localhost</code> is the
+address of the sever where the database service is running, in this case
+it is on the local machine, but it can be any valid IP or FQDN. The
+connection object is obtained by invoking the
+<code>DriverManager.getConnection</code> method, the method expects the
+URL of the database along with a database name username and password.
+The connection has to be closed, before exiting the program.</p>
+<p>In this example a try-with-resources is statement is used; hence the
+close method for the connection is called automatically. If anything
+goes wrong an exception will be thrown. In that case the program prints
+the exception’s stack trace</p>
+<p>If the program above is to be run, it will print out an exception,
+this is because the connection will fail due to missing drivers, by
+default the <code>JVM</code> does not ship with any drivers, for any
+database vendors, in this case a driver for connecting to the target
+type of database is required - <code>MySQL</code>. To do this the driver
+has to be downloaded from the official vendor distributor, usually those
+are jar files, which have to be added to the <code>classpath</code> when
+compiling / running the application. This can be done by appending the
+full path of the location of the jar with drivers to the
+<code>-cp</code> argument -
+<code>javac -cp .:path/to/mysql-connector-java-8.x.x.jar JdbcExample.java</code>
+and when running it
+<code>java -cp .:path/to/mysql-connector-java-8.x.x.jar JdbcExample</code>.</p>
+<p><code>Usually when a connection to the database fails and throws an exception, it is rarely possible to do something about it, these errors often happen to be unrecoverable, even though those are checked exception, the only thing that can be really done is log the exception and gracefully notify the user of the issue. Exceptions often will occur if the host is not reachable, the credentials are wrong or the database is protected in unexpected ways, all of which can not recover during the run-time of the application</code></p>
+<h2 id="manager">Manager</h2>
+<p>The <code>DriverManager</code> class helps establish the connection
+between the program and the <code>JDBC</code> drivers. This class also
+keeps track of different data sources and <code>JDBC</code> drivers.
+Hence, there is no need to explicitly load drivers:
+<code>DriverManager</code> searches for suitable driver and if found
+automatically loads it when the <code>getConnection</code> method is
+called. The driver manager also manages multiple concurrent drivers
+connected to their respective data sources.
+<code>Connection connection = DriverManager.getConnection(url + database, userName, password)</code></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> url <span class="op">=</span> <span class="st">&quot;jdbc:mysql://localhost:3306/&quot;</span><span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Driver</span> driver <span class="op">=</span> <span class="bu">DriverManager</span><span class="op">.</span><span class="fu">getDriver</span><span class="op">(</span>url<span class="op">);</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>driver<span class="op">.</span><span class="fu">getClass</span><span class="op">().</span><span class="fu">getName</span><span class="op">());</span></span></code></pre></div>
+<p>The code segment above obtains the driver for the specified
+connection string, in this case it prints out the following text -
+<code>com.mysql.jdbc.Driver</code> this is the fully qualified name of
+the <code>MySQL</code> <code>JDBC</code> driver and
+<code>DriverManager</code> was able to load it. From this Driver object,
+one can establish a connection by calling the <code>connect</code>
+method and passing in the database URL and the optional Properties file
+reference - <code>Connection connection = driver.connect(url);</code>
+The properties file can contain the username and password, and other
+additional details</p>
+<h2 id="querying">Querying</h2>
+<p>Once a connection is established to the desired database, one can
+perform various operations on it. Common operations are known by the
+acronym CRUD (create, read, update delete).</p>
+<h3 id="statement">Statement</h3>
+<p>The statement is an SQL statement that can be used to communicate an
+SQL statement to the database, and receive results from the database.
+The statement interface stays atop the <code>PreparedStatement</code>
+and <code>CallableStatement</code> interfaces.</p>
+<ul>
+<li><p><code>Statement</code> - sends a basic SQL statement to the
+database without any parameters for typical uses, one needs to use this
+interface. It can be created using the <code>createStatement</code>
+method in the Connection interface.</p></li>
+<li><p><code>PreparedStatement</code> - represents a pre-compiled
+statement that can be customized using IN parameters. Usually it is more
+efficient than a raw Statement object; hence it is used to improve
+performance, especially if an SQL statement is executed many times.
+Instance of this <code>prepareStatement</code> can be obtained by
+calling the <code>preparedStatement</code> method on the Connection
+interface</p></li>
+<li><p><code>CallableStatement</code> - exectues stored procedures. The
+<code>CallableStatement</code> instances can handle IN as well as OUT
+and INOUT parameters. To get an instance of it simply call the
+<code>prepareCall</code> method on the Connection interface.</p></li>
+</ul>
+<p>Once the instance of the Statement is created, statement is ready to
+be executed. The statement interface provides three execute methods:
+executeQuery(), executeUpdate() and execute() - it is usually based on
+what type of Statement it is, to invoke the relevant method</p>
+<ul>
+<li><p><code>SELECT</code> - if the type of the statement is select,
+then the <code>executeQuery</code> method has to be invoked, since it
+has no side effects, and is meant only to retrieve data, it is not
+destructive in nature. It returns a <code>ResultSet</code>.</p></li>
+<li><p><code>INSERT / UPDATE or DELETE</code> - if the type of the
+statement is destructive in nature, or mutates the state of the
+database, then one must use the <code>executeUpdate</code> method, it
+returns an integer reflecting the updated number of rows.</p></li>
+<li><p><code>unknown</code> - in case the statement is not of known
+type, i.e. the instance was not produced by the caller of the execute
+methods, one may use the execute method, which may return multiple
+<code>ResultSet</code> or multiple update counts, or a combination of
+both.</p></li>
+</ul>
+<h3 id="resultset">ResultSet</h3>
+<p>Relational databases contain tables. Each table has a set of
+attributes. The tabular nature of a relational database is returned as
+<code>ResultSet</code>. A <code>ResultSet</code> is a table with column
+headings and associated values requested by the query. A
+<code>ResultSet</code> maintains a cursor pointing to the current row.
+Only one row can be read at a time, so the cursor position must be
+changed in order to fetch other rows. Initially the cursor is set to
+just before the first row. One needs to call the <code>next</code>
+method to advance the cursor to the actual first row first. The method
+returns a boolean value ; hence it can be used in a while loop to
+iterate over the entire <code>ResultSet</code>.</p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 87%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>void beforeFirst()</td>
+<td>Sets the cursor just before the first row in the resultset.</td>
+</tr>
+<tr class="even">
+<td>void afterLast()</td>
+<td>Sets the cursor just after the last row of the resultset.</td>
+</tr>
+<tr class="odd">
+<td>boolean absolute(int rowNumber)</td>
+<td>Sets the cursor to the requested row number (absolute position in
+the table-not relative to the current position).</td>
+</tr>
+<tr class="even">
+<td>boolean relative(int rowNumber)</td>
+<td>Sets the cursor to the requested row number relative to the current
+position. rowNumber can be a positive or negative value: a positive
+value moves forward, and a negative value moves backward relative to the
+current position.</td>
+</tr>
+<tr class="odd">
+<td>boolean next()</td>
+<td>Sets the cursor to the next row of the resultset.</td>
+</tr>
+<tr class="even">
+<td>boolean previous()</td>
+<td>Sets the cursor to the previous row of the resultset.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="extraction">Extraction</h3>
+<p>Now that all the necessary interface have been visited and shown, to
+execute a simple SQL statement query on the database -
+<code>Connection, Statement and ResultSet</code>. The general high level
+overview of the steps which need to be taken to extract information from
+the database. First obtain a <code>Connection</code> object, then create
+a <code>Statement</code> which is used to create obtain the
+<code>ResultSet</code>. The general pattern of actions remains the same
+in all database working/related applications</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> DbConnector <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="bu">Connection</span> <span class="fu">connectToDb</span><span class="op">()</span> <span class="kw">throws</span> <span class="bu">SQLException</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> url <span class="op">=</span> <span class="st">&quot;jdbc:mysql://localhost:3306/&quot;</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> database <span class="op">=</span> <span class="st">&quot;addressBook&quot;</span><span class="op">;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> userName <span class="op">=</span> <span class="st">&quot;root&quot;</span><span class="op">;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> password <span class="op">=</span> <span class="st">&quot;mysql123&quot;</span><span class="op">;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">DriverManager</span><span class="op">.</span><span class="fu">getConnection</span><span class="op">(</span>url <span class="op">+</span> database<span class="op">,</span> userName<span class="op">,</span> password<span class="op">);</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DbQuery <span class="op">{</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Get connection, execute query, get the result set</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">// and print the entries from the result rest</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> connection <span class="op">=</span> DbConnector<span class="op">.</span><span class="fu">connectToDb</span><span class="op">();</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>                <span class="bu">Statement</span> statement <span class="op">=</span> connection<span class="op">.</span><span class="fu">createStatement</span><span class="op">();</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>                <span class="bu">ResultSet</span> resultSet <span class="op">=</span> statement<span class="op">.</span><span class="fu">executeQuery</span><span class="op">(</span><span class="st">&quot;SELECT * FROM contact&quot;</span><span class="op">))</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;ID </span><span class="sc">\t</span><span class="st">fName </span><span class="sc">\t</span><span class="st">lName </span><span class="sc">\t</span><span class="st">email </span><span class="sc">\t\t</span><span class="st">phoneNo&quot;</span><span class="op">);</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">while</span> <span class="op">(</span>resultSet<span class="op">.</span><span class="fu">next</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>resultSet<span class="op">.</span><span class="fu">getInt</span><span class="op">(</span><span class="st">&quot;id&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>                    <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;firstName&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>                    <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;lastName&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>                    <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;email&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>                    <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;phoneNo&quot;</span><span class="op">));</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">catch</span> <span class="op">(</span><span class="bu">SQLException</span> sqle<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>            sqle<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">exit</span><span class="op">(-</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In the example above, the column names are being used to extract the
+information from the query, however indices instead can be used too.
+Remember that the indices are defined based on the query, not based on
+the absolute number of columns in the table being queried. In this case
+the select statement, selects all columns, therefore the table and query
+both have the same order and number of columns, however that is not
+always the case. One can use the following snippet to extract the column
+information from the Statement instead</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="op">(</span>resultSet<span class="op">.</span><span class="fu">next</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>resultSet<span class="op">.</span><span class="fu">getInt</span><span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span> <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="dv">2</span><span class="op">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span> <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="dv">3</span><span class="op">)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span> <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="dv">4</span><span class="op">)</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span> <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="dv">5</span><span class="op">));</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>Take a good note at the indices, used to extract the information from the result set object, the column index in the ResultSet object starts from 1, not 0.</code></p>
+<p>While referring to columns by column index, if one refers to a column
+by an index that is more than the total number of columns, an exception
+will be thrown. For instance, if another call is added to extract
+<code>resultSet.getString(6)</code> - this will produce
+<code>SQLException - Column Index out of range 6 &gt; 5.</code>. This is
+different from accessing rows outside of the range with absolute(int) or
+relative(int) which simply wrap around the result set instead.</p>
+<p>In this case both the data type and number of columns and names are
+known, however what if none of this information is present. In that case
+one must use the <code>getMetaData</code> method, on the
+<code>ResultSet</code>, object that returns a
+<code>ResultMetaData</code> object; on that object one can then use the
+<code>getColumnCount</code> method to get the column count. When the
+data type of a column entry is not known, the <code>getObject</code>
+method can be used on the <code>ResultSet</code>.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> numOfColumns <span class="op">=</span> resultSet<span class="op">.</span><span class="fu">getMetaData</span><span class="op">().</span><span class="fu">getColumnCount</span><span class="op">();</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="op">(</span>resultSet<span class="op">.</span><span class="fu">next</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// remember that the column index starts from 1 not 0</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;=</span> numOfColumns<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// since we do not know the data type of the column, we use getObject()</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">print</span><span class="op">(</span>resultSet<span class="op">.</span><span class="fu">getObject</span><span class="op">(</span>i<span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The example above shows how to fetch and print out all columns and
+the information inside a given ResultSet instance without having to
+worry about the data type of the target object or column. This is often
+not the case since the columns are known at the point of writing the
+statement and query but sometimes it is a good idea to know that the
+meta data for the current Result set is available</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> connection <span class="op">=</span> DbConnector<span class="op">.</span><span class="fu">connectToDb</span><span class="op">();</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Statement</span> statement <span class="op">=</span> connection<span class="op">.</span><span class="fu">createStatement</span><span class="op">();</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">ResultSet</span> resultset <span class="op">=</span> statement<span class="op">.</span><span class="fu">executeQuery</span><span class="op">(</span><span class="st">&quot;SELECT firstName, email FROM contact WHERE firstName=</span><span class="sc">\&quot;</span><span class="st">Michael</span><span class="sc">\&quot;</span><span class="st">&quot;</span><span class="op">))</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;fName </span><span class="sc">\t</span><span class="st">email&quot;</span><span class="op">);</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span>resultset<span class="op">.</span><span class="fu">next</span><span class="op">()){</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>resultset<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;firstName&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span> resultset<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;email&quot;</span><span class="op">));</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">SQLException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    e<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">exit</span><span class="op">(-</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In the example above, a similar get query is used, to extract all
+matching entries, where the first name equals Michael, but note that
+only two of the total columns are extracted, the first name and the
+email. In this case had we decided to use indices, the two allowed
+indices would be 1 and 2 since those are the only columns being
+extracted from this query.</p>
+<h3 id="updating">Updating</h3>
+<p>Updating the database is done in one of two ways. One can use regular
+SQL queries to update the database directly, or one can fetch the
+result-set object using an SQL query and then change it and the database
+through the interface of the <code>ResultSet</code> itself. Both methods
+are possible and supported, it usually depends on the use case or
+application</p>
+<p>In order to modify the <code>resultset</code> and the database the
+<code>ResultSet</code> class provides a set of update methods for each
+data type. There are also other supporting methods, such as
+<code>updateRow</code> and <code>deleteRow</code> to make the task
+simpler.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> connection <span class="op">=</span> DbConnector<span class="op">.</span><span class="fu">connectToDb</span><span class="op">();</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Statement</span> statement <span class="op">=</span> connection<span class="op">.</span><span class="fu">createStatement</span><span class="op">(</span><span class="bu">ResultSet</span><span class="op">.</span><span class="fu">TYPE_SCROLL_SENSITIVE</span><span class="op">,</span> <span class="bu">ResultSet</span><span class="op">.</span><span class="fu">CONCUR_UPDATABLE</span><span class="op">);</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">ResultSet</span> resultSet <span class="op">=</span> statement<span class="op">.</span><span class="fu">executeQuery</span><span class="op">(</span><span class="st">&quot;SELECT * FROM contact WHERE firstName=</span><span class="sc">\&quot;</span><span class="st">Michael</span><span class="sc">\&quot;</span><span class="st">&quot;</span><span class="op">))</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// first fetch the data and display it before the update operation</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Before the update&quot;</span><span class="op">);</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;id </span><span class="sc">\t</span><span class="st">fName </span><span class="sc">\t</span><span class="st">lName </span><span class="sc">\t</span><span class="st">email </span><span class="sc">\t\t</span><span class="st">phoneNo&quot;</span><span class="op">);</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span>resultSet<span class="op">.</span><span class="fu">next</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>resultSet<span class="op">.</span><span class="fu">getInt</span><span class="op">(</span><span class="st">&quot;id&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;firstName&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;lastName&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;email&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;phoneNo&quot;</span><span class="op">));</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// now update the resultset and display the modified data</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    resultSet<span class="op">.</span><span class="fu">absolute</span><span class="op">(</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    resultSet<span class="op">.</span><span class="fu">updateString</span><span class="op">(</span><span class="st">&quot;phoneNo&quot;</span><span class="op">,</span> <span class="st">&quot;+919976543210&quot;</span><span class="op">);</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// reflect those changes back to the database</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// by calling updateRow() method</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    resultSet<span class="op">.</span><span class="fu">updateRow</span><span class="op">();</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;After the update&quot;</span><span class="op">);</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;id </span><span class="sc">\t</span><span class="st">fName </span><span class="sc">\t</span><span class="st">lName </span><span class="sc">\t</span><span class="st">email </span><span class="sc">\t\t</span><span class="st">phoneNo&quot;</span><span class="op">);</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    resultSet<span class="op">.</span><span class="fu">beforeFirst</span><span class="op">();</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span>resultSet<span class="op">.</span><span class="fu">next</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>resultSet<span class="op">.</span><span class="fu">getInt</span><span class="op">(</span><span class="st">&quot;id&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;firstName&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;lastName&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;email&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;phoneNo&quot;</span><span class="op">));</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">SQLException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    e<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">exit</span><span class="op">(-</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The example above is pretty straightforward, the result set is
+obtained, printed out, then the cursor is set to the first entry, the
+<code>phoneNo</code> for that entry is updated to a new value, and the
+result set is set back to the first entry and printed out in full. Note
+that an <code>updateRow</code> method is being called, this is what
+essentially <code>commits</code> the changes to the row, otherwise all
+changes done to a given row stay in-memory, not actually written out to
+the database.</p>
+<p><code>Two major things - first to make a ResultSet update-able one must use the correct form of the create statement, passing in TYPE_SCROLL_SENSITIVE and CONCUR_UPDATABLE, second major point, call updateRow, after making changes to a given row in the result set in order to actually persist the changes in the database</code></p>
+<h3 id="inserting">Inserting</h3>
+<p>Inserting a row is very much similar to updating a row in a
+<code>ResultSet</code>, the difference is that when a new row is to be
+inserted the <code>ResultSet</code> cursor has to be moved in an
+appropriate position, which is the special <code>insert row</code>, then
+one can simply call the update methods that were already used to set the
+values for the given columns for that new row.</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> connection <span class="op">=</span> DbConnector<span class="op">.</span><span class="fu">connectToDb</span><span class="op">();</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Statement</span> statement <span class="op">=</span> connection<span class="op">.</span><span class="fu">createStatement</span><span class="op">(</span> <span class="bu">ResultSet</span><span class="op">.</span><span class="fu">TYPE_SCROLL_SENSITIVE</span><span class="op">,</span> <span class="bu">ResultSet</span><span class="op">.</span><span class="fu">CONCUR_UPDATABLE</span><span class="op">);</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">ResultSet</span> resultSet <span class="op">=</span> statement<span class="op">.</span><span class="fu">executeQuery</span><span class="op">(</span><span class="st">&quot;SELECT * FROM contact&quot;</span><span class="op">))</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Before the insert&quot;</span><span class="op">);</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;id </span><span class="sc">\t</span><span class="st">fName </span><span class="sc">\t</span><span class="st">lName </span><span class="sc">\t</span><span class="st">email </span><span class="sc">\t\t</span><span class="st">phoneNo&quot;</span><span class="op">);</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span>resultSet<span class="op">.</span><span class="fu">next</span><span class="op">()){</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>resultSet<span class="op">.</span><span class="fu">getInt</span><span class="op">(</span><span class="st">&quot;id&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;firstName&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;lastName&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;email&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;phoneNo&quot;</span><span class="op">));</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// make sure to first move the cursor of the result set to a valid insert row</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    resultSet<span class="op">.</span><span class="fu">moveToInsertRow</span><span class="op">();</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// update all the columns for the new row to be inserted</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    resultSet<span class="op">.</span><span class="fu">updateString</span><span class="op">(</span><span class="st">&quot;firstName&quot;</span><span class="op">,</span> <span class="st">&quot;John&quot;</span><span class="op">);</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    resultSet<span class="op">.</span><span class="fu">updateString</span><span class="op">(</span><span class="st">&quot;lastName&quot;</span><span class="op">,</span> <span class="st">&quot;K.&quot;</span><span class="op">);</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    resultSet<span class="op">.</span><span class="fu">updateString</span><span class="op">(</span><span class="st">&quot;email&quot;</span><span class="op">,</span> <span class="st">&quot;john@abc.com&quot;</span><span class="op">);</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    resultSet<span class="op">.</span><span class="fu">updateString</span><span class="op">(</span><span class="st">&quot;phoneNo&quot;</span><span class="op">,</span> <span class="st">&quot;+19753186420&quot;</span><span class="op">);</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// commit the new row to the database</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    resultSet<span class="op">.</span><span class="fu">insertRow</span><span class="op">();</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;After the insert&quot;</span><span class="op">);</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;id </span><span class="sc">\t</span><span class="st">fName </span><span class="sc">\t</span><span class="st">lName </span><span class="sc">\t</span><span class="st">email </span><span class="sc">\t\t</span><span class="st">phoneNo&quot;</span><span class="op">);</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    resultSet<span class="op">.</span><span class="fu">beforeFirst</span><span class="op">();</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span>resultSet<span class="op">.</span><span class="fu">next</span><span class="op">()){</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>resultSet<span class="op">.</span><span class="fu">getInt</span><span class="op">(</span><span class="st">&quot;id&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;firstName&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;lastName&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;email&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> resultSet<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;phoneNo&quot;</span><span class="op">));</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">SQLException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    e<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Note that similarly to the <code>updateRow</code> method, there is a
+call to <code>insertRow</code> method, which makes sure that the changes
+are actually committed to the database. One very important thing here is
+that the correct type has to be provided for each value / each column.
+Also a column can not be left blank (without any value) otherwise an
+<code>SQLException</code> will be thrown.</p>
+<h3 id="deleting">Deleting</h3>
+<p>Deleting follows the pattern of insert and update, as in that a
+special method has to be called to actually perform the operation on the
+database itself, to commit the changes that is. For deleting that is the
+method called <code>deleteRow</code>. Since unlike insert or update,
+there is nothing more to be done, no columns to be updated or inserted
+that is the only thing to do in order to commit the changes to the
+database.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> connection <span class="op">=</span> DbConnector<span class="op">.</span><span class="fu">connectToDb</span><span class="op">();</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Statement</span> statement <span class="op">=</span> connection<span class="op">.</span><span class="fu">createStatement</span><span class="op">(</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">ResultSet</span><span class="op">.</span><span class="fu">TYPE_SCROLL_SENSITIVE</span><span class="op">,</span> <span class="bu">ResultSet</span><span class="op">.</span><span class="fu">CONCUR_UPDATABLE</span><span class="op">);</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">ResultSet</span> resultSet1 <span class="op">=</span> statement<span class="op">.</span><span class="fu">executeQuery</span><span class="op">(</span><span class="st">&quot;SELECT * FROM contact WHERE firstName=</span><span class="sc">\&quot;</span><span class="st">John</span><span class="sc">\&quot;</span><span class="st">&quot;</span><span class="op">))</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="op">(</span>resultSet1<span class="op">.</span><span class="fu">next</span><span class="op">()){</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">// delete the first row</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        resultSet1<span class="op">.</span><span class="fu">deleteRow</span><span class="op">();</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    resultSet1<span class="op">.</span><span class="fu">close</span><span class="op">();</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// now fetch again from the database</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">(</span><span class="bu">ResultSet</span> resultSet2 <span class="op">=</span> statement<span class="op">.</span><span class="fu">executeQuery</span><span class="op">(</span><span class="st">&quot;SELECT * FROM contact&quot;</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;After the deletion&quot;</span><span class="op">);</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;id </span><span class="sc">\t</span><span class="st">fName </span><span class="sc">\t</span><span class="st">lName </span><span class="sc">\t</span><span class="st">email </span><span class="sc">\t\t</span><span class="st">phoneNo&quot;</span><span class="op">);</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="op">(</span>resultSet2<span class="op">.</span><span class="fu">next</span><span class="op">()){</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>resultSet2<span class="op">.</span><span class="fu">getInt</span><span class="op">(</span><span class="st">&quot;id&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>                <span class="op">+</span> resultSet2<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;firstName&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>                <span class="op">+</span> resultSet2<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;lastName&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>                <span class="op">+</span> resultSet2<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;email&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>                <span class="op">+</span> resultSet2<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;phoneNo&quot;</span><span class="op">));</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">SQLException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    e<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">exit</span><span class="op">(-</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="creation">Creation</h3>
+<p>It is also possible to run update statements from the statement
+itself, above it was demonstrated how a result set can be used to modify
+the database, here it is demonstrated how an <code>executeUpdate</code>
+can be used to alter the state of the database instead, in this case
+creating a table.</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> connection <span class="op">=</span> DbConnector<span class="op">.</span><span class="fu">connectToDb</span><span class="op">();</span> <span class="bu">Statement</span> statement <span class="op">=</span> connection<span class="op">.</span><span class="fu">createStatement</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// use CREATE TABLE SQL statement to create table familyGroup</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    statement<span class="op">.</span><span class="fu">executeUpdate</span><span class="op">(</span><span class="st">&quot;CREATE TABLE familyGroup (id int not null auto_increment, nickName varchar(30) not null, primary key(id));&quot;</span><span class="op">);</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Table created successfully&quot;</span><span class="op">);</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="cf">catch</span> <span class="op">(</span><span class="bu">SQLException</span> sqle<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    sqle<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">exit</span><span class="op">(-</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The program would print that the table was created successfully in
+case no other abnormal conditions, such as inaccessible database or the
+likes. Note that in this case the <code>executeUpdate</code> is used,
+since the statement executes and update action on the database. If the
+statement itself was incorrect, has some sort of SQL syntax errors, the
+<code>MySQLSyntaxException</code> will be risen. Passing a correct
+statement is the responsibility of the application developer</p>
+<h2 id="caveats">Caveats</h2>
+<p>There are certain caveats that are discussed below which have to be
+mentioned to properly keep in mind some details regarding the behavior
+of the <code>Statement</code> and <code>ResultSet</code> objects when
+working with them. These points encompass the sections already discussed
+above</p>
+<ul>
+<li><p>The boolean absolute(int) method of <code>ResultSet</code> moves
+the cursor to the passed row number that <code>ResultSet</code> object,
+if the row number is positive it moves to that position from the
+beginning of the <code>ResultSet</code> object; if the row number is
+negative, if moves to that position from the end of the
+<code>ResultSet</code> object. Assume that there are 10 entries in the
+<code>ResultSet</code> Calling absolute(3) moves the cursor to the third
+row. Calling absolute(-2) moves the cursor to the eighth row. If out of
+range values are given, the cursor moves to either the start or the
+beginning of the <code>ResultSet</code></p></li>
+<li><p>In a <code>ResultSet</code> object, calling absolute(1) is
+equivalent to calling first() and same for absolute(-1) which is
+equivalent to calling last()</p></li>
+<li><p>One can use a column name or column index with
+<code>ResultSet</code> methods. The index corresponds to the index of
+the <code>ResultSet</code> object not the column number in the database
+table.</p></li>
+<li><p>A Statement object closes the current <code>ResultSet</code>, if
+the statement object is closed itself, re-executed or made to retrieve
+the next set of results. That means that it is not required to call
+close() method on the <code>ResultSet</code> since any
+<code>ResultSet</code> instance obtained from a Statement is bound to
+that Statement object instance in the first place.</p></li>
+<li><p>Think of a case in which one has two columns in a
+<code>ResultSet</code> object with the same name. How would one retrieve
+the associate values using the column name ? If the column name is used
+to retrieve the value, it always points to the first column that matches
+the name. Hence a column index has to be used instead</p></li>
+<li><p>One can use the column name of a <code>ResultSet</code> object
+without worrying about the casing of the column name using -
+<code>getXXX()</code> methods such as - <code>getString</code>,
+<code>getObject</code> and so on, methods accept case-insensitive column
+names to retrieve the associated value</p></li>
+<li><p>Note that <code>PreparedStatement</code> interface inherits from
+Statement. However <code>PreparedStatement</code> overrides all flavors
+of execute methods. For instance the behavior of
+<code>executeUpdate()</code> may be different from its base
+method.</p></li>
+<li><p>Any update may be canceled using the method
+<code>cancelRowUpdates()</code>, However this method must be called
+before calling <code>updateRow()</code>. In all other cases, it has no
+impact on the row.</p></li>
+<li><p>While connecting to the database, a correct username and password
+have to be specified, otherwise an <code>SQLException</code> will be
+thrown</p></li>
+<li><p>The calls to <code>insertRow</code> and <code>updateRow</code> or
+<code>deleteRow</code> act on the current row selected by the cursor for
+the current <code>ResultSet</code>, in other words, the last time the
+cursor was moved either with <code>moveToInsertRow</code> or absolute or
+relative, and any other methods which move the cursor.</p></li>
+</ul>
+<h1 id="summary">Summary</h1>
+<p>Identify the components required to connect to a database</p>
+<ul>
+<li><p><code>JDBC</code> hides the heterogeneity of all the
+<code>DBMSs</code> and offers a single set of <code>APIs</code> to
+interact with all types of databases. The complexity of heterogeneous
+interactions is delegated to the <code>JDBC</code> driver manager and
+<code>JDBC</code> drivers.</p></li>
+<li><p>The <code>getConnection()</code> method in the
+<code>DriverManager</code> class takes three arguments: a URL string, a
+username string, and a password string.</p></li>
+<li><p>The syntax of the URL (which needs to be specified to get the
+Connection object) is
+<code>jdbc:&lt;subprotocol&gt;:&lt;subname&gt;</code></p></li>
+<li><p>If the <code>JDBC</code> API is not able to locate the
+<code>JDBC</code> driver, it throws a <code>SQLException</code>. If jars
+for the drivers are available, they need to be included in the
+<code>classpath</code> to enable the <code>JDBC</code> API to locate the
+driver.</p></li>
+</ul>
+<p>Describe the interfaces that make up the core of the
+<code>JDBC</code></p>
+<ul>
+<li><p>The java.sql.Connection interface provides a channel through
+which the application and the database communicate.</p></li>
+<li><p><code>JDBC</code> supports two classes for querying and updating:
+<code>Statement</code> and <code>Resultset</code>.</p></li>
+<li><p>A <code>Statement</code> is a SQL statement that can be used to
+communicate a SQL statement to the connected database and receive
+results from the database. There are three types of Statements:</p></li>
+<li><p><code>Statement</code>: Sends a SQL statement to the database
+without any parameters</p></li>
+<li><p><code>PreparedStatement</code>: Represents a pre-compiled SQL
+statement that can be customized using IN parameters</p></li>
+<li><p><code>CallableStatement</code>: Executes stored procedures; can
+handle IN as well as <code>OUT</code> and <code>INOUT</code>
+parameters</p></li>
+<li><p>A <code>resultset</code> is a table with column heading and
+associated values requested by the query.</p></li>
+</ul>
+<p>Submit queries and read results from the database</p>
+<ul>
+<li><p>A <code>ResultSet</code> object maintains a cursor pointing to
+the current row. Initially, the cursor is set to just before the first
+row; calling the next() method advances the cursor position by one
+row.</p></li>
+<li><p>The column index in the <code>ResultSet</code> object starts from
+1 (not from 0).</p></li>
+<li><p>You need to call <code>updateRow()</code> after modifying the row
+contents in a <code>resultset</code>; otherwise, changes made to the
+<code>ResultSet</code> object are lost.</p></li>
+<li><p>You can use a try-with-resources statement to close resources
+(Connection, ResultSet, and Statement) automatically. It is not an error
+if a <code>ResultSet</code> is closed multiple times, even before the
+try-with-resources statement, has closed it at the end of the resource
+try-block, if the <code>ResultSet</code> is no longer required then it
+can be as closed as soon as that.</p></li>
+</ul>
+</body>
+</html>

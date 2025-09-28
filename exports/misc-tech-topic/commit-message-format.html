@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>commit-message-format</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#commit-message-guidelines"
+id="toc-commit-message-guidelines">Commit Message Guidelines</a>
+<ul>
+<li><a href="#why" id="toc-why">Why?</a></li>
+<li><a href="#commit-message-format"
+id="toc-commit-message-format">Commit Message Format</a>
+<ul>
+<li><a href="#type" id="toc-type"><code>&lt;type&gt;</code></a></li>
+<li><a href="#scope" id="toc-scope"><code>&lt;scope&gt;</code></a></li>
+<li><a href="#subject"
+id="toc-subject"><code>&lt;subject&gt;</code></a></li>
+<li><a href="#body" id="toc-body"><code>&lt;body&gt;</code></a></li>
+<li><a href="#footer"
+id="toc-footer"><code>&lt;footer&gt;</code></a></li>
+</ul></li>
+<li><a href="#generate-a-changelog"
+id="toc-generate-a-changelog">Generate a CHANGELOG</a></li>
+<li><a href="#ignore-non-important-commits"
+id="toc-ignore-non-important-commits">Ignore non-important commits</a>
+<ul>
+<li><a href="#examples" id="toc-examples">Examples</a></li>
+</ul></li>
+<li><a href="#pull-requests" id="toc-pull-requests">Pull
+Requests</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="commit-message-guidelines">Commit Message Guidelines</h1>
+<p>This document gathers wisdom from different sources to provide a
+sensible guide for writing commit messages.</p>
+<h2 id="why">Why?</h2>
+<ul>
+<li>provide a structured and clear project information while browsing
+git history</li>
+<li>allow an easy generation of the <code>CHANGELOG</code> by a
+script</li>
+<li>make it easy to ignore non-important commits</li>
+</ul>
+<h2 id="commit-message-format">Commit Message Format</h2>
+<p>A commit message consists of a <strong>header</strong>, a
+<strong>body</strong> and a <strong>footer</strong>. The header has a
+special format that includes a <strong>type</strong>, an optional
+<strong>scope</strong> and a <strong>subject</strong>:</p>
+<p><code>&lt;type&gt;(&lt;scope&gt;): &lt;subject&gt; &lt;BLANK LINE&gt; &lt;body&gt; &lt;BLANK LINE&gt; &lt;footer&gt;</code></p>
+<p>The <strong>header</strong> is mandatory and the
+<strong>scope</strong> element of the header is optional.</p>
+<p>The footer should contain a closing reference to an issue if any.</p>
+<p>Many projects sticks to the 50/72 rule by convention</p>
+<ul>
+<li>maximum 50 characters long first line (excluding type and
+scope)</li>
+<li>description maximum 72 lines long</li>
+</ul>
+<p>In general the following guideline can be followed</p>
+<ul>
+<li>Make separate commits for logically separate changes.</li>
+<li>Describe your changes well.</li>
+</ul>
+<h3 id="type"><code>&lt;type&gt;</code></h3>
+<p>Project defined, but some more common examples could be:</p>
+<ul>
+<li><p><strong>build</strong>: Changes that affect the build system or
+external dependencies (example scopes: gulp, broccoli, npm)</p></li>
+<li><p><strong>ci</strong>: Changes to our CI configuration files and
+scripts (example scopes: Circle, BrowserStack, SauceLabs)</p></li>
+<li><p><strong>docs</strong>: Documentation only changes</p></li>
+<li><p><strong>feat</strong>: A new feature (or
+<strong>feature</strong>)</p></li>
+<li><p><strong>license</strong>: Licensing compliance and
+changes</p></li>
+<li><p><strong>fix</strong>: A bug fix</p></li>
+<li><p><strong>perf</strong>: A code change that improves
+performance</p></li>
+<li><p><strong>refactor</strong>: A code change that neither fixes a bug
+nor adds a feature</p></li>
+<li><p><strong>style</strong>: Changes that do not affect the meaning of
+the code (white-space, formatting, missing semi-colons, etc)</p></li>
+<li><p><strong>test</strong>: Adding missing tests or correcting
+existing tests</p></li>
+<li><p><strong>revert</strong>: If the commit reverts a previous commit,
+it should begin with <code>revert:</code>, followed by the header of the
+reverted commit. In the body it should say:
+<code>This reverts commit &lt;hash&gt;.</code>, where the hash is the
+SHA of the commit being reverted.</p></li>
+</ul>
+<h3 id="scope"><code>&lt;scope&gt;</code></h3>
+<p>If applicable, the scope should be the name of the package affected
+(as perceived by the person reading the changelog generated from commit
+messages). The following is a list of example scopes:</p>
+<ul>
+<li><strong>common</strong></li>
+<li><strong>compiler</strong></li>
+<li><strong>compiler-cli</strong></li>
+<li><strong>core</strong></li>
+<li><strong>http</strong></li>
+<li><strong>router</strong></li>
+</ul>
+<h3 id="subject"><code>&lt;subject&gt;</code></h3>
+<p>The subject contains a succinct description of the change:</p>
+<ul>
+<li>use the imperative, present tense: “change” not “changed” nor
+“changes”. Read your commit message as “This commit will ..”</li>
+<li>don’t capitalize the first letter</li>
+<li>no dot (.) at the end</li>
+</ul>
+<h3 id="body"><code>&lt;body&gt;</code></h3>
+<p>Just as in the <strong>subject</strong>, use the imperative, present
+tense: “change” not “changed” nor “changes”. The body should include the
+motivation for the change and contrast this with previous behavior.</p>
+<h3 id="footer"><code>&lt;footer&gt;</code></h3>
+<p>The footer should contain any information about <strong>Breaking
+Changes</strong> and is also the place to reference issue numbers or
+identifiers that this commit <strong>Closes</strong>.</p>
+<ol type="1">
+<li><p>Breaking changes - Start with the word
+<code>BREAKING CHANGE:</code> with a space or two newlines. The rest of
+the commit message is then used for this.</p></li>
+<li><p>Referencing issues - Closed bugs should be listed on a separate
+line in the footer prefixed with “Closes” keyword like this:
+<code>Closes #234</code> or in case of multiple issues:
+<code>Closes #123, #245, #992</code></p></li>
+</ol>
+<h2 id="generate-a-changelog">Generate a CHANGELOG</h2>
+<p>Use these three sections in a changelog: new features, bug fixes,
+breaking changes. This list could be generated by a script when doing a
+release, along with links to related commits.</p>
+<ol type="1">
+<li><p>List of all subjects (first lines in commit message) since last
+release:</p>
+<p><code>bash git log &lt;last tag&gt; HEAD --pretty=format:%s</code></p></li>
+<li><p>List only the new New features in this release</p>
+<p><code>bash git log &lt;last release&gt; HEAD --grep feat</code></p></li>
+</ol>
+<h2 id="ignore-non-important-commits">Ignore non-important commits</h2>
+<p>You might want to ignore certain commits, like formatting changes For
+example, when bisecting, you can ignore these by:</p>
+<p><code>bash git bisect skip $(git rev-list --grep irrelevant &lt;good place&gt; HEAD)</code></p>
+<h3 id="examples">Examples</h3>
+<p><code>docs: update changelog to beta</code></p>
+<p><code>fix(pencil): stop graphite breaking when too much pressure applied</code></p>
+<p><code>feat(pencil): add 'graphiteWidth' option</code></p>
+<pre><code>perf(pencil): remove graphiteWidth option
+
+BREAKING CHANGE: The graphiteWidth option has been removed.
+The default graphite width of 10mm is always used for performance reasons.
+(Note that the BREAKING CHANGE:  token must be in the footer of the commit)</code></pre>
+<pre><code>feat(directive): add directives disabled/checked/multiple/readonly
+
+New directives for proper binding these attributes in older browsers. Added coresponding description, live examples and
+e2e tests.
+
+Closes #351</code></pre>
+<pre><code>feat(compile): simplify isolate scope bindings
+
+Change the isolate scope binding options to:
+- @attr - attribute binding (including interpolation)
+- =model - by-directional model binding
+- &amp;expr - expression execution binding
+
+This change simplifies the terminology as well as number of choices available to the developer. It also supports local
+name aliasing from the parent.
+
+BREAKING CHANGE: isolate scope bindings definition has changed and the inject option for the directive controller
+injection was removed.
+
+To migrate the code follow the example below:
+
+Before:
+
+scope: { myAttr: &#39;attribute&#39;, myBind: &#39;bind&#39;, myExpression: &#39;expression&#39;, myEval: &#39;evaluate&#39;, myAccessor: &#39;accessor&#39; }
+
+After:
+
+scope: { myAttr: &#39;@&#39;, myBind: &#39;@&#39;, myExpression: &#39;&amp;&#39;, // myEval - usually not useful, but in cases where the expression
+is assignable, you can use &#39;=&#39; myAccessor: &#39;=&#39; // in directive&#39;s template change myAccessor() to myAccessor }
+
+The removed `inject` wasn&#39;t generaly useful for directives so there should be no code using it.</code></pre>
+<h2 id="pull-requests">Pull Requests</h2>
+<ul>
+<li><p>To resolve conflicts, rebase pull request branches onto their
+target branch instead of merging the target branch into the pull request
+branch. This again results in a cleaner history without “criss-cross”
+merges.</p></li>
+<li><p>When addressing review comments in a pull request, please fix the
+issue in the commit where it appears, not in a new commit on top of the
+pull request’s history. While this requires force-pushing of the new
+iteration of your pull request’s branch, it has several
+advantages:</p></li>
+<li><p>Reviewers that go through (larger) pull requests commit by commit
+are always up-to-date with latest fixes, instead of coming across a
+commit that addresses their remarks only at the end.</p></li>
+<li><p>It maintains a cleaner history without distracting commits like
+“Address review comments”.</p></li>
+<li><p>As a result, tools like <a
+href="https://git-scm.com/docs/git-bisect">git-bisect</a> can operate in
+a more meaningful way.</p></li>
+<li><p>Fixing up commits allows for making fixes to commit messages,
+which is not possible by only adding new commits.</p>
+<p>If you are unfamiliar with fixing up existing commits, please read
+about <a
+href="https://git-scm.com/book/id/v2/Git-Tools-Rewriting-History">rewriting
+history</a> and <code>git rebase --interactive</code> in
+particular.</p></li>
+</ul>
+</body>
+</html>

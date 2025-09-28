@@ -1,0 +1,184 @@
+Streams
+
+Possibly the most important addition to the Java library in the Java 8 release is the stream API. The stream API is included in the java dot util dot stream package.
+
+Optional
+
+The Optional class type was introduced to allow Java developers to represent a value that might be empty, or in Java terms, null. The Optional class provides methods to check whether the value it holds is present before using it. This helps avoid the common pattern of writing if-not-null blocks, which can make code harder to read. Instead, the Optional interface allows you to express these checks and actions in a single line, often by chaining operations.
+
+You can think of the Optional class as similar to a Stream with only one element. Some of the methods in Optional match those in the Stream interface. Optional values can be extracted, mapped, and filtered.
+
+To create an Optional object, there are several built-in options:
+
+First, you can create an empty Optional using Optional dot empty. This is useful when a method that returns an Optional does not find any value to return. Instead of returning null, it returns an empty Optional.
+
+Second, you can create an Optional from a concrete value using Optional dot of, passing in the value you want to wrap. Note that this method checks for null, and if the value is null, it throws an exception.
+
+Third, you can create an Optional from a value that might be null using Optional dot ofNullable. This allows you to create either an empty or a non-empty Optional in a single statement. If the value is null, the Optional will be empty, and no exception will be thrown.
+
+The Optional class also has primitive versions: OptionalDouble, OptionalLong, and OptionalInt. These types have interfaces similar to the regular Optional type, with some slight differences. They do not inherit from the base Optional type, just as the primitive streams do not inherit from Stream, but only from BaseStream.
+
+For example, consider a block that creates a DoubleStream of temperature values, finds the maximum value using the max method, and then prints it if present. This demonstrates how primitive streams use their corresponding primitive Optional types, such as OptionalDouble. The primitive streams do not interact with the base, non-primitive Optional type, since that type is only a wrapper around object or class types and cannot be used with primitive types.
+
+Of course, you can convert between the primitive version of Optional and the object type by using auto-boxed numeric types, which are classes.
+
+Operations
+
+The stream API exposes several important operations that allow you to search, filter, and convert data in a stream. These operations are used to build up a stream transformation pipeline.
+
+Searching
+
+Methods ending with the word "Match" and methods starting with the word "find" in the Stream interface are useful for searching data from a stream. These methods return a boolean value.
+
+For searching operations, findFirst and findAny may not find a matching element in the stream, so they return an Optional of type T.
+
+The anyMatch method returns true if there is any element in the stream that matches the given condition. It returns false if the stream is empty or if there are no matching elements.
+
+The allMatch method returns true only if all elements in the stream match the given condition. If the stream is empty, it returns true without evaluating the condition.
+
+The noneMatch method returns true only if none of the elements in the stream match the given condition. If the stream is empty, it also returns true without evaluating the condition.
+
+The findFirst method returns the first element from the stream. If there is no element present, it returns an empty Optional.
+
+The findAny method returns one of the elements from the stream. If there is no element present, it returns an empty Optional.
+
+Unlike the anyMatch method, which returns false when the stream is empty, the allMatch and noneMatch methods return true if the stream is empty. This makes sense, since no elements in the stream means that allMatch or noneMatch will always return true for any condition.
+
+For example, consider a block that creates an IntStream of negative temperature values, then checks if any, all, or none of the values are greater than zero using the anyMatch, allMatch, and noneMatch methods. The results are printed to the console. This example demonstrates how the matching functions can be used to avoid filtering first and then checking the size of the resulting collection. Instead, the operation is condensed into a single searching step.
+
+The companion functions to the boolean match methods are findFirst and findAny. For example, you can use a transformation pipeline to filter all methods in the Stream API that end with "Match," sort them, and then extract the first one found. In this case, the sorting is in ascending order, so "allMatch" comes before "anyMatch" and "noneMatch." The find methods, like the boolean match methods, are also terminating operations.
+
+The reason there are two find methods in the API is that findAny is tailored for use cases involving parallel streams. For any stream, findFirst always returns the first element. However, the behavior of findAny is not defined for normal and parallel streams. It may return any element in the stream, especially in parallel streams.
+
+It is important to note that the match and find operations are short-circuiting. This means that as soon as a matching element is found, the operation terminates, and the rest of the stream is not processed.
+
+Calculation
+
+There are several calculation methods on the Stream and primitive streams API, such as min, max, and average. These operations are also called implicit reducers, because internally they use the reduce method of the stream. The reduce method accumulates a result from some computation and then returns that result. The reduce method is more general and can be used for operations beyond the simple ones listed here.
+
+For example, consider a block that splits a sentence into words, then finds and prints the word that is smallest in lexicographical order using the min method. In the Stream version, which is the non-primitive one, the min and max methods require a comparator to be passed in. This is necessary because otherwise there is no way to determine a meaningful result for the min or max operation. For the primitive versions of streams, a comparator is not needed, since the integral types have well-defined comparison rules.
+
+
+Stream and Primitive Stream Methods
+
+Let’s begin by reviewing the main methods available in both the general Stream interface and the specialized primitive stream interfaces in Java.
+
+The count method returns the number of elements in the stream. If the stream is empty, it returns zero.
+
+The min method, which takes a comparator, returns the minimum value in the stream. If the stream is empty, it returns an empty Optional value.
+
+Similarly, the max method, also using a comparator, returns the maximum value in the stream, or an empty Optional if the stream is empty.
+
+For primitive streams, there are additional methods. The sum method returns the sum of all elements in the stream, or zero if the stream is empty.
+
+The min and max methods for primitive streams return the minimum and maximum integer values, respectively, or an empty Optional if the stream is empty.
+
+The average method returns the average value of the elements in the stream, or an empty OptionalDouble if the stream is empty.
+
+Finally, the summaryStatistics method returns an object that contains the sum, count, average, minimum, and maximum values of the stream. This is particularly useful because, after calling a terminal operation like sum or count, the stream is closed and cannot be used for further operations. The summaryStatistics method collates all these statistics in one go, making it efficient and convenient.
+
+Here’s an example that demonstrates the use of summaryStatistics. In this example, a limerick is split into words, and the length of each word is analyzed. The summaryStatistics method is used to gather the number of words, the sum of their lengths, the minimum and maximum word sizes, and the average word size. The results are then printed out.
+
+Sorting
+
+Sorting is another important capability of streams. It allows you to order the items within the stream based on a specific criterion. The sorted method, which takes a comparator, is used for this purpose.
+
+For example, consider a list of words. You can sort these words by their length using a comparator that compares the lengths of two strings. The stream is first made distinct to remove duplicates, then sorted by length, and finally printed out.
+
+If you want to sort the words first by length and then alphabetically, you can chain comparators using the thenComparing method. This means that if two words have the same length, the second comparator, in this case the natural alphabetical order, is used to break the tie. You can chain as many comparators as needed, since thenComparing returns a comparator instance.
+
+To reverse the order of sorting, you have two options. You can modify the comparator to compare the second argument to the first, but this is not always possible, especially if you are reusing existing comparison methods like String’s compareTo. Alternatively, you can use the reversed method, which wraps the previous comparator and internally swaps the arguments, effectively reversing the order.
+
+The term “natural order” is often used in the Comparable and Comparator interfaces. It refers to the default order implied when comparing elements, which is typically ascending order. This convention ensures consistency across the API.
+
+Collecting
+
+The Stream API provides several methods to collect the results of a transformation pipeline into reusable data structures. The most generic method is collect, which takes a Collector interface as input. This allows the elements of the stream to be collected in any way you choose. There are also helper functions that provide predefined collectors for lists, sets, and maps.
+
+For example, you can split a string into words and collect them into a list using the toList method from the Collectors interface. By default, this creates an ArrayList to hold the entries.
+
+Similarly, you can collect elements into a set using the toSet method. By default, this creates a HashSet, which does not allow duplicate values.
+
+For more complex mappings, the toMap method can be used. This method requires at least two arguments: one to map the key of the HashMap from the stream entry, and another to map the value. For example, you can create a map where the key is the name itself and the value is the length of the name. The resulting map is then printed, showing each name and its corresponding length.
+
+In summary, the Stream API in Java provides powerful methods for counting, summarizing, sorting, and collecting data, making it a versatile tool for processing collections and sequences of data.
+
+
+This example shows how to provide a custom lambda reference for creating a collection. Since all collections have a way to add elements, in the simplest case, you only need to provide a way to create the desired collection. The rest is handled internally, adding the elements of the stream to that collection instance.
+
+In the code, a string containing the phrase “a rose is a rose is a rose” is split into words. Then, a stream is created from this array of words. The stream is collected into a TreeSet by passing a reference to the TreeSet constructor. This ensures the resulting set contains unique words in sorted order. Finally, each word in the set is printed out.
+
+Grouping
+
+There is another subset of collection operations called grouping. The grouping operation provides a way to create a map of entries based on some criteria. In other words, it groups elements according to a certain rule. The result is always a map, where the key represents the unique grouping criteria, and the value is a list of all elements that match that criteria.
+
+For example, consider a string: “you never know what you have until you clean your room.” This string is split into words, and a stream is created from the array. The stream is filtered to keep only distinct words. Then, the words are grouped by their length using the groupingBy method. The resulting map has keys representing word lengths, and each value is a list of words of that length.
+
+There is also a special case of grouping called partitioning. Partitioning is similar to grouping, but instead of grouping by a specific value, it splits the elements into two groups based on a predicate. In the example, all words with length less than four are grouped under the map key false, and all words with length greater than four are grouped under the map key true. The map is keyed on a boolean value, not an integer.
+
+The groupingBy method always accepts at least one argument, which is a function from the functional interface. The partitioningBy method, on the other hand, always accepts a predicate, also from the functional interface package. This difference is due to the nature of both methods: groupingBy groups entries into buckets based on a function, while partitioningBy splits them into at most two groups based on whether they match the predicate.
+
+Mapping
+
+Mapping is the process of converting the starting type of the stream entry to another type. These operations can be chained, meaning you can call map multiple times to transform each preceding type into a new one. Mapping is very useful when the starting type of the stream entries is not suitable for certain operations, and you want to refine the type so calculations can be performed more efficiently or at all.
+
+For example, consider a list of integers: one, two, three, four, and five. A stream is created from this list, and the map operation is used to square each integer. The forEach method then prints each squared value. In this example, the mapped type remains an integer, but the value is changed. This is the simplest demonstration of mapping: it allows you to mutate each entry of the stream, changing the value and even the type. However, each map operation must return the same type for all entries. It is not possible to return heterogeneous types unless they are all children of the same supertype.
+
+There are several mapping methods available. For example, mapToDouble converts the current stream into a stream of primitive doubles. Similarly, mapToLong and mapToInt convert the stream into streams of primitive longs and integers, respectively. The map method can also convert the stream into one containing elements of a different type.
+
+Flat mapping is a special case of regular mapping. It is usually used when the source collection is nested, such as a two-dimensional array. Flat mapping reduces this structure into a single dimension after the mapping. The flatMap method always accepts a function that takes the current type of entry in the stream and returns a stream.
+
+For example, suppose you have a stream of words and you want to find the unique characters in the sentence. Each word must be split into characters, and only the unique ones should be extracted. If you use the map method, each word is mapped to an array of characters, resulting in a stream of arrays. This does not achieve the desired effect.
+
+To fix this, you use flatMap. The flatMap method ensures that mapping a nested stream is flattened out into its composite elements. In this case, each word is split into characters, and flatMap converts the stream of arrays into a single stream of characters. The distinct method then filters out duplicate characters, and forEach prints each unique character.
+
+Summary
+
+Optional
+
+When there are no entries in a stream and operations such as max are called, instead of returning null or throwing an exception, Java eight returns Optional values. This is a better approach for handling empty results.
+
+There are primitive type versions of Optional for int, long, and double. These are called OptionalInt, OptionalLong, and OptionalDouble.
+
+Streams
+
+The Stream interface provides data and calculation methods such as count, min, and max. When invoking min or max, you need to pass a Comparator object as a parameter.
+
+The primitive type versions of the Stream interface, such as IntStream, LongStream, and DoubleStream, provide methods for count, sum, average, min, and max.
+
+The summaryStatistics method in IntStream, LongStream, and DoubleStream calculates count, sum, average, minimum, and maximum values of elements in the stream.
+
+The peek method is useful for debugging. It helps you understand how elements are transformed in the pipeline.
+
+You can transform or extract elements in a stream using the map method.
+
+You can search for data using search methods of the Stream classes, including findFirst, findAny, anyMatch, allMatch, and noneMatch.
+
+You can match a given predicate in a stream using the allMatch, noneMatch, and anyMatch methods. Unlike anyMatch, which returns false when the stream is empty, the allMatch and noneMatch methods return true if the stream is empty.
+
+You can look for elements in a stream using the findFirst and findAny methods. The findAny method is faster than findFirst when using parallel streams.
+
+The match and find methods are short-circuiting. This means the evaluation stops once the result is found, and the rest of the stream is not evaluated.
+
+Comparator and Comparable
+
+One way to sort a collection is to get a stream from the collection and call the sorted method on that stream. The sorted method sorts the elements in natural order, which requires that the stream elements implement the Comparable interface.
+
+
+Sorting with a Comparator
+
+When you want to sort elements in a stream using an order other than their natural order, you can provide a Comparator object to the sorted method. The Comparator interface in Java 8 has been improved with several helpful static and default methods, such as thenComparing and reversed. These methods allow you to build complex sorting logic by chaining comparators or reversing the order.
+
+Collectors and Collections
+
+The collect method, which is part of the Collectors class, offers various ways to gather elements from a stream into a collection. The Collectors class includes methods like toList, toSet, toMap, and toCollection. These methods let you create different types of collections from the elements in a stream.
+
+You can also group elements in a stream by using the groupingBy method from the Collectors class. This method takes a function as an argument, which defines the criteria for grouping the elements.
+
+If you need to separate elements in a stream based on a condition, you can use the partition method in the Collectors class. This method takes a predicate and splits the stream into two groups: those that match the condition and those that do not.
+
+Using the flatMap Method of the Stream API
+
+The flatMap method in the Stream API is used to flatten streams. When you map each element to a stream, flatMap combines all these resulting streams into one continuous, flat stream. This is especially useful when working with nested collections or when you want to process all elements at the same level.
+
+

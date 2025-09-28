@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>17-new-io-package</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#nio" id="toc-nio">NIO</a>
+<ul>
+<li><a href="#reading" id="toc-reading">Reading</a></li>
+<li><a href="#writing" id="toc-writing">Writing</a></li>
+<li><a href="#memory-mapping"
+id="toc-memory-mapping">Memory-mapping</a></li>
+<li><a href="#async" id="toc-async">Async</a></li>
+<li><a href="#path" id="toc-path">Path</a></li>
+<li><a href="#files" id="toc-files">Files</a></li>
+</ul></li>
+</ul>
+</nav>
+<h2 id="nio">NIO</h2>
+<p>Java <code>NIO</code> or <code>new-io</code>, is basically the new
+improved implementation of the standard <code>java.io</code>, this new
+implementation which was greatly improved in 1.7 allows one to work with
+IO streams in a non blocking way, which can greatly alleviate the load
+on particular systems, such as web servers. For example in a regular
+scenario where each new request to a web server creates a new thread, or
+uses free thread from a pool, instead of blocking the entire thread
+waiting for an java.io operation, using the old implementation, with the
+new approach one can use java.nio to open a channel to a file in a non
+blocking way, and when ready to read from the file or device.</p>
+<h3 id="reading">Reading</h3>
+<p>The two examples show the usage of the new <code>API</code>, compared
+to the old one, in both cases the implementation is blocking however,
+the new <code>NIO</code> <code>API</code> is much cleaner, does most of
+the work internally, is wrapped in nice short methods which deliver the
+data easily, however it has less control over how the data stream is
+read.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> OldIOReadExample <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">(</span><span class="bu">BufferedReader</span> reader <span class="op">=</span> <span class="kw">new</span> <span class="bu">BufferedReader</span><span class="op">(</span><span class="kw">new</span> <span class="bu">FileReader</span><span class="op">(</span><span class="st">&quot;example.txt&quot;</span><span class="op">)))</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>            <span class="bu">String</span> line<span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">while</span> <span class="op">((</span>line <span class="op">=</span> reader<span class="op">.</span><span class="fu">readLine</span><span class="op">())</span> <span class="op">!=</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>line<span class="op">);</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">IOException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>            e<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> NIOReadExample <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>            <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> lines <span class="op">=</span> Files<span class="op">.</span><span class="fu">readAllLines</span><span class="op">(</span>Paths<span class="op">.</span><span class="fu">get</span><span class="op">(</span><span class="st">&quot;example.txt&quot;</span><span class="op">),</span> StandardCharsets<span class="op">.</span><span class="fu">UTF_8</span><span class="op">);</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> <span class="op">(</span><span class="bu">String</span> line <span class="op">:</span> lines<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>line<span class="op">);</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">IOException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>            e<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="writing">Writing</h3>
+<p>The two examples show the usage of the new <code>API</code>, compared
+to the old one, in both cases the implementation is blocking however,
+the new <code>NIO</code> <code>API</code> is much cleaner, does most of
+the work internally, is wrapped in nice short methods which deliver the
+data easily, however it has less control over how the data stream is
+write.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> OldIOWriteExample <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">(</span><span class="bu">BufferedWriter</span> writer <span class="op">=</span> <span class="kw">new</span> <span class="bu">BufferedWriter</span><span class="op">(</span><span class="kw">new</span> <span class="bu">FileWriter</span><span class="op">(</span><span class="st">&quot;example.txt&quot;</span><span class="op">)))</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>            writer<span class="op">.</span><span class="fu">write</span><span class="op">(</span><span class="st">&quot;Hello, World!&quot;</span><span class="op">);</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            writer<span class="op">.</span><span class="fu">newLine</span><span class="op">();</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            writer<span class="op">.</span><span class="fu">write</span><span class="op">(</span><span class="st">&quot;This is a sample text.&quot;</span><span class="op">);</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">IOException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            e<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> NIOWriteExample <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> lines <span class="op">=</span> <span class="bu">Arrays</span><span class="op">.</span><span class="fu">asList</span><span class="op">(</span><span class="st">&quot;Hello, World!&quot;</span><span class="op">,</span> <span class="st">&quot;This is a sample text.&quot;</span><span class="op">);</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>            Files<span class="op">.</span><span class="fu">write</span><span class="op">(</span>Paths<span class="op">.</span><span class="fu">get</span><span class="op">(</span><span class="st">&quot;example.txt&quot;</span><span class="op">),</span> lines<span class="op">,</span> StandardCharsets<span class="op">.</span><span class="fu">UTF_8</span><span class="op">);</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">IOException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>            e<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="memory-mapping">Memory-mapping</h3>
+<p>The implementation below deals with memory mapped files, which is a
+feature of the <code>NIO</code> library, allows one to map a given file
+resource to virtual memory, the OS can serve the file contents as if
+from the main memory which should make reading <code>mmaped</code> files
+more effective. This is a well known feature used in other languages
+such as C or C++.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> NIOMemoryMappedReadExample <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">(</span><span class="bu">FileChannel</span> fileChannel <span class="op">=</span> <span class="bu">FileChannel</span><span class="op">.</span><span class="fu">open</span><span class="op">(</span>Paths<span class="op">.</span><span class="fu">get</span><span class="op">(</span><span class="st">&quot;example.txt&quot;</span><span class="op">),</span> StandardOpenOption<span class="op">.</span><span class="fu">READ</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>            <span class="bu">MappedByteBuffer</span> buffer <span class="op">=</span> fileChannel<span class="op">.</span><span class="fu">map</span><span class="op">(</span><span class="bu">FileChannel</span><span class="op">.</span><span class="fu">MapMode</span><span class="op">.</span><span class="fu">READ_ONLY</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> fileChannel<span class="op">.</span><span class="fu">size</span><span class="op">());</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> buffer<span class="op">.</span><span class="fu">limit</span><span class="op">();</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">print</span><span class="op">((</span><span class="dt">char</span><span class="op">)</span> buffer<span class="op">.</span><span class="fu">get</span><span class="op">());</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">IOException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            e<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="async">Async</h3>
+<p>In the example below one can see how the channels <code>API</code>
+might be used to read from a file, in an <code>async</code> manner,
+while the future is not finished, other work can be done, one can poll
+on the future over a specific period of time to check if it is ready,
+but the reading itself happens without blocking the current thread.</p>
+<p>The code below demonstrates how to read and write from a file using
+the <code>async</code> approach in <code>nio</code>, notice how both the
+calls tr read and write are non blocking, the thread is not stopped
+waiting for response from the calls, instead</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> AsyncFileReadExample <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">(</span>AsynchronousFileChannel fileChannel <span class="op">=</span> AsynchronousFileChannel<span class="op">.</span><span class="fu">open</span><span class="op">(</span>Paths<span class="op">.</span><span class="fu">get</span><span class="op">(</span><span class="st">&quot;example.txt&quot;</span><span class="op">),</span> StandardOpenOption<span class="op">.</span><span class="fu">READ</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>            <span class="bu">ByteBuffer</span> buffer <span class="op">=</span> <span class="bu">ByteBuffer</span><span class="op">.</span><span class="fu">allocate</span><span class="op">(</span><span class="dv">1024</span><span class="op">);</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>            <span class="bu">Future</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> result <span class="op">=</span> fileChannel<span class="op">.</span><span class="fu">read</span><span class="op">(</span>buffer<span class="op">,</span> <span class="dv">0</span><span class="op">);</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">while</span> <span class="op">(!</span>result<span class="op">.</span><span class="fu">isDone</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Doing something else while file is being read...&quot;</span><span class="op">);</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>                <span class="co">// Do something else in the meantime (e.g., a longer computation)</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> bytesRead <span class="op">=</span> result<span class="op">.</span><span class="fu">get</span><span class="op">();</span>  <span class="co">// Blocks future here if not yet done</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Bytes read: &quot;</span> <span class="op">+</span> bytesRead<span class="op">);</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>            <span class="co">// rewind the buffer, reset the buffer pointer back so it can be read</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>            buffer<span class="op">.</span><span class="fu">rewind</span><span class="op">();</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>            <span class="co">// read the contents of the buffer, that can be done in many ways, here</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>            <span class="co">// one just copies back to a regular byte array,</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>            <span class="dt">byte</span><span class="op">[]</span> data <span class="op">=</span> <span class="kw">new</span> <span class="dt">byte</span><span class="op">[</span>buffer<span class="op">.</span><span class="fu">remaining</span><span class="op">()];</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>            buffer<span class="op">.</span><span class="fu">get</span><span class="op">(</span>data<span class="op">);</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;File content: &quot;</span> <span class="op">+</span> <span class="kw">new</span> <span class="bu">String</span><span class="op">(</span>data<span class="op">));</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">IOException</span> <span class="op">|</span> <span class="bu">InterruptedException</span> <span class="op">|</span> java<span class="op">.</span><span class="fu">util</span><span class="op">.</span><span class="fu">concurrent</span><span class="op">.</span><span class="fu">ExecutionException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>            e<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> AsyncFileWriteExample <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> args<span class="op">[])</span> <span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">(</span>AsynchronousFileChannel fileChannel <span class="op">=</span> AsynchronousFileChannel<span class="op">.</span><span class="fu">open</span><span class="op">(</span>Paths<span class="op">.</span><span class="fu">get</span><span class="op">(</span><span class="st">&quot;example.txt&quot;</span><span class="op">),</span> StandardOpenOption<span class="op">.</span><span class="fu">WRITE</span><span class="op">,</span> StandardOpenOption<span class="op">.</span><span class="fu">CREATE</span><span class="op">))</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Create a buffer.</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>            <span class="bu">ByteBuffer</span> mBuf <span class="op">=</span> <span class="bu">ByteBuffer</span><span class="op">.</span><span class="fu">allocate</span><span class="op">(</span><span class="dv">26</span><span class="op">);</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Write some bytes to the buffer.</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i<span class="op">&lt;</span><span class="dv">26</span><span class="op">;</span> i<span class="op">++)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>            mBuf<span class="op">.</span><span class="fu">put</span><span class="op">((</span><span class="dt">byte</span><span class="op">)(</span><span class="ch">&#39;A&#39;</span> <span class="op">+</span> i<span class="op">));</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Reset the buffer so that it can be written.</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>            mBuf<span class="op">.</span><span class="fu">rewind</span><span class="op">();</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Write the buffer from start to the output file.</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            fChan<span class="op">.</span><span class="fu">write</span><span class="op">(</span>mBuf<span class="op">);</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span><span class="op">(</span>InvalidPathException e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Path Error &quot;</span> <span class="op">+</span> e<span class="op">);</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">IOException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;I/O Error: &quot;</span> <span class="op">+</span> e<span class="op">);</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">exit</span><span class="op">(</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="path">Path</h3>
+<p>Another key feature added to the <code>NIO</code> library which
+serves as a bridge between the native <code>java.lang</code> File class
+and the new <code>NIO</code> packages. Below are listed some of the
+methods which are present in the Path class which are mostly meant to
+work with system paths, and are the backbone of the <code>nio</code>
+package library</p>
+<table>
+<colgroup>
+<col style="width: 43%" />
+<col style="width: 56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>compareTo(Path other)</td>
+<td>Compares this <code>Path</code> to another <code>Path</code>
+lexicographically.</td>
+</tr>
+<tr class="even">
+<td>endsWith(Path other)</td>
+<td>Checks if this <code>Path</code> ends with the specified
+<code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>endsWith(String other)</td>
+<td>Checks if this <code>Path</code> ends with the given string,
+treating it as a sequence of name elements.</td>
+</tr>
+<tr class="even">
+<td>equals(Object other)</td>
+<td>Compares this <code>Path</code> with another object for
+equality.</td>
+</tr>
+<tr class="odd">
+<td>getFileName()</td>
+<td>Returns the file name or the last name element of the
+<code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>getName(int index)</td>
+<td>Returns the name element at the specified index from the
+<code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>getNameCount()</td>
+<td>Returns the number of name elements in the <code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>getParent()</td>
+<td>Returns the parent path of this <code>Path</code>, or
+<code>null</code> if there is no parent.</td>
+</tr>
+<tr class="odd">
+<td>getRoot()</td>
+<td>Returns the root of the <code>Path</code>, if available.</td>
+</tr>
+<tr class="even">
+<td>hashCode()</td>
+<td>Returns a hash code for the <code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>isAbsolute()</td>
+<td>Returns <code>true</code> if the <code>Path</code> is absolute.</td>
+</tr>
+<tr class="even">
+<td>iterator()</td>
+<td>Returns an iterator over the name elements of the
+<code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>normalize()</td>
+<td>Returns a normalized version of the <code>Path</code>, removing
+redundant elements like <code>.</code> and <code>..</code>.</td>
+</tr>
+<tr class="even">
+<td>of(String first, String… more)</td>
+<td>Creates a <code>Path</code> from one or more strings.</td>
+</tr>
+<tr class="odd">
+<td>of(URI uri)</td>
+<td>Converts a <code>URI</code> to a <code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>register(WatchService watcher, Kind&lt;?&gt;… events)</td>
+<td>Registers the <code>Path</code> with a <code>WatchService</code> to
+monitor file system events.</td>
+</tr>
+<tr class="odd">
+<td>register(WatchService watcher, Kind&lt;?&gt;[] events, Modifier…
+modifiers)</td>
+<td>Registers the <code>Path</code> with a <code>WatchService</code>
+with extra settings.</td>
+</tr>
+<tr class="even">
+<td>relativize(Path other)</td>
+<td>Constructs a relative path from this path to the given
+<code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>resolve(Path other)</td>
+<td>Appends the provided <code>Path</code> to this
+<code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>resolve(Path first, Path… more)</td>
+<td>Appends one or more paths to this <code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>resolve(String other)</td>
+<td>Appends the given string (path segment) to this
+<code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>resolve(String first, String… more)</td>
+<td>Appends one or more strings to this <code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>resolveSibling(Path other)</td>
+<td>Resolves the <code>Path</code> against the parent of this path.</td>
+</tr>
+<tr class="even">
+<td>resolveSibling(String other)</td>
+<td>Resolves the <code>Path</code> against the parent with a sibling
+represented by a string.</td>
+</tr>
+<tr class="odd">
+<td>startsWith(Path other)</td>
+<td>Checks if this <code>Path</code> starts with the specified
+<code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>startsWith(String other)</td>
+<td>Checks if this <code>Path</code> starts with the given string.</td>
+</tr>
+<tr class="odd">
+<td>subpath(int beginIndex, int endIndex)</td>
+<td>Returns a subpath of this <code>Path</code> from
+<code>beginIndex</code> to <code>endIndex</code>.</td>
+</tr>
+<tr class="even">
+<td>toAbsolutePath()</td>
+<td>Converts this <code>Path</code> to an absolute path.</td>
+</tr>
+<tr class="odd">
+<td>toFile()</td>
+<td>Converts the <code>Path</code> to a <code>File</code> object.</td>
+</tr>
+<tr class="even">
+<td>toRealPath(LinkOption… options)</td>
+<td>Returns the real path after resolving symbolic links and verifying
+the file’s existence.</td>
+</tr>
+<tr class="odd">
+<td>toString()</td>
+<td>Returns the string representation of the <code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>toUri()</td>
+<td>Converts the <code>Path</code> to a <code>URI</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><code>When updating legacy code bases it is possible to convert from the old File to the new Path and vice versa by calling the toPath or toFile methods which will do exactly that.</code></p>
+<h3 id="files">Files</h3>
+<p>The files class mostly contains static methods, which are also meant
+to work with the <code>Path</code> class, already mentioned above, the
+<code>Files</code> class is similarly to the <code>Path</code> class one
+of the cornerstones of the <code>NIO</code> library in java. Some of the
+most notable methods from the <code>Files</code> class are listed
+below</p>
+<table>
+<colgroup>
+<col style="width: 44%" />
+<col style="width: 55%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>copy(InputStream, Path, CopyOption…)</td>
+<td>Copies data from an <code>InputStream</code> to the target
+<code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>copy(Path, OutputStream)</td>
+<td>Copies the contents of a file (from a <code>Path</code>) to an
+<code>OutputStream</code>.</td>
+</tr>
+<tr class="odd">
+<td>copy(Path, Path, CopyOption…)</td>
+<td>Copies a file from one <code>Path</code> to another, with optional
+copy options.</td>
+</tr>
+<tr class="even">
+<td>createAndCheckIsDirectory(Path, FileAttribute&lt;?\&gt;…)</td>
+<td>Creates a directory and checks if it was successfully created.</td>
+</tr>
+<tr class="odd">
+<td>createBufferedReaderLinesStream(BufferedReader)</td>
+<td>Creates a <code>Stream\&lt;String\&gt;</code> of lines from a
+<code>BufferedReader</code>.</td>
+</tr>
+<tr class="even">
+<td>createDirectories(Path, FileAttribute&lt;?\&gt;…)</td>
+<td>Creates a directory along with any necessary non-existent parent
+directories.</td>
+</tr>
+<tr class="odd">
+<td>createDirectory(Path, FileAttribute&lt;?\&gt;…)</td>
+<td>Creates a new directory at the specified <code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>createFile(Path, FileAttribute&lt;?\&gt;…)</td>
+<td>Creates a new file at the given <code>Path</code> with optional file
+attributes.</td>
+</tr>
+<tr class="odd">
+<td>createFileChannelLinesStream(FileChannel, Charset)</td>
+<td>Creates a <code>Stream\&lt;String\&gt;</code> of lines from a
+<code>FileChannel</code>, using the specified <code>Charset</code>.</td>
+</tr>
+<tr class="even">
+<td>createLink(Path, Path)</td>
+<td>Creates a hard link between two paths (source and target).</td>
+</tr>
+<tr class="odd">
+<td>createTempDirectory(Path, String, FileAttribute&lt;?\&gt;…)</td>
+<td>Creates a temporary directory in the given <code>Path</code>, with
+an optional prefix.</td>
+</tr>
+<tr class="even">
+<td>createTempFile(Path, String, String, FileAttribute&lt;?\&gt;…)</td>
+<td>Creates a temporary file in the given <code>Path</code>, with an
+optional prefix and suffix.</td>
+</tr>
+<tr class="odd">
+<td>delete(Path)</td>
+<td>Deletes the file or directory at the given <code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>deleteIfExists(Path)</td>
+<td>Deletes the file or directory if it exists, otherwise does
+nothing.</td>
+</tr>
+<tr class="odd">
+<td>exists(Path, LinkOption…)</td>
+<td>Checks if the file or directory at the given <code>Path</code>
+exists.</td>
+</tr>
+<tr class="even">
+<td>find(Path, int, BiPredicate&lt;Path, BasicFileAttributes&gt;,
+FileVisitOption…)</td>
+<td>Finds files in a directory tree based on a matching condition
+(<code>BiPredicate</code>).</td>
+</tr>
+<tr class="odd">
+<td>followLinks(LinkOption…)</td>
+<td>Configures whether symbolic links should be followed during file
+operations.</td>
+</tr>
+<tr class="even">
+<td>getAttribute(Path, String, LinkOption…)</td>
+<td>Retrieves a specific file attribute of the file at the given
+<code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>getFileStore(Path)</td>
+<td>Returns the <code>FileStore</code> (e.g., disk partition) where the
+file is located.</td>
+</tr>
+<tr class="even">
+<td>getLastModifiedTime(Path, LinkOption…)</td>
+<td>Retrieves the last modified time of the file at the given
+<code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>getOwner(Path, LinkOption…)</td>
+<td>Retrieves the owner of the file at the given <code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>getPosixFilePermissions(Path, LinkOption…)</td>
+<td>Retrieves the POSIX file permissions of the file at the given
+<code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>isAccessible(Path, AccessMode…)</td>
+<td>Checks if the file can be accessed with the given access modes
+(e.g., read, write).</td>
+</tr>
+<tr class="even">
+<td>isDirectory(Path, LinkOption…)</td>
+<td>Checks if the given <code>Path</code> represents a directory.</td>
+</tr>
+<tr class="odd">
+<td>isExecutable(Path)</td>
+<td>Checks if the file at the given <code>Path</code> is
+executable.</td>
+</tr>
+<tr class="even">
+<td>isHidden(Path)</td>
+<td>Checks if the file at the given <code>Path</code> is hidden.</td>
+</tr>
+<tr class="odd">
+<td>isReadable(Path)</td>
+<td>Checks if the file at the given <code>Path</code> is readable.</td>
+</tr>
+<tr class="even">
+<td>isRegularFile(Path, LinkOption…)</td>
+<td>Checks if the given <code>Path</code> represents a regular
+file.</td>
+</tr>
+<tr class="odd">
+<td>isSameFile(Path, Path)</td>
+<td>Checks if two <code>Path</code> objects refer to the same file.</td>
+</tr>
+<tr class="even">
+<td>isWritable(Path)</td>
+<td>Checks if the file at the given <code>Path</code> is writable.</td>
+</tr>
+<tr class="odd">
+<td>lines(Path)</td>
+<td>Returns a <code>Stream\&lt;String\&gt;</code> of all lines in the
+file at the given <code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>lines(Path, Charset)</td>
+<td>Returns a <code>Stream\&lt;String\&gt;</code> of all lines in the
+file using the specified <code>Charset</code>.</td>
+</tr>
+<tr class="odd">
+<td>list(Path)</td>
+<td>Returns a <code>Stream\&lt;Path\&gt;</code> of all entries in the
+directory at the given <code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>move(Path, Path, CopyOption…)</td>
+<td>Moves a file from one <code>Path</code> to another, with optional
+move options.</td>
+</tr>
+<tr class="odd">
+<td>notExists(Path, LinkOption…)</td>
+<td>Checks if the file or directory at the given <code>Path</code> does
+not exist.</td>
+</tr>
+<tr class="even">
+<td>read(InputStream, int)</td>
+<td>Reads up to <code>n</code> bytes from an
+<code>InputStream</code>.</td>
+</tr>
+<tr class="odd">
+<td>readAllBytes(Path)</td>
+<td>Reads all bytes from a file at the given <code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>readAllLines(Path)</td>
+<td>Reads all lines from a file at the given <code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>readAllLines(Path, Charset)</td>
+<td>Reads all lines from a file using the specified
+<code>Charset</code>.</td>
+</tr>
+<tr class="even">
+<td>readAttributes(Path, Class&lt;A&gt;, LinkOption…) &lt;A extends
+BasicFileAttributes&gt;</td>
+<td>Reads the file attributes as an instance of the given class
+<code>A</code>.</td>
+</tr>
+<tr class="odd">
+<td>readAttributes(Path, String, LinkOption…)</td>
+<td>Reads a set of file attributes identified by a string.</td>
+</tr>
+<tr class="even">
+<td>readString(Path)</td>
+<td>Reads the contents of a file into a <code>String</code>.</td>
+</tr>
+<tr class="odd">
+<td>readString(Path, Charset)</td>
+<td>Reads the contents of a file into a <code>String</code> using the
+specified <code>Charset</code>.</td>
+</tr>
+<tr class="even">
+<td>setAttribute(Path, String, Object, LinkOption…)</td>
+<td>Sets a file attribute for the file at the given
+<code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>setLastModifiedTime(Path, FileTime)</td>
+<td>Sets the last modified time of the file at the given
+<code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>setOwner(Path, UserPrincipal)</td>
+<td>Sets the owner of the file at the given <code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>setPosixFilePermissions(Path, Set&lt;PosixFilePermission&gt;)</td>
+<td>Sets the POSIX file permissions for the file at the given
+<code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>size(Path)</td>
+<td>Returns the size of the file at the given <code>Path</code>.</td>
+</tr>
+<tr class="odd">
+<td>walk(Path, FileVisitOption…)</td>
+<td>Returns a <code>Stream\&lt;Path\&gt;</code> that walks through the
+directory tree starting at the given <code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>walk(Path, int, FileVisitOption…)</td>
+<td>Returns a <code>Stream\&lt;Path\&gt;</code> that walks the directory
+tree to a specified depth.</td>
+</tr>
+<tr class="odd">
+<td>walkFileTree(Path, FileVisitor&lt;? super Path&gt;)</td>
+<td>Walks a file tree starting from the given <code>Path</code>,
+visiting each file using a <code>FileVisitor</code>.</td>
+</tr>
+<tr class="even">
+<td>walkFileTree(Path, Set&lt;FileVisitOption&gt;, int, FileVisitor&lt;?
+super Path&gt;)</td>
+<td>Walks a file tree with additional options and a depth limit,
+visiting each file using a <code>FileVisitor</code>.</td>
+</tr>
+<tr class="odd">
+<td>write(Path, Iterable&lt;? extends CharSequence&gt;, Charset,
+OpenOption…)</td>
+<td>Writes an <code>Iterable</code> of character sequences to a file
+using the specified <code>Charset</code>.</td>
+</tr>
+<tr class="even">
+<td>write(Path, Iterable&lt;? extends CharSequence&gt;,
+OpenOption…)</td>
+<td>Writes an <code>Iterable</code> of character sequences to a
+file.</td>
+</tr>
+<tr class="odd">
+<td>write(Path, byte[], OpenOption…)</td>
+<td>Writes a byte array to a file at the given <code>Path</code>.</td>
+</tr>
+<tr class="even">
+<td>writeString(Path, CharSequence, Charset, OpenOption…)</td>
+<td>Writes a <code>CharSequence</code> to a file using the specified
+<code>Charset</code>.</td>
+</tr>
+<tr class="odd">
+<td>writeString(Path, CharSequence, OpenOption…)</td>
+<td>Writes a <code>CharSequence</code> to a file.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

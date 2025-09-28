@@ -1,0 +1,320 @@
+Advanced Design
+
+A significant portion of Java interview questions often focus on changes introduced in Java 8, especially those related to language features and the standard library. This chapter explores lambda expressions, which are foundational for understanding Streams and other new capabilities in Java 8.
+
+Abstract
+
+Abstract classes provide a way to define an abstraction without specifying implementation details. In some cases, using an abstract class is more suitable than using interfaces. This is because abstract classes can offer both behavior, similar to interfaces, and a more precise definition of the type’s semantics.
+
+An abstract class defines common functionality and enforces a stricter contract for its subclasses. For example, consider a class called Shape that declares an abstract method named area. This method must be implemented by any concrete subclass.
+
+Abstract classes cannot be instantiated directly. They are marked with the abstract keyword in the class declaration, and must contain at least one abstract method, which is a method without an implementation. If you try to provide an implementation for a method marked as abstract, the compiler will generate an error.
+
+It is a compile-time error if a class is declared abstract but does not contain any abstract methods. Similarly, if a class is not declared abstract but contains an abstract method, this is also a compile-time error. Additionally, an abstract class cannot be declared as both abstract and final.
+
+An abstract class can extend another abstract class, as long as it continues to meet these rules. This means that the subclass must either implement all inherited abstract methods or remain abstract itself.
+
+Final
+
+The final keyword in Java can be applied to classes, methods, and variables. As mentioned earlier, final classes cannot be extended. Final methods cannot be overridden, and final variables cannot be reassigned.
+
+Classes
+
+Declaring a class as final has several important benefits, even though they are sometimes overlooked. As discussed in the chapter on immutability, marking a class as final ensures that it cannot be subclassed. This guarantees that the class’s behavior remains unchanged, effectively sealing it from external modification or misuse by third parties.
+
+There is also a performance benefit. When the compiler knows that a class is final and cannot be subclassed, it can optimize calls to the class’s member methods. Since there is no possibility of dynamic polymorphism, or late binding, the compiler can optimize method calls during bytecode generation.
+
+Methods
+
+A final method behaves similarly to a final class. It prevents the method from being overridden in subclasses. This can be used to guarantee that certain behavior defined in a superclass is never changed, ensuring that critical functionality is not accidentally altered.
+
+Variables
+
+Final variables are especially useful when working with immutable classes. They ensure that a member variable is assigned only once and cannot be reassigned. This assignment can occur either in the constructor, in all constructors defined for the class, or alongside the variable declaration. If a final variable is not assigned a value, the compiler will generate an error.
+
+Nested Classes
+
+A nested class is a class defined within another, enclosing class. There are four types of nested classes in Java.
+
+Static Inner Classes
+
+Static inner classes are defined in a static context and are associated with the enclosing class type itself, not with any particular instance. There are several important rules regarding their use and access:
+
+Every static inner class is associated with the enclosing class type, not with an instance.
+
+The accessibility of the static inner class is determined by the outer class. For example, even if the static inner class is declared public, if the outer class has package-private or default access, the static inner class will not be publicly accessible.
+
+The name of the inner static class is expressed in the context of the outer class. To use the nested static inner class, you must refer to it using the syntax OuterClassName dot InnerClassName. It is also possible to statically import the inner class to avoid this long naming chain.
+
+When a static inner class or interface is defined inside an interface, it is implicitly static. However, you cannot define a local inner class or interface inside an interface. This restriction does not apply to abstract classes.
+
+Static nested classes can be declared abstract or final. They can also serve as base classes for other classes, or extend other class types, including the enclosing class.
+
+Static nested classes can have static members, which is not true for all types of nested classes.
+
+Static nested classes can only access static members of the enclosing class. However, if the static inner class has a reference to an instance of the enclosing class, it can access its members, regardless of access modifier, including private members.
+
+Enclosing classes can access the static members of the inner static class. If they have a reference to an instance of the inner static class, they can also access its member variables, regardless of access modifier.
+
+To instantiate a static inner class, you must reference the outer class name first, followed by the static member class. For example, you would write OuterClassName dot InnerClassName, then use the new keyword to create an instance.
+
+Here is an example that demonstrates the relationship between an outer class and its inner static class. In this example, the outer class defines both static and instance members. The inner static class can access the static members of the outer class directly, and can access instance members if it is given a reference to an instance of the outer class. The outer class can also access the static members of the inner class, and, if it has an instance of the inner class, can access its member variables.
+
+To create an instance of the inner static class, you use the syntax Outer dot Inner, followed by the new keyword. Note that the inner class must be visible. If the outer class is package-private, the inner class will not be visible outside the package, even if it is declared public.
+
+Inner Classes
+
+Inner classes are a specialized case of static inner classes, but they are defined as non-static members inside another class. The most important difference is that a non-static inner class is associated with an instance of the enclosing class, not with the class type itself.
+
+Each instance of the outer class has its own instance of the non-static inner class. In other words, every non-static inner class is associated with an instance of the enclosing class, which is different from static inner classes that are bound to the class type.
+
+The inner class can access the non-static members of the enclosing class without needing a reference to an instance, because it is already bound to the instance of the outer class.
+
+The outer class cannot access member variables of the nested inner class without first declaring an instance of it.
+
+The inner non-static class cannot have static members. This is because the class type definition is tied to an instance of the enclosing class, and static members are bound to the class type, not to an instance. Therefore, the inner class type does not exist independently of the outer class instance.
+
+In the next section, we will continue exploring the details of inner classes and their usage.
+
+
+Let’s walk through the concepts and code examples provided, focusing on how inner classes, local classes, anonymous classes, and enums work in Java.
+
+First, we have an example involving an outer class and its inner class.
+
+In this example, the Outer class has a constructor that creates an instance of its inner class, called Inner, by passing the current instance as a reference. This is done by calling new Inner on the current Outer instance. The code also demonstrates that the outer class can access private members of the inner class.
+
+Inside the Inner class, there is a static final member called innerStaticMember, and an instance member called innerMember. The constructor of the Inner class shows two important things. First, it accesses an instance member of the enclosing Outer class using Outer dot this. Second, it assigns a value to its own innerMember by referencing a static member of the Outer class, which does not require an instance reference.
+
+To create an instance of the inner class from outside the Outer class, you must use a reference to an existing Outer instance. This is done by calling new Inner on the outerInstance.
+
+Now, let’s move on to local classes.
+
+Local classes are named class definitions that exist only within the local scope of a code block, such as inside a method or constructor. They are not tied to the enclosing class or its instance. In earlier versions of Java, you could not define local interfaces inside methods, constructors, or initialization blocks, but this restriction was later removed.
+
+One important limitation is that you cannot return an instance of a locally defined class type directly, because the class only exists within the method’s scope. However, if the local class extends or implements a type that is visible outside the method, you can return that supertype instead.
+
+For example, if you define a local class called LocalType inside a method, you cannot return LocalType directly. But if LocalType implements an interface like Closeable, you can return a Closeable from the method.
+
+Another key point is that every local variable accessed within a local class must be effectively final. This means that once the variable is assigned, it cannot be changed for the rest of the method, even outside the local class. If you try to reassign such a variable, the compiler will produce an error. However, variables not used inside the local class can be reassigned as usual.
+
+The general rule is that only final or effectively final variables can be used inside a local class. If a variable is not explicitly marked as final, the compiler will treat it as effectively final if it is not reassigned.
+
+Next, let’s discuss anonymous classes.
+
+Anonymous classes, as the name suggests, do not have a name. They are defined as part of an instance-creation expression. Anonymous classes are useful in the same situations as local classes, but they have no explicit name and cannot have constructors, since constructors require a class name.
+
+Anonymous classes are defined directly in the new expression. They cannot extend other classes or implement interfaces explicitly, but they can provide implementations for abstract methods or override methods from a superclass.
+
+For example, you can create an anonymous class that implements the Closeable interface by defining it in the new expression. You can also override methods from a concrete class in an anonymous class, effectively creating a new type with custom behavior.
+
+Anonymous classes were widely used before the introduction of lambda expressions, especially for implementing functional interfaces. With lambdas, many use cases for anonymous classes have been replaced by more concise syntax.
+
+Now, let’s talk about enums.
+
+Enums, or enumeration types, provide a way to define a set of named constants. Unlike in some other languages where enums are just integers, in Java, enums are full-fledged class types. They can have constructors, methods, and fields, just like regular classes.
+
+A basic enum defines a set of named constants, such as DOTMATRIX, INKJET, and LASER. These are compile-time constants, similar to enums in languages like C or C plus plus.
+
+Enums can also have constructors, but these constructors are always private. This is because enum instances are created by the runtime, not by the user. Each enum constant is a singleton instance, meaning there is only one instance of each constant in the runtime.
+
+For example, you can define an enum called PrinterType with constants DOTMATRIX, INKJET, and LASER, each with an associated page print capacity. The enum has a private instance member to store the capacity, and a private constructor that assigns the value. The semicolon at the end of the enum constant list is required if the enum has additional members, such as fields or methods.
+
+In summary, inner classes, local classes, anonymous classes, and enums each provide different ways to structure and organize code in Java, with specific rules and use cases for each. Understanding these constructs helps you write more flexible and maintainable Java programs.
+
+
+Enums in Java
+
+Enums in Java can have custom methods that extend their behavior. For example, you might see a method called getPrintPageCapacity, which simply returns the value of a field named pagePrintCapacity. This allows each enum constant to have its own associated data and behavior.
+
+Enums are always defined as public, static, and final. This means they are always visible, cannot be extended, and cannot be tied to a specific instance of a class. In other words, you cannot define a non-static inner enum inside another class.
+
+There are several important rules that apply to enumerations in Java, which set them apart from regular classes and their instances.
+
+First, you cannot create an enum using the new keyword. Enum instances are created by the Java runtime based on their definition in the enum type itself.
+
+Second, you can compare enum values using the double equals operator. This works because every enum instance of a given type is created only once by the runtime.
+
+Third, enums of the same type can also be compared using the equals method. By default, this is equivalent to using double equals, unless the method is overridden.
+
+Fourth, the toString method of an enum type prints the name of the enum entry by default. However, you can override toString just like you would for any other class.
+
+Fifth, the values method on an enum type returns an array of all the enum constants for that type.
+
+Finally, enum constants cannot be cloned. If you try to call the clone method, it will throw a CloneNotSupportedException.
+
+Interfaces
+
+An interface in Java is a special type that provides no member variables and only has member methods. By default, these methods are not implemented and usually represent some kind of behavior.
+
+Unlike abstract classes, interfaces are implemented using the implements keyword, not extends. A class can implement as many interfaces as it wants, but it can only extend a single parent class.
+
+Starting with Java 8, interfaces can have default methods. These are utility methods that are similar to static methods, but they are not static. They can be overridden by the class that implements the interface. Default methods usually provide a general-purpose implementation that wraps around the API of the interface.
+
+For example, the Iterator interface provides a default method called forEachRemaining. This method loops over the remaining entries in the iterator, calling hasNext and next. The default method wraps their usage in a straightforward implementation, but the actual logic for hasNext and next is provided by the class that implements the interface.
+
+There are several key points to remember about interfaces and how they differ from regular classes.
+
+Interfaces can extend other interfaces, one or more, using the extends keyword. However, they cannot extend abstract or concrete classes.
+
+Interfaces cannot be instantiated, and they cannot have constructors. However, a reference variable of an interface type can refer to an object that implements it. For example, you might see Iterator it equals new IteratorImpl.
+
+Interfaces do not contain non-static instance variables. If a data member is defined in an interface, it is implicitly declared as public, static, and final.
+
+An interface can have abstract methods, default methods, and static methods. All methods in an interface are abstract by default, so there is no need to explicitly use the abstract keyword.
+
+An interface can be declared within another interface or class. It is always static by default, and is known as a nested interface. There is no such thing as a non-static nested interface, since non-static nested types are linked to an instance.
+
+An interface can have an empty body. These are called marker interfaces, and are often used for future extension or to identify certain behavior during reflection.
+
+If an abstract class implements an interface, it does not have to implement the methods immediately. However, the concrete subclasses must provide implementations for those methods.
+
+Only public member methods are allowed in an interface. The purpose of an interface is to expose actions or behaviors, not to hide them.
+
+For example, if you try to declare a protected or private method in an interface, the compiler will produce an error. All methods are public by default, and there is no need to specify the qualifier.
+
+Default methods in interfaces cannot be marked as synchronized. This is because the synchronized qualifier requires the runtime to lock the current object or instance, but interfaces cannot be instantiated. However, you can use a synchronized block inside the default method, locking around the current instance.
+
+For example, you might see a default method in an interface that uses synchronized this within its body. This is allowed, because when the method is invoked, this refers to the instance of the class that implements the interface. However, you cannot mark the default method itself as synchronized.
+
+The Diamond Pattern
+
+There is a well-known issue called the diamond pattern when declaring multiple interfaces. If a class implements two interfaces that both provide default methods with the same signature, a conflict arises.
+
+This issue only occurs with default methods, since non-default methods have no implementation and therefore do not cause conflicts.
+
+For example, suppose you have two interfaces, Interface1 and Interface2, both of which provide a default method called foo. If a class called Diamond implements both interfaces, the compiler will produce an error because it sees two methods with the same signature coming from different type hierarchies.
+
+To resolve this, the method must be overridden in the child class. The implementation must explicitly specify which method to use, or provide its own implementation. If you try to call foo directly without overriding it, the compiler will not know which default method to call, and you will get a compile-time error.
+
+
+To resolve the issue described above, and to avoid a compiler error, you need to qualify the method using the super keyword. Just as the this keyword refers to the current instance, the super keyword refers to the superclass or interface of a given class. Both calls can be used or referenced here, or in any other method in the Diamond class.
+
+If a certain condition is met, you can use Interface1.super.foo to call the default method from the first interface. Otherwise, you can use Interface2.super.foo to call the default method from the second interface.
+
+This approach is now correct. After the method in Diamond properly resolves the conflict between the two foo methods, the compiler will recognize that the method is explicitly overridden in the implementation and will know how to call it. When you create a new instance of Diamond and call foo, it will work as expected.
+
+Now, let’s consider another scenario. When an interface and a base class have the same method signature, for backward compatibility, the Java runtime will pick the method from the base class. In this case, the “class wins” rule is applied. This ensures compatibility with older versions and the established behavior of the language.
+
+For example, imagine you have a class called BaseClass with a method foo, and an interface called BaseInterface that also defines a default method foo. If you create a class called Diamond that extends BaseClass and implements BaseInterface, then when you call foo on a Diamond instance, the method from BaseClass will be called. Even though there are two methods with the same signature, the one from the interface will be completely ignored by the compiler.
+
+Now, let’s look at a small caveat. What happens if the method in BaseClass is marked as final? Since final means the method cannot be overridden, the compiler will be confused. It will still try to apply the “class wins” rule, but if you attempt to override the method, the compiler will throw an error. You cannot change this behavior.
+
+For example, if you have a BaseClass with a final foo method, and a BaseInterface with a default foo method, and then you try to override foo in a subclass called Diamond, the compiler will produce an error. Even though you might think the compiler would assume you want to override the method from the interface, since the one from the class is final, that is not the case. The class still wins, and the compiler insists on overriding the method from the class. Since it is final, this results in a compile-time error.
+
+Functional interfaces
+
+The concept of a functional interface was introduced in Java 8, alongside lambda expressions. The idea behind functional interfaces is that they provide only one single method that must be implemented. An interface with no methods, or only default methods, is not considered a functional interface. Java 8 introduced a new annotation called FunctionalInterface, which can be used to mark interfaces at compile time. This annotation is used to validate whether a given interface is truly a functional interface.
+
+Some examples of functional interfaces in the Java standard library include Runnable in the java.lang package, which defines a single run method. Comparator in the java.util package, which defines a single compare method. ActionListener in the java.awt.event package, which defines a single actionPerformed method. And FileFilter in the java.io package, which defines a single accept method.
+
+A functional interface must have at least one abstract, non-implemented, non-default method to be considered a functional interface. Functional interfaces are closely related to lambda expressions, and many new additions to the java.lang library use them.
+
+For example, if you declare an interface with the FunctionalInterface annotation and provide one abstract, non-implemented, and non-default method, that is perfectly valid. However, if you declare an interface with the FunctionalInterface annotation but provide no methods at all, or if you provide two abstract methods, the compiler will produce an error. Only one abstract method is allowed at most.
+
+If you declare an interface with only a default method and no abstract methods, the compiler will also produce an error, stating that no abstract method was found in the interface.
+
+There are some interesting caveats related to functional interfaces and interfaces in general. Interfaces do not inherit from the Object class, but they implicitly declare many of the same methods as Object. If you provide an abstract method from the Object class in the interface, it still remains a functional interface.
+
+For example, if you declare a Comparator interface with a compare method and an equals method, this is still a valid functional interface. This is because the equals method matches the one defined by default in the Object class. Even though interfaces do not inherit from Object by default, they have the same methods. In this case, the signature of equals matches the one in Object, so there is no compiler error. However, if the interface only had the equals method in its declaration, then a compiler error would occur, since the interface would not have a single abstract method. Remember, methods like equals and others from Object are not considered abstract in this context. They are provided with a default implementation by the runtime if one is not supplied.
+
+Declaring methods that match the default ones from Object, in a functional or regular interface, does not count as adding abstract methods. They are more like default methods, which are implemented by the runtime if an implementation is not provided.
+
+Lambda expression
+
+One of the most important features introduced in Java 8, and in the language in general, is the lambda function. Lambda expressions are one of the most powerful features that Java exposes. Lambda expressions are similar to closures. They provide an easy way to supply a stateful callback or action behavior.
+
+Several coordinated changes were made in the language, the virtual machine, and the libraries to enable lambda reference functions. First, a new operator was added to introduce the creation of lambda expressions, which is the arrow operator. This operator is used to define and declare lambda references in user code.
+
+The function reference operator was also introduced. This operator is directly related to lambda expressions and allows functions to be converted to lambda expressions, which in turn are simple functional interfaces.
+
+The default keyword was introduced as well. It is used in interfaces and, most importantly, allows certain interfaces to be easily converted into functional interfaces while still retaining backward compatibility.
+
+The streams library, and the integration of the collections library with streams, was another major change. This made interoperability between the streams library and the collections library very smooth and without significant friction.
+
+The introduction of lambda expressions brought a slight paradigm shift in the way programs are developed. It allows behavior or actions to be passed as function arguments. Lambda expressions represent a stateless transformation on a piece of data, which can be passed around just like a simple variable.
+
+The functional programming style is a style of programming that focuses on writing functions to perform tasks, rather than changing the state or data of a program in a step-by-step approach. Functional design comes from languages like Lisp or Scheme. It promotes functions and actions as user-accessible and writable variables in user code.
+
+Key concepts of functional programming include pure functions and state immutability. Pure functions always give the same output if given the same input, without relying on or changing the state of internal or external data the function has access to. State immutability means that data is not changed directly. Instead of modifying existing data in place, functions create and return new data based on the original data. This approach avoids side effects, where one part of the program changes something that affects another part in an unexpected way.
+
+
+First class functions
+
+In Java, functions are considered first class objects. This means you can treat them just like any other variable. You can pass functions as arguments to other functions, return them from functions, or assign them to variables. This flexibility allows you to write code that is more modular and expressive.
+
+High order functions
+
+High order functions are functions that either take other functions as input, or return functions as output. Common examples include functions like map, filter, or reduce, which apply other functions to a collection of data in useful ways.
+
+Lambda syntax and declaration
+
+A lambda expression in Java is defined by two main elements: the argument list and the body. These are separated by the special arrow operator, which is written as a hyphen followed by a greater-than sign. For example, you can define a variable as a lambda that returns the number five. In this case, the lambda has no arguments and simply returns a value. For single argument lambda expressions, if the type is not provided, you can omit the brackets around the argument. If you have multiple arguments, you specify them in a list, and the type can often be omitted because Java can deduce it from the left hand side. However, if you need to provide types, you must provide them for all arguments in the list, not just some of them. Lambda expressions do not always have to return a value; they can simply execute an action and exit.
+
+Lambda expressions are always linked to a specific type. This type can be a user-defined functional interface, or one of the existing functional interfaces provided by the Java standard library, such as Function, Predicate, or Consumer. In other words, the left hand side of a lambda is always a concrete type, just like any other variable.
+
+Here is an example of a custom user-defined functional interface and how to use it with a lambda expression.
+
+This code defines an interface called LambdaFunction with a single method named call. In the main method, a lambda expression is assigned to a variable of type LambdaFunction. The lambda prints "Hello world" when called. The code then calls the call method on the lambdaFunction variable, which executes the lambda and prints the message.
+
+Calling the lambda expression is no different than accessing the respective method of the interface and passing the necessary arguments, if any. This is why lambda expressions are simply an extension of already existing semantic and lexical objects in the Java language. They do not introduce a completely new type of lexical scoped object. Instead, they take advantage of other features of the language.
+
+Lambda Design
+
+It is helpful to compare Java's approach to lambdas with other languages where closures also exist and functions can be passed as arguments. For example, in JavaScript, you can assign a function to a variable and then use the call operator, which is a pair of parentheses, to invoke the function referenced in the variable. Java did not introduce lambdas in this way, because doing so would have required a completely new type of syntax and deeper language changes. Instead, Java reuses existing functionality to achieve similar results.
+
+In JavaScript, you might see code where a variable outside is referenced inside a closure, and the closure is assigned to a variable called foo. Later, foo is called, and it prints the value of outside. This illustrates how closures in other languages are fundamentally different from lambda expressions in Java. In Java, local variables referenced in lambda expressions must be effectively final. This means the variables must not be changed or reassigned in the lambda expression's body or anywhere else in the local scope where the variable is used or visible. This restriction exists because of the way local variables are stored in Java, which is different from other languages.
+
+Effectively Final
+
+Here is a simple example of what happens when a local variable or function argument is reassigned somewhere in the lambda body or in the function body. This is only relevant if the referenced local variable is used in both the lambda body and the function body. For function arguments, they are always considered effectively final within a lambda expression body.
+
+This code defines an interface called Functional with a single method named call. In the main method, a local variable called word is assigned the value "hello". A lambda expression is created that prints the value of word with "ay" appended. The lambda is called, printing "helloay". If you try to reassign word to null after the lambda is created and called, the compiler will produce an error. This is because word is treated as effectively final, even though it is not explicitly declared as final.
+
+The next example shows how a lambda expression is actually expanded by the compiler. While the actual runtime creates the lambda in a different way, conceptually, the lambda is transformed into a named or anonymous class that captures the scope inside member variables, which are initialized in the constructor.
+
+In this example, a lambda expression is assigned to a Runnable variable and prints the value of foo. The expanded version shows how the compiler might generate an inner local class that implements Runnable. The captured variable foo is stored as a private final member variable, initialized in the constructor. The run method prints the value of this member variable.
+
+It is important to mention that local variables are not shared between threads in Java. They are stored on the stack and are not affected by the memory model. Only instance members, static fields, array elements, and similar constructs are stored on the heap. Local variables and exception handler parameters are never stored on the heap and are not shared between threads. Therefore, since they cannot be shared, a copy of the value must be captured in an object, such as an instance member field, that can be shared between threads.
+
+When a lambda is created, the local variable capture becomes an instance variable of the unnamed or anonymous class representing the lambda expression. It holds the same value as the local variable at the time the lambda is created. The reference is the same, but the variables are different—one is the local variable from the function, and the other is a member of the anonymous class. Both are assigned the same starting value.
+
+If the language allowed you to change and reassign this variable in user code, it would appear as if the same variable from the function scope and the lambda scope were the same, even though they are not. Allowing reassignment separately and independently in the outer function scope and the lambda body would be confusing.
+
+Member variables are not subject to such restrictions. The lambda automatically captures the current instance, and you can access member variables without referencing this explicitly. However, you can use this or super to be more verbose if you wish, since the lambda captures the immediate instance that encloses it.
+
+Only local variables and function arguments are required to be treated as effectively final, for the reasons described above. If a lambda expression references a member variable, it is not subject to these restrictions, because of the way the memory model works in Java. This means that member variables will be mutable and reassignable both outside and inside the lambda body. This is important to remember.
+
+Summary
+
+Abstract classes and methods
+
+
+Abstraction and Abstract Classes
+
+An abstraction specifies the functionality that a class supports, without revealing the finer details of how that functionality is implemented. You cannot create instances directly from an abstract class. Abstract classes are important because they enable run-time polymorphism, which in turn allows for loose coupling between components.
+
+Final Variables and Methods
+
+A final class is a class that cannot be inherited from—meaning, you cannot create a subclass of a final class. Similarly, a final method is a method that cannot be overridden by subclasses. All methods in a final class are automatically final, so they cannot be overridden either. A final variable is a variable that can only be assigned a value once.
+
+Inner, Local, and Anonymous Classes
+
+Java supports four types of nested classes. These are static nested classes, inner classes, local inner classes, and anonymous inner classes. Static nested classes can have static members, while the other types of nested classes cannot. Both static nested classes and inner classes can access members of their outer class, including private members. However, static nested classes are limited to accessing only static members of the outer class. Local classes, which include both local inner classes and anonymous inner classes, can access all variables declared in the outer scope, whether that scope is a method, a constructor, or a statement block.
+
+Enumerated Types
+
+Enumerated types, or enums, provide a type-safe way to restrict user input to a fixed set of values. You cannot use the new keyword to create instances of an enum, even within the enum definition itself. Enum classes are final by default, so they cannot be subclassed. All enum classes automatically inherit from the java dot lang dot Enum class. Enums can also include methods and constructors.
+
+Interfaces and Overriding
+
+An interface in Java can have three kinds of methods: abstract methods, default methods, and static methods. The diamond problem occurs when a derived type inherits two method definitions from base types that have the same signature. If two super interfaces have the same method name and one of them provides a definition, the compiler will issue an error, and you must resolve this conflict manually. If both a base class and a base interface define methods with the same signature, the method definition in the class takes precedence, and the interface definition is ignored.
+
+A functional interface is an interface that contains exactly one abstract method, but it can have any number of default or static methods. Declaring a functional interface creates a functional interface type, which can be used with lambda expressions. Importantly, methods inherited from the Object class do not count as abstract methods when determining if an interface is functional.
+
+Lambda Expressions
+
+In a lambda expression, the left side of the arrow operator specifies the parameters, while the right side specifies the body of the function. The arrow operator, which is written as a hyphen followed by a greater-than sign, allows for concise expression of lambda functions. You can create a reference to a functional interface and assign a lambda expression to it. When you invoke the abstract method from that interface, it will execute the assigned lambda expression.
+
+The compiler can often infer the types of lambda parameters if they are omitted. When you do declare parameters, you can include modifiers such as final. Any variables accessed by a lambda function are considered to be effectively final, meaning their values cannot change after they are assigned.
+
+

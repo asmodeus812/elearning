@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>1-core-class-design</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#class-design" id="toc-class-design">Class design</a>
+<ul>
+<li><a href="#encapsulation" id="toc-encapsulation">Encapsulation</a>
+<ul>
+<li><a href="#public" id="toc-public">Public</a></li>
+<li><a href="#private" id="toc-private">Private</a></li>
+<li><a href="#protected" id="toc-protected">Protected</a></li>
+<li><a href="#default" id="toc-default">Default</a></li>
+<li><a href="#relationship" id="toc-relationship">Relationship</a></li>
+</ul></li>
+<li><a href="#inheritance" id="toc-inheritance">Inheritance</a></li>
+<li><a href="#polymorphism" id="toc-polymorphism">Polymorphism</a></li>
+<li><a href="#overloading" id="toc-overloading">Overloading</a></li>
+<li><a href="#overriding" id="toc-overriding">Overriding</a>
+<ul>
+<li><a href="#tostring" id="toc-tostring">toString</a></li>
+<li><a href="#hashcode-equals" id="toc-hashcode-equals">hashCode &amp;
+equals</a></li>
+</ul></li>
+<li><a href="#invocation" id="toc-invocation">Invocation</a>
+<ul>
+<li><a href="#constructor" id="toc-constructor">Constructor</a></li>
+<li><a href="#methods" id="toc-methods">Methods</a></li>
+</ul></li>
+<li><a href="#composition" id="toc-composition">Composition</a></li>
+<li><a href="#singleton" id="toc-singleton">Singleton</a></li>
+<li><a href="#immutability" id="toc-immutability">Immutability</a></li>
+<li><a href="#static" id="toc-static">Static</a>
+<ul>
+<li><a href="#variable" id="toc-variable">Variable</a></li>
+<li><a href="#block" id="toc-block">Block</a></li>
+<li><a href="#rules" id="toc-rules">Rules</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#summary" id="toc-summary">Summary</a>
+<ul>
+<li><a href="#implement-encapsulation"
+id="toc-implement-encapsulation">Implement encapsulation</a></li>
+<li><a href="#implement-inheritance"
+id="toc-implement-inheritance">Implement inheritance</a></li>
+<li><a href="#implement-polymorphism"
+id="toc-implement-polymorphism">Implement polymorphism</a></li>
+<li><a href="#override-hashcode-equals-and-tostring"
+id="toc-override-hashcode-equals-and-tostring">Override hashCode,
+equals, and toString</a></li>
+<li><a href="#singleton-and-immutable-classes"
+id="toc-singleton-and-immutable-classes">Singleton and immutable
+classes</a></li>
+<li><a href="#static-initialize-blocks-variables-methods-and-classes"
+id="toc-static-initialize-blocks-variables-methods-and-classes">Static
+initialize blocks, variables, methods, and classes</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="class-design">Class design</h1>
+<h2 id="encapsulation">Encapsulation</h2>
+<p>The term encapsulation refers to combining data and associated
+functions as a single unit. In object oriented programming data and
+associated behavior forms a single unit, which is referred to as a
+class. The access modifiers determine the level of visibility for a Java
+entity (a class, method or a field). Access modifiers enable you to
+enforce effective encapsulation. If all member variables of a class can
+be accessed from anywhere then there is no point putting these variables
+in a class and no purpose in encapsulating data and behavior together in
+a class or unit.</p>
+<p>There are four types of access modifiers which are -
+<code>public, private, protected and default</code></p>
+<h3 id="public">Public</h3>
+<p>The most liberal one, If a class or its members are declared as
+public, they can be accessed from any other class regardless of the
+package boundary. It is comparable to a public place in the real
+world.</p>
+<p><code>A public method in a class is accessible to the outside world only if the class is declared as public, if the class does not specify any access modifier itself, meaning it is using default access, then the public method is accessible only within the containing package</code></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// com/java/core/subpackage/DefaultAccessClass/java</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> com</span><span class="op">.</span><span class="im">java</span><span class="op">.</span><span class="im">core</span><span class="op">.</span><span class="im">subpackage</span><span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">// the DefaultAccessClass, is declared with `default` access, meaning only classes within the `subpackage` can access it</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">// and its methods.</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DefaultAccessClass <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this constructor even if defined public, is only public for classes which are within the same package as this class</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// meaning that only those classes can access this constructor and create an instance of this class</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">DefaultAccessClass</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">// com/java/core/TopLevelClass.java</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> com</span><span class="op">.</span><span class="im">java</span><span class="op">.</span><span class="im">core</span><span class="op">;</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> com</span><span class="op">.</span><span class="im">java</span><span class="op">.</span><span class="im">core</span><span class="op">.</span><span class="im">subpackage</span><span class="op">;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> TopLevelClass <span class="op">{</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="kw">throws</span> <span class="bu">IOException</span> <span class="op">{</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// this is a compile time error, the DefaultAccessClass is not visible, neither is its constructor to the</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// TopLevelClass, since it is located in a different package, at a higher level than the DefaultAccessClass</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        TestJava2 two <span class="op">=</span> <span class="kw">new</span> <span class="fu">TestJava2</span><span class="op">();</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The example above shows how two different files, located in different
+packages within the same project can guard against global public access
+when using the default package protected access modifier</p>
+<h3 id="private">Private</h3>
+<p>As the name implies the most stringent access modifier. A private
+class member cannot be accessed from outside the class, only members of
+the same class can access these private members.</p>
+<p><code>A class or interface cannot be declared as private or protected. Furthermore, member methods or fields of an interface cannot be declared as private or protected.</code></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// this is invalid, will produce a compile time error, there is no way to declare a private or protected class, the</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">// access modifiers that can be put on a class are either public or default (no access modifier specified, implies default</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">// access, see above)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="kw">class</span> PrivateClassType <span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>   <span class="co">// such a class declaration can never exist, it not allowed by the language itself</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="protected">Protected</h3>
+<p>The protected one is a modifier which allows the member which is
+declared as protected to be accessed from the containing class where it
+is defined (just as private), and every class which inherits from
+it.</p>
+<h3 id="default">Default</h3>
+<p>As already discussed the default or package protected modifier, is
+the implicit one, when no modifier is specified in front of a class or
+member declaration, the default one takes effect, it is only accessible
+to other members within the same package where the protected type /
+member is defined.</p>
+<h3 id="relationship">Relationship</h3>
+<p>The table below represents the Relationship between the different
+types of modifiers and how are they accessible based on the location
+they are declared in. Takes into account classes, subclasses - inside or
+outside the same package.</p>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 14%" />
+<col style="width: 18%" />
+<col style="width: 19%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Modifier</th>
+<th>Within the same class</th>
+<th>Subclass inside the package</th>
+<th>Subclass outside the package</th>
+<th>Other class inside the package</th>
+<th>Other class outside the package</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Public</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>Private</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>Protected</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Default</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h2 id="inheritance">Inheritance</h2>
+<p>A re-usability mechanism in object-oriented programming. With
+inheritance, the common properties of various objects are exploited to
+form relationships with each other. The abstract and common properties
+are provided in the super class, which is available to the more
+specialized sub class. Inheritance represents a is-a relationship
+between different class type declarations</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// take an array of numbers and sum them up</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">double</span> <span class="fu">sum</span><span class="op">(</span><span class="bu">Number</span> <span class="op">[]</span>nums<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> sum <span class="op">=</span> <span class="fl">0.0</span><span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="bu">Number</span> num <span class="op">:</span> nums<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        sum <span class="op">+=</span> num<span class="op">.</span><span class="fu">doubleValue</span><span class="op">();</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> sum<span class="op">;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> <span class="op">[]</span>s<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// create a Number array</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Number</span> <span class="op">[]</span>nums <span class="op">=</span> <span class="kw">new</span> <span class="bu">Number</span><span class="op">[</span><span class="dv">4</span><span class="op">];</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// assign derived class objects</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    nums<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">Byte</span><span class="op">((</span><span class="dt">byte</span><span class="op">)</span><span class="dv">10</span><span class="op">);</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    nums<span class="op">[</span><span class="dv">1</span><span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">Integer</span><span class="op">(</span><span class="dv">10</span><span class="op">);</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    nums<span class="op">[</span><span class="dv">2</span><span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">Float</span><span class="op">(</span><span class="fl">10.0f</span><span class="op">);</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    nums<span class="op">[</span><span class="dv">3</span><span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">Double</span><span class="op">(</span><span class="fl">10.0f</span><span class="op">);</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// pass the Number array to sum and print the result</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The sum of numbers is: &quot;</span> <span class="op">+</span> <span class="fu">sum</span><span class="op">(</span>nums<span class="op">));</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The example above demonstrates how using the top level superclass
+Number, which is a superclass of types such as Float, Double, Integer
+etc, can be used to sum up different types, and also collect them into
+an array of the same type, which are referencing instances of the child
+classes. Each of them implements the method <code>doubleValue</code>,
+meaning that they can all be summed up together and produce a result
+even though they are concretely different types</p>
+<h2 id="polymorphism">Polymorphism</h2>
+<p>Generally speaking most languages have two different types of
+polymorphism, static and dynamic. Each is evaluated during different
+stage of the <code>lifecycle</code> of the program and its
+execution.</p>
+<ul>
+<li><p><code>Static</code> - when different forms of a single entity are
+resolved at compile time (early binding). Function overloading is an
+example of static polymorphism</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Square <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> aside<span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> bside<span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">area</span><span class="op">(</span><span class="dt">int</span> a<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> a <span class="op">*</span> a<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">area</span><span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> a <span class="op">*</span> b<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">// the area method is overloaded, one version of it will calculate the area of an actual square, the other will</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">// calculate the area of special type of a square - a rectangle, there are two versions of the same method - area</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="bu">Shape</span> shape1 <span class="op">=</span> <span class="kw">new</span> <span class="fu">Square</span><span class="op">();</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>shape1<span class="op">.</span><span class="fu">area</span><span class="op">(</span><span class="dv">10</span><span class="op">));</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="bu">Shape</span> shape2 <span class="op">=</span> <span class="kw">new</span> <span class="fu">Square</span><span class="op">();</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>shape2<span class="op">.</span><span class="fu">area</span><span class="op">(</span><span class="dv">10</span><span class="op">,</span> <span class="dv">5</span><span class="op">));</span></span></code></pre></div></li>
+<li><p><code>Dynamic</code> - when different forms of a single entity
+are resolved at run time (late binding). Function overriding is an
+example of dynamic polymorphism</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> <span class="bu">Shape</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">area</span><span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span> <span class="op">}</span> <span class="co">// default implementation</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// other members</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Circle <span class="kw">extends</span> <span class="bu">Shape</span> <span class="op">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> radius<span class="op">;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">Circle</span><span class="op">(</span><span class="dt">int</span> r<span class="op">)</span> <span class="op">{</span> radius <span class="op">=</span> r<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// other constructors</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">area</span><span class="op">()</span> <span class="op">{</span><span class="cf">return</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">PI</span> <span class="op">*</span> radius <span class="op">*</span> radius<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// other declarations</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Square <span class="kw">extends</span> <span class="bu">Shape</span> <span class="op">{</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> side<span class="op">;</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">Square</span><span class="op">(</span><span class="dt">int</span> a<span class="op">)</span> <span class="op">{</span> side <span class="op">=</span> a<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">area</span><span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> side <span class="op">*</span> side<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// other declarations</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="bu">Shape</span> shape1 <span class="op">=</span> <span class="kw">new</span> <span class="fu">Circle</span><span class="op">(</span><span class="dv">10</span><span class="op">);</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>shape1<span class="op">.</span><span class="fu">area</span><span class="op">());</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="bu">Shape</span> shape2 <span class="op">=</span> <span class="kw">new</span> <span class="fu">Square</span><span class="op">(</span><span class="dv">10</span><span class="op">);</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>shape2<span class="op">.</span><span class="fu">area</span><span class="op">());</span></span></code></pre></div></li>
+</ul>
+<h2 id="overloading">Overloading</h2>
+<p>The process of defining a method with the same name, but with
+different input arguments/parameters is what method overloading is. This
+feature works at compile time, and it is the compiler that would
+actually resolve which call to make, to which relevant version of the
+overloaded method. The method overloading allows for one to provides a
+way to define multiple ‘versions’ of the same method, each of which can
+do different things.</p>
+<p><code>The rule of thumb for overloading is that overloading can not be done entirely based on return types, it is based on the name of the method along side the order and types of arguments this method is declared with, the return type has no control over the overloading of a given method</code></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Circle <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// other members</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">fillColor</span> <span class="op">(</span><span class="dt">int</span> red<span class="op">,</span> <span class="dt">int</span> green<span class="op">,</span> <span class="dt">int</span> blue<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">/* color the circle using RGB color values - actual code elided */</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">fillColor</span> <span class="op">(</span><span class="dt">float</span> hue<span class="op">,</span> <span class="dt">float</span> saturation<span class="op">,</span> <span class="dt">float</span> brightness<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">/* color the circle using HSB values - actual code elided */</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Overloaded methods can call each other, as long as the same version
+of the overloaded method does not call itself, otherwise recursion will
+occur, and that should handled differently with extra care.</p>
+<p>Constructors can also be overloaded, they are not much different than
+regular methods, with the only difference is that every version
+overloaded method can return different result, however constructors
+always have one pre-defined return type, obviously. Another possibility
+is to call different version of the overloaded constructor, from a
+constructor, that reduces code duplication and similarly to overloaded
+methods, constructors can call overloaded constructors for the same
+type</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="fu">Circle</span><span class="op">(</span><span class="dt">int</span> x<span class="op">,</span> <span class="dt">int</span> y<span class="op">,</span> <span class="dt">int</span> r<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    xPos <span class="op">=</span> x<span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    yPos <span class="op">=</span> y<span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    radius <span class="op">=</span> r<span class="op">;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="fu">Circle</span><span class="op">(</span><span class="dt">int</span> x<span class="op">,</span> <span class="dt">int</span> y<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">this</span><span class="op">(</span>x<span class="op">,</span> y<span class="op">,</span> <span class="dv">10</span><span class="op">);</span> <span class="co">// passing default radius 10</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="fu">Circle</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">this</span><span class="op">(</span><span class="dv">20</span><span class="op">,</span> <span class="dv">20</span><span class="op">,</span> <span class="dv">10</span><span class="op">);</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// assume some default values for xPos, yPos and radius</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Overloading resolution - the way the compiler resolves overloaded
+methods is that it follows a procedure - first it looks for the exact
+match - the method definition with exactly the same number of parameters
+and types of parameters, If match is not found, it looks for the closest
+match by using implicit upcasts (autocast), If the compiler can not find
+a match then you will get a compiler error. What is upcasting, the
+compiler allows what is called a safe autocast, which is always
+upcasting action, never downcasting, since that can produce all types of
+overflow (for integer types) errors or in some cases not even possible
+to do.</p>
+<p>Class type rules</p>
+<ul>
+<li><code>Integer</code> -&gt; can be upcasted to Number (Integer is a
+child class of Number)</li>
+<li><code>Integer</code> -&gt; can be upcasted to Object (All classes
+are child classes of Object)</li>
+<li><code>String</code> -&gt; can be upcasted to CharSequence (String is
+a child class of CharSequence)</li>
+<li><code>String</code> -&gt; can be upcasted to Object (All classes are
+child classes of Object)</li>
+</ul>
+<p>Primitive type rules</p>
+<ul>
+<li><code>byte</code> -&gt; <code>short</code> -&gt; <code>int</code>
+-&gt; <code>long</code> (Primitive upcasting rules and procedures)</li>
+</ul>
+<p>Cross type rules</p>
+<ul>
+<li><code>autoboxing</code> - primitive types will be autoboxed to their
+Class equivalents or upcasted Class equivalents</li>
+</ul>
+<p>In the example below the overloaded methods are ordered in a way
+which aims to represent the order in which the overloaded methods can be
+resolved, starting from the narrowest (byte) type, to the widest
+(Object)</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">aMethod</span><span class="op">(</span><span class="dt">byte</span> val<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;byte&quot;</span><span class="op">);</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">aMethod</span><span class="op">(</span><span class="dt">short</span> val<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;short&quot;</span><span class="op">);</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">aMethod</span><span class="op">(</span><span class="dt">int</span> val<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;int&quot;</span><span class="op">);</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">aMethod</span><span class="op">(</span><span class="dt">long</span> val<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;long&quot;</span><span class="op">);</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">aMethod</span><span class="op">(</span><span class="bu">Integer</span> val<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;integer&quot;</span><span class="op">);</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">aMethod</span><span class="op">(</span><span class="bu">Number</span> val<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;number&quot;</span><span class="op">);</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">aMethod</span><span class="op">(</span><span class="bu">Object</span> val<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;object&quot;</span><span class="op">);</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="dt">byte</span> b <span class="op">=</span> <span class="dv">9</span><span class="op">;</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">// A explanation of how the resolution works</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">// in case no byte overload existed -&gt; short</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// in case no short overload existed -&gt; int</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">// in case no int overload existed -&gt; long</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">// in case no long overload existed -&gt; Integer</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    <span class="co">// in case no Integer overload existed -&gt; Number</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">// in case no Number overload existed -&gt; Object</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aMethod</span><span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>Something VERY VERY important to remember is that by default all numeric literals defined in java code are defined as implicit int/Integer</code></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// a demonstration of method overloading with two major caveats from the java spec - downcast combined with code literals</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">aMethod</span> <span class="op">(</span><span class="dt">byte</span> val <span class="op">)</span> <span class="op">{</span> <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span> <span class="op">(</span><span class="st">&quot;byte&quot;</span><span class="op">);</span> <span class="op">}</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">aMethod</span> <span class="op">(</span><span class="dt">short</span> val <span class="op">)</span> <span class="op">{</span> <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span> <span class="op">(</span><span class="st">&quot;short&quot;</span><span class="op">);</span> <span class="op">}</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this will produce a compile time error, the literal 9 is implicitly defined as int/Integer by the Java spec, meaning</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// that there is truly no overload that can be used to accept this call, remember that downcasts are not allowed, they</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// have to be explicitly defined - like so (byte) 9</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aMethod</span><span class="op">(</span><span class="dv">9</span><span class="op">);</span> <span class="co">// compiler error</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aMethod</span><span class="op">((</span><span class="dt">byte</span><span class="op">)</span> <span class="dv">9</span><span class="op">);</span> <span class="co">// that is going to resolve fine, to the byte overload</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aMethod</span><span class="op">((</span><span class="dt">short</span><span class="op">)</span> <span class="dv">9</span><span class="op">);</span> <span class="co">// that is going to resolve fine, to the short overload</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Ambiguous overloading, can occur when the compiler can not truly
+resolve the method to use for overloading, consider a case where the
+arguments defined/declared for a method call are such that the implicit
+upcasting provided by the compiler can interfere with the overloading
+resolution. Even though the method is called with two integer types,
+there is no direct overload that takes in two integers as arguments,
+however there are two overloads which have the same type of arguments
+but in different order, since the compiler will try to upcast the
+integer to match the <code>long</code>, there is no way for it to
+resolve which one of these two overloads should take precedence, since
+the order of arguments does matter, so does their type, even more
+so.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">aMethod</span> <span class="op">(</span><span class="dt">long</span> val1<span class="op">,</span> <span class="dt">int</span> val2<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span> <span class="op">(</span><span class="st">&quot;long, int&quot;</span><span class="op">);</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">aMethod</span> <span class="op">(</span><span class="dt">int</span> val1<span class="op">,</span> <span class="dt">long</span> val2<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span> <span class="op">(</span><span class="st">&quot;int, long&quot;</span><span class="op">);</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">// this is ambiguous call, and will produce a compile time error, the compiler can upcast both 9 or 10 to long, but</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">// which overload to call, both of the</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>overloaded methods are valid<span class="op">,</span> and can be called with these arguments</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="fu">aMethod</span><span class="op">(</span><span class="dv">9</span><span class="op">,</span> <span class="dv">10</span><span class="op">);</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">// now the call below is valid, since it explicitly casts the types into the respective types, which means the compiler</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">// now finds an exact overloaded method match, and knows which method to call - int, long</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="fu">aMethod</span><span class="op">((</span><span class="dt">int</span><span class="op">)</span> <span class="dv">9</span><span class="op">,</span> <span class="op">(</span><span class="dt">long</span><span class="op">)</span> <span class="dv">10</span><span class="op">);</span></span></code></pre></div>
+<h2 id="overriding">Overriding</h2>
+<p>By default all classes and types defined by the user or the standard
+library, extend from the implicit Object type, which provides several
+important methods which usually should be overridden when a new type is
+defined, those are:</p>
+<ul>
+<li><code>String toString()</code> - defines how a class should be
+expressed when printed out, in a human readable format</li>
+<li><code>int hashCode()</code> - creates an integer hash of the class
+instance, using the instance fields</li>
+<li><code>boolean equals(Object)</code> - compares the current instance
+with another one</li>
+</ul>
+<p>There are several others which are not mandatory, or required to be
+overridden, but can also be useful in certain situations</p>
+<ul>
+<li><code>Object clone()</code> - clone the state of the current
+instance into a new object</li>
+<li><code>void finalize()</code> - is the inverse version of the
+constructor, used to free resources which the instance might use to
+avoid leaking them</li>
+</ul>
+<p>Several others which are not allowed to be overridden, because they
+are defined as final, are the methods like</p>
+<ul>
+<li><code>void wait() and its overloaded counterparts</code> -</li>
+<li><code>void notify()</code> -</li>
+<li><code>void notifyAll()</code> -</li>
+<li><code>Class&lt;?&gt; getClass()</code> -</li>
+</ul>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this will produce compile time error, since toString is declared as public, in the Object class, it is not possible</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// to reduce the visibility of this method during overriding process, neither protected or private will work in this case</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Override</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">protected</span> <span class="bu">String</span> <span class="fu">toString</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// another example, which changes the signature of the declared method, in this case the declaration of the toString</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// is explicitly defined that the method returns String, therefore the overridden version must comply with that and not</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// change the declaration</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Override</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="bu">Object</span> <span class="fu">toString</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<p><code>While overriding a method you can not specify a class privilege which reduces the visibility of the initial method declaration, for example a method declared public, can not be overridden as protected or private, however the other way around it is allowed, a private method, can be overridden as protected or even public. Further more it is not allowed to change the signature of the method, when overriding both the return type and the type and number of arguments, as well as the name (obviously) must match exactly as the ones defined in the parent class</code></p>
+<p>There is a way to make overriding more user friendly, while still
+keeping intact the signature of the method being overridden, this is the
+so called <code>covariant types</code>, they allow one to specify a
+narrower type for the return type the narrower type however
+<code>has to be part of the hierarchy of the original type.</code></p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">abstract</span> <span class="kw">class</span> <span class="bu">Shape</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">abstract</span> <span class="bu">Shape</span> <span class="fu">copy</span><span class="op">();</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> Circle <span class="kw">extends</span> <span class="bu">Shape</span> <span class="op">{</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Override</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> Circle <span class="fu">copy</span><span class="op">()</span> <span class="op">{</span> <span class="co">/* return a copy of this object */</span> <span class="op">}</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The example above is using a covariant type for the copy method,
+overrides the copy method with a different return type, however that
+return type is very much part of the hierarchy of the Shape type, and is
+also a narrower type than the Shape which is the original return type of
+the copy method defined in the Shape abstract class above, therefore
+that is allowed</p>
+<p><code>Covariant type inference is ONLY allowed for return types, changing the method arguments/parameters from the original declaration is not allowed, even using covariant types, at this point what is happening is method overloading not overriding, a method can not be overriden and overloaded both at the same time, it exists only in one or the other state</code></p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// imagine the following type Point, which aims to override the equals method, however instead of that it actually</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">// overloads it, leading to hidden mistakes in the code, which are hard to spot</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">boolean</span> <span class="fu">equals</span><span class="op">(</span><span class="bu">Point</span> other<span class="op">){</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="op">(</span>other <span class="op">==</span> <span class="kw">null</span><span class="op">)</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="op">((</span>xPos <span class="op">==</span> other<span class="op">.</span><span class="fu">xPos</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="op">(</span>yPos <span class="op">==</span> other<span class="op">.</span><span class="fu">yPos</span><span class="op">))</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="bu">Point</span> p1 <span class="op">=</span> <span class="kw">new</span> <span class="bu">Point</span><span class="op">(</span><span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">);</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="bu">Point</span> p2 <span class="op">=</span> <span class="kw">new</span> <span class="bu">Point</span><span class="op">(</span><span class="dv">50</span><span class="op">,</span> <span class="dv">100</span><span class="op">);</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="bu">Point</span> p3 <span class="op">=</span> <span class="kw">new</span> <span class="bu">Point</span><span class="op">(</span><span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">);</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co">// this seemingly works, since the types are of Point, and the method being invoked is the actual overloaded one (not</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">// the overridden) equals specified above, however it is a mistake</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;p1 equals p2 is &quot;</span> <span class="op">+</span> p1<span class="op">.</span><span class="fu">equals</span><span class="op">(</span>p2<span class="op">));</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;p1 equals p3 is &quot;</span> <span class="op">+</span> p1<span class="op">.</span><span class="fu">equals</span><span class="op">(</span>p3<span class="op">));</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="bu">Object</span> p1 <span class="op">=</span> <span class="kw">new</span> <span class="bu">Point</span><span class="op">(</span><span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">);</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="bu">Object</span> p2 <span class="op">=</span> <span class="kw">new</span> <span class="bu">Point</span><span class="op">(</span><span class="dv">50</span><span class="op">,</span> <span class="dv">100</span><span class="op">);</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="bu">Object</span> p3 <span class="op">=</span> <span class="kw">new</span> <span class="bu">Point</span><span class="op">(</span><span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">);</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="co">// the types are objects, so the .equals being called here is the default equals which the Object type implements, that</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="co">// usually compares the objects by reference, and naturally the return here is `false`</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;p1 equals p2 is &quot;</span> <span class="op">+</span> p1<span class="op">.</span><span class="fu">equals</span><span class="op">(</span>p2<span class="op">));</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;p1 equals p3 is &quot;</span> <span class="op">+</span> p1<span class="op">.</span><span class="fu">equals</span><span class="op">(</span>p3<span class="op">));</span></span></code></pre></div>
+<p>The example above shows how <code>covariant</code> types are not
+applicable for argument of a function which needs to be overridden, it
+effectively overloads it instead, that is why it is advisable to use the
+<code>@Override</code> annotation, that annotation serves as a note to
+the compiler that one would like to override the method, and changing
+the method arguments to covariant types would have immediately resulted
+in a compiler error, since the compiler would have seen that instead of
+overriding the method we are overloading it.</p>
+<p><code>Use the @Override annotation where possible to avoid such hidden mistakes, which can be detrimental to resolving issues in ones code</code></p>
+<h3 id="tostring">toString</h3>
+<p>As already discussed overriding toString method is not mandatory
+however it is recommended, this helps identify different objects when
+they are printed out during debugging or general logging actions. The
+toString method has a string method signature which has to be followed
+in order to correctly override the method.</p>
+<h3 id="hashcode-equals">hashCode &amp; equals</h3>
+<p>These are the two methods which most classes should strive to
+correctly override, always. They are important for the correct
+functioning of a lot of internal containers provided by the java core
+libraries and containers. They are often used to compare and distinguish
+different instances of a given class. They represent a consistent,
+constant way to generate a unique identifier for a given state of a
+given class instance, and also a consistent way to compare different
+instances, and their state.</p>
+<p><code>The methods hashCode() and equals() need to be conssitent for a class. For parctical purposes, ensure that you follow this one rule: the hashCode method MUST return the same hash value for two objects if the equals method returns true for them. This is a general rule of thumb that has to be followed to ensure correctness across the program</code></p>
+<p>Usually both <code>hashCode</code> and <code>equals</code> use the
+members of a given class to generate the respective hashCode or check
+the equality of an object.</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> <span class="bu">Point</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">hashCode</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// use bit-manipulation operators such as ^ to generate close to unique</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// hash codes here we are using the magic numbers 7, 11 and 53,</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">// but you can use any numbers, preferably primes</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">(</span><span class="dv">7</span> <span class="op">*</span> xPos<span class="op">)</span> <span class="op">^</span> <span class="op">(</span><span class="dv">11</span> <span class="op">*</span> yPos<span class="op">)</span> <span class="op">^</span> <span class="op">(</span><span class="dv">53</span> <span class="op">*</span> yPos<span class="op">);</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">boolean</span> <span class="fu">equals</span><span class="op">(</span><span class="bu">Object</span> arg<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// perform some basic checks between the two instances, which can early exit with a clear answer</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span>arg <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span><span class="kw">this</span> <span class="op">==</span> arg<span class="op">)</span> <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// only in case the target is of the same instance is it actually possible to do any meaningful comparison</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span>arg <span class="kw">instanceof</span> <span class="bu">Point</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>            <span class="bu">Point</span> that <span class="op">=</span> <span class="op">(</span><span class="bu">Point</span><span class="op">)</span> arg<span class="op">;</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>            <span class="co">// note that both the equals and hashCode use the same members to perform the comparison or hash generation</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span><span class="op">((</span><span class="kw">this</span><span class="op">.</span><span class="fu">xPos</span> <span class="op">==</span> that<span class="op">.</span><span class="fu">xPos</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="op">(</span><span class="kw">this</span><span class="op">.</span><span class="fu">yPos</span> <span class="op">==</span> that<span class="op">.</span><span class="fu">yPos</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// otherwise return false for equality</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In the example above, both <code>hashCode</code> and
+<code>equals</code> use the same members and their state to compute the
+result of the methods, which ensures that executing the
+<code>hashCode</code> and <code>equals</code> on two objects which are
+the same will produce the same result - same <code>hash code</code> and
+also the equals method will return <code>true</code></p>
+<h2 id="invocation">Invocation</h2>
+<p>Method invocation from another context (i.e super class) can be
+tricky, explore the different options one has when having to invoke a
+method outside the scope of the declaring class type</p>
+<h3 id="constructor">Constructor</h3>
+<p>It is often useful to call the base class method inside the
+overridden method. To do that one can use the special keyword called
+<code>super</code>. The <code>super</code> keyword refers to the super
+class, in this case the parent of the current class, every class type
+has a super type, at the very least even if a class that has no parent,
+extends by default from the Object class which is still its super class.
+When calling the super constructor, from the constructor that has to be
+the first statement in the constructor.</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> InvokeSuperClass <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Example 1</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">InvokeSuperClass</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// this super call in the constructor has to be the very first call, otherwise a compile time error will occur</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">super</span><span class="op">();</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">// set more properties here, the super or this keyword can be used to reference super or this members, as many</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// times as one would like</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Example 2</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">InvokeSuperClass</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// this super call in the constructor has to be the very first call, otherwise a compile time error will occur</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">();</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// set more properties here, the super or this keyword can be used to reference super or this members, as many</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// times as one would like</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Example 3</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">InvokeSuperClass</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// this is not possible, one can not invoke the super and then call one of the current class/type constructors</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// in the same constructor, this will produce a compile time error</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>        <span class="kw">super</span><span class="op">();</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">();</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Example 4</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">InvokeSuperClass</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">// this is not possible, the first statement has to be either no call to super() or this() constructors, or the</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">// call has to be the very first statement in the constructor, this will produce a compile time error</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">member</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">();</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The examples above show a few options for invoking a
+<code>super</code> and <code>this</code> constructor from the declaring
+type, however note that it is not possible to combine both statements in
+the same constructor, usually to do this, one has to have two versions
+of the constructor, one having the <code>super()</code> call only, and
+another which invokes it with <code>this()</code>. Also there is a clear
+example that if a call to this() or super() is made in the constructor
+it has to be the very first statement in the constructor otherwise a
+compile time error will be issued.</p>
+<h3 id="methods">Methods</h3>
+<p>As a continuation of the above, calling super methods can be done in
+any place in the child method, it does not have to be the very first
+statement of the method, neither does it have to be calling a super
+method only once, there are no obvious restrictions to calling super
+methods from a regular member method of a declaring class, besides the
+obvious recursion problem which might occur, but the compiler will not
+complain</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> MemberMethodSuper <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">method</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> MemberMethodThis <span class="kw">extends</span> MemberMethodSuper <span class="op">{</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Override</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">method</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the super method is being overridden by a new one, however the original one can still be called, the actual</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// implementation is not lost and can still be referenced</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> f <span class="op">=</span> <span class="kw">this</span><span class="op">.</span><span class="fu">computeSomeValue</span><span class="op">();</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> k <span class="op">=</span> <span class="kw">super</span><span class="op">.</span><span class="fu">method</span><span class="op">();</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> f <span class="op">+</span> k<span class="op">;</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">method2</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">// a completely different method which is not present in the super class, also refers to the `original`</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// implementation of the `method`</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">super</span><span class="op">.</span><span class="fu">method</span><span class="op">()</span> <span class="op">+</span> <span class="kw">super</span><span class="op">.</span><span class="fu">method</span><span class="op">();</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="composition">Composition</h2>
+<p>Composition is the companion class design along side Inheritance,
+unlike Inheritance which represents is-a relationship the Composition
+represents has-a relationship, meaning that a given set of classes can
+be combined together co build a more complex data structure, unlike
+inheritance there is no limit to how many classes one can combine with
+has-a relationship.</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> Circle <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="bu">Point</span> center<span class="op">;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">double</span> radius<span class="op">;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">Circle</span><span class="op">(</span><span class="dt">int</span> x<span class="op">,</span> <span class="dt">int</span> y<span class="op">,</span> <span class="dt">int</span> r<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        center <span class="op">=</span> <span class="kw">new</span> <span class="bu">Point</span><span class="op">(</span>x<span class="op">,</span> y<span class="op">);</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        radius <span class="op">=</span> r<span class="op">;</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The general rule of thumb is to always prefer composition over
+inheritance, there are very many cases where composition is the right
+choice, and inheritance is not. When designing a system, start by
+considering composition first, then fallback to inheritance where
+composition might make things less re-usable or harder to use /
+interface with.</p>
+<p><code>Use inheritance when a subclass specifies a base class, so that you can exploit dynamic polymorphism. In other cases use composition, to get code that is easy to change and loosley coupled. In summary, as mentioned favor composition over inheritance.</code></p>
+<h2 id="singleton">Singleton</h2>
+<p>Special type of pattern in class design which ensures that a given
+class is only instantiated only once, usually on demand, the first time
+a method for the class is accessed, but often times that could also be
+done during a static block, then the class loader loads the classes in
+the run time for the first time. In either case the idea is that only
+one single instance would ever need to exist of a given class or type.
+These usually have no visible to the outside world constructors.</p>
+<p><code>A singleton class usually has a public static final method - getSingleton(), which provides a single point of access for the singleton, in a global context, this method is usually in charge of creating the singleton the first time it is called, and using the very same instance on every subsequent call to the getSingleton method. One such example might be a Logging claass, or in general a class which provides common stateless, utility actions which do not need to be stateful, rarely would one persist a static state in a singleton class.</code></p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">// make sure to define the class as final, usually singleton classes are never extended, since they provide a well</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co">// encapsulated functionality</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">final</span> <span class="kw">class</span> Singleton <span class="op">{</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// declare but do not initialize or construct the member which would store a reference to the singleton instance</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> Singleton instance<span class="op">;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the first rule of thumb, to make sure it is indeed going to be guaranteed to be singleton, by completely hiding</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the default constructor away, now only members of the singleton class can access and work with that constructor</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="fu">Singleton</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the second rule, to obtain or create the instance correctly, unless that is done in a static block, then the</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// method should be declared as synchronized, this would effectively lock the state of the class, that would guarantee</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// that if multiple threads happen to call getSingleton at the same time, all but one thread would be locked/wait for</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the method to execute and complete</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="kw">synchronized</span> <span class="dt">final</span> Singleton <span class="fu">getSingleton</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span>instance <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>            instance <span class="op">=</span> <span class="fu">createSingletonInstance</span><span class="op">();</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> instance<span class="op">;</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The use of synchronized above, while correct is an overkill, since
+the lock will be put every time the method is called however, it is only
+needed just once, when the instance is created, there is a more
+performant solution which will not be such a bottleneck for all
+subsequent calls where the lock is not necessary.</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> Singleton <span class="fu">getSingleton</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>instance <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>        <span class="kw">synchronized</span> <span class="op">(</span>Singleton<span class="op">.</span><span class="fu">class</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>instance <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                instance <span class="op">=</span> <span class="kw">new</span> <span class="fu">Singleton</span><span class="op">();</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> instance<span class="op">;</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The slightly modified example above shows how to use a conditional
+locking, it does effectively the same thing, however only when the
+instance is not initialized. This saves on extra performance in every
+other scenario, which is like 99% of the cases - the singleton is
+created, and only used, where locking is not required.</p>
+<h2 id="immutability">Immutability</h2>
+<p>An immutable class is such that once created, its state can never be
+altered, none of the methods or interface the class exposes would ever
+mutate the instance, it might produce a copy of the original with a
+modified state, which copy would also be immutable, but the state of the
+source instance will never be changed. Such an eample is the String
+class from <code>java.lang</code>. While the String class exposes
+certain methods, which seem to be mutating the String, actually they are
+producing a brand new instance of the original, representing the mutated
+state - e.g. the method trim(), would not trim out the String instance
+that it is called on, it would instead produce a new instance with the
+trim applied</p>
+<p>Such classes are quite powerful, because they ensure a functional
+type approach to state transition, implying that they are more robust,
+easy to use and reason about, however they can also be the source or
+root of performance and other problems when misused or abused.</p>
+<ul>
+<li>immutable objects are safer to use, once the value is checked or
+known, it can not be changed, and remains constant</li>
+<li>immutable objects are thread safe, they do not require any locking
+since no state can be changed, no matter how many threads use it</li>
+<li>immutable objects that have the same state or share some of the
+state internally can be cached or optimized out by sharing</li>
+</ul>
+<p><code>There is a good rule of thumb, which states that all classes should be immutable, unless there is a very good reason to make them mutable, and in practice that is usually the case</code></p>
+<p>To define an immutable class, and make sure it stays the same there
+are really two main points to consider,</p>
+<ul>
+<li><p>make the fields final and initialize them in the constructor -
+this can be taken to extreme levels by making the class itself final,
+and the methods as well, that would ensure that the class is very much
+closed to being extended, or the methods overridden, completely never
+allowing any external party to produce a child class which silently
+mutates the instance state in the interface implementation</p></li>
+<li><p>ensure that methods never mutate the state of the members - extra
+care should be taken in case the Immutable type itself includes through
+composition mutable reference types, such types which through their
+interface can or would mutate the internal state of the
+instance/object.</p></li>
+</ul>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">final</span> <span class="kw">class</span> ImmutableValue <span class="op">{</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// declare them final, to ensure that it can not be re-assigned</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> Value value<span class="op">;</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// make sure the members are initialized correctly</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">ImmutableValue</span><span class="op">(</span>Value value<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">value</span> <span class="op">=</span> value<span class="op">;</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// provide the rest of the immutable interface</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">final</span> ImmutableValue <span class="fu">increment</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// take care of making sure that if the members themselves are mutable (e.g. Value, is mutable) the methods do</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">// not make any mutable calls on the object, or restore it to the original state if that would ever happen, or is</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// required.</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>As mentioned immutable classes have the drawback of possibly creating
+many new instances of the Immutable instance, instead of modifying the
+original one, which could prove to be a problem, that is usually solved
+by having a mutable version of the type, or by caching the immutable
+state, so it can be re-used since it is immutable - the default
+<code>java.lang.String</code> implementation does that</p>
+<h2 id="static">Static</h2>
+<p>The static context in java is usually bound to the type itself, when
+the <code>ClassLoader</code> loads a given class, the static context is
+initialized and bound to the loaded Class instance itself, in a way.
+This gives the user the ability to reference a state which is bound not
+to an instance of the class, but to the class itself, meaning that
+different instances of the class have access to this shared state. It is
+not really shared, it simply lives in a higher scope, so it is visible
+between the different instances.</p>
+<h3 id="variable">Variable</h3>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> StaticVariable <span class="op">{</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">int</span> k <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">increment</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>        k<span class="op">++;</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="co">// the initial value is going to be 0, at the very moment the class loader loads the class into the run-time, the static</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="co">// variables and initializers are called</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>StaticVariable s1 <span class="op">=</span> <span class="kw">new</span> <span class="fu">StaticVariable</span><span class="op">();</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>StaticVariable s2 <span class="op">=</span> <span class="kw">new</span> <span class="fu">StaticVariable</span><span class="op">();</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>s1<span class="op">.</span><span class="fu">increment</span><span class="op">();</span> <span class="co">// after this call the value of k will be 1</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>s2<span class="op">.</span><span class="fu">increment</span><span class="op">();</span> <span class="co">// after this call the value of k will be 2</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="co">// different instances access the same state through a higher scope or level bound to the class type itself, not the instance</span></span></code></pre></div>
+<h3 id="block">Block</h3>
+<p>There is also a static block which extends the meaning and abilities
+of the static initializer, the application of the static block is to
+allow more complex code to be executed before a given static variable is
+initialized</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> StaticBlock <span class="op">{</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="bu">Map</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">,</span> <span class="bu">String</span><span class="op">&gt;</span> map<span class="op">;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">static</span> <span class="op">{</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        map <span class="op">=</span> <span class="kw">new</span> <span class="bu">HashMap</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">,</span> <span class="bu">String</span><span class="op">&gt;();</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        map<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">&quot;1&quot;</span><span class="op">,</span> <span class="st">&quot;a&quot;</span><span class="op">);</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        map<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">&quot;2&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">);</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>        map<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">&quot;3&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">);</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        map<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">&quot;4&quot;</span><span class="op">,</span> <span class="st">&quot;d&quot;</span><span class="op">);</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        map<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">&quot;5&quot;</span><span class="op">,</span> <span class="st">&quot;e&quot;</span><span class="op">);</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>        map<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">&quot;6&quot;</span><span class="op">,</span> <span class="st">&quot;f&quot;</span><span class="op">);</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The static block above not only creates an instance of the map, but
+also makes sure the map is populated with some sort of values. It is
+executed right after the JVM loads the class into memory. The static
+block is like a default constructor for the class type itself, in a way,
+semantically they have a very similar effects.</p>
+<h3 id="rules">Rules</h3>
+<p>There are several rules which apply to static context and static
+methods in particular, listed below, these are:</p>
+<ul>
+<li><p>Static methods can not use the this keyword, since that would
+imply referencing an instance, however in a static context, there is no
+class instance to speak of</p></li>
+<li><p>Static methods can not use the super keyword, for the very same
+reason mentioned above, it invokes a base class method in an instance
+context</p></li>
+<li><p>Static methods can not be overridden, since overriding is a run
+time, late binding process, which is only applicable to instance
+methods</p></li>
+<li><p>Static methods are mostly suited for utility purposes and
+actions, since they can not access member variables of an instance, they
+should not be used to mutate static state</p></li>
+<li><p>Main method must always be defined static, otherwise there is no
+way for the run-time to locate the entry point for the program, and
+execute it</p></li>
+</ul>
+<h1 id="summary">Summary</h1>
+<p>Let us briefly review the key points from each objective in this
+chapter</p>
+<h2 id="implement-encapsulation">Implement encapsulation</h2>
+<ul>
+<li>Encapsulation: Combining data and the functions operating on it as a
+single unit.</li>
+<li>You cannot access the private methods of the base class in the
+derived class.</li>
+<li>You can access the protected method either from a class in the same
+package (just like package private or default) as well as from a derived
+class.</li>
+<li>You can also access a method with a default access modifier if it is
+in the same package.</li>
+<li>You can access public methods of a class from any other class.</li>
+</ul>
+<h2 id="implement-inheritance">Implement inheritance</h2>
+<ul>
+<li>Inheritance: Creating hierarchical relationships between related
+classes. Inheritance is also called an “IS-A” relationship.</li>
+<li>You use the super keyword to call base class methods.</li>
+<li>Inheritance implies IS-A and composition implies HAS-A
+relationship.</li>
+<li>Favor composition over inheritance.</li>
+</ul>
+<h2 id="implement-polymorphism">Implement polymorphism</h2>
+<ul>
+<li>Polymorphism: Interpreting the same message (i.e., method call) with
+different meanings depending on the context.</li>
+<li>Resolving a method call based on the dynamic type of the object is
+referred to as runtime polymorphism.</li>
+<li>Overloading is an example of static polymorphism (early binding)
+while overriding is an example of dynamic polymorphism (late
+binding).</li>
+<li>Method overloading: Creating methods with same name but different
+types and/or numbers of parameters.</li>
+<li>You can have overloaded constructors. You can call a constructor of
+the same class in another constructor using the this keyword.</li>
+<li>Overload resolution is the process by which the compiler looks to
+resolve a call when overloaded definitions of a method are
+available.</li>
+<li>In overriding, the name of the method, number of arguments, types of
+arguments, and return type should match exactly.</li>
+<li>In covariant return types, you can provide the derived class of the
+return type in the overriding method.</li>
+</ul>
+<h2 id="override-hashcode-equals-and-tostring">Override hashCode,
+equals, and toString</h2>
+<ul>
+<li>You can override clone(), equals(), hashCode(), toString() and
+finalize() methods in your classes. Since getClass(), notify(),
+notifyAll(), and the overloaded versions of wait() method are declared
+final, you cannot override these methods.</li>
+<li>If you’re using an object in containers like HashSet or HashMap,
+make sure you override the hashCode() and equals() methods correctly.
+For instance, ensure that the hashCode() method returns the same hash
+value for two objects if the equals() method returns true for them.</li>
+</ul>
+<h2 id="singleton-and-immutable-classes">Singleton and immutable
+classes</h2>
+<ul>
+<li>A singleton ensures that only one object of its class is
+created.</li>
+<li>Making sure that an intended singleton implementation is indeed
+singleton is a nontrivial task, especially in a multi-threaded
+environment.</li>
+<li>Once an immutable object is created and initialized, it cannot be
+modified.</li>
+<li>Immutable objects are safer to use than mutable objects; further,
+immutable objects are thread safe; further, immutable objects that have
+same state can save space by sharing the state internally.</li>
+<li>To define an immutable class, make it final. Make all its fields
+private and final. Provide only accessor methods (i.e., getter methods)
+but don’t provide mutator methods. For fields that are mutable reference
+types, or methods that need to mutate the state, create a deep copy of
+the object if needed.</li>
+</ul>
+<h2 id="static-initialize-blocks-variables-methods-and-classes">Static
+initialize blocks, variables, methods, and classes</h2>
+<ul>
+<li>There are two types of member variables: class variables and
+instance variables. All variables that require an instance (object) of
+the class to access them are known as instance variables. All variables
+that are shared among all instances and are associated with a class
+rather than an object are referred to as class variables (declared using
+the static keyword).</li>
+<li>All static members do not require an instance to call/access them.
+You can directly call/access them using the class name.</li>
+<li>A static member can call/access only a static member of the same
+class.</li>
+</ul>
+</body>
+</html>

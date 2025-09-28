@@ -1,13 +1,26 @@
 #!/bin/bash
 
-if [ $# -lt 2 ]; then
-    echo "Usage $0 {input-file} export_folder"
+if [ $# -lt 1 ]; then
+    echo "Usage $0 {input_file}"
     exit 1
 fi
 
-input="$1"
-target="$(pwd "$input")/exports/$2/$(basename "$input")"
-mkdir -p "$(pwd)/exports/$2" && echo "Processing $input"
+source=$1
+cwd="$(pwd)"
+cwd="${cwd%/}"
 
-pandoc -t html5 --pdf-engine=xelatex --listings -H listings-setup.tex --toc -V geometry:"left=1cm, top=1cm, right=1cm, bottom=1cm" -V fontsize=12pt "$input.md" -o "$target.html"
-pandoc --pdf-engine=xelatex --listings -H listings-setup.tex --toc -V geometry:"left=1cm, top=1cm, right=1cm, bottom=1cm" -V fontsize=12pt "$target.html" -o "$target.pdf"
+input=$(basename "$source")
+relative="${source#"$cwd"/}"
+target=$(dirname "$cwd/exports/$relative")
+mkdir -p "$target" && echo "Processing $input"
+
+source="$cwd/$source"
+target="$target/$input"
+
+if [[ -f "$target.pdf" ]]; then
+    echo "Resources already generated for $input"
+else
+    echo "Generating resources for target $input..."
+    pandoc -t html5 --pdf-engine=xelatex --listings -H listings-setup.tex --toc -V geometry:"left=1cm, top=1cm, right=1cm, bottom=1cm" -V fontsize=12pt "$source.md" -o "$target.html"
+    pandoc --pdf-engine=xelatex --listings -H listings-setup.tex --toc -V geometry:"left=1cm, top=1cm, right=1cm, bottom=1cm" -V fontsize=12pt "$target.html" -o "$target.pdf"
+fi

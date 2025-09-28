@@ -1,0 +1,74 @@
+Release Java 9
+
+Java 9 was released in September twenty seventeen. This release brought many improvements to the libraries and application programming interfaces, but did not introduce any major changes to the core language itself. In contrast, later versions such as Java 10 and Java 11, which were released in March and September of twenty eighteen respectively, made more incremental changes and improvements on top of Java 9. Now, let’s explore the most notable features introduced between Java 9 and Java 11.
+
+General
+
+First, let’s talk about JShell, also known as the Java Shell. This is an interactive command-line tool for evaluating code snippets. It’s ideal for learning, experimentation, and quick prototyping. With JShell, you can quickly test and iterate over small pieces of code. For example, you can start JShell with a default set of import statements by using a startup script. This script, called startup dot j s h, might contain import statements for commonly used Java libraries, such as utilities, time, input and output, math, file operations, networking, text formatting, and streams. When you start JShell with this script, those imports are loaded automatically, making it easier to use library features right away.
+
+To start JShell with this initialization file, you would run a command that tells JShell to use the startup script. This sets up your shell environment with the predefined imports.
+
+Next, the SafeVarargs annotation can now be used on private methods. Previously, this annotation was only allowed on final and static methods. SafeVarargs is used to indicate that a method’s variable arguments are handled safely within its implementation. However, it’s important to note that the annotation only suppresses compiler warnings—it does not guarantee runtime safety. For example, if you annotate a private static method that takes a list of strings as variable arguments, but then assign an integer list to the argument array, the code will compile without warnings. However, at runtime, trying to retrieve a string from what is actually an integer list will cause a class cast exception. This demonstrates that the annotation only affects compile-time checks, not runtime behavior.
+
+Another improvement is in the try-with-resources statement. You can now use final or effectively final variables with try-with-resources, without having to explicitly define them inside the try block. An effectively final variable is one that is not reassigned after its initial assignment. Before Java 9, you had to declare the resource variable inside the try block. Now, you can declare it outside, as long as it is not reassigned. If you try to reassign the variable, the compiler will produce an error. This change makes resource management more convenient and less verbose.
+
+Language
+
+Now, let’s discuss the var keyword for local variables and type inference. This feature allows you to declare local variables without explicitly specifying their type. Java infers the type based on the right-hand side of the assignment. However, there are several restrictions on where var can be used. You cannot use var to define class members or fields. You cannot use it as the return type of methods. You cannot assign null to a var variable. You cannot use var to infer the result type of a lambda expression. You cannot use var for compound assignments, such as declaring multiple variables in one statement. And you cannot use var for method parameters.
+
+Outside of these restrictions, var can be used in most other contexts. It is mainly syntactic sugar to reduce verbosity. When you assign a value to a variable using var, the type is inferred from the right-hand side expression, not from any supertype or subtype. For example, if you assign a new array list to a variable using var, the type will be array list. Explicit casts are allowed where valid, such as casting null to a string.
+
+Library
+
+Moving on to library enhancements, the Stream API received new methods: takeWhile, dropWhile, and an improved iterate method. These methods support more fluent, functional-style programming. Unlike filter, which processes all elements and may not preserve order, takeWhile and dropWhile always process elements in order. TakeWhile processes elements from the start and stops at the first element that does not match the predicate. DropWhile skips elements as long as the predicate is true, then processes the rest. These methods are especially useful for ordered or sorted streams. For example, if you have a list of numbers from one to nine and use takeWhile with a predicate that checks if the number is less than five, the result will be a list containing one, two, three, and four.
+
+The Optional API also received enhancements. New methods such as ifPresentOrElse, or, and stream were added to improve usability. The ifPresentOrElse method allows you to specify two actions: one to run if the optional value is present, and another to run if it is empty. Both actions are provided as lambda expressions. The general signature of the method takes a consumer for the present case and a runnable for the empty case.
+
+CompletableFuture also saw improvements. New methods include newIncompleteFuture, defaultExecutor, completeAsync, and orTimeout. The most notable is completeAsync, which allows you to modify the completion state of a future after it has been created but before it has started or completed. This is similar to supplyAsync, which is a static method that creates a new completed future, but completeAsync is an instance method that changes the state of the current future. The newIncompleteFuture method is a companion to completeAsync. It creates a future that is not yet completed, allowing you to control when it is completed. To run the future, you can call thenApply or similar methods.
+
+Platform
+
+Finally, let’s look at platform changes. Multi-Release JARs allow you to package multiple versions of classes optimized for different Java versions within the same JAR file. The structure of a multi-release JAR is such that, for Java 8 and below, the compiled class files are at the root of the JAR. For Java 9 and above, the META-INF folder can contain subdirectories for different Java versions. To create a multi-release JAR, you first compile the base classes for the lowest version you want to support. Then, you compile additional classes for higher versions using the release flag. Finally, you package the JAR with the base implementation, and update it with the new release classes for higher versions. This allows your library to take advantage of newer Java features while maintaining compatibility with older versions.
+
+That covers the most notable features introduced in Java 9, 10, and 11.
+
+
+Let’s begin by describing the structure of a multi-release Java archive, or JAR file.
+
+In this example, the JAR file named mylibrary dot jar contains a default compiled class for Java 8 and below, located at com slash myapp slash Main dot class. It also includes a META-INF directory, which holds version-specific subdirectories. For instance, there is a directory for version 9, containing a Java 9 and above version of Main dot class, and a directory for version 11, containing a Java 11 and above version of Main dot class. This structure allows the JAR to provide different class implementations depending on the Java runtime version.
+
+Now, let’s move on to the Java Platform Module System, also known as Project Jigsaw.
+
+This system modularized the Java Development Kit, or JDK, into smaller, more manageable modules. The result is reduced memory usage and improved startup time, since only the necessary modules are loaded. The module system introduced a special file called module-info dot java. This file allows JAR packages to include only the modules that are actually used, which significantly decreases the overall size of the JAR, reduces friction, and improves performance.
+
+Within each package, or at the package level, the module-info dot java file specifies what the module exports, what it depends on, and defines the module’s name. Notably, the JDK itself was modularized, which means that end-users can package their own custom JDK, including only the modules required by their specific application. This is especially useful because the packaged JDK can be distributed alongside the application, providing a fully reproducible environment and runtime.
+
+Here’s an example of what a module-info dot java file might look like.
+
+This file defines a module named com dot example dot myapp. It declares dependencies on the java dot sql module from the JDK, as well as a custom module, such as an external library. It also exports two packages: com dot example dot myapp dot api, and com dot example dot myapp dot utils. Internal packages are not exported and remain hidden by default.
+
+The module-info file provides meta-information for package exports, but it does not export individual classes. In the example above, the root package com dot example dot myapp exports specific packages and specifies dependencies. Unlike traditional fat JARs, which are built by tools like Maven or Gradle and contain all dependencies for a given application, the module approach works differently. The final JAR contains only the actual application. When the application is started, the required modules are provided on the module path. The module path is similar to the class path; it is a list of modules that must be loaded by the runtime. These are the dependent modules for the application.
+
+Next, let’s look at how a module-based application is built and run.
+
+First, during compilation, the javac command is used with the module path option to specify external libraries and the source files, including the module-info dot java file. This compiles the application and its modules. Then, to run the application, the java command is used with the module path option, specifying both the external libraries and the compiled application. The main class is referenced using the module and class name. This approach means that third-party libraries are present during both compilation and runtime, allowing for upgrades without recompiling the entire application.
+
+In contrast, the traditional approach uses the class path for both compilation and running. All third-party and application classes are included together. The javac command compiles the application with the class path option, and the java command runs the application with the class path option. In this case, libraries are packaged in the final JAR, making it difficult to provide new versions without repackaging everything.
+
+It is important to note that the module approach allows you to upgrade third-party libraries at runtime without having to repackage the application, as long as the library’s API remains compatible. This is a powerful feature, since you can update only the application’s dependencies without recompiling the application itself.
+
+The module approach is similar to how dynamic link libraries, or DLLs, and shared objects work. The application is compiled against the API, or contract, of a given library, but the implementation itself is not packaged within the application. Instead, it is linked dynamically at runtime. The old approach of bundling everything together is more like static linking.
+
+Now, let’s discuss the Java Linker, or jlink.
+
+This is a new tool that allows you to create custom runtime images containing only the required modules, which reduces the application’s size. As an extension of the module approach, jlink enables you to package a Java runtime along with the application itself, in a single bundle. This is similar to a fat JAR, but instead of including third-party libraries, the bundle contains only the JDK runtime modules required by the application, along with the application’s own code. Third-party libraries are still specified externally at runtime.
+
+Here’s how the process works.
+
+First, you compile the application with the required modules and third-party dependencies using the javac command and the module path option. Next, you use the jlink tool to create and package a minimized version of the JDK, along with the application itself. The jlink command specifies the module path, adds the required modules, and outputs a custom runtime directory. Additional options can strip debug information, compress files, and remove unnecessary header files and manual pages.
+
+Finally, you run the application using the custom runtime’s java binary, specifying the module and main class.
+
+In summary, the Java Platform Module System and the Java Linker provide a more modular, efficient, and flexible way to build, package, and run Java applications. They allow for fine-grained control over dependencies, easier upgrades, and smaller, more focused runtime environments.
+
+

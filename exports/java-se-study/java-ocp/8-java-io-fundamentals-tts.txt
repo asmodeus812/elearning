@@ -1,0 +1,250 @@
+IO Streams
+
+The topic of input and output in Java is broad. It covers much more than just reading from or writing to the console or files.
+
+Within the java.lang.System class, there are three important public static fields: out, err, and in. The out and err fields represent the standard output and error streams, while in represents the standard input stream. Specifically, System.in is an InputStream, and both System.out and System.err are PrintStream objects.
+
+Here’s how you can read a single character from the standard input stream, which is typically the keyboard or another input device. The code prompts the user to type a character, then reads one byte from System.in using the read method. The value returned is an integer between zero and two hundred fifty-five, representing the ASCII code of the character typed. For example, if you type the digit five, the output will be fifty-three, which is the ASCII code for the character '5'. The read method returns an integer instead of a byte because it needs to signal special conditions, such as end-of-stream, by returning negative one.
+
+If an input or output exception occurs during reading, the program prints an error message to System.err and exits with a status of negative one.
+
+The standard input and output streams are initialized automatically when the Java Virtual Machine starts. Sometimes, you may want to redirect these streams. Java provides static methods for this purpose: System.setIn allows you to assign a new InputStream to standard input, while System.setOut and System.setErr let you assign new PrintStream objects to standard output and error, respectively. This means you can redirect output to a file or another destination.
+
+For example, you can create a PrintStream that writes to a file called log dot t x t, then use System.setOut to redirect all standard output to that file. Any subsequent calls to System.out.println will write to the file instead of the console. This technique is useful for logging and other scenarios where you want to capture output.
+
+Console
+
+The Console class in Java provides a more user-friendly way to read input from the standard input stream, compared to reading raw bytes from System.in. It also offers printing capabilities, giving you access to standard output.
+
+To use the Console class, you obtain a Console object by calling System.console. If the console object is null, it means the program was not started from a command line or terminal, and you should handle this case appropriately, perhaps by printing an error message and exiting.
+
+Once you have a Console object, you can read a line of text from the user and print it back using the printf method. The Console class interacts directly with the underlying operating system to access the standard input and output file descriptors, providing a better API for usability. However, if you run your program from an integrated development environment or through an internal process, System.console may return null because the Java Virtual Machine was not started in a terminal.
+
+The Console class provides several useful methods:
+
+The reader method returns a Reader object associated with the console, allowing you to perform read operations.
+
+The writer method returns a PrintWriter object for writing to the console.
+
+The readLine method reads a line of text from the user and returns it as a string, excluding any line termination characters. If the user signals end-of-input, such as by pressing Control Z or Control D, this method returns null.
+
+There is an overloaded version of readLine that takes a format string and arguments. It first prints the formatted string, then reads a line of input.
+
+The readPassword method reads a password from the user and returns it as a character array. While the user types the password, nothing is displayed on the console, providing privacy.
+
+There is also a version of readPassword that prints a formatted prompt before reading the password.
+
+The format and printf methods both write formatted strings to the console. The printf method is provided as a convenience for those familiar with the C or C plus plus languages.
+
+Finally, the flush method ensures that any buffered output is actually written to the console.
+
+The Console class supports formatting input and output using string-formatting flags, similar to the printf function in C. The first parameter of the printf method is a format string, which may contain both string literals and format specifiers. The actual values to be formatted are passed as additional arguments. If the format string is invalid, the method can throw an IllegalFormatException.
+
+Output
+
+The general syntax for a format string in printf is as follows: percent sign, followed by an optional argument index, flags, width, precision, and finally a data type specifier. This allows you to control how values are formatted and displayed in the console.
+
+
+Format Specifiers in Java
+
+Each format specifier in Java begins with a percent sign, followed by optional elements such as the argument index, flags, width, and precision, and ends with a data type specifier.
+
+The argument index is an integer followed by a dollar sign, like one dollar or two dollar, which refers to the position of the argument in the argument list. For example, one dollar refers to the first argument, and two dollar refers to the second.
+
+Flags are single-character symbols that control formatting characteristics, such as alignment and padding. For instance, the minus sign flag specifies left alignment, while the zero flag pads number types with leading zeroes.
+
+The width specifier sets the minimum number of characters that the formatted value will occupy. If the data is shorter than the specified width, it is padded with spaces by default. If the data is longer, the full data appears in the output without being trimmed.
+
+The precision field is relevant only for floating-point numbers. It specifies the number of digits to display after the decimal point.
+
+Finally, the data type specifier indicates the expected type of input data, such as integer, string, or floating-point number. This field acts as a placeholder for the input data.
+
+Let’s analyze the following format string:
+
+Percent minus fifteen s, tab, percent five d, double tab, percent d, double tab, percent point one f, newline.
+
+The first part, percent minus fifteen s, means a string padded to at least fifteen characters, left-aligned.
+
+The next part, percent five d, means a decimal integer padded with spaces to at least five digits.
+
+Percent point one f means a floating-point number displayed with one digit after the decimal point.
+
+Tab characters are used to separate the formatted arguments, creating equal spacing between them.
+
+Common Format Symbols
+
+Here are some commonly used format symbols in Java:
+
+Percent b is for Boolean values.
+
+Percent c is for characters.
+
+Percent d is for signed decimal integers.
+
+Percent e is for floating-point numbers in scientific notation.
+
+Percent f is for floating-point numbers in decimal format.
+
+Percent g is for floating-point numbers, using either decimal or scientific notation depending on the value.
+
+Percent h prints the hash code of the argument.
+
+Percent n inserts a line separator, which is a new line character.
+
+Percent o formats an integer as an octal value.
+
+Percent s is for strings.
+
+Percent t is for date and time values.
+
+Percent x formats an integer as a hexadecimal value.
+
+All of these format symbols are also supported by the format method in the Console class. In general, these format strings and symbols are widely applicable throughout the Java standard library.
+
+Additional Notes on Format Specifiers
+
+If you do not specify any string formatting specifier, the printf method will not print anything from the given arguments.
+
+Flags such as minus and zero only make sense when you specify a width with the format specifier string.
+
+To print a percent character in a format string, you need to use an escape sequence. Since percent is an escape character, you must use double percent to print a single percent sign.
+
+You can use the argument index feature to explicitly refer to arguments by their position. For example, the following code prints “world hello” because the order of arguments is reversed. The format string uses two dollar s for the second argument and one dollar s for the first argument.
+
+This block defines a call to the printf method on the console object, using a format string that reverses the order of the arguments. The first argument is “hello” and the second is “world,” but the format string prints the second argument first, followed by the first argument.
+
+The less-than symbol in a format string supports relative indexing, allowing you to reuse the argument matched by the previous format specifier. For example, the following code prints “ten a twelve.” The first value is printed as a decimal, the second as hexadecimal, and the third as octal, all using the same argument.
+
+This block calls the printf method on the console object, using a format string that prints the same value in decimal, hexadecimal, and octal formats by reusing the argument.
+
+If you do not provide the intended input data type as expected by the format string, you will get an IllegalFormatConversionException. For example, if you provide a string instead of an expected integer, you will see an exception message indicating a type mismatch.
+
+This block shows an exception message that occurs when the data type provided does not match the expected type in the format string. In this case, the format string expects an integer, but a string is provided.
+
+Input Using the Console Class
+
+It is also possible to use the Console class to get input from the user. There are methods such as readLine and readPassword. In these methods, the first argument is the format specifier string, and the following arguments are the values to be passed to the format string. These methods return the character data read from the console.
+
+This block demonstrates how to use the Console class to read a username and password from the user. The readLine method prompts for the username, and the readPassword method prompts for the password. The password is read as a character array for security reasons. The code then checks if the username and password match expected values, prints a success or failure message, and finally clears the password from memory using the Arrays.fill method.
+
+At the end, the password is emptied out. This is a common and secure programming practice to prevent malicious reads of program data that could reveal password strings. The readPassword method returns a character array instead of a string because string objects are immutable and cannot be forcefully destroyed from memory. By using a character array, you can overwrite the contents once the password is no longer needed.
+
+Streams in Java
+
+The streams API discussed in earlier chapters is different from the input and output streams discussed here. They serve very different purposes.
+
+Streams are ordered sequences of data. Java handles input and output in terms of streams. When you read a sequence of bytes from a binary file, you are reading from an input stream, since the flow of information is from the file to the program. When writing to a file, you use an output stream, since the flow is from the program to the file.
+
+Character Streams
+
+Character streams are meant for reading or writing character or text-based input and output, such as text files, documents, XML, or HTML files. The data is usually encoded in UTF-16 and stored as characters. Input and output character streams are called readers and writers, respectively. The abstract classes Reader and Writer, along with their derived classes in the Java package, provide support for character streams.
+
+Byte Streams
+
+Byte streams are meant for reading or writing binary data, such as executable files, image files, or files in low-level formats like zip, class, object, or executable files. The data is handled as bytes, which are units of eight-bit data. Input and output byte streams are simply called input streams and output streams. The abstract classes InputStream and OutputStream, along with their derived classes, provide support for byte streams.
+
+It is not recommended to mix different streams for different purposes. For example, if you try to read a bitmap image with a Reader, the character stream will interpret the bytes as UTF-16 characters, which will not produce the expected result. In such cases, you should use an InputStream to read the contents of the image.
+
+Hierarchy of Character Streams
+
+The Writer class is the base for several classes, including BufferedWriter, CharArrayWriter, FilterWriter, OutputStreamWriter, FileWriter, PrintWriter, PipedWriter, and StringWriter.
+
+The Reader class is the base for BufferedReader, CharArrayReader, FilterReader, PushbackReader, InputStreamReader, FileReader, and PipedReader.
+
+Hierarchy of Byte Streams
+
+The InputStream class is the base for AudioInputStream, ByteArrayInputStream, FileInputStream, FilterInputStream, BufferedInputStream, DataInputStream, PushbackInputStream, ObjectInputStream, PipedInputStream, SequenceInputStream, and the deprecated StringBufferInputStream.
+
+The OutputStream class is the base for ByteArrayOutputStream, FileOutputStream, FilterOutputStream, BufferedOutputStream, DataOutputStream, PrintStream, and PipedOutputStream.
+
+This concludes the overview of format specifiers, input handling with the Console class, and the hierarchy and purpose of character and byte streams in Java.
+
+
+OutputStream and Its Subclasses
+
+The OutputStream class in Java serves as the base class for writing byte streams. Several important subclasses extend OutputStream, including ByteArrayOutputStream, FileOutputStream, FilterOutputStream, and ObjectOutputStream. FilterOutputStream itself has further subclasses, such as BufferedOutputStream, DataOutputStream, and PrintStream. Another notable subclass is PipedOutputStream.
+
+Character Streams
+
+Let’s look at a basic example of reading a file from disk. The simplest approach is to use a FileReader and repeatedly call its read method in a loop, printing each character as it is read. However, this method is inefficient and potentially incorrect, especially when dealing with files that use encodings like UTF-8 or UTF-16. In these encodings, a single character can span multiple bytes—one to four bytes for UTF-8, and two to four bytes for UTF-16. If you read and print one character at a time, you might only get part of a character, especially with surrogate pairs, resulting in incorrect or unreadable output. This approach only works reliably for ASCII-encoded files, where each character is exactly one byte.
+
+The following code demonstrates this basic, but flawed, approach. It attempts to read a file character by character and print each one. If the file is not found, or if an input or output error occurs, it prints an error message.
+
+This code opens a file using FileReader, reads each character one at a time, and prints it. If the file is missing or an error occurs, it prints an error message.
+
+As mentioned, this method is crude and not recommended. It is slow and error-prone, especially if the file’s encoding is unknown. A better approach is to use BufferedReader, which buffers input and can read entire lines or store the contents as a string, making it more efficient and robust.
+
+Byte Streams
+
+Byte streams are used for processing files that do not contain human-readable text. For example, a Java source file is readable, but a compiled .class file is not. The .class file is intended for the Java Virtual Machine, so you must use byte streams to process it. Many file formats include a special number, called a magic number, at the beginning of the file. This helps programs quickly identify the file type. Some text files, especially those using Unicode encodings, may also include a byte order mark, or BOM, to indicate the file’s byte order and encoding scheme.
+
+The next code example demonstrates how to read the first four bytes of a file and compare them to the magic number used by Java .class files, which is “C A F E B A B E” in hexadecimal. If the bytes match, the file is identified as a .class file. If not, it is not a .class file. The code also handles file not found and input or output errors.
+
+This code reads the first four bytes of a file, compares them to the expected magic number for Java class files, and prints whether the file matches. It also demonstrates the need for explicit casting when working with byte values in Java.
+
+To write data to files, you can use the OutputStream class. Writing data is essentially the reverse of reading data from a binary file using InputStream.
+
+Data Streams
+
+There are special types of byte streams in Java called data streams, which make it easier to write and read primitive types such as byte, short, int, long, float, and double. These types are represented as multi-byte values in Java, so writing them to a file and reading them back requires careful handling. Data streams write the actual bytes of the internal representation, not a human-readable format. While you could write these values as plain text, it would be much harder to read and parse them, especially for floating-point numbers.
+
+The following code demonstrates how to use DataOutputStream to write the numbers one through ten to a file, storing each number as a byte, short, int, long, float, and double. Then, it uses DataInputStream to read the values back in the same order and print them.
+
+This code writes the numbers zero through nine to a file, storing each number in several primitive formats. It then reads the values back in the same order and prints them. The order and size of each value must be consistent when writing and reading, or the data will be misinterpreted.
+
+Object Streams
+
+Object streams are similar to data streams, but they are designed to write entire Java objects to files. Java’s serialization mechanism allows you to easily save and restore object instances. The following example creates a map of U.S. presidents and their terms, then writes the map to a file using ObjectOutputStream. If the file cannot be created or an error occurs, it prints an error message.
+
+This code creates a map of U.S. presidents and their terms, then serializes the map to a file using ObjectOutputStream. If the file cannot be created or an input or output error occurs, it prints an error message.
+
+
+Let’s walk through the code and concepts described here, focusing on how Java handles object serialization and deserialization, and then summarizing key points about console and file I/O.
+
+First, the code example demonstrates how to read a serialized object from a file named “object dot data.” It uses an ObjectInputStream wrapped around a FileInputStream. The code attempts to read an object from the file. If the object is not null and is an instance of the Map interface, it casts the object to a Map and prints out its entries, showing each president’s name and description. If the file is not found, an error message is printed. If there is an input or output error, a different error message is shown. If the class of the object cannot be recognized—perhaps because the file is corrupted or the class definition has changed—another specific error message is displayed.
+
+This example is similar to one using data streams, but here, a single object instance, specifically a Map, is written to a file and then read back. The contents of the map are made persistent in the file, and all its properties are serialized. Serialization in Java converts the contents of objects in memory, along with metadata describing those contents, into a stream of bytes. If the object contains references to other objects, those are included as well.
+
+When Java serializes data, it includes not only the object’s data but also metadata about the class type. This allows Java to reconstruct the exact type of the object during deserialization. This process works for built-in types like Map, List, and Set, as well as for custom user-defined objects.
+
+A key property included during serialization is the serialVersionUID. This is a unique identifier that acts as a version number for the class. When an object is written to a file and later read back, Java compares the serialVersionUID in the file with the one in the current class definition. If they do not match, deserialization will fail. This mechanism helps ensure that a serialized object is compatible with the class definition it is being deserialized into, which is important for maintaining backward compatibility as the class evolves.
+
+While the Serializable interface is required for an object to be serialized, the serialVersionUID field helps control versioning and compatibility during serialization and deserialization. If you do not explicitly declare this field, Java generates it automatically based on the class structure. However, this can lead to problems if the class changes, because the generated value will also change.
+
+Imagine you have a user class that was serialized to a file when it was first created. Later, you modify the class by adding or removing fields. Java has no way to know how to read the new version of the class from the file. In such cases, you can customize how an instance is read from or written to a file by defining special private methods. These methods are not overrides or overloads of Object class methods, but are instead recognized by the Java serialization mechanism. They are called readObject, which takes an ObjectInputStream, and writeObject, which takes an ObjectOutputStream. These methods allow you to manually control how an object is written or read, making it possible to handle changes in the class’s declaration over time.
+
+For example, consider a class called CustomUserClass that implements Serializable. Inside this class, you can define a private writeObject method that writes the default fields and then writes a custom field. Similarly, you can define a private readObject method that reads the default fields and then reads the custom field. This approach gives you flexibility to handle future changes in the class.
+
+Now, let’s move on to the summary of key points about reading and writing data from the console and using the java dot i o package.
+
+Summary
+
+To read and write data from the console, Java provides three public static fields in the System class: in, out, and err. These represent the standard input, output, and error streams. System dot in is of type InputStream, while System dot out and System dot err are of type PrintStream.
+
+You can redirect these standard streams by calling the methods System dot setIn, System dot setOut, and System dot setErr.
+
+To obtain a reference to the console, use the System dot console method. If the Java Virtual Machine is not associated with any console, this method will return null.
+
+The Console class provides many methods for formatted input and output. You can use the printf and format methods to print formatted text. The overloaded readLine and readPassword methods can take format strings as arguments.
+
+Format specifiers in Java follow a template: percent sign, followed by optional flags, width, and precision, and ending with a data type specifier. The percent sign and data type specifier are mandatory, while the other components are optional.
+
+For reading secure strings such as passwords, use the readPassword method. It is recommended to use the fill method of the Array class to clear the password from the character array after use, to prevent malicious access.
+
+Now, let’s discuss the java dot i o package.
+
+The java dot i o package provides classes for both character streams and byte streams. Character streams are used for text-based input and output, while byte streams are used for data-based input and output.
+
+Character streams for reading and writing are called readers and writers, represented by the abstract classes Reader and Writer. Byte streams for reading and writing are called input streams and output streams, represented by the abstract classes InputStream and OutputStream.
+
+You should use character streams for processing text files or human-readable files, and byte streams for data files. Mixing up these streams can lead to unexpected behavior and bugs, so always use the appropriate stream for the task at hand.
+
+Both byte and character streams can be buffered. Buffer classes are provided as wrappers for the underlying streams. Using buffering can significantly speed up input and output operations, especially when working with large amounts of data.
+
+For processing data with primitive data types and strings, you can use data streams.
+
+Finally, to read and write objects in memory to files and vice versa, you can use object streams, specifically the ObjectInputStream and ObjectOutputStream classes.
+
+This concludes the explanation and summary of Java’s serialization mechanism and the key points about console and file input and output.
+
+

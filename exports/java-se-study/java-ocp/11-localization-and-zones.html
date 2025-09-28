@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>11-localization-and-zones</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#preface" id="toc-preface">Preface</a>
+<ul>
+<li><a href="#locale" id="toc-locale">Locale</a>
+<ul>
+<li><a href="#structure" id="toc-structure">Structure</a></li>
+<li><a href="#details" id="toc-details">Details</a></li>
+<li><a href="#creating" id="toc-creating">Creating</a></li>
+</ul></li>
+<li><a href="#resource-bundles" id="toc-resource-bundles">Resource
+bundles</a>
+<ul>
+<li><a href="#usage" id="toc-usage">Usage</a></li>
+<li><a href="#loading" id="toc-loading">Loading</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#summary" id="toc-summary">Summary</a></li>
+</ul>
+</nav>
+<h1 id="preface">Preface</h1>
+<p>Computers and software have become so prevalent today that they are
+used everywhere in the world, for human activities. For any software to
+be relevant and useful to these users, it needs to be localized. The
+process in which we adapt the software to the local language and customs
+is known as localization.</p>
+<p><code>Localization</code> is all about making the software relevant
+and usable for the users from different cultures - in other words,
+customizing software for people from different countries or languages.
+How is that achieved ? Two important guidelines should be heeded when
+you localize a software application</p>
+<ul>
+<li><p>Do <code>not hardcode</code> text (such as messages to the users,
+textual elements in the GUI etc.). and separate them into external files
+or dedicated classes. With this accomplished there is usually minimal
+effort to add support for a new local in the software.</p></li>
+<li><p>Handle <code>cultural specific aspects</code> such as date, time
+and currency, formatting with localization in mind. Instead of assuming
+a default locale, design in such a way that the current locale is
+fetched and customized.</p></li>
+</ul>
+<h2 id="locale">Locale</h2>
+<p>A locale is place representing a country, language or culture.
+Consider the Canada-French locale, French is spoken in many parts of
+Canada, and this could be a locale. In other words, if one wants to sell
+software that is customized for Canadians who speak French then one
+needs to facilitate the software for this locale. In Java, this locale
+is represented by the code fr_CA, where fr is short for French (the
+language) and CA is short for Canada (for the country code).</p>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>static Locale[] getAvailableLocales()</td>
+<td>Returns a list of available locales (i.e., installed locales)
+supported by the JVM.</td>
+</tr>
+<tr class="even">
+<td>static Locale getDefault()</td>
+<td>Returns the default locale of the JVM.</td>
+</tr>
+<tr class="odd">
+<td>static void setDefault(Locale newLocale)</td>
+<td>Sets the default locale of the JVM.</td>
+</tr>
+<tr class="even">
+<td>—————————————-</td>
+<td>—————————————————————————————-</td>
+</tr>
+<tr class="odd">
+<td>String getCountry()</td>
+<td>Returns the country code for the locale object.</td>
+</tr>
+<tr class="even">
+<td>String getDisplayCountry()</td>
+<td>Returns the country name for the locale object.</td>
+</tr>
+<tr class="odd">
+<td>String getLanguage()</td>
+<td>Returns the language code for the locale object.</td>
+</tr>
+<tr class="even">
+<td>String getDisplayLanguage()</td>
+<td>Returns the language name for the locale object.</td>
+</tr>
+<tr class="odd">
+<td>String getVariant()</td>
+<td>Returns the variant code for the locale object.</td>
+</tr>
+<tr class="even">
+<td>String getDisplayVariant()</td>
+<td>Returns the name of the variant code for the locale object.</td>
+</tr>
+<tr class="odd">
+<td>String toString()</td>
+<td>Returns a String composed of the codes for the locale’s language,
+country, variant, etc.</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The default locale is: &quot;</span> <span class="op">+</span> <span class="bu">Locale</span><span class="op">.</span><span class="fu">getDefault</span><span class="op">());</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Locale</span> <span class="op">[]</span> locales <span class="op">=</span> <span class="bu">Locale</span><span class="op">.</span><span class="fu">getAvailableLocales</span><span class="op">();</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;No. of other available locales is: </span><span class="sc">%d</span><span class="st">, and they are: </span><span class="sc">%n</span><span class="st">&quot;</span><span class="op">,</span> locales<span class="op">.</span><span class="fu">length</span><span class="op">);</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="bu">Arrays</span><span class="op">.</span><span class="fu">stream</span><span class="op">(</span>locales<span class="op">).</span><span class="fu">forEach</span><span class="op">(</span>locale <span class="op">-&gt;</span> <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;Locale code: </span><span class="sc">%s</span><span class="st"> and it stands for </span><span class="sc">%s</span><span class="st"> </span><span class="sc">%n</span><span class="st">&quot;</span><span class="op">,</span> locale<span class="op">,</span> locale<span class="op">.</span><span class="fu">getDisplayName</span><span class="op">()));</span></span></code></pre></div>
+<h3 id="structure">Structure</h3>
+<p>And the output of the snippet above, might look something like that.
+Note that the output is abridged to only show the general format in
+which the locales are printed and their respective display names</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>The default locale is: en_US</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>No. of other available locales is: 160, and they are:</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>Locale code: ms_MY and it stands for Malay (Malaysia)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>Locale code: ar_QA and it stands for Arabic (Qatar)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>Locale code: is_IS and it stands for Icelandic (Iceland)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>Locale code: sr_RS_#Latn and it stands for Serbian (Latin,Serbia)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Locale code: no_NO_NY and it stands for Norwegian (Norway,Nynorsk)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>Locale code: th_TH_TH_#u-nu-thai and it stands for Thai (Thailand,TH)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>Locale code: fr_FR and it stands for French (France)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>Locale code: tr and it stands for Turkish</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>Locale code: es_CO and it stands for Spanish (Colombia)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>Locale code: en_PH and it stands for English (Philippines)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>Locale code: et_EE and it stands for Estonian (Estonia)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>Locale code: el_CY and it stands for Greek (Cyprus)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>Locale code: hu and it stands for Hungarian</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>[... rest of the output is elided ... ]</span></code></pre></div>
+<p>There are multiple types of of localization formats</p>
+<ul>
+<li>“hu” - stands for Hungarian, just one code where the code is the
+language code, doubles as country code and variant too</li>
+<li>“ms_MY” - stands for Malay (Malaysia) - language and country
+code</li>
+<li>“no_NO_NY” - stands for Norwegian (Norway, Nynorsk) - language,
+country and region codes</li>
+<li>“th<em>TH_TH</em>#u-nu-thai” - two or three initial codes separated
+with, language, country code, variant and the extension is
+<code>u-nu-thai</code></li>
+</ul>
+<p>Here is the general format of the locale or localization string. The
+locale coding scheme allows combining different variations to create a
+locale.</p>
+<p><code>The format of the locale: language + "_" + country + "_" + (variant + "_#" | "#") + script + "-" + extensions, note that country code and variant are always written out in capital letters, the language is written out as lower case.</code></p>
+<p>Consider English which is spoken in many countries. There are
+variations in English based on the country in which the language is
+spoken. We all know that American English is different from British
+English, but there are many such versions. Below is a quick snippet that
+prints out all english language based localization formats.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Arrays</span><span class="op">.</span><span class="fu">stream</span><span class="op">(</span><span class="bu">Locale</span><span class="op">.</span><span class="fu">getAvailableLocales</span><span class="op">())</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">filter</span><span class="op">(</span>locale <span class="op">-&gt;</span> locale<span class="op">.</span><span class="fu">getLanguage</span><span class="op">().</span><span class="fu">equals</span><span class="op">(</span><span class="st">&quot;en&quot;</span><span class="op">))</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">forEach</span><span class="op">(</span>locale <span class="op">-&gt;</span> <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;Locale code: </span><span class="sc">%s</span><span class="st"> and it stands for </span><span class="sc">%s</span><span class="st"> </span><span class="sc">%n</span><span class="st">&quot;</span><span class="op">,</span> locale<span class="op">,</span> locale<span class="op">.</span><span class="fu">getDisplayName</span><span class="op">()));</span></span></code></pre></div>
+<p>The output might look something like that, note that there are quite
+a few types of locales which are based off of english. The output refers
+to different locales in English and makes use of only language code and
+the country code.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Locale code: en_MT and it stands for English (Malta)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>Locale code: en_GB and it stands for English (United Kingdom)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>Locale code: en_CA and it stands for English (Canada)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>Locale code: en_US and it stands for English (United States)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>Locale code: en_ZA and it stands for English (South Africa)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>Locale code: en and it stands for English</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>Locale code: en_SG and it stands for English (Singapore)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>Locale code: en_IE and it stands for English (Ireland)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>Locale code: en_IN and it stands for English (India)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>Locale code: en_AU and it stands for English (Australia)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>Locale code: en_NZ and it stands for English (New Zealand)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>Locale code: en_PH and it stands for English (Philippines)</span></code></pre></div>
+<h3 id="details">Details</h3>
+<p>The locale class has a few other methods, to obtain information about
+the language, country, variant and script extensions, which can all be
+part of the local string.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Locale</span><span class="op">.</span><span class="fu">setDefault</span><span class="op">(</span><span class="bu">Locale</span><span class="op">.</span><span class="fu">CANADA_FRENCH</span><span class="op">);</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Locale</span> defaultLocale <span class="op">=</span> <span class="bu">Locale</span><span class="op">.</span><span class="fu">getDefault</span><span class="op">();</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;The default locale is </span><span class="sc">%s</span><span class="st"> </span><span class="sc">%n</span><span class="st">&quot;</span><span class="op">,</span> defaultLocale<span class="op">);</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;The default language code is </span><span class="sc">%s</span><span class="st"> and the name is </span><span class="sc">%s</span><span class="st"> </span><span class="sc">%n</span><span class="st">&quot;</span><span class="op">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    defaultLocale<span class="op">.</span><span class="fu">getLanguage</span><span class="op">(),</span> defaultLocale<span class="op">.</span><span class="fu">getDisplayLanguage</span><span class="op">());</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;The default country code is </span><span class="sc">%s</span><span class="st"> and the name is </span><span class="sc">%s</span><span class="st"> </span><span class="sc">%n</span><span class="st">&quot;</span><span class="op">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    defaultLocale<span class="op">.</span><span class="fu">getCountry</span><span class="op">(),</span> defaultLocale<span class="op">.</span><span class="fu">getDisplayCountry</span><span class="op">());</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;The default variant code is </span><span class="sc">%s</span><span class="st"> and the name is </span><span class="sc">%s</span><span class="st"> </span><span class="sc">%n</span><span class="st">&quot;</span><span class="op">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    defaultLocale<span class="op">.</span><span class="fu">getVariant</span><span class="op">(),</span> defaultLocale<span class="op">.</span><span class="fu">getDisplayVariant</span><span class="op">());</span></span></code></pre></div>
+<p>The snippet above will print out something along the lines of the
+following. Note that the variant code is empty so is the display name of
+the variant code. What is the difference between the methods such as
+<code>getCountry</code> and <code>getDisplayCountry</code>. The former
+returns the country code and the latter returns the human readable name
+of the country. The country code is a two or three letter code based on
+ISO 3166. The <code>getLanguage</code> and
+<code>getDisplayLanguage</code> is similar to the country code, it is
+based on the ISO 639. There was no variant in the locale, as mentioned,
+so nothing got printed out. However for some other locales there could
+be variant values and those values would get printed for that locale.
+The variant could be any extra details such as operating environments
+(like MAC for Macintosh machine) or name of the company (such as Sun or
+Oracle). Other than these one can also have less widely used methods
+such as the <code>getScript()</code> - which returns the script part
+code of the locale string (if a script is present in the extra field
+format)</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>The default locale is fr_CA</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>The default language code is fr and the name is franais</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>The default country code is CA and the name is Canada</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>The default variant code is and the name is</span></code></pre></div>
+<p><code>Instead of calling Local's getDisplayCountry, method which takes no arguments, you can choose to overloaded version of the getDisplayCountry(Locale), which takes a Locale object as an argument. This will print the name of the country as in the passed locale. For example, for the call Locale.GERMANY.getDisplayCountry() wil print out "Deutschalnd" (that is how germans refer to their country) however for the call Locale.GERMANY.getDisplayCountry(Locale.ENGLISH) the output will be Germany, that is the British refer to the country Germany.</code></p>
+<h3 id="creating">Creating</h3>
+<p>There are many ways to get or create a Locale object. Below are
+listed four options here for creating an instance of Italian locale,
+that corresponds to the language code of it.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Locale</span> locale1 <span class="op">=</span> <span class="kw">new</span> <span class="bu">Locale</span><span class="op">(</span><span class="st">&quot;it&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">);</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Locale</span> locale2 <span class="op">=</span> <span class="kw">new</span> <span class="bu">Locale</span><span class="op">(</span><span class="st">&quot;it&quot;</span><span class="op">);</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Locale</span> locale3 <span class="op">=</span> <span class="kw">new</span> <span class="bu">Locale</span><span class="op">.</span><span class="fu">Builder</span><span class="op">().</span><span class="fu">setLanguageTag</span><span class="op">(</span><span class="st">&quot;it&quot;</span><span class="op">).</span><span class="fu">buld</span><span class="op">();</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="bu">Locale</span> locale4 <span class="op">=</span> <span class="bu">Locale</span><span class="op">.</span><span class="fu">ITALIAN</span><span class="op">;</span></span></code></pre></div>
+<p>The way the locale is created is surely based on needs, if the
+language thag is coming from user input, one should use the
+constructors, otherwise the predefined constants can be used
+instead.</p>
+<h2 id="resource-bundles">Resource bundles</h2>
+<p>The resource bundles are tightly related to the Locale, they are
+meant to hold resources based on the Locale type. They are used to
+customize the behavior of the program based on the locale. One obvious
+solution is to get the default locale, check if the locale is Italy, and
+print “Ciao”, while it will work, but this approach is neither flexible
+nor extensible. How about customizing to other locales like Saudi Arabia
+or Thailand. One has to find and replace all the locale specific strings
+for customizing each locale. This task will be a nightmare if the
+application is designed like that, consisting of thousands of strings to
+be replaced, spread over a million lines of code, and there are many
+locales to support</p>
+<p>In Java, resource bundles provide a solution to this problem of how
+to customize the application to local-specific needs. So what is a
+resource bundle ? A resource bundle is a set of classes or property
+files that help define a set of keys and map those keys to locale
+specific values. The abstract class <code>ResourceBundle</code>,
+provides an abstraction of resource bundles in Java. It has two derived
+classes <code>PropertyResourceBundle</code> and
+<code>ListResourceBundle</code>. The two derived classes provide support
+for resource bundles using two different mechanisms:</p>
+<ul>
+<li><p><code>PropertyResourceBundle</code> this concrete class provides
+support for multiple locales in the form of property files, For each
+locale, one needs to specify the keys and values in a property file, for
+that locale. For a given locale, if you use the
+<code>ResourceBundle.getBundle()</code> method the relevant property
+file will be automatically loaded. Of course there is no magic i it;
+there are certain naming conventions that need to be followed for
+creating the property files, which will be discussed below.</p></li>
+<li><p><code>ListResourceBundle</code> - for adding support to a locale,
+extend this class. In the derived class the method
+<code>getContents</code> has to be overridden. Which returns and
+<code>Object[][]</code>. This array must have the list of keys and
+values, The keys must be Strings. Typically the values are also Strings,
+but values can be anything: sound clips, video clips, URLs or
+pictures.</p></li>
+</ul>
+<h3 id="usage">Usage</h3>
+<p>As already mentioned if the application is designed with localization
+in mind in the first place, support for new locales can be added without
+doing any changes to the code. As discussed above, property files define
+strings as key value pairs in a file. Here is an example of a classpath
+that can be mapped to an actual path in your machine:
+<code>classpath=C:\Program File\Java\jre8</code>. Property files will
+usually contain numerous such key value pairs, with each such pair in
+separate lines, as in the following</p>
+<pre class="properties"><code>classpath=C:\Program Files\Java\jre8
+temp=C:\Windows\Temp
+windir=C:\Windows</code></pre>
+<p>In the case of localization one uses property files to map the same
+key strings to different value strings. In the program, the key strings
+are used, and by loading the matching property file for the locale the
+corresponding values for the keys will be fetched from the property
+files for use in the program. The naming of these property files is
+important and below is the content of these bundles. To keep this
+example simple there is only one key-value pair in these property files;
+in real-world programs, there could be a few hundred or even thousands
+of pairs present in each property file</p>
+<p>ResourceBundle.properties</p>
+<pre class="properties"><code>Greeting=Hello</code></pre>
+<p>ResourceBundle_ar.properties</p>
+<pre class="properties"><code>Greeting=As-salamu Alayjum</code></pre>
+<p>ResourceBundle_it.properties</p>
+<pre class="properties"><code>Greeting=Ciao</code></pre>
+<p>As demonstrated above, the default bundle is named
+<code>ResourceBundle</code>.properties. The resource bundle for Arabic
+is named <code>ResourceBundle_ar</code>. Note that the suffix “_ar”
+indicating Arabic is the localized language. Similarly the resource
+bundle for Italian is named <code>ResourceBundle_it</code>, which makes
+use of the “_it” suffix to indicate the Italian as the associated
+language with this property file.</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Locale</span> currentLocale <span class="op">=</span> <span class="bu">Locale</span><span class="op">.</span><span class="fu">getDefault</span><span class="op">();</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">ResourceBundle</span> resBundle <span class="op">=</span> <span class="bu">ResourceBundle</span><span class="op">.</span><span class="fu">getBundle</span><span class="op">(</span><span class="st">&quot;ResourceBundle&quot;</span><span class="op">,</span> currentLocale<span class="op">);</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span>resBundle<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;Greeting&quot;</span><span class="op">));</span></span></code></pre></div>
+<p>The example above will load by default the default resource bundle
+which is the file <code>ResourceBundle.properties</code>. However if the
+locale is different, say it is manually set to Italy with the
+<code>Locale.setDefault(Locale.ITALY)</code>. Then the file that will be
+loaded is the properties file that matches the Italy locale, however if
+none is found, it will still default to the default one mentioned above.
+Manually setting the locale is not recommended since that is done by the
+<code>JVM</code>, based on the system settings, or can be done when
+starting the application with
+<code>java -jar -Duser.language=it -Duser.region=IT LocalizedHello</code>.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>D<span class="op">:</span>\<span class="op">&gt;</span> java LocalizedHello</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>Hello</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>D<span class="op">:</span>\<span class="op">&gt;</span> java <span class="op">-</span>Duser<span class="op">.</span><span class="fu">language</span><span class="op">=</span>it LocalizedHello</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>Ciao</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>D<span class="op">:</span>\<span class="op">&gt;</span> java <span class="op">-</span>Duser<span class="op">.</span><span class="fu">language</span><span class="op">=</span>ar LocalizedHello</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>As<span class="op">-</span>Salamu Alaykum</span></code></pre></div>
+<p>This demonstrates how an application can be started from the command
+line, with different locale, by default the locale is assume to be
+en_US, (US English). The corresponding property file is loaded and the
+message string is resolved. Also note that the snippet above does not
+specify any suffixes for the name of the <code>ResourceBundle</code>,
+this is already mentioned, that the name of the file has to follow a
+specific convention, the name is always <code>ResourceBundle</code>, and
+the suffix is the same / matches as the format string of the locale</p>
+<p><code>ListResourceBundle</code>, is used when a support for new
+locale is required, by extending this class. While extending the
+<code>ListResourceBundle</code> class one needs to override the abstract
+method <code>getContents</code>, the signature of the method is -
+<code>protected Object[][] getContents()</code>. Note that the keys have
+to be String, but the values can be of any type, hence the array of type
+Object, further the method returns a list of keys and value pairs. As a
+result the getContents method returns a two dimensional array of
+Objects</p>
+<p><code>Resource bundles are created by extending the ListResourceBundle class, whereas with PropertyResourceBundle, the resource bundle is created as property file. Furthermore, when extending ListResourceBundle, as a value one can specify any type of object, whereas in the PropertyResourceBundle the value is restricted to be of type String only, the same as the key type</code></p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// default US English version</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ResBundle <span class="kw">extends</span> <span class="bu">ListResourceBundle</span> <span class="op">{</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="bu">Object</span><span class="op">[][]</span> <span class="fu">getContents</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> contents<span class="op">;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">static</span> <span class="dt">final</span> <span class="bu">Object</span><span class="op">[][]</span> contents <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span> <span class="st">&quot;MovieName&quot;</span><span class="op">,</span> <span class="st">&quot;Avatar&quot;</span> <span class="op">},</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span> <span class="st">&quot;GrossRevenue&quot;</span><span class="op">,</span> <span class="op">(</span><span class="bu">Long</span><span class="op">)</span> <span class="dv">2782275172L</span> <span class="op">},</span> <span class="co">// in US dollars</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span> <span class="st">&quot;Year&quot;</span><span class="op">,</span> <span class="op">(</span><span class="bu">Integer</span><span class="op">)</span><span class="dv">2009</span> <span class="op">}</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">// Italian version</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ResBundle_it_IT <span class="kw">extends</span> <span class="bu">ListResourceBundle</span> <span class="op">{</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="bu">Object</span><span class="op">[][]</span> <span class="fu">getContents</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> contents<span class="op">;</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">static</span> <span class="dt">final</span> <span class="bu">Object</span><span class="op">[][]</span> contents <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span> <span class="st">&quot;MovieName&quot;</span><span class="op">,</span> <span class="st">&quot;Che Bella Giornata&quot;</span> <span class="op">},</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span> <span class="st">&quot;GrossRevenue&quot;</span><span class="op">,</span> <span class="op">(</span><span class="bu">Long</span><span class="op">)</span> <span class="dv">43000000L</span> <span class="op">},</span> <span class="co">// in euros</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span> <span class="st">&quot;Year&quot;</span><span class="op">,</span> <span class="op">(</span><span class="bu">Integer</span><span class="op">)</span><span class="dv">2011</span> <span class="op">}</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> LocalizedBoxOfficeHits <span class="op">{</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">printMovieDetails</span><span class="op">(</span><span class="bu">ResourceBundle</span> resBundle<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> movieName <span class="op">=</span> resBundle<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;MovieName&quot;</span><span class="op">);</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Long</span> revenue <span class="op">=</span> <span class="op">(</span><span class="bu">Long</span><span class="op">)(</span>resBundle<span class="op">.</span><span class="fu">getObject</span><span class="op">(</span><span class="st">&quot;GrossRevenue&quot;</span><span class="op">));</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Integer</span> year <span class="op">=</span> <span class="op">(</span><span class="bu">Integer</span><span class="op">)</span> resBundle<span class="op">.</span><span class="fu">getObject</span><span class="op">(</span><span class="st">&quot;Year&quot;</span><span class="op">);</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Movie &quot;</span> <span class="op">+</span> movieName <span class="op">+</span> <span class="st">&quot;(&quot;</span> <span class="op">+</span> year <span class="op">+</span> <span class="st">&quot;)&quot;</span> <span class="op">+</span> <span class="st">&quot; grossed &quot;</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> revenue <span class="op">);</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> args<span class="op">[])</span> <span class="op">{</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>        LocalizedBoxOfficeHits localizedHits <span class="op">=</span> <span class="kw">new</span> <span class="fu">LocalizedBoxOfficeHits</span><span class="op">();</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">// print the largest box-office hit movie for default (US) locale</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Locale</span> locale <span class="op">=</span> <span class="bu">Locale</span><span class="op">.</span><span class="fu">getDefault</span><span class="op">();</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>        localizedHits<span class="op">.</span><span class="fu">printMovieDetails</span><span class="op">(</span><span class="bu">ResourceBundle</span><span class="op">.</span><span class="fu">getBundle</span><span class="op">(</span><span class="st">&quot;ResBundle&quot;</span><span class="op">,</span> locale<span class="op">));</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>        <span class="co">// print the largest box-office hit movie for Italian locale</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>        locale <span class="op">=</span> <span class="kw">new</span> <span class="bu">Locale</span><span class="op">(</span><span class="st">&quot;it&quot;</span><span class="op">,</span> <span class="st">&quot;IT&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">);</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>        localizedHits<span class="op">.</span><span class="fu">printMovieDetails</span><span class="op">(</span><span class="bu">ResourceBundle</span><span class="op">.</span><span class="fu">getBundle</span><span class="op">(</span><span class="st">&quot;ResBundle&quot;</span><span class="op">,</span> locale<span class="op">));</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>First thing that should be noted here, is that the resource bundle
+classes are not directly instantiated. They are actually loaded
+dynamically once the <code>getBundle</code> method is called, this
+happens during the run-time of the program using reflection internally
+the java implementation is creating instances of the classes that extend
+the <code>ListResourceBundle</code>. They are instantiated based on the
+required locale. These instances are then cached for further use, since
+more than likely the locale will be kept constant across the execution
+of the program, however that is <code>not always guaranteed</code>, that
+is why it is not really advisable to cache the current
+<code>ResourceBundle</code> object in user space, it is usually
+recommended to simply keep calling <code>getBundle</code> every time the
+resource bundle is required, or wrap that call in a static utility
+method, but do not cache the instance of <code>ResourceBundle</code>
+itself, since the locale might change.</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">// This code change will result in throwing this exception:</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Exception in thread &quot;main&quot; java.lang.ClassCastException:</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">// java.lang.Long cannot be cast to java.lang.Integer</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="bu">Integer</span> revenue <span class="op">=</span> <span class="op">(</span><span class="bu">Integer</span><span class="op">)(</span>resBundle<span class="op">.</span><span class="fu">getObject</span><span class="op">(</span><span class="st">&quot;GrossRevenue&quot;</span><span class="op">));</span></span></code></pre></div>
+<p><code>When using ListResourceBundle, one needs to be extra careful about the type of the resource behind a given string key, since it is of type Object, it can be anything, in this case the GrossRevenue is strictly defined as Long, therefore it can not be cast to Integer just like that, one needs to use the method toInt() from the Long's interface to convert it to proper int first. This cast here is not trying to cast primitives, rather it is trying to cast class instances of incompatible types</code></p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">// This code will crash with this exception:</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Exception in the thread &quot;main&quot; java.util.MissingResourceException:</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Can&#39;t find resources for bundle ResBundle, key GrossRevenu, due to typo</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="bu">Long</span> revenue <span class="op">=</span> <span class="op">(</span><span class="bu">Long</span><span class="op">)(</span>resBundle<span class="op">.</span><span class="fu">getObject</span><span class="op">(</span><span class="st">&quot;GrossRevenu&quot;</span><span class="op">));</span></span></code></pre></div>
+<p><code>The key name in the ResourceBundle is important, meaning that it must match exactly, it is also case sensitive, otherwise an exception will be thrown, in this case the MissingResourceException, this is relevant for both PropertyResourceBundle and ListResourceBundle resource bundle types</code></p>
+<h3 id="loading">Loading</h3>
+<p>The process of finding a matching resource bundle is same for classes
+extended from <code>ListResourceBundle</code> as it is for property
+files defined for <code>PropertyResourceBundle</code>. For the resource
+bundles implemented as classes extended from
+<code>ListResourceBundle</code>, Java uses the reflection mechanism to
+find and load the class.
+<code>The class has to be defined as public, and should be visible, so that the reflection mechanism will find the class.</code></p>
+<p>Naming convention for the Resource bundles - both files and classes
+(extending from <code>ListResourceBundle</code>) are enforced by the
+language itself, Java provides naming convention to be followed for
+creating resource bundles. Only through the names of the property
+bundles does the Java library load the relevant locales. Hence it is
+important to understand and follow this naming convention when creating
+the property bundles for localizing Java applications.</p>
+<p><code>packagequalifier.bundlename + "_" + language + "_" + country + "_" + (variant + "_#" | "#") + script + "-" + extensions</code></p>
+<p>Given that there could be many resource bundles for a bundle name,
+what is the search sequence to determine the resource bundle to be
+loaded ? To clarify, the sequence is a series of steps. The search
+starts from the first step, and if at any of the steps a match is found
+the resource bundle is loaded. Otherwise the search process continues to
+the next step.</p>
+<ol type="1">
+<li><p>The search starts by looking for an exact match for the resource
+bundle with the full name.</p></li>
+<li><p>The last component (separated by _) is dropped and the search is
+repeated with the resulting shorter name. This process is repeated until
+the last locale modifier is left e.g. -
+<code>ResourceBundle_th_TH_TH_#u-nu-thai</code> -&gt;
+<code>ResourceBundle_th_TH_TH</code> -&gt;
+<code>ResourceBundle_th_TH</code> -&gt;
+<code>ResourceBundle_th</code></p></li>
+<li><p>Search for the resource bundle for the default locale (assume
+that the default configured locale is en_US) -
+<code>ResourceBundle_en_US</code> -&gt;
+<code>ResourceBundle_en</code></p></li>
+<li><p>Search for the resource bundle with just the name of the bundle.
+- <code>ResourceBundle</code></p></li>
+<li><p>The search fails throwing a
+<code>MissingBundleException</code></p></li>
+</ol>
+<p><code>What happens is that the search is exhausting all possible names for a bundle, this is also very useful since this guarantees that as long as there is a default bundle, or a larger scope bundle it will be found, even if there is none for the current locale, guaranteeing that applications will still continue to work just fine, in the absence of some specific or niche locale for the current user or system. The serach starts by first looking at the most specific bundle name, based on the locale, gradually broadening the scope, by looking for a more generic bundle name</code></p>
+<h1 id="summary">Summary</h1>
+<p>Read and set the locale</p>
+<ul>
+<li><p>A locale represents a language culture or country; the Locale
+class in Java provides an abstraction for this concept.</p></li>
+<li><p>Each locale can have three entries: the language and country to
+form locale tags. There are no standard tags for variants;</p></li>
+<li><p>The <code>getter</code> methods in the Locale class - such as
+<code>getLanguage</code> or <code>getCountry</code>,
+<code>getVariant</code> return codes; whereas the similar methods of
+<code>getDisplayName</code>, <code>getDisplayLanguage</code> and so on,
+return human readable text representation for those codes</p></li>
+<li><p>The <code>getDefault</code> method in Locale returns the default
+locale set in the <code>JVM</code>. This default locale can be changed
+to another locale by using the <code>setDefault</code> method.</p></li>
+<li><p>There are many ways to create or get a Locale object - using a
+<code>constructor</code>, <code>forLanguageTag</code>,
+<code>Locale.Builder</code> or from the predefined constants</p></li>
+</ul>
+<p>Create and use properties file</p>
+<ul>
+<li><p>A resource bundle is a set of classes or property files that help
+define a set of keys and map those keys to locale-specific
+values.</p></li>
+<li><p>The class <code>ResourceBundle</code> has two derived classes
+<code>PropertyResourceBundle</code> and
+<code>ListResourceBundle</code>.</p></li>
+<li><p>To obtain the resource bundle use the
+<code>ResourceBundle.getBundle</code> method to get the bundle for a
+given locale, or the default one</p></li>
+<li><p>The <code>PropertyResourceBundle</code> class provides support
+for multiple locales in the form of property files, for each locale one
+needs to specify the keys and values in a property file located on the
+class path. Both the keys and values in the file are of type
+String</p></li>
+<li><p>To add support for a new locale extend the
+<code>ListResourceBundle</code>, class in the derived class override the
+abstract method <code>Object[][] getContents</code> The returned array
+must have the list of keys and values. The keys must be string and
+values can be of any type</p></li>
+<li><p>When passing the key string to the <code>getObject()</code>
+method to fetch the matching value in the resource bundle make sure that
+h passed keys and the key in the resource bundle exactly match (the key
+name is case sensitive). I the y do not match a
+<code>MissingResourceException</code> will be thrown</p></li>
+<li><p>The naming convention for a fully qualified resource bundle name
+is the <code>packagequalifier + the local format string</code></p></li>
+</ul>
+<p>Build resource bundle</p>
+<ul>
+<li><p>The process of finding a matching resource bundle is same for
+classes extended from <code>ListResourceBundle</code> as for property
+files defined for <code>PropertyResourceBundle</code>.</p></li>
+<li><p>The special search sequence to look for a matching resource
+bundle. Search starts from the most narrow - using the current locale,
+to the most broad - default <code>ResourceBundle</code></p></li>
+<li><p>The <code>getBundle()</code> method takes a
+<code>ResourceBundle.Control</code> object as an additional parameter.
+By extending this <code>ResourceBundle.Control</code> class and passing
+that object one can control or customize the resource bundle searching
+and loading process</p></li>
+</ul>
+</body>
+</html>

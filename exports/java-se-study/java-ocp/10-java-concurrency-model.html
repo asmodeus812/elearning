@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>10-java-concurrency-model</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#thread-model" id="toc-thread-model">Thread model</a>
+<ul>
+<li><a href="#terms" id="toc-terms">Terms</a></li>
+<li><a href="#creation" id="toc-creation">Creation</a></li>
+<li><a href="#synchronization"
+id="toc-synchronization">Synchronization</a></li>
+<li><a href="#deadlocks" id="toc-deadlocks">Deadlocks</a></li>
+<li><a href="#livelocks" id="toc-livelocks">Livelocks</a></li>
+<li><a href="#atomics" id="toc-atomics">Atomics</a></li>
+<li><a href="#classes" id="toc-classes">Classes</a>
+<ul>
+<li><a href="#cyclicbarrier"
+id="toc-cyclicbarrier">CyclicBarrier</a></li>
+<li><a href="#collections" id="toc-collections">Collections</a></li>
+<li><a href="#copyonwritearraylist"
+id="toc-copyonwritearraylist">CopyOnWriteArrayList</a></li>
+</ul></li>
+<li><a href="#executors" id="toc-executors">Executors</a></li>
+<li><a href="#callable" id="toc-callable">Callable</a></li>
+<li><a href="#executorservice"
+id="toc-executorservice">ExecutorService</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="thread-model">Thread model</h1>
+<p>Concurrency is gaining importance with more widespread use of
+multi-core processors. The Latin root of the work concurrency means -
+running together. In programming you can have multiple threads running
+in parallel in a program executing different tasks at the same time.
+When used correctly concurrency can improve the performance and
+responsiveness of the application and hence it is a powerful and useful
+feature. From the beginning Java has supported concurrency in the form
+of low-level threads management, locks and synchronization. Since 5.0,
+it also supports high level concurrency API in its concurrent package.
+From version 8, Java has gotten even better support for concurrency with
+the introduction of parallel streams.</p>
+<h2 id="terms">Terms</h2>
+<p>Here are some of the more critical terms which need to be
+understood</p>
+<ul>
+<li><p>Critical section - user object used for allowing the execution of
+just one active thread from many others <code>within one process</code>.
+The other non selected threads which try to acquire this object are put
+to sleep</p></li>
+<li><p>Mutex - Kernel object used for allowing the execution of just
+<code>one  active thread</code> from many others
+<code>among different processes</code>. The other non selected threads
+which try to acquire this object are put to sleep</p></li>
+<li><p>Lock - Kernel object used for allowing the execution of just
+<code>one active thread</code> from many others
+<code>within the same process</code>. The other non selected threads
+which are trying to acquire the object are put to sleep</p></li>
+<li><p>Semaphore - Kernel object used for allowing the execution of a
+group of active threads, from many others. The other non selected
+threads trying to acquire this object are put to sleep. It can be used
+for interprocess/shared actions but is not recommended due to it not
+being very safe, lacking some of the properties and attributes of the
+shared mutex (mentioned above)</p></li>
+<li><p>Monitors - are special objects which comprise of the primitive
+object <code>Mutex</code> and <code>Conditional variable</code>
+mentioned above, they are a synchronization construct to control access
+to shared resources. Provides a mutual exclusion, ensuring that only one
+thread can execute critical section at a time, and condition
+synchronization, allowing threads to wait for a specific condition to be
+met</p></li>
+</ul>
+<p><code>In Java every object has an intrinsic monitor associated with it. This monitor can be used to synchronize access to the objects's methods or blocks of code. It is comprised of the intrinsic monitor locks (mutex or a lock) and the wait-notify mechanism (conditional synchronization)</code></p>
+<h2 id="creation">Creation</h2>
+<p>The <code>Thread</code> and Object classes and the
+<code>Runnable</code> interface provide the necessary support for
+concurrency in Java. The Thread class has methods such as run, start and
+sleep that are useful for multi-threading. The Object class has methods
+such as wait and notify that support concurrency and are designed to be
+used for that purpose actually. Since every class in Java derives from
+the Object class all the objects have some basic multi-threading
+capabilities. It is also very easy to acquire a lock on an
+object/instance using the synchronized keyword.</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 8%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Thread currentThread()</td>
+<td>Static method</td>
+<td>Returns reference to the current thread.</td>
+</tr>
+<tr class="even">
+<td>String getName()</td>
+<td>Instance method</td>
+<td>Returns the name of the current thread.</td>
+</tr>
+<tr class="odd">
+<td>int getPriority()</td>
+<td>Instance method</td>
+<td>Returns the priority value of the current thread.</td>
+</tr>
+<tr class="even">
+<td>void join() <br> void join(long) <br> void join(long, int) <br></td>
+<td>Overloaded instance methods</td>
+<td>The current thread invoking join on another thread waits until the
+other thread completes. You can optionally give the timeout in
+milliseconds (given in long) or timeout in milliseconds as well as
+nanoseconds (given in long and int).</td>
+</tr>
+<tr class="odd">
+<td>void run()</td>
+<td>Instance method</td>
+<td>Once you start a thread (using the start() method), the run() method
+will be called when the thread is ready to execute.</td>
+</tr>
+<tr class="even">
+<td>void setName(String)</td>
+<td>Instance method</td>
+<td>Changes the name of the thread to the given name in the
+argument.</td>
+</tr>
+<tr class="odd">
+<td>void setPriority(int)</td>
+<td>Instance method</td>
+<td>Sets the priority of the thread to the given argument value.</td>
+</tr>
+<tr class="even">
+<td>void sleep(long) <br> void sleep(long, int) <br></td>
+<td>Overloaded static methods</td>
+<td>Makes the current thread sleep for given milliseconds (given in
+long) or for given milliseconds and nanoseconds (given in long and
+int).</td>
+</tr>
+<tr class="odd">
+<td>void start()</td>
+<td>Instance method</td>
+<td>Starts the thread; JVM calls the run() method of the thread.</td>
+</tr>
+<tr class="even">
+<td>String toString()</td>
+<td>Instance method</td>
+<td>Returns the string representation of the thread; the string has the
+thread’s name, priority, and its group. Creating</td>
+</tr>
+</tbody>
+</table>
+<p>To create thread objects, one can extend the Thread class, and
+override the run method. If the method is not overridden the default
+method will be run, which does nothing. To override the run method, it
+needs to be declared as public, it takes no arguments and has a void
+return type - <code>public void run()</code></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MyThread <span class="kw">extends</span> <span class="bu">Thread</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>            <span class="co">// sleep the current thread for 1 second, then print out the current thread name</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>            <span class="fu">sleep</span><span class="op">(</span><span class="dv">1000</span><span class="op">);</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;In run(); thread name is: &quot;</span> <span class="op">+</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">());</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">catch</span> <span class="op">(</span><span class="bu">InterruptedException</span> ex<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>            ex<span class="op">.</span><span class="fu">printStackTrace</span><span class="op">();</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>            <span class="co">// ignore the `InterruptedException` - this is perhaps the one of the</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>            <span class="co">// very few of the exceptions in Java which is acceptable to ignore</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>            <span class="co">// if it happens there is really not much that can be done anyways</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            <span class="co">// from the user space that is</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;In run(); thread name is: &quot;</span> <span class="op">+</span> <span class="fu">getName</span><span class="op">());</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> args<span class="op">[])</span> <span class="op">{</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// create a plain thread object, this is a software thread, it is obtained directly from the operating system</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span> myThread <span class="op">=</span> <span class="kw">new</span> <span class="fu">MyThread</span><span class="op">();</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">// start the thread execution, this will make sure to invoke the run method</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        myThread<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// start method is not blocking meaning that the println will be invoked immediately, here for the main thread</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;In main(); thread name: &quot;</span> <span class="op">+</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">());</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>There is also another way to create a thread, instead of extending
+the Thread class, one can implement an anonymous class from the
+<code>Runnable</code> interface as well. The Thread class itself,
+implements Runnable interface. The Runnable interface declares a sole
+method, run(). Hence when one implements Runnable interface the run
+method has to have an implementation. The Thread class provides a
+constructor that accepts a Runnable argument, that way one can create a
+new thread with a Runnable target as well</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RunnableImpl <span class="kw">implements</span> <span class="bu">Runnable</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">// sleep the current thread for 1 second, then print out the current thread name</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sleep</span><span class="op">(</span><span class="dv">1000</span><span class="op">);</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;In run(); thread name is: &quot;</span> <span class="op">+</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">());</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> args<span class="op">[])</span> <span class="kw">throws</span> <span class="bu">Exception</span> <span class="op">{</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// create a plain thread object, this is a software thread, it is obtained directly from the operating system</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span> myThread <span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(</span><span class="kw">new</span> <span class="fu">RunnableImpl</span><span class="op">());</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// start the thread execution, this will make sure to invoke the run method</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        myThread<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// start method is not blocking meaning that the println will be invoked immediately, here for the main thread</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;In main(); thread name is: &quot;</span> <span class="op">+</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">());</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The example above creates a Thread object from a Runnable instead of
+extending the Thread class, this is generally much simpler and easier
+way to manage threads, it also allows Threads to be re-usable and less
+exposed to the user land.</p>
+<h2 id="synchronization">Synchronization</h2>
+<p>Threads share memory, and they can concurrently modify data. Since
+the modification can be done at the same time without safeguards, this
+can lead to unintuitive results. When to or more threads are trying to
+access a variable and one of them wants to modify it, you get a problem
+known as race condition, data race or race hazard. To solve this problem
+data modification has to be done in an atomic way. Meaning that only one
+thread must be allowed to change the data at a given time, this is done
+through locks and mutexes. In java land those are called synchronized
+blocks. This can avoid the race condition by locking the data being
+modified that ensures that only one thread at a time can enter the
+modification block and only once it exists the modification block then
+other threads are allowed to modify the data as well - this is called a
+<code>critical section</code></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">synchronized</span><span class="op">(</span>objectInstance<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// critical section - code segment guarded by the mutex lock</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>Synchronized blocks will never be left in only-locked state, even if exception is thrown, before the block finishes, or for some other reason the block is unable to complete fully, the lock will still be released, that ensures that there is no dead-lock, meaning that if the lock was to remain stuck in locked state, other threads will wait indefinitely on it.</code></p>
+<p>There is also a way to synchronize methods too, the keyword is put at
+the front of the method declaration instead. The entire method in that
+case is synchronized, In that case when the method declared as
+synchronized is called a lock is obtained on the object on which the
+method is called, in this case the instance of the class, it is released
+when the method exits - it is somewhat equivalent to doing -
+<code>synchronized(this) { /* code */ }</code></p>
+<p><code>Static methods can also be declared as synchronized, however in that case the target of the synchronization lock is not the class instance it is the class type itself, remember that in Java even the class type is in a way treated as an instance of the class type itself, so it will lock around like that - synchronized(ClassType.class) { /* code */ }</code></p>
+<p>Constructors can not be declared synchronized, this is because there
+is no instance to lock around in the first place, this will produce a
+compiler error. You can however have synchronized block inside the
+constructor which locks around some of the data members or input
+arguments themselves</p>
+<p><code>Why can't you declare constructors synchronized? The JVM ensures that only one thread can invoke a constructor call (for a specific constructor) at a given point in time. So, there is no need to declare a constructor synchronized</code></p>
+<p>It is common to misunderstand that a synchronized block obtains a
+lock for a block of code. Actually, the lock is obtained for an object
+and not for a piece of code. The obtained lock is held until all the
+statements in that block complete execution.</p>
+<h2 id="deadlocks">Deadlocks</h2>
+<p>A deadlock arisees when locking threads results in a situation where
+they canot prodceed and thus wait indefinitely for others to
+terminate.Say one thread acquires a lock on reosurce r1 and waits to
+acquire another on resource r2, At the same time say there is another
+thread that has already acquired a lock around r2 and is waiting to
+obtain a lock on r1. Neither of the threads can proceed until the other
+one releases the lock, which never happens - to they are stuck in a
+deadlock.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Balls class has a globally accessible data member to hold the number of balls thrown</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Balls <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">long</span> balls <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Runs class has a globally accessible data member to hold the number of runs scored</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Runs <span class="op">{</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">long</span> runs <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CounterOne <span class="kw">implements</span> <span class="bu">Runnable</span> <span class="op">{</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this method increments runs variable first and then increments the balls variable</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// since these variables are accessible from other threads,</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we need to acquire a lock before processing them</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Override</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// since we&#39;re updating runs variable first, first lock the Runs.class</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        <span class="kw">synchronized</span><span class="op">(</span>Runs<span class="op">.</span><span class="fu">class</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>            <span class="co">// lock on Balls.class before updating balls variable</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>            <span class="kw">synchronized</span><span class="op">(</span>Balls<span class="op">.</span><span class="fu">class</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>                Runs<span class="op">.</span><span class="fu">runs</span><span class="op">++;</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>                Balls<span class="op">.</span><span class="fu">balls</span><span class="op">++;</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CounterTwo <span class="kw">implements</span> <span class="bu">Runnable</span> <span class="op">{</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// this method increments balls variable first and then increments the runs variable</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// since these variables are accessible from other threads,</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we need to acquire a lock before processing them</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Override</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">// since we&#39;re updating balls variable first; so first lock Balls.class</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        <span class="kw">synchronized</span><span class="op">(</span>Balls<span class="op">.</span><span class="fu">class</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>            <span class="co">// acquire lock on Runs.class before updating runs variable</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>            <span class="kw">synchronized</span><span class="op">(</span>Runs<span class="op">.</span><span class="fu">class</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>                Balls<span class="op">.</span><span class="fu">balls</span><span class="op">++;</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>                Runs<span class="op">.</span><span class="fu">runs</span><span class="op">++;</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> DeadLock <span class="op">{</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> args<span class="op">[])</span> <span class="kw">throws</span> <span class="bu">InterruptedException</span> <span class="op">{</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>        CounterOne c1 <span class="op">=</span> <span class="kw">new</span> <span class="fu">CounterOne</span><span class="op">();</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>        CounterTwo c2 <span class="op">=</span> <span class="kw">new</span> <span class="fu">CounterTwo</span><span class="op">();</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>        <span class="co">// create two threads and start them at the same time</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span> t1 <span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(</span>c1<span class="op">);</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span> t2 <span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(</span>c2<span class="op">);</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>        t1<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>        t2<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Waiting for threads to complete execution...&quot;</span><span class="op">);</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>        t1<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>        t2<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Done.&quot;</span><span class="op">);</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>It is clear in the example above that depending on which thread
+starts first, and runs its method, it will acquire lock around
+<code>Runs (CounterOne)</code>, however it is possible, that the other
+acquires lock around <code>Balls (CounterTwo)</code>. In that case they
+will never be able to obtain the inner synchronized block lock since the
+other thread is already holding it - leading to deadlock</p>
+<p>It is not guaranteed that this program will lead to a deadlock every
+time it is started, it is quite dependent on very specific circumstances
+but it is possible, and that is the problem. The sequence in which the
+threads are executed and the order in which the locks are acquired and
+released, the time it takes to obtain the lock and so on, all play a
+role in a deadlock situation like that</p>
+<h2 id="livelocks">Livelocks</h2>
+<p>Assume that there are two robotic cars that are programmed to
+automatically drive in the road. There is a situation where two robotic
+cars reach the two opposite ends of a narrow bridge. The bridge is so
+narrow that only one car can pass through at at time. The robotic cars
+are programmed such that they wait for the other car to pass through
+first. When both the cars attempt to enter the bridge at the same time,
+the following situation could happen each car starts to enter the bridge
+notices that the other car is attempting to do the same and reverses.
+Note that the cars keep moving forward and backward and thus appear as
+if they are doing lots of work, but there is no progress made by either
+of the cars. This situation is called a <code>livelock</code></p>
+<p>Consider two threads <code>t1</code> and <code>t2</code> assume that
+thread <code>t1</code> makes a change and thread <code>t2</code> undoes
+that change. When both the threads <code>t1</code> and <code>t2</code>
+work, it will appear as though lots of work is getting done, but no
+progress is made. This situation is called a
+<code>livelock in threads</code></p>
+<p>Consider the situation in which numerous threads have different
+priorities assigned to them in the range of lowest priority 1 to highest
+priority 10 which is the range allowed for priority of threads in Java.
+When a lock is available the thread scheduler will give priority to the
+threads with priority over low priority. If there are many high prio
+threads that want to obtain the lock and also hold the lock for long
+time periods when will the low priority threads get a chance to obtain
+the lock. In other words in a situation where low priority threads
+starve for a long time trying to obtain the lock is known as lock
+starvation. There are many techniques available for detecting or
+avoiding threading problems like <code>livelocks</code> and starvation
+but they are not within the scope of these discussions.</p>
+<p>As mentioned monitors in java are a way to make the locking mechanism
+more flexible and allow threads to inter cooperate, in the example
+below</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SharedResource <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="bu">Queue</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> queue <span class="op">=</span> <span class="kw">new</span> <span class="bu">LinkedList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> capacity <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">synchronized</span> <span class="dt">void</span> <span class="fu">produce</span><span class="op">(</span><span class="dt">int</span> value<span class="op">)</span> <span class="kw">throws</span> <span class="bu">InterruptedException</span> <span class="op">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="op">(</span>queue<span class="op">.</span><span class="fu">size</span><span class="op">()</span> <span class="op">==</span> capacity<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            <span class="fu">wait</span><span class="op">();</span> <span class="co">// Wait if the queue is full</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        queue<span class="op">.</span><span class="fu">add</span><span class="op">(</span>value<span class="op">);</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="fu">notifyAll</span><span class="op">();</span> <span class="co">// Notify consumers</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">synchronized</span> <span class="dt">int</span> <span class="fu">consume</span><span class="op">()</span> <span class="kw">throws</span> <span class="bu">InterruptedException</span> <span class="op">{</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="op">(</span>queue<span class="op">.</span><span class="fu">isEmpty</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>            <span class="fu">wait</span><span class="op">();</span> <span class="co">// Wait if the queue is empty</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> value <span class="op">=</span> queue<span class="op">.</span><span class="fu">poll</span><span class="op">();</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">notifyAll</span><span class="op">();</span> <span class="co">// Notify producers</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> value<span class="op">;</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    SharedResource sharedResource <span class="op">=</span> <span class="kw">new</span> <span class="fu">SharedResource</span><span class="op">();</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Producer thread</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Thread</span> producer <span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(()</span> <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;=</span> <span class="dv">10</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>                sharedResource<span class="op">.</span><span class="fu">produce</span><span class="op">(</span>i<span class="op">);</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>                <span class="bu">Thread</span><span class="op">.</span><span class="fu">sleep</span><span class="op">(</span><span class="dv">100</span><span class="op">);</span> <span class="co">// Simulate production delay</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>            <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">interrupt</span><span class="op">();</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Producer interrupted&quot;</span><span class="op">);</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">});</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Consumer thread</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Thread</span> consumer <span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(()</span> <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;=</span> <span class="dv">10</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>                sharedResource<span class="op">.</span><span class="fu">consume</span><span class="op">();</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>                <span class="bu">Thread</span><span class="op">.</span><span class="fu">sleep</span><span class="op">(</span><span class="dv">150</span><span class="op">);</span> <span class="co">// Simulate consumption delay</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>            <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">interrupt</span><span class="op">();</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Consumer interrupted&quot;</span><span class="op">);</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    <span class="op">});</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Start both threads</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    producer<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>    consumer<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Wait for both threads to complete</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>        producer<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>        consumer<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">interrupt</span><span class="op">();</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">err</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Main thread interrupted&quot;</span><span class="op">);</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Producer and Consumer have finished.&quot;</span><span class="op">);</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="atomics">Atomics</h2>
+<p>The concurrent package has two sub-packages atomic and locks. Below
+are discussed the atomic variables in the atomic package. Often one
+desires to see code that acquires and releases locks for implementing
+primitive simple operations like <code>incrementing</code> a variable,
+<code>decrementing</code> a variable and so on. Acquiring and releasing
+locks for such primitive operations is not efficient. In such cases Java
+provides an efficient alternative in the form of atomic variables. Here
+is a list of some of the classes in this package and their short
+description</p>
+<ul>
+<li>AtomicBoolean - Atomically updates a boolean value primitive</li>
+<li>AtomicInteger - Atomically updates integer primitive value; inherits
+from the number Class</li>
+<li>AtmoicIntegerArray - An integer array in which elements ca be
+updated atomically</li>
+<li>AtomicLong - Atomically update-able long value; inherits from the
+Number class</li>
+<li>AtomicLongArray - A long array in which elements can be updated
+atomically</li>
+<li>AtmoicRefernce<V> - An atomically update-able object reference of
+type V</li>
+<li>AtomicRefernceArray<E> - An atomically update-able array that can
+hold object references of type E (E refers to the base type of the
+elements within the array)</li>
+</ul>
+<p><code>Only AtmoicInteger &amp; AtomicLong extend from the Number class but not AtomicBoolean. All other classes in the atomic sub-package inherit directly from the Object class</code></p>
+<p>Of the classes mentioned above, the AtomicInteger and AtomicLong are
+the most important. The table below lists some of the most important
+methods from these classes as well.</p>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 65%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AtomicInteger()</td>
+<td>Creates an instance of AtomicInteger with initial value 0.</td>
+</tr>
+<tr class="even">
+<td>AtomicInteger(int initVal)</td>
+<td>Creates an instance of AtomicInteger with initial value
+initVal.</td>
+</tr>
+<tr class="odd">
+<td>int get()</td>
+<td>Returns the integer value held in this object.</td>
+</tr>
+<tr class="even">
+<td>void set(int newVal)</td>
+<td>Resets the integer value held in this object to newVal.</td>
+</tr>
+<tr class="odd">
+<td>int getAndSet(int newValue)</td>
+<td>Returns the current int value held in this object and sets the value
+held in this object to newVal.</td>
+</tr>
+<tr class="even">
+<td>boolean compareAndSet(int expect, int update)</td>
+<td>Compares the int value of this object to the expect value, and if
+they are equal, sets the int value of this object to the update
+value.</td>
+</tr>
+<tr class="odd">
+<td>int getAndIncrement()</td>
+<td>Returns the current value of the integer value in this object and
+increments the integer value in this object. Similar to the behavior of
+i++ where i is an int.</td>
+</tr>
+<tr class="even">
+<td>int getAndDecrement()</td>
+<td>Returns the current value of the integer value in this object and
+decrements the integer value in this object. Similar to the behavior of
+i– where i is an int.</td>
+</tr>
+<tr class="odd">
+<td>int getAndAdd(int delta)</td>
+<td>Returns the integer value held in this object and adds given delta
+value to the integer value.</td>
+</tr>
+<tr class="even">
+<td>int incrementAndGet()</td>
+<td>Increments the current value of the integer value in this object and
+returns that value. Similar to the behavior of ++i where i is an
+int.</td>
+</tr>
+<tr class="odd">
+<td>int decrementAndGet()</td>
+<td>Decrements the current integer value in this object and returns that
+value. Similar to behavior of –i where i is an int.</td>
+</tr>
+<tr class="even">
+<td>int addAndGet(int delta)</td>
+<td>Adds the delta value to the current value of the integer in this
+object and returns that value.</td>
+</tr>
+<tr class="odd">
+<td>int intValue() <br> long longValue() <br> float floatValue() <br>
+double doubleValue()</td>
+<td>Casts the current int value of the object and returns it as int,
+long, float, or double values.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="classes">Classes</h2>
+<p>There are many classes and interfaces in the concurrent package, that
+provide high-level <code>APIs</code> for concurrent programming. When
+one uses the synchronized keyword, it employs <code>mutexes</code> to
+synchronize between threads for safe shared access. Threads also often
+needed to coordinate their executions to complete a bigger higher-level
+task. It is possible to build higher level abstractions for thread
+synchronization. These high-level abstractions for synchronizing
+activities of two or more threads are known as
+<code>synchronizers</code>. <code>Synchronizers</code>, internally make
+use of the existing low level API for thread coordination.</p>
+<ul>
+<li><p><code>Semaphore</code> controls access to shared resource. A
+semaphore maintains a counter to specify number of resources that the
+semaphore controls.</p></li>
+<li><p><code>CountjdownLatch</code> allows one or more threads to wait
+for countdown to complete.</p></li>
+<li><p><code>Exchanger</code> class is meant for exchanging data between
+two threads. This class is useful when two threads need to synchronize
+between each other and continuously exchange data.</p></li>
+<li><p><code>CyclicBarrier</code> - helps provide a synchronization
+point where threads may need to wait at a predefined execution point
+until all other threads reach that point.</p></li>
+<li><p><code>Phaser</code> - is a useful feature when few independent
+threads have to work in phases to compete a task</p></li>
+</ul>
+<h3 id="cyclicbarrier">CyclicBarrier</h3>
+<p>There are many situations in concurrent programming where threads may
+need to wait at a predefined execution point until all other thread
+reach that point <code>CyclicBarrier</code> helps provide such a
+synchronization point. In other words it allows a set of threads to wait
+for each other at common barrier point before continuing execution. It
+is useful when one needs multiple threads to perform their tasks
+independently but then synchronize at a certain point before proceeding
+to the next phase.</p>
+<ul>
+<li>Fixed - the number of threads that must reach the barrier point when
+creating the <code>CyclicBarrier</code></li>
+<li>Action - one can specify an optional <code>barrier action</code>
+which is a task executed by one of the threads when all reach the
+barrier</li>
+<li>Reusable - the barrier can be reused after the threads are released,
+hence the name <code>cyclic</code></li>
+<li>Blocking - threads calling await are
+<code>blocked until required</code> number of threads have called
+it.</li>
+</ul>
+<p>So how does it work, well threads call the await method, when they
+reach the barrier, in other words during some time of the execution, the
+barrier implies that the thread has reached the point at which it can
+perform no more work, and needs to wait for other threads to finish
+their work. If the required number of threads (specified in the
+constructor of the <code>CyclicBarrier</code> have called await(), the
+barrier is broken and all waiting threads are released. If there is a
+barrier action it is executed by one of the threads just before the
+barrier is broken</p>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CyclicBarrier(int numThreads)</td>
+<td>Creates a CyclicBarrier object with the number of threads waiting on
+it specified. Throws IllegalArgumentException if numThreads is negative
+or zero.</td>
+</tr>
+<tr class="even">
+<td>CyclicBarrier(int parties, Runnable barrierAction)</td>
+<td>Same as the previous constructor; this constructor additionally
+takes the thread to call when the barrier is reached.</td>
+</tr>
+<tr class="odd">
+<td>int await() <br> int await(long timeout, TimeUnit unit)</td>
+<td>Blocks until the specified number of threads have called await() on
+this barrier. The method returns the arrival index of this thread. This
+method can throw an InterruptedException if the thread is interrupted
+while waiting for other threads or a BrokenBarrierException if the
+barrier was broken for some reason (for example, another thread was
+timed-out or interrupted).The overloaded method takes a time-out period
+as an additional option; this overloaded version throws a
+TimeoutException if all other threads aren’t reached within the time-out
+period.</td>
+</tr>
+<tr class="even">
+<td>boolean isBroken()</td>
+<td>Returns true if the barrier is broken. A barrier is broken if at
+least one thread in that barrier was interrupted or timed-out, or if a
+barrier action failed throwing an exception.</td>
+</tr>
+<tr class="odd">
+<td>void reset()</td>
+<td>Resets the barrier to the initial state. If there are any threads
+waiting on that barrier, they will throw the BrokenBarrier
+exception.</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// The run() method in this thread should be called only when</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">// four players are ready to start the game</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MixedDoubleTennisGame <span class="kw">extends</span> <span class="bu">Thread</span> <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;All four players ready, game starts </span><span class="sc">\n</span><span class="st"> Love all...&quot;</span><span class="op">);</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">// This thread simulates arrival of a player.</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">// Once a player arrives, he/she should wait for other players to arrive</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Player <span class="kw">extends</span> <span class="bu">Thread</span> <span class="op">{</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">CyclicBarrier</span> waitPoint<span class="op">;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">Player</span><span class="op">(</span><span class="bu">CyclicBarrier</span> barrier<span class="op">,</span> <span class="bu">String</span> name<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">setName</span><span class="op">(</span>name<span class="op">);</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        waitPoint <span class="op">=</span> barrier<span class="op">;</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Player &quot;</span> <span class="op">+</span> <span class="fu">getName</span><span class="op">()</span> <span class="op">+</span> <span class="st">&quot; is ready &quot;</span><span class="op">);</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>            waitPoint<span class="op">.</span><span class="fu">await</span><span class="op">();</span> <span class="co">// await for all four players to arrive</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span><span class="op">(</span><span class="bu">BrokenBarrierException</span> <span class="op">|</span> <span class="bu">InterruptedException</span> exception<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;An exception occurred while waiting... &quot;</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>                <span class="op">+</span> exception<span class="op">);</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co">// Creates a CyclicBarrier object by passing the number of threads and the thread to run</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co">// when all the threads reach the barrier</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CyclicBarrierTest <span class="op">{</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> <span class="op">[]</span>args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">// a mixed-double tennis game requires four players;</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">// so wait for four players</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">// (i.e., four threads) to join to start the game</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Reserving tennis court </span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> <span class="st">&quot;As soon as four players arrive, game will start&quot;</span><span class="op">);</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>        <span class="bu">CyclicBarrier</span> barrier <span class="op">=</span> <span class="kw">new</span> <span class="bu">CyclicBarrier</span><span class="op">(</span><span class="dv">4</span><span class="op">,</span> <span class="kw">new</span> <span class="fu">MixedDoubleTennisGame</span><span class="op">());</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>        <span class="kw">new</span> <span class="fu">Player</span><span class="op">(</span>barrier<span class="op">,</span> <span class="st">&quot;G I Joe&quot;</span><span class="op">);</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>        <span class="kw">new</span> <span class="fu">Player</span><span class="op">(</span>barrier<span class="op">,</span> <span class="st">&quot;Dora&quot;</span><span class="op">);</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>        <span class="kw">new</span> <span class="fu">Player</span><span class="op">(</span>barrier<span class="op">,</span> <span class="st">&quot;Tintin&quot;</span><span class="op">);</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>        <span class="kw">new</span> <span class="fu">Player</span><span class="op">(</span>barrier<span class="op">,</span> <span class="st">&quot;Barbie&quot;</span><span class="op">);</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In the example above, the premise is quite simple, a tennis game is
+required to have 4 players, until 4 players are present the game can not
+start, the start of the game itself is represented with the class
+MixedDoubleTennisGame, which is representing the action that has to be
+executed when the 4 threads call the await method on the CyclicBarrier
+object. Once all 4 threads do call the await method, then the run method
+of the MixedDoubleTennisGame will be run, and the game will start</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Reserving tennis court</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>As soon as four players arrive, game will start</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>Player Dora is ready</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>Player G I Joe is ready</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>Player Tintin is ready</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>Player Barbie is ready</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>All four players ready, game starts</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>Love all...</span></code></pre></div>
+<p>An example output from the program above, can look something like
+that, notice that until the 4 players have registered, i.e. the await
+methods are not triggered, the game will not start. This crude example,
+shows how a set of threads can be interlinked, or rather their work or
+actions, in such a way that only when they finish their work, another
+thread action can be initiated.</p>
+<h3 id="collections">Collections</h3>
+<p>The concurrent package provides a number of classes that are
+thread-safe equivalents of the ones provided in the collections
+framework classes in the java util package. For example the
+<code>ConcurrentHashMap</code> is a concurrent equivalent of the
+<code>HashMap</code>, The <code>main</code> difference between these two
+containers is that one needs to explicitly synchronize insertions and
+deletions with <code>HashMap</code>, whereas such synchronization is
+built into the <code>ConcurrentHashMap</code>. If one knows how to use
+the interface of the <code>HashMap</code>, then the
+<code>ConcurrentHashMap</code> is no different.</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 91%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Class</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>BlockingQueue</td>
+<td>This interface extends the Queue interface. In BlockingQueue, if the
+queue is empty, it waits (i.e., blocks) for an element to be inserted,
+and if the queue is full, it waits for an element to be removed from the
+queue.</td>
+</tr>
+<tr class="even">
+<td>ArrayBlockingQueue</td>
+<td>This class provides a fixed-sized array based implementation of the
+BlockingQueue interface.</td>
+</tr>
+<tr class="odd">
+<td>LinkedBlockingQueue</td>
+<td>This class provides a linked-list-based implementation of the
+BlockingQueue interface.</td>
+</tr>
+<tr class="even">
+<td>DelayQueue</td>
+<td>This class implements BlockingQueue and consists of elements that
+are of type Delayed. An element can be retrieved from this queue only
+after its delay period.</td>
+</tr>
+<tr class="odd">
+<td>PriorityBlockingQueue</td>
+<td>Equivalent to java.util.PriorityQueue, but implements the
+BlockingQueue interface.</td>
+</tr>
+<tr class="even">
+<td>SynchronousQueue</td>
+<td>This class implements BlockingQueue. In this container, each
+insert() by a thread waits (blocks) for a corresponding remove() by
+another thread and vice versa.</td>
+</tr>
+<tr class="odd">
+<td>LinkedBlockingDeque</td>
+<td>This class implements BlockingDeque where insert and remove
+operations could block; uses a linked-list for implementation.</td>
+</tr>
+<tr class="even">
+<td>ConcurrentHashMap</td>
+<td>Analogous to Hashtable, but with safe concurrent access and
+updates.</td>
+</tr>
+<tr class="odd">
+<td>ConcurrentSkipListMap</td>
+<td>Analogous to TreeMap, but provides safe concurrent access and
+updates.</td>
+</tr>
+<tr class="even">
+<td>ConcurrentSkipListSet</td>
+<td>Analogous to TreeSet, but provides safe concurrent access and
+updates.</td>
+</tr>
+<tr class="odd">
+<td>CopyOnWriteArrayList</td>
+<td>Similar to ArrayList, but provides safe concurrent access. When the
+container is modified, it creates a fresh copy of the underlying
+array.</td>
+</tr>
+<tr class="even">
+<td>CopyOnWriteArraySet</td>
+<td>A Set implementation, but provides safe concurrent access and is
+implemented using CopyOnWriteArrayList. When the container is modified,
+it creates a fresh copy of the underlying array.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="copyonwritearraylist">CopyOnWriteArrayList</h3>
+<p>Both <code>ArrayList</code> and <code>CopyOnWriteArrayList</code>
+implement the List interface. These are three main differences between
+both of those classes, when used in concurrent context</p>
+<ul>
+<li><p><code>ArrayList</code> is not thread safe but
+<code>CopyOnWriteArrayList</code> is. That means it is unsafe to use
+<code>ArrayList</code> in contexts where multiple threads are executing
+on the same instance of the <code>ArrayList</code>, especially when a
+modification is being made</p></li>
+<li><p>Methods in <code>ArrayList</code> such as remove add and set
+methods can throw a <code>ConcurrentModificationException</code> if
+another thread modifies the <code>ArrayList</code> when on thread is
+accessing it. However it is safe to perform these operations from
+multiple threads on a <code>CopyOnWriteArrayList</code>; and hence
+methods such as remove add and set do not throw this exception. All the
+active iterators will still have access to the unmodified version of the
+container and hence they remain unaffected; if one tries to create an
+iterator after the modification one will get the iterator for the
+modified container</p></li>
+<li><p>Iterator can be obtained by calling the iterator() method on a
+List object; if remove() is called when the underlying container is
+modified an exception can be thrown. However one cannot call remove
+method on an iterator of a <code>CopyOnWriteArrayList</code>, it always
+throws <code>UnsupportedOperationException</code></p></li>
+</ul>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ModifyingList <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> <span class="op">[]</span>args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> aList <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        aList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;one&quot;</span><span class="op">);</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        aList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;two&quot;</span><span class="op">);</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        aList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;three&quot;</span><span class="op">);</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Iterator</span> listIter <span class="op">=</span> aList<span class="op">.</span><span class="fu">iterator</span><span class="op">();</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span><span class="op">(</span>listIter<span class="op">.</span><span class="fu">hasNext</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>listIter<span class="op">.</span><span class="fu">next</span><span class="op">());</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>            aList<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;four&quot;</span><span class="op">);</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This example above shows how a <code>CopyOnWriteArrayList</code> can
+be also useful in non-concurrent context, this is because the example
+above, will throw <code>ConcurrentModificationException</code>, since an
+element is being added to the array, while the array is being iterated
+over, in this scenario one might want to replace the
+<code>ArrayList</code> with a <code>CopyOnWriteArrayList</code>.</p>
+<p>The way the <code>CopyOnWriteArrayList</code> works, is by creating a
+copy of the container data when a new element is being added, meaning
+that if an iterator is obtained before a call to add (or any method that
+modifies the array) the iterator will still point to the original
+unmodified array, thus there is no exception being thrown, but the
+iterator will iterated over the original array, meaning that new
+elements being added will not be printed out (taking the example
+above)</p>
+<h2 id="executors">Executors</h2>
+<p>Threads can be directly managed by the applications by creating
+Thread objects, however that is cumbersome to manage. If one wishes to
+abstract away this low level detail of a multi-threading programming,
+the executor services are a good choice. That interface declares only
+one method, which is <code>void execute(Runnable)</code>. The derived
+interfaces and classes such as <code>ExecutorService</code>,
+<code>ThreadPoolExecutor</code>, and <code>ForkJoinPool</code>, support
+useful functionality, which extends the base interface. The basic
+premise of the Executor chain/hierarchy of classes is that they are
+meant to provide re-usable containers for Thread objects, which aid the
+creation, destruction, reuse and running of threads.</p>
+<h2 id="callable">Callable</h2>
+<p>Callable is an interface that declares one method
+<code>V call()</code>. It represents a task that needs to be completed
+by a thread. Once the task completes it returns a value. For some reason
+if the call method cannot execute or fails it throws an Exception. To
+execute a task using the Callable object, a thread pool first must be
+created. A thread pool is a collection of threads that can execute
+tasks.</p>
+<h2 id="executorservice">ExecutorService</h2>
+<p>The <code>ExecutorService</code> interface extends the Executor
+interface and provides services such as termination of threads and
+production of Future objects. Some tasks may take considerable execution
+time to complete. So when one submits a task so the executor service, a
+Future object is returned back. Future represents object that contain a
+value that is returned by a thread in the future. In other words, the
+Future is the result of the action that would be executed by the thread,
+sometime in the future. The Future object has methods like -
+<code>isDone()</code>, that check if the task is complete and then a
+<code>get()</code> method that can be used to obtain the result of the
+task. Note that the <code>get()</code> method, is blocking, if it is
+called before the task is done, it will block the current thread until
+the task is done.</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Factorial implements Callable so that it can be passed to a ExecutorService</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">// and get executed as a task.</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Factorial <span class="kw">implements</span> <span class="bu">Callable</span><span class="op">&lt;</span><span class="bu">Long</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">long</span> n<span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">Factorial</span><span class="op">(</span><span class="dt">long</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">n</span> <span class="op">=</span> n<span class="op">;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="bu">Long</span> <span class="fu">call</span><span class="op">()</span> <span class="kw">throws</span> <span class="bu">Exception</span> <span class="op">{</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span>n <span class="op">&lt;=</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">Exception</span><span class="op">(</span><span class="st">&quot;for finding factorial, N should be &gt; 0&quot;</span><span class="op">);</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">long</span> fact <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span><span class="op">(</span><span class="dt">long</span> longVal <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> longVal <span class="op">&lt;=</span> n<span class="op">;</span> longVal<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>            fact <span class="op">*=</span> longVal<span class="op">;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fact<span class="op">;</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">// Illustrates how Callable, Executors, ExecutorService, and Future are related;</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">// also shows how they work together to execute a task</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CallableTest <span class="op">{</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> <span class="op">[]</span>args<span class="op">)</span> <span class="kw">throws</span> <span class="bu">Exception</span> <span class="op">{</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the value for which we want to find the factorial</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        <span class="dt">long</span> N <span class="op">=</span> <span class="dv">20</span><span class="op">;</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">// get a callable task to be submitted to the executor service</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Callable</span><span class="op">&lt;</span><span class="bu">Long</span><span class="op">&gt;</span> task <span class="op">=</span> <span class="kw">new</span> <span class="fu">Factorial</span><span class="op">(</span>N<span class="op">);</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">// create an ExecutorService with a fixed thread pool having one thread</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        <span class="bu">ExecutorService</span> es <span class="op">=</span> <span class="bu">Executors</span><span class="op">.</span><span class="fu">newSingleThreadExecutor</span><span class="op">();</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">// submit the task to the executor service and store the Future object</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Future</span><span class="op">&lt;</span><span class="bu">Long</span><span class="op">&gt;</span> future <span class="op">=</span> es<span class="op">.</span><span class="fu">submit</span><span class="op">(</span>task<span class="op">);</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">// wait for the get() method that blocks until the computation is complete.</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;factorial of </span><span class="sc">%d</span><span class="st"> is </span><span class="sc">%d</span><span class="st">&quot;</span><span class="op">,</span> N<span class="op">,</span> future<span class="op">.</span><span class="fu">get</span><span class="op">());</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">// done. shutdown the executor service since we don&#39;t need it anymore</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>        es<span class="op">.</span><span class="fu">shutdown</span><span class="op">();</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In this program the <code>Factorial</code> class implements Callable,
+Since the task is to compute the factorial of a number N, the task needs
+to return a result. In the example it is also important to note that for
+sake of simplicity the single threaded executor service is called with
+<code>newSingleThreadExecutor</code>, method ins the Executors class.
+Note that there are other methods such as
+<code>newFixedThreadPool</code> to create a thread pool with multiple
+threads depending on the level of parallelism one needs. The Executors
+class is mainly supposed to act as a factory for different Executor
+service implementations, which provide different types of executors,
+which in turn provide different capabilities for managing the native
+Thread objects</p>
+<p>The Fork/Join framework in the concurrent package helps simplify
+writing <code>parallelized</code> code. The framework is an
+implementation of the <code>ExecutorService</code> interface and
+provides an easy-to-use concurrent platform in order to exploit multiple
+processors. This framework is very useful for modeling divide and
+conquer problems. This approach is suitable for tasks that can be
+divided recursively and computed on a smaller scale; the computed
+results are then combined. Dividing the task into smaller tasks is
+called forking and merging the results from the smaller tasks is called
+joining</p>
+<p>The Fork/Join framework uses the work-stealing algorithm: when a
+worker thread completes all its work, and is free, it takes or steals,
+work from other threads that are still busy with doing some other work.
+Each thread in the fork/join framework has a queue with tasks, other
+threads can steal tasks from that queue.</p>
+<p>The <code>ForkJoinPool</code> is the most important class in the
+fork/join framework, it is a thread pool for running fork/join tasks and
+it executes an instance of <code>ForkJoinTask</code>. It executes tasks
+and manages their <code>lifecycle</code>.</p>
+<p>Briefly the Fork/Join algorithm is designed as follows, below the
+pseudo code for this algorithm is laid out</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>forkJoin {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    fork the task;</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    join the task;</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    compose the results;</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>doRecursive {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    if (task is small enough to be handled by a single thread) {</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        compute the small task</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        if there is a result to return, do so</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    } else {</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        divide or fork the task into two parts</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        call compute on first task and obtain result</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        join on second task, and obtain result</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        combine results from both tasks</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>In the <code>ForkJoin</code> framework there are a few other classes
+besides the <code>ForkJoinPool</code> which are used to describe the
+algorithm presented above</p>
+<ul>
+<li><p><code>RecursiveTask&lt;V&gt;</code> - that is a task that can run
+in a ForkJoinPool the compute method returns a value of type V. It
+inherits from ForkJoinTask</p></li>
+<li><p><code>RecursiveAction</code> - is a task that can run in a
+ForkJoinPool It is similar to RecursiveTask but does not return a
+value</p></li>
+</ul>
+<p>Let us ascertain how to use the fork join framework in problem
+solving, here are the steps to use the framework</p>
+<ul>
+<li><p>First check whether the problem is suitable for the fork join
+approach or not. Remember that it is not suitable for all kinds of
+tasks, the problem at hand must follow some core characteristics</p>
+<pre><code>*   The problem can be designed as a recursive task where the task can be subdivided into smaller units and the
+    results can be combined together.
+*   The subdivided tasks are independent and can be computed separately without hte need for communication etween the
+    tasks when computation is in process. (Of course after the computation is over, the results have to be joined together</code></pre></li>
+<li><p>If the problem to be solved can be modeled recursively then
+define a task class that extends either RecursiveTask or RecursiveAction
+if a task returns a result extend from RecursiveTask otherwise extend
+from RecursiveAction.</p></li>
+<li><p>Override the compute method in the newly defined task class. The
+compute method actually performs the task if the task is small enough to
+be executed; or splits the task into subtasks and invoke them. The
+subtasks can be invoked either by invokeAll or fork method (use fork
+when the subtask returns a value). Use the join method to get the
+computed results.</p></li>
+<li><p>Merge the results, if computed from the subtasks.</p></li>
+<li><p>Instantiate <code>ForkJoinPool</code> create an instance of the
+task class and start the execution of the task using the invoke method
+on the ForkJoinPool instance.</p></li>
+<li><p>That is is - computation of the algorithm is done</p></li>
+</ul>
+<p>The example below illustrates how one can compute the sum of 1..N
+numbers using fork join framework the range of numbers are divided into
+half until the range can be handled by a single thread. Once the range
+summation completes the result gets summed up together.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SumOfNUsingForkJoin <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// one million - we want to compute sum</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// from 1 .. one million</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">long</span> N <span class="op">=</span> <span class="dv">1000_000</span><span class="op">;</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// number of threads to create for distributing the effort</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">int</span> NUM_THREADS <span class="op">=</span> <span class="dv">10</span><span class="op">;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// This is the recursive implementation of the algorithm; inherit from RecursiveTask</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// instead of RecursiveAction since we&#39;re returning values.</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">static</span> <span class="kw">class</span> RecursiveSumOfN <span class="kw">extends</span> RecursiveTask<span class="op">&lt;</span><span class="bu">Long</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// from and to are range of values to sum-up</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">long</span> from<span class="op">,</span> to<span class="op">;</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">public</span> <span class="fu">RecursiveSumOfN</span><span class="op">(</span><span class="dt">long</span> from<span class="op">,</span> <span class="dt">long</span> to<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>            <span class="kw">this</span><span class="op">.</span><span class="fu">from</span> <span class="op">=</span> from<span class="op">;</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>            <span class="kw">this</span><span class="op">.</span><span class="fu">to</span> <span class="op">=</span> to<span class="op">;</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the method performs fork and join to compute the sum if the range</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// of values can be summed by a threadremember that we want to divide</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the summation task equally among NUM_THREADS) then, sum the range</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// of numbers from..to using a simple for loop;</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// otherwise, fork the range and join the results</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>        <span class="kw">public</span> <span class="bu">Long</span> <span class="fu">compute</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span><span class="op">(</span> <span class="op">(</span>to <span class="op">-</span> from<span class="op">)</span> <span class="op">&lt;=</span> N<span class="op">/</span>NUM_THREADS<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>                <span class="co">// the range is something that can be handled</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>                <span class="co">// by a thread, so do summation</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>                <span class="dt">long</span> localSum <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>                <span class="co">// add in range &#39;from&#39; .. &#39;to&#39; inclusive of the value &#39;to&#39;</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span><span class="op">(</span><span class="dt">long</span> i <span class="op">=</span> from<span class="op">;</span> i <span class="op">&lt;=</span> to<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>                    localSum <span class="op">+=</span> i<span class="op">;</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> localSum<span class="op">;</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>                <span class="co">// no, the range is too big for a thread to handle,</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>                <span class="co">// so fork the computation</span></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>                <span class="co">// we find the mid-point value in the range from..to</span></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>                <span class="dt">long</span> mid <span class="op">=</span> <span class="op">(</span>from <span class="op">+</span> to<span class="op">)/</span><span class="dv">2</span><span class="op">;</span></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>                <span class="co">// determine the computation for first half</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>                <span class="co">// with the range from..mid</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>                RecursiveSumOfN firstHalf <span class="op">=</span> <span class="kw">new</span> <span class="fu">RecursiveSumOfN</span><span class="op">(</span>from<span class="op">,</span> mid<span class="op">);</span></span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>                <span class="co">// now, fork off that task</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>                firstHalf<span class="op">.</span><span class="fu">fork</span><span class="op">();</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>                <span class="co">// determine the computation for second half</span></span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>                <span class="co">// with the range mid+1..to</span></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>                RecursiveSumOfN secondHalf <span class="op">=</span> <span class="kw">new</span> <span class="fu">RecursiveSumOfN</span><span class="op">(</span>mid <span class="op">+</span> <span class="dv">1</span><span class="op">,</span> to<span class="op">);</span></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>                <span class="co">// now, wait for the first half of computing sum to</span></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>                <span class="co">// complete, once done, add it to the remaining part</span></span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>                <span class="dt">long</span> resultSecond <span class="op">=</span> secondHalf<span class="op">.</span><span class="fu">compute</span><span class="op">();</span></span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> firstHalf<span class="op">.</span><span class="fu">join</span><span class="op">()</span> <span class="op">+</span> resultSecond<span class="op">;</span></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span> <span class="op">[]</span>args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Create a fork-join pool that consists of NUM_THREADS</span></span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>        ForkJoinPool pool <span class="op">=</span> <span class="kw">new</span> <span class="fu">ForkJoinPool</span><span class="op">(</span>NUM_THREADS<span class="op">);</span></span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a>        <span class="co">// submit the computation task to the fork-join pool</span></span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>        <span class="dt">long</span> computedSum <span class="op">=</span> pool<span class="op">.</span><span class="fu">invoke</span><span class="op">(</span><span class="kw">new</span> <span class="fu">RecursiveSumOfN</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> N<span class="op">));</span></span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>        <span class="co">// this is the formula sum for the range 1..N</span></span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>        <span class="dt">long</span> formulaSum <span class="op">=</span> <span class="op">(</span>N <span class="op">*</span> <span class="op">(</span>N <span class="op">+</span> <span class="dv">1</span><span class="op">))</span> <span class="op">/</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Compare the computed sum and the formula sum</span></span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">printf</span><span class="op">(</span><span class="st">&quot;Sum for range 1..</span><span class="sc">%d</span><span class="st">; computed sum = </span><span class="sc">%d</span><span class="st">, &quot;</span> <span class="op">+</span> <span class="st">&quot;formula sum = </span><span class="sc">%d</span><span class="st"> </span><span class="sc">%n</span><span class="st">&quot;</span><span class="op">,</span> N<span class="op">,</span> computedSum<span class="op">,</span> formulaSum<span class="op">);</span></span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Analyzing how this program works. In this program one wishes to
+compute the sum of the values in the range of 1..1,000,000. For the sake
+of simplicity, the program uses ten threads to execute the tasks. The
+class RecursiveSumOfN extends <code>RecursiveTask&lt;Long&gt;</code>. In
+that class long is used since the sum of numbers in each sub-range is a
+long value. In addition the RecursiveTask is chosen instead of
+RecursiveAction because each subtask returns value. If the subtask does
+not return a value, the RecursiveAction can be used instead.</p>
+<p>In the compute method, the decision to either compute the sum or
+split the task is made. The condition on which that is done is
+<code>(to - from) &lt;= N/NUM_THREADS</code>. This is the threshold
+value in this computation. In other words, if the range of values is
+within the threshold that can be handled by a task, then the computation
+is performed, otherwise the task is split recursively. Either the sum is
+computed using a simple for loop from the ranges, or the middle of the
+range is ound, afterwards that is handled in the recursive part of the
+algorithm.</p>
+<p>recursive</p>
+</body>
+</html>

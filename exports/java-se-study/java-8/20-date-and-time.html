@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20-date-and-time</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#date-time" id="toc-date-time">Date &amp; Time</a>
+<ul>
+<li><a href="#temporalunit" id="toc-temporalunit">TemporalUnit</a>
+<ul>
+<li><a href="#localdate" id="toc-localdate">LocalDate</a></li>
+<li><a href="#localtime" id="toc-localtime">LocalTime</a></li>
+<li><a href="#localdatetime"
+id="toc-localdatetime">LocalDateTime</a></li>
+<li><a href="#datetimeformatter"
+id="toc-datetimeformatter">DateTimeFormatter</a></li>
+<li><a href="#zoneddatetime"
+id="toc-zoneddatetime">ZonedDateTime</a></li>
+</ul></li>
+<li><a href="#temporalamount" id="toc-temporalamount">TemporalAmount</a>
+<ul>
+<li><a href="#period" id="toc-period">Period</a></li>
+<li><a href="#duration" id="toc-duration">Duration</a></li>
+<li><a href="#instant" id="toc-instant">Instant</a></li>
+<li><a href="#usage" id="toc-usage">Usage</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="date-time">Date &amp; Time</h1>
+<p>With java 8 the standard introduced several new top level classes for
+dealing with dates and date transformations. They are called
+<code>LocalDate</code>, <code>Localime</code>,
+<code>LocalDateTime</code>, from the name it is easy to infer what those
+classes are meant to represent and interface with. Those are located at
+the top level package <code>java.time</code>, there are however more
+packages under the java time umbrella which are used to fine tune and
+provide fine grained access to modify and transform dates and time
+formats</p>
+<p><code>None of the new date &amp; time related class types define a public constructor, they are meant to be constructed through factory static final methods, provided by the runtime, they follow this concept to be consistent with the rest of the new types provided by the run-time</code></p>
+<p>The diagram below shows the general relationship between the classes
+and interfaces in the new <code>java.time</code> package provided by the
+<code>JDK 8</code> specification</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode md"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>+-----------------+</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>|    Temporal     | &lt;------------------------------------+</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>|  (Interface)    |                                       ^</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>+-----------------+                                       |</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        ^                                                 |</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        |                                                 |</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        |                                                 |</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>+------------------+                              +---------------------+</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>|    TemporalUnit  |                              |     TemporalField   |</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>|   (Interface)    |                              |    (Interface)      |</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>+------------------+                              +---------------------+</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        ^                                                 ^</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        |                                                 |</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        |                                                 |</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>+----------------------+                          +----------------------+</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>|   ChronoUnit         |                          |    ChronoField       |</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>|  (Enum, implements   |                          |    (Enum, implements |</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>|   TemporalUnit)      |                          |     TemporalField)   |</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>+----------------------+                          +----------------------+</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        ^                                                 ^</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        |                                                 |</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        |                                                 |</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>+---------------------+                           +---------------------+</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>|    Chronology       |                           |      LocalDate      |</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>|  (Abstract Class)   |                           |     (Class)         |</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>+---------------------+                           +---------------------+</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>                                                          ^</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>                                                          |</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>                                                          |</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>                                                  +---------------------+</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>                                                  |      LocalTime      |</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>                                                  |     (Class)         |</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>                                                  +---------------------+</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>                                                          ^</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>                                                          |</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>                                                          |</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>                                                  +---------------------+</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>                                                  |     LocalDateTime   |</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>                                                  |     (Class)         |</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>                                                  +---------------------+</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>                                                          ^</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>                                                          |</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>                                                          |</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>                                                  +---------------------+</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>|                                                 |      ZonedDateTime  |</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>                                                  |     (Class)         |</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>                                                  +---------------------+</span></code></pre></div>
+<h2 id="temporalunit">TemporalUnit</h2>
+<p>A unit of date-time, such as Days or Hours. Measurement of time is
+built on units, such as years, months, days, hours, minutes and seconds.
+Implementations of this interface represent those units. The various
+implementations are listed below</p>
+<h3 id="localdate">LocalDate</h3>
+<p>The local date time is internally represented using the
+<code>Gregorian calendar</code>, under the <code>ISO8601</code>. By
+default the format for the date of the is
+<code>LocalDate YYYY-MM-DD</code></p>
+<table>
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method Name/Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>LocalDate.now()</td>
+<td>Returns the current date based on the system clock.</td>
+</tr>
+<tr class="even">
+<td>LocalDate.of(int year, int month, int dayOfMonth)</td>
+<td>Creates an instance of <code>LocalDate</code> for a specified year,
+month, and day.</td>
+</tr>
+<tr class="odd">
+<td>LocalDate.ofYearDay(int year, int dayOfYear)</td>
+<td>Returns a <code>LocalDate</code> from a given year and the day of
+the year (1 to 365/366).</td>
+</tr>
+<tr class="even">
+<td>LocalDate.parse(CharSequence text)</td>
+<td>Parses a <code>LocalDate</code> from a text string (e.g.,
+“2023-10-26”).</td>
+</tr>
+<tr class="odd">
+<td>LocalDate.parse(CharSequence text, DateTimeFormatter formatter)</td>
+<td>Parses a date using the specified
+<code>DateTimeFormatter</code>.</td>
+</tr>
+<tr class="even">
+<td>plusDays(long daysToAdd)</td>
+<td>Returns a copy of this <code>LocalDate</code> with the specified
+number of days added.</td>
+</tr>
+<tr class="odd">
+<td>plusMonths(long monthsToAdd)</td>
+<td>Returns a copy of this <code>LocalDate</code> with the specified
+number of months added.</td>
+</tr>
+<tr class="even">
+<td>plusYears(long yearsToAdd)</td>
+<td>Returns a copy of this <code>LocalDate</code> with the specified
+number of years added.</td>
+</tr>
+<tr class="odd">
+<td>minusDays(long daysToSubtract)</td>
+<td>Returns a copy of this <code>LocalDate</code> with the specified
+number of days subtracted.</td>
+</tr>
+<tr class="even">
+<td>minusMonths(long monthsToSubtract)</td>
+<td>Returns a copy of this <code>LocalDate</code> with the specified
+number of months subtracted.</td>
+</tr>
+<tr class="odd">
+<td>minusYears(long yearsToSubtract)</td>
+<td>Returns a copy of this <code>LocalDate</code> with the specified
+number of years subtracted.</td>
+</tr>
+<tr class="even">
+<td>isBefore(ChronoLocalDate otherDate)</td>
+<td>Checks if this <code>LocalDate</code> is before the specified
+date.</td>
+</tr>
+<tr class="odd">
+<td>isAfter(ChronoLocalDate otherDate)</td>
+<td>Checks if this <code>LocalDate</code> is after the specified
+date.</td>
+</tr>
+<tr class="even">
+<td>isLeapYear()</td>
+<td>Checks if the year of this <code>LocalDate</code> is a leap
+year.</td>
+</tr>
+<tr class="odd">
+<td>getDayOfWeek()</td>
+<td>Returns the day of the week for this <code>LocalDate</code> (e.g.,
+MONDAY, TUESDAY).</td>
+</tr>
+<tr class="even">
+<td>getDayOfMonth()</td>
+<td>Returns the day of the month (1-31) of this
+<code>LocalDate</code>.</td>
+</tr>
+<tr class="odd">
+<td>getMonth()</td>
+<td>Returns the <code>Month</code> enum for the month of this
+<code>LocalDate</code> (e.g., JANUARY, FEBRUARY).</td>
+</tr>
+<tr class="even">
+<td>getMonthValue()</td>
+<td>Returns the month of this <code>LocalDate</code> as an
+<code>int</code> (1-12).</td>
+</tr>
+<tr class="odd">
+<td>lengthOfMonth()</td>
+<td>Returns the length of the month of this <code>LocalDate</code> in
+days.</td>
+</tr>
+<tr class="even">
+<td>lengthOfYear()</td>
+<td>Returns the length of the year of this <code>LocalDate</code> in
+days (365 or 366).</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>LocalDate curDate <span class="op">=</span> LocalDate<span class="op">.</span><span class="fu">now</span><span class="op">();</span> <span class="co">// each of the new Local* classes implement a human readable toString()</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>curDate<span class="op">);</span> <span class="co">// that would print the date in the format mentioned above, yyyy-mm-dd</span></span></code></pre></div>
+<h3 id="localtime">LocalTime</h3>
+<table>
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method Name/Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>LocalTime.now()</td>
+<td>Returns the current time based on the system clock.</td>
+</tr>
+<tr class="even">
+<td>LocalTime.of(int hour, int minute)</td>
+<td>Creates an instance of <code>LocalTime</code> for a specified hour
+and minute.</td>
+</tr>
+<tr class="odd">
+<td>LocalTime.of(int hour, int minute, int second)</td>
+<td>Creates an instance of <code>LocalTime</code> for a specified hour,
+minute, and second.</td>
+</tr>
+<tr class="even">
+<td>LocalTime.of(int hour, int minute, int second, int
+nanoOfSecond)</td>
+<td>Creates an instance of <code>LocalTime</code> with hour, minute,
+second, and nanosecond.</td>
+</tr>
+<tr class="odd">
+<td>LocalTime.parse(CharSequence text)</td>
+<td>Parses a <code>LocalTime</code> from a text string (e.g.,
+“12:34:56”).</td>
+</tr>
+<tr class="even">
+<td>LocalTime.parse(CharSequence text, DateTimeFormatter formatter)</td>
+<td>Parses a time using the specified
+<code>DateTimeFormatter</code>.</td>
+</tr>
+<tr class="odd">
+<td>plusHours(long hoursToAdd)</td>
+<td>Returns a copy of this <code>LocalTime</code> with the specified
+number of hours added.</td>
+</tr>
+<tr class="even">
+<td>plusMinutes(long minutesToAdd)</td>
+<td>Returns a copy of this <code>LocalTime</code> with the specified
+number of minutes added.</td>
+</tr>
+<tr class="odd">
+<td>plusSeconds(long secondsToAdd)</td>
+<td>Returns a copy of this <code>LocalTime</code> with the specified
+number of seconds added.</td>
+</tr>
+<tr class="even">
+<td>plusNanos(long nanosToAdd)</td>
+<td>Returns a copy of this <code>LocalTime</code> with the specified
+number of nanoseconds added.</td>
+</tr>
+<tr class="odd">
+<td>minusHours(long hoursToSubtract)</td>
+<td>Returns a copy of this <code>LocalTime</code> with the specified
+number of hours subtracted.</td>
+</tr>
+<tr class="even">
+<td>minusMinutes(long minutesToSubtract)</td>
+<td>Returns a copy of this <code>LocalTime</code> with the specified
+number of minutes subtracted.</td>
+</tr>
+<tr class="odd">
+<td>minusSeconds(long secondsToSubtract)</td>
+<td>Returns a copy of this <code>LocalTime</code> with the specified
+number of seconds subtracted.</td>
+</tr>
+<tr class="even">
+<td>minusNanos(long nanosToSubtract)</td>
+<td>Returns a copy of this <code>LocalTime</code> with the specified
+number of nanoseconds subtracted.</td>
+</tr>
+<tr class="odd">
+<td>isBefore(LocalTime otherTime)</td>
+<td>Checks if this <code>LocalTime</code> is before the specified
+time.</td>
+</tr>
+<tr class="even">
+<td>isAfter(LocalTime otherTime)</td>
+<td>Checks if this <code>LocalTime</code> is after the specified
+time.</td>
+</tr>
+<tr class="odd">
+<td>getHour()</td>
+<td>Returns the hour part of this <code>LocalTime</code> (0-23).</td>
+</tr>
+<tr class="even">
+<td>getMinute()</td>
+<td>Returns the minute part of this <code>LocalTime</code> (0-59).</td>
+</tr>
+<tr class="odd">
+<td>getSecond()</td>
+<td>Returns the second part of this <code>LocalTime</code> (0-59).</td>
+</tr>
+<tr class="even">
+<td>getNano()</td>
+<td>Returns the nanosecond part of this <code>LocalTime</code>
+(0-999,999,999).</td>
+</tr>
+<tr class="odd">
+<td>toSecondOfDay()</td>
+<td>Returns the number of seconds since midnight for this
+<code>LocalTime</code>.</td>
+</tr>
+<tr class="even">
+<td>toNanoOfDay()</td>
+<td>Returns the number of nanoseconds since midnight for this
+<code>LocalTime</code>.</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>LocalTime curTime <span class="op">=</span> LocalTime<span class="op">.</span><span class="fu">now</span><span class="op">();</span> <span class="co">// similarly to the LocalDate, LocalTime also implements a human readable toString()</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>curTime<span class="op">);</span> <span class="co">// that would print the time in the format mentioned above, hh:mm:ss:mmmm</span></span></code></pre></div>
+<h3 id="localdatetime">LocalDateTime</h3>
+<table>
+<colgroup>
+<col style="width: 48%" />
+<col style="width: 51%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method Name/Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>LocalDateTime.now()</td>
+<td>Returns the current date-time based on the system clock.</td>
+</tr>
+<tr class="even">
+<td>LocalDateTime.of(int year, int month, int dayOfMonth, int hour, int
+minute)</td>
+<td>Creates an instance with specified date and time.</td>
+</tr>
+<tr class="odd">
+<td>LocalDateTime.of(int year, int month, int dayOfMonth, int hour, int
+minute, int second)</td>
+<td>Creates an instance with date, time, and seconds.</td>
+</tr>
+<tr class="even">
+<td>LocalDateTime.of(LocalDate date, LocalTime time)</td>
+<td>Combines a <code>LocalDate</code> and <code>LocalTime</code> to
+create a <code>LocalDateTime</code>.</td>
+</tr>
+<tr class="odd">
+<td>LocalDateTime.parse(CharSequence text)</td>
+<td>Parses a <code>LocalDateTime</code> from a text string (e.g.,
+“2023-10-26T10:15:30”).</td>
+</tr>
+<tr class="even">
+<td>LocalDateTime.parse(CharSequence text, DateTimeFormatter
+formatter)</td>
+<td>Parses using a specified <code>DateTimeFormatter</code>.</td>
+</tr>
+<tr class="odd">
+<td>plusDays(long daysToAdd)</td>
+<td>Returns a copy of this <code>LocalDateTime</code> with the specified
+number of days added.</td>
+</tr>
+<tr class="even">
+<td>plusHours(long hoursToAdd)</td>
+<td>Returns a copy of this <code>LocalDateTime</code> with the specified
+number of hours added.</td>
+</tr>
+<tr class="odd">
+<td>plusMinutes(long minutesToAdd)</td>
+<td>Returns a copy of this <code>LocalDateTime</code> with the specified
+number of minutes added.</td>
+</tr>
+<tr class="even">
+<td>plusSeconds(long secondsToAdd)</td>
+<td>Returns a copy of this <code>LocalDateTime</code> with the specified
+number of seconds added.</td>
+</tr>
+<tr class="odd">
+<td>plusNanos(long nanosToAdd)</td>
+<td>Returns a copy of this <code>LocalDateTime</code> with the specified
+number of nanoseconds added.</td>
+</tr>
+<tr class="even">
+<td>minusDays(long daysToSubtract)</td>
+<td>Returns a copy of this <code>LocalDateTime</code> with the specified
+number of days subtracted.</td>
+</tr>
+<tr class="odd">
+<td>minusHours(long hoursToSubtract)</td>
+<td>Returns a copy of this <code>LocalDateTime</code> with the specified
+number of hours subtracted.</td>
+</tr>
+<tr class="even">
+<td>minusMinutes(long minutesToSubtract)</td>
+<td>Returns a copy of this <code>LocalDateTime</code> with the specified
+number of minutes subtracted.</td>
+</tr>
+<tr class="odd">
+<td>minusSeconds(long secondsToSubtract)</td>
+<td>Returns a copy of this <code>LocalDateTime</code> with the specified
+number of seconds subtracted.</td>
+</tr>
+<tr class="even">
+<td>minusNanos(long nanosToSubtract)</td>
+<td>Returns a copy of this <code>LocalDateTime</code> with the specified
+number of nanoseconds subtracted.</td>
+</tr>
+<tr class="odd">
+<td>isBefore(ChronoLocalDateTime&lt;?&gt; otherDateTime)</td>
+<td>Checks if this <code>LocalDateTime</code> is before the specified
+date-time.</td>
+</tr>
+<tr class="even">
+<td>isAfter(ChronoLocalDateTime&lt;?&gt; otherDateTime)</td>
+<td>Checks if this <code>LocalDateTime</code> is after the specified
+date-time.</td>
+</tr>
+<tr class="odd">
+<td>toLocalDate()</td>
+<td>Extracts the <code>LocalDate</code> part from this
+<code>LocalDateTime</code>.</td>
+</tr>
+<tr class="even">
+<td>toLocalTime()</td>
+<td>Extracts the <code>LocalTime</code> part from this
+<code>LocalDateTime</code>.</td>
+</tr>
+<tr class="odd">
+<td>getYear()</td>
+<td>Returns the year part of this <code>LocalDateTime</code>.</td>
+</tr>
+<tr class="even">
+<td>getMonth()</td>
+<td>Returns the <code>Month</code> enum for the month part of this
+<code>LocalDateTime</code>.</td>
+</tr>
+<tr class="odd">
+<td>getDayOfMonth()</td>
+<td>Returns the day of the month of this
+<code>LocalDateTime</code>.</td>
+</tr>
+<tr class="even">
+<td>getHour()</td>
+<td>Returns the hour part of this <code>LocalDateTime</code>
+(0-23).</td>
+</tr>
+<tr class="odd">
+<td>getMinute()</td>
+<td>Returns the minute part of this <code>LocalDateTime</code>
+(0-59).</td>
+</tr>
+<tr class="even">
+<td>getSecond()</td>
+<td>Returns the second part of this <code>LocalDateTime</code>
+(0-59).</td>
+</tr>
+<tr class="odd">
+<td>getNano()</td>
+<td>Returns the nanosecond part of this <code>LocalDateTime</code>.</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>LocalDateTime curDateTime <span class="op">=</span> LocalDateTime<span class="op">.</span><span class="fu">now</span><span class="op">();</span> <span class="co">// similarly to the LocalDate, LocalDateTime also implements a human readable toString()</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>curDateTime<span class="op">);</span> <span class="co">// that would print the time in the format mentioned above, yyyy-mm-ddThh:mm:ss:mmmm</span></span></code></pre></div>
+<h3 id="datetimeformatter">DateTimeFormatter</h3>
+<p>In general along with the core date time classes the default library
+provides means of changing or defining the format of a date when it is
+printed out to string, or to construct an instance of the
+<code>LocalDate, Time and DateTime</code> classes from a given
+pattern</p>
+<table>
+<colgroup>
+<col style="width: 45%" />
+<col style="width: 54%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method Name/Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>static DateTimeFormatter ofPattern(String pattern)</td>
+<td>Creates a <code>DateTimeFormatter</code> using the specified pattern
+string.</td>
+</tr>
+<tr class="even">
+<td>static DateTimeFormatter ofPattern(String pattern, Locale
+locale)</td>
+<td>Creates a <code>DateTimeFormatter</code> using the specified pattern
+and locale.</td>
+</tr>
+<tr class="odd">
+<td>static DateTimeFormatter ISO_LOCAL_DATE()</td>
+<td>Returns a formatter for ISO-8601 local date format
+(yyyy-MM-dd).</td>
+</tr>
+<tr class="even">
+<td>static DateTimeFormatter ISO_LOCAL_TIME()</td>
+<td>Returns a formatter for ISO-8601 local time format (HH:mm:ss).</td>
+</tr>
+<tr class="odd">
+<td>static DateTimeFormatter ISO_LOCAL_DATE_TIME()</td>
+<td>Returns a formatter for ISO-8601 local date-time format
+(yyyy-MM-dd’T’HH:mm:ss).</td>
+</tr>
+<tr class="even">
+<td>String format(TemporalAccessor temporal)</td>
+<td>Formats the specified temporal object into a string.</td>
+</tr>
+<tr class="odd">
+<td>T parse(CharSequence text, ResolverStyle resolverStyle)</td>
+<td>Parses the text to produce a temporal object based on the
+formatter.</td>
+</tr>
+<tr class="even">
+<td>T parse(CharSequence text)</td>
+<td>Parses the text to produce a temporal object based on the
+formatter’s pattern.</td>
+</tr>
+</tbody>
+</table>
+<p>The table below lists all the different indicators that can be used
+in the construction of a pattern, the rule of thumb is that based on the
+number of repretitions of the letter in the pattern that is how a
+certain element will be represented, that is not always true, but it is
+an approximate, for example <code>M MM MMM MMMM</code>, will give output
+of <code>4, 04, Apr, April</code>.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Indicator</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>a</td>
+<td>AM/PM indicator</td>
+</tr>
+<tr class="even">
+<td>d</td>
+<td>Day in month</td>
+</tr>
+<tr class="odd">
+<td>E</td>
+<td>Day in week</td>
+</tr>
+<tr class="even">
+<td>h</td>
+<td>Hour, 12-hour clock</td>
+</tr>
+<tr class="odd">
+<td>H</td>
+<td>Hour, 24-hour clock</td>
+</tr>
+<tr class="even">
+<td>M</td>
+<td>Month</td>
+</tr>
+<tr class="odd">
+<td>m</td>
+<td>Minutes</td>
+</tr>
+<tr class="even">
+<td>s</td>
+<td>Seconds</td>
+</tr>
+<tr class="odd">
+<td>y</td>
+<td>Year</td>
+</tr>
+</tbody>
+</table>
+<p>Below one can simply see how the <code>formatter</code> can be used
+to parse any type of <code>LocalDate</code>, Time and
+<code>DateTime</code> into a String, or do the inverse operation of that
+by using the <code>parse</code> method to convert a String to an
+instance of Local*</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>DateTimeFormatter formatter <span class="op">=</span> DateTimeFormatter<span class="op">.</span><span class="fu">ofPattern</span><span class="op">(</span><span class="st">&quot;dd-MM-yyyy&quot;</span><span class="op">);</span> <span class="co">// Define a pattern for formatting</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>LocalDate date <span class="op">=</span> LocalDate<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">2023</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="dv">26</span><span class="op">);</span> <span class="co">// Create a LocalDate instance</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> formattedDate <span class="op">=</span> date<span class="op">.</span><span class="fu">format</span><span class="op">(</span>formatter<span class="op">);</span> <span class="co">// Format the LocalDate to a string</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> dateString <span class="op">=</span> <span class="st">&quot;26-10-2023&quot;</span><span class="op">;</span> <span class="co">// Define a local date as a String</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>LocalDate parsedDate <span class="op">=</span> LocalDate<span class="op">.</span><span class="fu">parse</span><span class="op">(</span>dateString<span class="op">,</span> formatter<span class="op">);</span> <span class="co">// Parse a string to create a LocalDate instance</span></span></code></pre></div>
+<h3 id="zoneddatetime">ZonedDateTime</h3>
+<p>This is a special type of <code>LocalDateTime</code>, which allows
+one to represent an actual <code>time zone</code> along with the rest of
+the information about a date and time. The <code>ZonedDateTime</code>
+class allows one to convert from regular
+<code>LocalDate, Time and DateTime</code> to <code>ZonedDateTime</code>
+and back.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>LocalDate localDate <span class="op">=</span> LocalDate<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">2024</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="dv">26</span><span class="op">);</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>LocalTime localTime <span class="op">=</span> LocalTime<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="dv">14</span><span class="op">,</span> <span class="dv">30</span><span class="op">);</span> <span class="co">// 2:30 PM</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Combine LocalDate and LocalTime to create LocalDateTime</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>LocalDateTime localDateTime <span class="op">=</span> LocalDateTime<span class="op">.</span><span class="fu">of</span><span class="op">(</span>localDate<span class="op">,</span> localTime<span class="op">);</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;LocalDateTime: &quot;</span> <span class="op">+</span> localDateTime<span class="op">);</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Convert LocalDateTime to ZonedDateTime</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>ZonedDateTime zonedDateTime <span class="op">=</span> localDateTime<span class="op">.</span><span class="fu">atZone</span><span class="op">(</span>ZoneId<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="st">&quot;America/New_York&quot;</span><span class="op">));</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;ZonedDateTime (America/New_York): &quot;</span> <span class="op">+</span> zonedDateTime<span class="op">);</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Convert ZonedDateTime back to LocalDateTime</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>LocalDateTime convertedLocalDateTime <span class="op">=</span> zonedDateTime<span class="op">.</span><span class="fu">toLocalDateTime</span><span class="op">();</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Converted LocalDateTime from ZonedDateTime: &quot;</span> <span class="op">+</span> convertedLocalDateTime<span class="op">);</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">// Create ZonedDateTime directly</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>ZonedDateTime zonedDateTimeNow <span class="op">=</span> ZonedDateTime<span class="op">.</span><span class="fu">now</span><span class="op">(</span>ZoneId<span class="op">.</span><span class="fu">of</span><span class="op">(</span><span class="st">&quot;Europe/London&quot;</span><span class="op">));</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Current ZonedDateTime (Europe/London): &quot;</span> <span class="op">+</span> zonedDateTimeNow<span class="op">);</span></span></code></pre></div>
+<p>The string representation of a ZonedDateTime is very similar to the
+regular <code>LocalDateTime</code> string representation however a zone
+information is included at the end of the string, the zone information
+is enclosed in a square brackets -
+<code>YYYY-MM-DDTHH:MM:SS.NNNNNNNNN[ZoneId]</code>. That is due to the
+fact that the zone information is very sensitive to changes in the date
+time, obviously, therefore a very accurate representation of the date
+and time information has to be available</p>
+<p><code>Note that the default printout for ZonedDateTime is always using nanos unlike the LocalDateTime which is has the format of YYYY-MM-DDTHH:MM:SS which does not include any nano seconds information</code></p>
+<h2 id="temporalamount">TemporalAmount</h2>
+<p>Framework-level interface defining an amount of time, such as “6
+hours”, “8 days” or “2 years and 3 months”. This is the base interface
+type for amounts of time. An amount is distinct from a date or
+time-of-day in that it is not tied to any specific point on the
+time-line. The various implementations of this interface are listed
+below.</p>
+<h3 id="period">Period</h3>
+<p>A period is defined based on date amount, measured in years, months
+or days. It is useful for representing a period of time based on dates.
+There are several methods which are provide means of inter operating
+with <code>LocalDate</code> or <code>LocalDateTime</code>, which are the
+relevant <code>TemporalUnits</code> which can support math with Period
+type, which is based on years, months and days. One such example is the
+method called <code>between</code> with the following signature -
+<code>Period.between(LocalDate start, LocalDate end)</code> - to
+calculate the period between two dates, that period instance can then be
+converted to any scale which the period class type supports, such as
+days, months or years</p>
+<h3 id="duration">Duration</h3>
+<p>This class models a quantity or amount of time in terms of seconds
+and nanoseconds. It can be accessed using other duration-based units,
+such as minutes and hours. In addition, the <code>ChronoUnit.DAYS</code>
+unit can be used and is treated as exactly equal to 24 hours, thus
+ignoring daylight savings effects.</p>
+<h3 id="instant">Instant</h3>
+<p>The Instant class represents a moment on the timeline, typically used
+to capture a timestamp. It is the closest equivalent to an absolute
+point in time in Java and is often measured in milliseconds (or
+nanoseconds) since the Unix epoch (1970-01-01T00:00:00Z). Commonly used
+when you need an exact, machine-based time representation (e.g., for
+timestamps or logging). Instant is immutable and thread-safe.</p>
+<h3 id="usage">Usage</h3>
+<p>The table below represents the basic api of the temporal amount
+implementations such as Period, Duration, Instant - these are designed
+in such a way that they can easily inter operate between the other
+implementations of
+<code>TemporalAmount (Period, Duration, Instant)</code> and
+<code>TemporalUnit (LocalTime, LocalDate, LocalDateTime)</code></p>
+<p><code>Note that most TemporalUnit implementation classes implement methods which work and inter operate with the TemporalAmount interface.</code></p>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 71%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>LocalDate.atStartOfDay()</td>
+<td>Converts a <code>LocalDate</code> to a <code>LocalDateTime</code> at
+the start of the day.</td>
+</tr>
+<tr class="even">
+<td>LocalDate.minus(Period period)</td>
+<td>Returns a <code>LocalDate</code> that is the result of subtracting a
+<code>Period</code> from this <code>LocalDate</code>.</td>
+</tr>
+<tr class="odd">
+<td>LocalDate.plus(Period period)</td>
+<td>Returns a <code>LocalDate</code> that is the result of adding a
+<code>Period</code> to this <code>LocalDate</code>.</td>
+</tr>
+<tr class="even">
+<td>LocalDateTime.toInstant(ZoneOffset offset)</td>
+<td>Converts a <code>LocalDateTime</code> to an <code>Instant</code>
+using a specified <code>ZoneOffset</code>.</td>
+</tr>
+<tr class="odd">
+<td>——————————————</td>
+<td>—————————————————————————————————————–</td>
+</tr>
+<tr class="even">
+<td>Duration.between(Instant start, Instant end)</td>
+<td>Calculates the duration between two <code>Instant</code>
+objects.</td>
+</tr>
+<tr class="odd">
+<td>Duration.ofDays(long days)</td>
+<td>Obtains a <code>Duration</code> representing a specified number of
+days.</td>
+</tr>
+<tr class="even">
+<td>Duration.ofHours(long hours)</td>
+<td>Obtains a <code>Duration</code> representing a specified number of
+hours.</td>
+</tr>
+<tr class="odd">
+<td>Duration.ofMinutes(long minutes)</td>
+<td>Obtains a <code>Duration</code> representing a specified number of
+minutes.</td>
+</tr>
+<tr class="even">
+<td>Duration.ofSeconds(long seconds)</td>
+<td>Obtains a <code>Duration</code> representing a specified number of
+seconds.</td>
+</tr>
+<tr class="odd">
+<td>Duration.toHours()</td>
+<td>Converts this <code>Duration</code> to a number of hours.</td>
+</tr>
+<tr class="even">
+<td>Duration.toMillis()</td>
+<td>Converts this <code>Duration</code> to a number of
+milliseconds.</td>
+</tr>
+<tr class="odd">
+<td>——————————————</td>
+<td>—————————————————————————————————————–</td>
+</tr>
+<tr class="even">
+<td>Instant.isAfter(Instant other)</td>
+<td>Checks if this <code>Instant</code> is after the specified
+<code>Instant</code>.</td>
+</tr>
+<tr class="odd">
+<td>Instant.isBefore(Instant other)</td>
+<td>Checks if this <code>Instant</code> is before the specified
+<code>Instant</code>.</td>
+</tr>
+<tr class="even">
+<td>Instant.minus(Duration duration)</td>
+<td>Returns an <code>Instant</code> that is the result of subtracting a
+<code>Duration</code> from this <code>Instant</code>.</td>
+</tr>
+<tr class="odd">
+<td>Instant.minus(Duration duration)</td>
+<td>Returns an <code>Instant</code> that is the result of subtracting a
+<code>Duration</code> from this <code>Instant</code>.</td>
+</tr>
+<tr class="even">
+<td>Instant.now()</td>
+<td>Obtains the current instant from the system clock.</td>
+</tr>
+<tr class="odd">
+<td>Instant.ofEpochMilli(long epochMilli)</td>
+<td>Obtains an <code>Instant</code> from a timestamp in milliseconds
+since the epoch (1970-01-01T00:00:00Z).</td>
+</tr>
+<tr class="even">
+<td>Instant.ofEpochSecond(long epochSecond)</td>
+<td>Obtains an <code>Instant</code> from a timestamp in seconds since
+the epoch.</td>
+</tr>
+<tr class="odd">
+<td>Instant.plus(Duration duration)</td>
+<td>Returns an <code>Instant</code> that is the result of adding a
+<code>Duration</code> to this <code>Instant</code>.</td>
+</tr>
+<tr class="even">
+<td>Instant.plus(Duration duration)</td>
+<td>Returns an <code>Instant</code> that is the result of adding a
+<code>Duration</code> to this <code>Instant</code>.</td>
+</tr>
+<tr class="odd">
+<td>Instant.toEpochMilli()</td>
+<td>Converts this <code>Instant</code> to a number of milliseconds since
+the epoch.</td>
+</tr>
+<tr class="even">
+<td>Instant.toEpochSecond()</td>
+<td>Converts this <code>Instant</code> to a number of seconds since the
+epoch.</td>
+</tr>
+<tr class="odd">
+<td>——————————————</td>
+<td>—————————————————————————————————————–</td>
+</tr>
+<tr class="even">
+<td>Period.between(LocalDate start, LocalDate end)</td>
+<td>Calculates the period between two <code>LocalDate</code>
+objects.</td>
+</tr>
+<tr class="odd">
+<td>Period.minus(Period period)</td>
+<td>Returns a <code>Period</code> that is the result of subtracting the
+specified <code>Period</code> from this <code>Period</code>.</td>
+</tr>
+<tr class="even">
+<td>Period.ofDays(int days)</td>
+<td>Obtains a <code>Period</code> representing a specified number of
+days.</td>
+</tr>
+<tr class="odd">
+<td>Period.ofMonths(int months)</td>
+<td>Obtains a <code>Period</code> representing a specified number of
+months.</td>
+</tr>
+<tr class="even">
+<td>Period.ofYears(int years)</td>
+<td>Obtains a <code>Period</code> representing a specified number of
+years.</td>
+</tr>
+<tr class="odd">
+<td>Period.plus(Period period)</td>
+<td>Returns a <code>Period</code> that is the result of adding the
+specified <code>Period</code> to this <code>Period</code>.</td>
+</tr>
+<tr class="even">
+<td>Period.toString()</td>
+<td>Returns a string representation of the <code>Period</code>.</td>
+</tr>
+<tr class="odd">
+<td>Period.toTotalMonths()</td>
+<td>Converts this <code>Period</code> to a total number of months.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

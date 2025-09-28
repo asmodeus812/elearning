@@ -1,0 +1,312 @@
+Class design
+
+Encapsulation
+
+Encapsulation is the concept of combining data and the functions that operate on that data into a single unit. In object-oriented programming, this unit is called a class. The idea is to keep the data and its associated behavior together, making it easier to manage and protect.
+
+Access modifiers in Java control how visible a class, method, or field is to other parts of the program. These modifiers help enforce encapsulation by restricting or allowing access as needed. If every variable in a class could be accessed from anywhere, there would be little point in grouping them together in a class. Encapsulation would lose its purpose.
+
+There are four main types of access modifiers in Java: public, private, protected, and default.
+
+Public
+
+The public modifier is the most open. If a class or its members are declared as public, they can be accessed from any other class, regardless of the package. Think of it like a public place—anyone can enter.
+
+However, there is an important detail. A public method in a class is only accessible to the outside world if the class itself is also declared as public. If the class uses the default access (meaning no modifier is specified), then even public methods are only accessible within the same package.
+
+For example, consider two files in different packages. One file defines a class with default access, and the other tries to use it. Even if the constructor is public, it is only accessible to classes within the same package. If a class in a different package tries to create an instance, it will result in a compile-time error. This demonstrates how default access can prevent global public access, even within the same project.
+
+Private
+
+The private modifier is the strictest. A private class member cannot be accessed from outside the class. Only the class itself can use its private members.
+
+It is important to note that you cannot declare a class or interface as private or protected. Also, member methods or fields of an interface cannot be private or protected.
+
+For example, trying to declare a class as private will result in a compile-time error. Java only allows classes to be public or to have default access. Private or protected classes are not permitted.
+
+Protected
+
+The protected modifier allows a member to be accessed from the class where it is defined, as well as from any subclass, even if the subclass is in a different package. This is less restrictive than private, but not as open as public.
+
+Default
+
+The default, or package-protected, modifier is used when no access modifier is specified. In this case, the class or member is only accessible to other classes within the same package. It is not accessible from outside the package.
+
+Relationship
+
+To summarize the relationships between these modifiers, consider the following:
+
+A public member is accessible from anywhere.
+A private member is only accessible within its own class.
+A protected member is accessible within its own class, any subclass, and any class in the same package.
+A default member is accessible within its own class and any class in the same package, but not from subclasses outside the package.
+
+Inheritance
+
+Inheritance is a key feature of object-oriented programming that promotes reusability. It allows common properties and behaviors to be defined in a superclass, which can then be inherited by more specialized subclasses. This forms an "is-a" relationship between classes.
+
+For example, consider a method that sums an array of numbers. The method takes an array of the superclass Number, which can hold instances of Byte, Integer, Float, and Double. Each of these subclasses implements the doubleValue method, allowing them to be summed together, even though they are different concrete types. This demonstrates how inheritance enables code to work with a variety of related types in a unified way.
+
+Polymorphism
+
+Polymorphism allows objects to take on many forms. Most programming languages support two types of polymorphism: static and dynamic.
+
+Static polymorphism, also known as early binding, is resolved at compile time. Function overloading is a common example. For instance, a class might define multiple versions of an area method—one that calculates the area of a square, and another that calculates the area of a rectangle. The compiler determines which version to call based on the arguments provided.
+
+Dynamic polymorphism, or late binding, is resolved at runtime. Function overriding is an example. A superclass might define a method called area, and subclasses like Circle and Square provide their own implementations. When you call area on a Shape reference, the actual method that gets executed depends on the runtime type of the object.
+
+Overloading
+
+Method overloading is the process of defining multiple methods with the same name but different parameter lists. This is resolved at compile time. Overloading allows you to provide different versions of a method to handle different types or numbers of arguments.
+
+It is important to remember that overloading is determined by the method name and the types and order of its parameters. The return type alone does not affect overloading. You cannot overload methods solely based on their return types.
+
+In summary, encapsulation, inheritance, and polymorphism are fundamental concepts in object-oriented programming. Access modifiers help enforce encapsulation, inheritance promotes code reuse, and polymorphism allows for flexible and dynamic behavior. Method overloading provides additional flexibility by allowing multiple versions of a method to coexist.
+
+
+Let’s walk through the concepts of method overloading and overriding in Java, focusing on how the compiler resolves overloaded methods, the rules for upcasting, and the nuances of overriding methods from parent classes.
+
+First, consider the following example involving a class called Circle.
+
+In this class, there are two methods named fillColor. One version takes three integer parameters—red, green, and blue—representing RGB color values. The other version takes three floating-point parameters—hue, saturation, and brightness—representing HSB color values. Each method colors the circle using the respective color model.
+
+Overloaded methods like these can call each other, as long as the same version does not call itself. If a method calls itself, recursion occurs, which should be handled with extra care.
+
+Constructors can also be overloaded. The main difference between overloaded methods and constructors is that overloaded methods can return different results, while constructors always return an instance of the class. It is also possible for one constructor to call another overloaded constructor within the same class. This helps reduce code duplication.
+
+For example, in the Circle class, there are three constructors. The first constructor takes three parameters—x, y, and r—and sets the position and radius. The second constructor takes only x and y, and calls the first constructor, passing a default radius of ten. The third constructor takes no parameters and calls the first constructor with default values for position and radius.
+
+Now, let’s discuss how the compiler resolves overloaded methods. The process is as follows: First, the compiler looks for an exact match, meaning a method with the same number and types of parameters. If no exact match is found, it looks for the closest match using implicit upcasts, also known as autocasts. If the compiler cannot find a suitable match, it produces a compile-time error.
+
+Upcasting refers to the compiler’s ability to automatically convert a value to a more general type, which is always a safe operation. Downcasting, on the other hand, is not allowed by default because it can lead to errors or is sometimes not possible.
+
+Here are some class type upcasting rules. An Integer can be upcasted to a Number, since Integer is a child class of Number. Integer can also be upcasted to Object, because all classes are ultimately child classes of Object. Similarly, a String can be upcasted to CharSequence, and also to Object.
+
+For primitive types, the upcasting rules are as follows: a byte can be upcasted to a short, then to an int, and then to a long. This is the standard primitive upcasting sequence.
+
+There are also cross-type rules involving autoboxing. Primitive types can be automatically converted, or autoboxed, to their class equivalents or to upcasted class equivalents.
+
+Let’s look at an example that demonstrates how overloaded methods are resolved, starting from the narrowest type, byte, up to the widest, Object.
+
+In this example, there are several overloaded versions of a method called aMethod. Each version takes a different parameter type: byte, short, int, long, Integer, Number, and Object. In the main method, a variable b of type byte is defined and passed to aMethod. The compiler will first look for a method that takes a byte. If that does not exist, it will look for a method that takes a short, then int, then long, then Integer, then Number, and finally Object. The method that matches the parameter type most closely will be called.
+
+It is very important to remember that all numeric literals in Java code are defined as int, or Integer, by default. This can lead to some subtle issues with method overloading.
+
+For example, if you define two overloaded methods, one that takes a byte and one that takes a short, and then call aMethod with the literal value nine, the compiler will produce an error. This is because the literal nine is treated as an int, and there is no overloaded method that takes an int. Downcasting is not allowed automatically, so you must explicitly cast the value to byte or short for the call to resolve correctly.
+
+Ambiguous overloading can occur when the compiler cannot determine which overloaded method to use. For instance, if you have two overloaded methods, one that takes a long and an int, and another that takes an int and a long, and you call aMethod with two integer literals, the compiler cannot decide which method to use. Both arguments can be upcasted to long, but the order of arguments matters, and the compiler cannot resolve the ambiguity. However, if you explicitly cast the arguments to the correct types, the compiler can find an exact match and resolve the call.
+
+Now, let’s move on to the concept of overriding.
+
+By default, all classes and types in Java extend from the Object class. The Object class provides several important methods that are often overridden when defining a new type. These include the toString method, which defines how a class should be represented as a human-readable string; the hashCode method, which creates an integer hash of the class instance; and the equals method, which compares the current instance with another object.
+
+There are other methods in Object that can be overridden, such as clone, which creates a copy of the object, and finalize, which is used to free resources before the object is garbage collected. However, some methods in Object are declared as final and cannot be overridden. These include wait and its overloaded counterparts, notify, notifyAll, and getClass.
+
+When overriding a method, you cannot reduce the visibility of the original method. For example, if a method is declared as public in the parent class, it cannot be overridden as protected or private in the subclass. However, you can increase the visibility, such as overriding a private method as protected or public.
+
+Additionally, you cannot change the signature of the method when overriding. The return type, the type and number of arguments, and the method name must match exactly as defined in the parent class.
+
+There is a concept called covariant return types, which allows you to specify a narrower return type when overriding a method, as long as the narrower type is part of the hierarchy of the original type.
+
+For example, consider an abstract class called Shape with an abstract method copy that returns a Shape. In a subclass called Circle, you can override the copy method to return a Circle instead of a Shape. This is allowed because Circle is a subclass of Shape.
+
+In summary, method overloading and overriding are powerful features in Java that allow you to define multiple methods with the same name but different parameters, and to provide specific implementations of methods in subclasses. Understanding how the compiler resolves overloaded methods, the rules for upcasting, and the constraints on overriding methods is essential for writing robust and maintainable Java code.
+
+
+The example above is using a covariant type for the copy method. It overrides the copy method with a different return type. However, that return type is still part of the hierarchy of the Shape type, and is also a narrower type than Shape, which is the original return type of the copy method defined in the Shape abstract class above. Therefore, this is allowed.
+
+Covariant type inference is only allowed for return types. Changing the method arguments or parameters from the original declaration is not allowed, even when using covariant types. At this point, what is happening is method overloading, not overriding. A method cannot be overridden and overloaded at the same time—it exists only in one or the other state.
+
+Now, let’s look at an example involving the equals method in Java. Imagine the following type, called Point, which aims to override the equals method. However, instead of overriding, it actually overloads it, leading to hidden mistakes in the code that are hard to spot.
+
+In this example, the Point class defines a method called equals that takes another Point as an argument and compares their x and y positions. If both positions match, it returns true; otherwise, it returns false.
+
+Next, three Point objects are created: p1, p2, and p3. When calling p1.equals(p2) and p1.equals(p3), the overloaded equals method is used, since the types are Point. This seems to work, but it is actually a mistake.
+
+Now, consider the case where the variables are declared as Object types: p1, p2, and p3. When calling p1.equals(p2) and p1.equals(p3) in this context, the default equals method from the Object class is called. This method usually compares objects by reference, so the result is false, even if the objects have the same state.
+
+This example shows how covariant types are not applicable for the arguments of a function that needs to be overridden. Instead, it effectively overloads the method. That is why it is advisable to use the Override annotation. This annotation serves as a note to the compiler that you intend to override the method. Changing the method arguments to covariant types would immediately result in a compiler error, since the compiler would see that you are overloading, not overriding.
+
+In summary, use the Override annotation where possible to avoid such hidden mistakes, which can be detrimental to resolving issues in your code.
+
+Now, let’s discuss the toString method.
+
+As already discussed, overriding the toString method is not mandatory, but it is recommended. This helps identify different objects when they are printed out during debugging or general logging actions. The toString method has a specific string method signature that must be followed in order to correctly override the method.
+
+Next, let’s talk about hashCode and equals.
+
+These are the two methods that most classes should strive to correctly override, always. They are important for the correct functioning of many internal containers provided by the Java core libraries. They are often used to compare and distinguish different instances of a given class. They represent a consistent, constant way to generate a unique identifier for a given state of a class instance, and also a consistent way to compare different instances and their state.
+
+The methods hashCode and equals need to be consistent for a class. For practical purposes, ensure that you follow this one rule: the hashCode method must return the same hash value for two objects if the equals method returns true for them. This is a general rule of thumb that must be followed to ensure correctness across the program.
+
+Usually, both hashCode and equals use the members of a given class to generate the respective hash code or check the equality of an object.
+
+In the following example, the Point class defines both hashCode and equals methods. The hashCode method uses bit-manipulation operators and some magic numbers—seven, eleven, and fifty-three, which are preferably primes—to generate a nearly unique hash code based on the x and y positions. The equals method performs some basic checks: it returns false if the argument is null, returns true if the argument is the same instance, and only compares the x and y positions if the argument is also a Point. Both methods use the same members to compute their results, ensuring that two objects with the same state will have the same hash code and will be considered equal.
+
+Now, let’s move on to invocation.
+
+Method invocation from another context, such as a superclass, can be tricky. Let’s explore the different options you have when invoking a method outside the scope of the declaring class type.
+
+First, let’s look at constructors.
+
+It is often useful to call the base class method inside the overridden method. To do that, you can use the special keyword super. The super keyword refers to the superclass, in this case the parent of the current class. Every class type has a super type. At the very least, even if a class has no explicit parent, it extends by default from the Object class, which is still its superclass.
+
+When calling the super constructor from your constructor, it must be the first statement in the constructor.
+
+In the following examples, several scenarios are shown for invoking a super and this constructor from the declaring type.
+
+In the first example, the constructor calls super as the very first statement, which is required. After that, you can set more properties, and use the super or this keyword to reference members as many times as you like.
+
+In the second example, the constructor calls this as the first statement, which is also allowed.
+
+In the third example, the constructor tries to call both super and this, but this is not possible. You cannot invoke both the super and another constructor of the current class in the same constructor. This will produce a compile-time error.
+
+In the fourth example, the constructor tries to assign a value to a member before calling this, but this is also not allowed. The first statement must be either a call to a super or this constructor, or no call at all. Otherwise, a compile-time error will occur.
+
+These examples show a few options for invoking a super and this constructor from the declaring type. However, note that it is not possible to combine both statements in the same constructor. Usually, to do this, you need to have two versions of the constructor: one having the super call only, and another which invokes it with this. Also, if a call to this or super is made in the constructor, it must be the very first statement, otherwise a compile-time error will be issued.
+
+Now, let’s discuss methods.
+
+As a continuation of the above, calling super methods can be done at any place in the child method. It does not have to be the very first statement of the method, nor does it have to be called only once. There are no obvious restrictions to calling super methods from a regular member method of a declaring class, besides the obvious recursion problem which might occur. However, the compiler will not complain.
+
+In the following example, there is a class called MemberMethodSuper, which defines a method called method that returns zero. Another class, MemberMethodThis, extends MemberMethodSuper and overrides the method. In the overridden method, it computes some value, calls the super method, and returns the sum of the two. This demonstrates that the super method is being overridden by a new one, but the original implementation can still be called. The actual implementation is not lost and can still be referenced.
+
+
+Let’s continue with the explanation of the code and concepts provided.
+
+First, there is a method called method2. This method is not present in the superclass, and it refers to the original implementation of another method called method. The method2 function returns the result of calling the superclass’s method twice and adding the results together. This demonstrates how a subclass can access and reuse functionality from its parent class, even in new methods that are unique to the subclass.
+
+Now, let’s move on to the concept of composition.
+
+Composition
+
+Composition is a fundamental class design pattern that complements inheritance. While inheritance represents an “is-a” relationship, composition represents a “has-a” relationship. This means that you can combine different classes together to build more complex data structures. Unlike inheritance, which is limited to a single parent class in many languages, composition allows you to combine as many classes as needed.
+
+For example, consider a class called Circle. This class contains a private member called center, which is a Point object, and another member called radius, which is a double. The constructor for Circle takes coordinates and a radius, then creates a new Point for the center and sets the radius. This demonstrates how a Circle “has a” Point as its center, rather than “is a” Point.
+
+The general rule of thumb is to prefer composition over inheritance. There are many cases where composition is the right choice, and inheritance is not. When designing a system, start by considering composition first. Only use inheritance if composition would make your code less reusable or harder to interface with. In summary, use inheritance when a subclass needs to specify a base class to take advantage of dynamic polymorphism. In all other cases, use composition to create code that is easier to change and more loosely coupled. Favor composition over inheritance.
+
+Singleton
+
+The singleton pattern is a special type of class design that ensures a class is instantiated only once, usually on demand. This often happens the first time a method of the class is accessed, but it can also occur during a static block when the class loader loads the class for the first time. The key idea is that only one instance of the class should ever exist.
+
+Singleton classes usually have no public constructors. Instead, they provide a public static final method, often called getSingleton, which acts as the single point of access for the singleton instance. This method is responsible for creating the singleton the first time it is called, and returning the same instance on every subsequent call. A common example is a logging class, or any class that provides stateless utility actions. Rarely would you persist static state in a singleton class.
+
+In the example provided, the Singleton class is defined as final, meaning it cannot be extended. It has a private static member to hold the singleton instance, and a private constructor to prevent external instantiation. The getSingleton method is both static and synchronized, ensuring that only one thread can create the instance at a time. If the instance does not exist, it is created; otherwise, the existing instance is returned.
+
+However, using synchronized on the entire method can be overkill, since the lock is only needed the first time the instance is created. A more efficient solution is to use conditional locking. In this approach, the method first checks if the instance is null. If it is, it synchronizes on the class and checks again before creating the instance. This way, the lock is only acquired when necessary, improving performance for all subsequent calls.
+
+Immutability
+
+An immutable class is one whose state cannot be changed after it is created. None of the methods or interfaces exposed by the class can mutate the instance. Instead, methods may return a new instance with the modified state, leaving the original unchanged. A classic example is the String class in Java. While String exposes methods that appear to modify the string, such as trim, these methods actually return a new String instance with the changes applied.
+
+Immutable classes are powerful because they ensure a functional approach to state transitions. They are robust, easy to use, and easy to reason about. However, they can also lead to performance issues if misused, since creating many new instances can be expensive.
+
+There are several advantages to immutable objects. They are safer to use, since their value cannot change once set. They are thread-safe, as no locking is required—no matter how many threads use them, the state cannot change. Additionally, immutable objects with the same state can be cached or shared internally, since their state will never change.
+
+A good rule of thumb is to make all classes immutable unless there is a compelling reason to make them mutable. To define an immutable class, there are two main points to consider. First, make the fields final and initialize them in the constructor. This can be taken further by making the class itself final, and the methods final as well, ensuring that the class cannot be extended or its methods overridden. Second, ensure that methods never mutate the state of the members. Extra care should be taken if the immutable type includes, through composition, mutable reference types. In such cases, the methods should not make mutable calls on the object, or should restore it to the original state if necessary.
+
+For example, consider a class called ImmutableValue. The value field is declared final and initialized in the constructor. The class is final, and methods like increment return a new instance rather than modifying the original. If the value member is itself mutable, care must be taken to avoid mutating it.
+
+One drawback of immutable classes is that they can create many new instances instead of modifying the original, which can be a problem. This is often solved by having a mutable version of the type, or by caching immutable states so they can be reused. The default String implementation in Java does this.
+
+Static
+
+In Java, the static context is bound to the type itself. When the class loader loads a class, the static context is initialized and associated with the loaded class. This allows you to reference state that is bound not to an instance, but to the class itself. Different instances of the class have access to this shared state, which lives in a higher scope and is visible between instances.
+
+Let’s look at an example involving a static variable. There is a class called StaticVariable, which has a private static integer called k, initialized to zero. The increment method increases k by one. When the class is loaded, the static variable k is initialized. If you create two instances of StaticVariable, called s1 and s2, and call increment on s1, the value of k becomes one. If you then call increment on s2, the value of k becomes two. This demonstrates that the static variable is shared across all instances of the class.
+
+
+Different instances access the same state through a higher scope or level that is bound to the class type itself, not to the individual instance.
+
+Block
+
+There is also a concept called a static block, which extends the meaning and abilities of the static initializer. The purpose of a static block is to allow more complex code to be executed before a given static variable is initialized.
+
+In the provided example, a class named StaticBlock is defined. Inside this class, there is a static block that creates a map and populates it with several key-value pairs. This static block is executed immediately after the Java Virtual Machine loads the class into memory. The static block not only creates the map but also ensures it is filled with initial values. In a way, the static block acts like a default constructor for the class type itself, since it prepares static data before any instance is created.
+
+Rules
+
+There are several important rules that apply to static context and static methods in particular.
+
+First, static methods cannot use the keyword this, because that would imply referencing an instance, and in a static context, there is no class instance available.
+
+Second, static methods cannot use the keyword super, for the same reason. The super keyword is used to invoke a base class method in an instance context, which does not exist in static methods.
+
+Third, static methods cannot be overridden. Overriding is a runtime, late binding process that only applies to instance methods.
+
+Fourth, static methods are mostly suited for utility purposes and actions. Since they cannot access member variables of an instance, they should not be used to mutate static state.
+
+Finally, the main method must always be defined as static. Otherwise, the runtime cannot locate the entry point for the program and execute it.
+
+Summary
+
+Let us briefly review the key points from each objective in this chapter.
+
+Implement encapsulation
+
+Encapsulation means combining data and the functions that operate on it as a single unit.
+
+You cannot access the private methods of the base class in the derived class.
+
+You can access a protected method either from a class in the same package, just like with package-private or default access, as well as from a derived class.
+
+You can also access a method with a default access modifier if it is in the same package.
+
+You can access public methods of a class from any other class.
+
+Implement inheritance
+
+Inheritance is the process of creating hierarchical relationships between related classes. Inheritance is also called an “is-a” relationship.
+
+You use the super keyword to call base class methods.
+
+Inheritance implies an “is-a” relationship, while composition implies a “has-a” relationship.
+
+It is generally better to favor composition over inheritance.
+
+Implement polymorphism
+
+Polymorphism means interpreting the same message, or method call, with different meanings depending on the context.
+
+Resolving a method call based on the dynamic type of the object is referred to as runtime polymorphism.
+
+Overloading is an example of static polymorphism, also known as early binding, while overriding is an example of dynamic polymorphism, or late binding.
+
+Method overloading means creating methods with the same name but different types or numbers of parameters.
+
+You can have overloaded constructors. You can call a constructor of the same class in another constructor using the this keyword.
+
+Overload resolution is the process by which the compiler decides which method to call when multiple overloaded definitions are available.
+
+In overriding, the name of the method, the number of arguments, the types of arguments, and the return type must match exactly.
+
+With covariant return types, you can provide a derived class of the return type in the overriding method.
+
+Override hashCode, equals, and toString
+
+You can override methods such as clone, equals, hashCode, toString, and finalize in your classes. However, methods like getClass, notify, notifyAll, and the overloaded versions of wait are declared final, so you cannot override them.
+
+If you are using an object in containers like HashSet or HashMap, make sure you override the hashCode and equals methods correctly. For example, ensure that the hashCode method returns the same hash value for two objects if the equals method returns true for them.
+
+Singleton and immutable classes
+
+A singleton ensures that only one object of its class is created.
+
+Making sure that a singleton implementation is truly a singleton is a nontrivial task, especially in a multi-threaded environment.
+
+Once an immutable object is created and initialized, it cannot be modified.
+
+Immutable objects are safer to use than mutable objects. Furthermore, immutable objects are thread-safe. Additionally, immutable objects that have the same state can save space by sharing the state internally.
+
+To define an immutable class, make it final. Make all its fields private and final. Provide only accessor methods, also known as getter methods, and do not provide mutator methods. For fields that are mutable reference types, or for methods that need to mutate the state, create a deep copy of the object if needed.
+
+Static initialize blocks, variables, methods, and classes
+
+There are two types of member variables: class variables and instance variables. All variables that require an instance, or object, of the class to access them are known as instance variables. All variables that are shared among all instances and are associated with a class rather than an object are referred to as class variables. These are declared using the static keyword.
+
+All static members do not require an instance to call or access them. You can directly call or access them using the class name.
+
+A static member can call or access only a static member of the same class.
+
+

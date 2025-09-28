@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>3-technical-questions</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#important-topics" id="toc-important-topics">Important
+topics</a>
+<ul>
+<li><a href="#structures" id="toc-structures">Structures</a></li>
+<li><a href="#algorithms" id="toc-algorithms">Algorithms</a></li>
+<li><a href="#concepts" id="toc-concepts">Concepts</a></li>
+</ul></li>
+<li><a href="#solving-process" id="toc-solving-process">Solving
+process</a></li>
+<li><a href="#compilation-interpretation"
+id="toc-compilation-interpretation">Compilation &amp; Interpretation</a>
+<ul>
+<li><a href="#key-core-differences" id="toc-key-core-differences">Key
+&amp; Core Differences</a></li>
+<li><a href="#compiled-interpreted"
+id="toc-compiled-interpreted">Compiled &amp; Interpreted</a></li>
+<li><a href="#java-virtual-machine" id="toc-java-virtual-machine">Java
+virtual machine</a>
+<ul>
+<li><a href="#introduction-and-description"
+id="toc-introduction-and-description">Introduction and
+description</a></li>
+<li><a href="#key-features-and-processes"
+id="toc-key-features-and-processes">Key features and processes</a></li>
+<li><a href="#memory-management-control"
+id="toc-memory-management-control">Memory management &amp;
+control</a></li>
+<li><a href="#garbage-collection-algorithms"
+id="toc-garbage-collection-algorithms">Garbage collection
+algorithms</a></li>
+<li><a href="#garbage-collection-strategies"
+id="toc-garbage-collection-strategies">Garbage collection
+strategies</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#trick-questions" id="toc-trick-questions">Trick
+questions</a></li>
+</ul>
+</nav>
+<h1 id="important-topics">Important topics</h1>
+<p>For each of the topics below make sure you understand how to use and
+implement them, on paper and then on a computer.</p>
+<h2 id="structures">Structures</h2>
+<ol type="1">
+<li>Linked lists</li>
+<li>Trees, Tires and Graphs</li>
+<li>Stacks &amp; Queues</li>
+<li>Heaps</li>
+<li>Vectors / Arrays</li>
+<li>Hash tables</li>
+</ol>
+<h2 id="algorithms">Algorithms</h2>
+<ol type="1">
+<li>Breadth-First Search</li>
+<li>Depth-First Search</li>
+<li>Binary Search</li>
+<li>Merge Sort</li>
+<li>Quick Sort</li>
+<li>Other Sorting algorithms</li>
+</ol>
+<h2 id="concepts">Concepts</h2>
+<ol type="1">
+<li>Bit manipulation</li>
+<li>Memory (Stack &amp; Heap)</li>
+<li>Recursion</li>
+<li>Dynamic programming</li>
+<li>Big O time &amp; space</li>
+</ol>
+<h1 id="solving-process">Solving process</h1>
+<p>Make sure to understand the problem , ask for paper and pen and
+record the problem on it, write it down, do not try to memorize it
+otherwise you will miss important details. Ask for example, draw and
+write down it too.</p>
+<p>When drawing an example make it as specific to the problem as
+possible, use the data you have been given, or make up one yourself, but
+try to make the example about the problem, do not draw generic trees,
+stacks etc. Make it large so you can see patterns, edge cases etc.</p>
+<p>Try to trade off space or time for the other e.g. - store data
+(hash-table, vector, list, stack, tree etc.), sort data (mutate the
+input example, by sorting it to fit in the problem’s solution).</p>
+<p>Sometimes it might be useful to write down an implementation that
+solves the issue incorrectly, or not completely.</p>
+<ol type="1">
+<li>Listen - pay very close attention to any information, in the problem
+description, ask for more details, as much as you can think of to narrow
+down the problem at hand, try to make no assumptions about the
+problem.</li>
+<li>Example - ask for example, more than one if you have to, be
+aggressive with the questions, to allow for no foul play</li>
+<li>Brute force - try to solve the problem in the most naive obvious
+way, that comes to mind</li>
+<li>Optimize - try to apply different approaches to the problem solution
+afterwards, such as dynamiting programming or memorization etc - avoid
+bottlenecks, unnecessary work or duplicated work</li>
+<li>Walk through - analyze the problem, try to describe it, make sure it
+makes sense, if not, go back to the example and start over, from step
+2</li>
+<li>Implement - make sure whatever you implement is well structured, now
+that it</li>
+<li>Test - go through your code and test it, if you have to do any
+changes to adjust the logic go back to step 3</li>
+</ol>
+<h1 id="compilation-interpretation">Compilation &amp;
+Interpretation</h1>
+<ul>
+<li><p>Compiled Languages: In strictly compiled languages, such as C and
+C++, source code is translated directly into machine code by a compiler
+before execution. The resulting machine code is specific to the target
+hardware architecture.</p>
+<ol type="1">
+<li>Compilation Process: The compilation process involves translating
+the entire source code into machine code in one pass. This generates an
+executable file containing native machine code that can be directly
+executed by the CPU.</li>
+<li>Execution: Strictly compiled languages produce standalone
+executables that are independent of the original source code. The
+compiled code is executed directly by the CPU without the need for an
+intermediate runtime environment.</li>
+</ol></li>
+<li><p>Interpreted Languages: In interpreted languages, such as Python
+and JavaScript, source code is executed line by line by an interpreter
+at runtime. The interpreter reads and executes each statement of the
+source code sequentially.</p>
+<ol type="1">
+<li>Interpretation Process: The interpreter reads the source code,
+parses it into intermediate representations (such as bytecode or AST),
+and executes it immediately. There is no separate compilation step to
+generate machine code.</li>
+<li>Execution: Interpreted languages typically require an interpreter to
+be installed on the target system to execute the source code. The
+interpreter translates and executes the source code on-the-fly, without
+producing standalone executables.</li>
+</ol></li>
+</ul>
+<h2 id="key-core-differences">Key &amp; Core Differences</h2>
+<ol type="1">
+<li>Compilation vs. Interpretation:
+<ul>
+<li>Compiler: Translates entire source code into machine code before
+execution.</li>
+<li>Interpreter: Executes source code line by line at runtime without
+prior translation.</li>
+</ul></li>
+<li>Output:
+<ul>
+<li>Compiler: Produces standalone executable files containing native
+machine code.</li>
+<li>Interpreter: Executes source code directly without generating
+standalone executables.</li>
+</ul></li>
+<li>Execution Speed:
+<ul>
+<li>Compiler: Generally produces faster-executing code as it is
+optimized for the target hardware architecture.</li>
+<li>Interpreter: May have slower execution speed compared to compiled
+languages due to the overhead of interpretation at runtime.</li>
+</ul></li>
+<li>Portability:
+<ul>
+<li>Compiler: Generates machine code specific to the target hardware
+architecture, potentially limiting portability.</li>
+<li>Interpreter: Source code is platform-independent, and the
+interpreter translates and executes code on-the-fly, allowing for
+greater portability.</li>
+</ul></li>
+</ol>
+<p>In summary, strictly compiled languages translate source code into
+machine code before execution, resulting in standalone executables,
+while interpreted languages execute source code directly at runtime
+using an interpreter.</p>
+<h2 id="compiled-interpreted">Compiled &amp; Interpreted</h2>
+<p>Several interpreted languages utilize Just-In-Time (JIT) compilation
+techniques to improve performance. Some examples of interpreted
+languages with JIT compilation include:</p>
+<ul>
+<li><p>JavaScript (V8 Engine): JavaScript is commonly used in web
+development, and modern JavaScript engines such as Google’s V8 engine
+(used in Chrome and Node.js) employ JIT compilation to dynamically
+compile frequently executed JavaScript code into native machine code for
+improved performance.</p></li>
+<li><p>Python (PyPy): While Python is traditionally interpreted,
+projects like PyPy implement a JIT compiler for Python code. PyPy’s JIT
+compiler (Just-In-Time Compiler for Python) dynamically compiles Python
+bytecode into native machine code at runtime, resulting in significant
+performance improvements over traditional interpreters.</p></li>
+<li><p>Ruby (YARV): The YARV (Yet Another Ruby VM) interpreter for Ruby
+includes a JIT compiler called MJIT (Method JIT). MJIT dynamically
+compiles Ruby methods into native machine code, providing performance
+enhancements for Ruby applications.</p></li>
+<li><p>PHP (HHVM): The HipHop Virtual Machine (HHVM), developed by
+Facebook, includes a JIT compiler for PHP code. HHVM’s JIT compiler
+dynamically compiles PHP bytecode into native machine code, offering
+performance improvements over traditional PHP interpreters.</p></li>
+<li><p>Lua (LuaJIT): LuaJIT is a Just-In-Time (JIT) compiler for the Lua
+programming language. It dynamically compiles Lua bytecode into highly
+optimized native machine code at runtime, resulting in significant
+performance gains for Lua applications.</p></li>
+<li><p>Java (JVM): like HotSpot, incorporate Just-In-Time (JIT)
+compilation. The JVM dynamically compiles frequently executed bytecode
+sequences into optimized native machine code during runtime. This
+compilation process aims to improve the performance of Java applications
+by translating bytecode into efficient machine code</p></li>
+</ul>
+<h2 id="java-virtual-machine">Java virtual machine</h2>
+<h3 id="introduction-and-description">Introduction and description</h3>
+<p>Several implementations of the Java Virtual Machine (JVM) have been
+developed by different organizations and communities. Here are some
+notable implementations:</p>
+<ol type="1">
+<li><p>Oracle HotSpot VM: Developed and maintained by Oracle
+Corporation. HotSpot is the default JVM implementation included in
+Oracle’s JDK (Java Development Kit) distributions. It is known for its
+high performance, advanced optimization techniques, and support for
+features like Just-In-Time (JIT) compilation and multiple garbage
+collection algorithms.</p></li>
+<li><p>OpenJ9: Developed and maintained by the Eclipse Foundation
+(formerly IBM). OpenJ9 is an open-source JVM implementation that focuses
+on high performance, low memory footprint, and fast startup times. It is
+included in Eclipse Adoptium (formerly AdoptOpenJDK) distributions and
+used in various cloud and enterprise Java environments.</p></li>
+<li><p>GraalVM: Developed and maintained by Oracle Labs. GraalVM is a
+high-performance polyglot virtual machine that supports multiple
+programming languages, including Java, JavaScript, Python, Ruby, and
+others. It includes the GraalVM Native Image technology, which enables
+ahead-of-time compilation of Java applications into native executables
+for improved startup time and reduced memory overhead.</p></li>
+<li><p>Azul Zulu JVM: Developed and maintained by Azul Systems. Zulu is
+a certified, fully compatible, and open-source JVM implementation based
+on the OpenJDK project. It is available for various platforms, including
+Linux, Windows, macOS, and Docker, and is commonly used in enterprise
+environments.</p></li>
+<li><p>Amazon Corretto JVM: Developed and maintained by Amazon Web
+Services (AWS). Corretto is a no-cost, multiplatform, production-ready
+distribution of OpenJDK. It is designed to provide long-term support,
+security updates, and performance enhancements for Java applications
+running on AWS cloud services and on-premises.</p></li>
+<li><p>SAP JVM: Developed and maintained by SAP SE. SAP JVM is a
+high-performance, highly optimized JVM implementation designed for
+enterprise-grade Java applications. It includes features like advanced
+garbage collection algorithms, memory management optimizations, and
+support for SAP application platforms.</p></li>
+</ol>
+<h3 id="key-features-and-processes">Key features and processes</h3>
+<ol type="1">
+<li><p>The Java Virtual Machine (JVM) executes Java bytecode, which is
+an intermediate representation of Java code compiled from source code
+(.java files). Here’s an overview of the pipeline for executing Java
+code on the JVM:</p></li>
+<li><p>Java Source Code Compilation: Java source code files (.java) are
+compiled into Java bytecode files (.class) using the Java compiler
+(javac). The Java compiler translates Java source code into
+platform-independent bytecode instructions, which are stored in .class
+files.</p></li>
+<li><p>Class Loading: The JVM loads classes (.class files) into memory
+as they are needed during program execution. Class loading involves
+three steps: loading, linking, and initialization. Loading: The class
+loader reads the bytecode from the .class file and creates a
+representation of the class in memory. Linking: The class loader
+performs verification, preparation (e.g., allocating memory for static
+fields), and resolution (e.g., resolving symbolic references to other
+classes). Initialization: The JVM initializes the class by executing
+static initializers and initializing static fields.</p></li>
+<li><p>Bytecode Verification: Before executing bytecode, the JVM
+performs bytecode verification to ensure that the bytecode adheres to
+certain safety constraints and does not violate the Java language rules.
+Bytecode verification checks for various properties, such as type
+safety, stack integrity, and proper control flow.</p></li>
+<li><p>Just-In-Time (JIT) Compilation: The JVM employs a Just-In-Time
+(JIT) compiler to translate bytecode into native machine code at
+runtime. When a method is called frequently or identified as a hot spot
+during profiling, the JIT compiler compiles the bytecode of the method
+into optimized native machine code. The native machine code is then
+cached and executed directly by the CPU, bypassing interpretation of the
+bytecode. JIT compilation aims to improve performance by dynamically
+optimizing frequently executed code paths.</p></li>
+<li><p>Execution: The JVM executes the compiled native machine code,
+which corresponds to the bytecode instructions of the Java program.
+Execution involves interpreting bytecode or executing the compiled
+native machine code, depending on whether JIT compilation has been
+performed for specific code paths.</p></li>
+<li><p>Garbage Collection: The JVM manages memory allocation and
+deallocation using automatic garbage collection. Garbage collection
+identifies and reclaims memory that is no longer in use, preventing
+memory leaks and ensuring efficient memory usage.</p></li>
+</ol>
+<p>Here is a very simple example of the different steps the java virtual
+machine might go through to generate byte or machine code from an input
+java source</p>
+<ol type="1">
+<li><p>Java source code</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">class</span> Calculator <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>        <span class="kw">public</span> <span class="dt">static</span> <span class="dt">int</span> <span class="fu">sum</span><span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> a <span class="op">+</span> b<span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div></li>
+<li><p>Bytecode generation</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode sh"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>    <span class="ex">javac</span> Calculator.java</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="ex">javap</span> <span class="at">-c</span> Calculator</span></code></pre></div></li>
+<li><p>Java byte code</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>    public class Calculator {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>        public static int sum(int, int);</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>            Code:</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>            0: iload_0</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            1: iload_1</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            2: iadd</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            3: ireturn</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div></li>
+<li><p>Native machine code</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode asm"><code class="sourceCode fasm"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>        <span class="bu">mov</span> <span class="kw">eax</span><span class="op">,</span> <span class="dt">DWORD</span> <span class="dt">PTR</span> <span class="op">[</span><span class="kw">rsp</span><span class="op">+</span><span class="bn">0x8</span><span class="op">]</span>    <span class="co">; Load the value of the first argument (a)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">add</span> <span class="kw">eax</span><span class="op">,</span> <span class="dt">DWORD</span> <span class="dt">PTR</span> <span class="op">[</span><span class="kw">rsp</span><span class="op">+</span><span class="bn">0xc</span><span class="op">]</span>    <span class="co">; Add the value of the second argument (b)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">ret</span>                             <span class="co">; Return the result</span></span></code></pre></div></li>
+</ol>
+<p>After JIT compilation, the bytecode instructions are translated into
+native machine code. The native machine code for the sum method is
+represented using x86 assembly language here. Instructions such as mov
+and add perform similar operations to the bytecode instructions but are
+specific to the native architecture. The ret instruction is used to
+return the result from the method.</p>
+<h3 id="memory-management-control">Memory management &amp; control</h3>
+<p>Below are presented some common concepts about memory management in a
+garbage collected language such as java, most of the principles below
+apply for most other languages using similar approaches</p>
+<ol type="1">
+<li><p><strong>What is Garbage Collection in Java?</strong> Garbage
+collection in Java is an automatic memory management process where the
+JVM automatically reclaims memory occupied by objects that are no longer
+in use or reachable by the program. It helps developers by eliminating
+the need to manually free memory and reduces the risk of memory
+leaks.</p></li>
+<li><p><strong>How does Java’s Garbage Collector work?</strong> Java’s
+garbage collector works by periodically identifying and reclaiming
+memory occupied by objects that are no longer reachable or needed by the
+program. It uses various algorithms like Mark-Sweep, Copying, and
+Generational to efficiently manage memory. The process involves marking
+objects that are still in use, reclaiming memory occupied by unreachable
+objects, and compacting memory to reduce fragmentation.</p></li>
+<li><p><strong>What are the different types of garbage collectors in
+Java?</strong> Java offers different garbage collection algorithms to
+suit different application needs. These include Serial, Parallel, CMS
+(Concurrent Mark-Sweep), G1 (Garbage-First), and ZGC (Z Garbage
+Collector). Each algorithm has its own characteristics such as
+throughput, latency, and suitability for different application
+scenarios.</p></li>
+<li><p><strong>What is the difference between System.gc() and
+Runtime.getRuntime().gc()?</strong> System.gc() and
+Runtime.getRuntime().gc() are both used to suggest garbage collection,
+but they differ in their invocation. System.gc() is a static method that
+suggests garbage collection to the JVM, while Runtime.getRuntime().gc()
+is an instance method that provides a reference to the runtime object
+before suggesting garbage collection.</p></li>
+<li><p><strong>How do you prevent memory leaks in Java?</strong> Memory
+leaks in Java can be prevented by following best practices such as
+releasing resources in a timely manner, closing streams properly using
+try-with-resources, being cautious with static variables, avoiding
+excessive object creation, and using memory profiling tools to identify
+potential leaks.</p></li>
+<li><p><strong>Explain the concept of memory leak in Java?</strong> A
+memory leak occurs in Java when objects are no longer needed by the
+application but are still referenced, preventing them from being garbage
+collected. This leads to a gradual increase in memory usage over time,
+potentially causing OutOfMemoryErrors and performance
+degradation.</p></li>
+<li><p><strong>What is the purpose of the finalize() method in
+Java?</strong> The finalize() method in Java is called by the garbage
+collector before reclaiming an object’s memory. Its purpose is to
+perform any necessary cleanup or resource releasing operations. However,
+it’s generally not recommended to rely on finalize() for resource
+cleanup due to its unpredictable nature and performance
+implications.</p></li>
+<li><p><strong>How can you monitor and tune garbage collection in Java
+applications?</strong> Garbage collection in Java applications can be
+monitored and tuned using various tools such as VisualVM, JConsole, and
+Mission Control. These tools provide insights into garbage collection
+activity, heap usage, and performance metrics. Tuning can involve
+adjusting JVM parameters like heap size, garbage collector type, and GC
+tuning flags based on application requirements and performance
+goals.</p></li>
+<li><p><strong>What is the impact of garbage collection on application
+performance?</strong> Garbage collection can have a significant impact
+on application performance, affecting factors such as CPU overhead,
+pause times, and throughput. Proper garbage collection tuning is
+essential to balance these factors and optimize application
+responsiveness and scalability.</p></li>
+<li><p><strong>What are the following class types and their
+purpose?</strong> <code>WeakReference</code>,
+<code>SoftReference</code>, and <code>PhantomReference</code> are types
+of reference objects in Java used for more controlled object lifecycle
+and memory management. - <code>WeakReference</code> objects allow
+objects to be garbage collected when no longer referenced strongly. -
+<code>PhantomReference</code> objects provide more control over cleanup
+actions without interfering with garbage collection. These reference
+types are particularly useful in scenarios like caching and managing
+native resources. - <code>SoftReference</code> objects are garbage
+collected only when memory is low.</p></li>
+</ol>
+<h3 id="garbage-collection-algorithms">Garbage collection
+algorithms</h3>
+<h4 id="mark-and-sweep">Mark and Sweep</h4>
+<ul>
+<li><p>Mark Phase: The first phase, known as the “mark” phase, involves
+traversing all reachable objects starting from the roots (e.g., global
+variables, local variables, and active threads). During the traversal,
+each reachable object is marked or flagged as “in-use” or “reachable”.
+This phase identifies all objects that are still actively being used by
+the program and marks them for retention.</p></li>
+<li><p>Sweep Phase: The second phase, known as the “sweep” phase,
+involves scanning the entire heap memory. During this phase, memory
+regions not marked as “in-use” are considered garbage and are eligible
+for reclamation. The garbage collector then reclaims the memory occupied
+by these unreachable objects, effectively freeing it up for future
+allocations.</p></li>
+<li><p>Advantages: Mark and Sweep is straightforward and relatively easy
+to implement. It doesn’t require moving objects around in memory, which
+can simplify memory management in certain scenarios. It can handle
+cycles in object references (objects referencing each other) without
+additional complexity.</p></li>
+<li><p>Disadvantages: Mark and Sweep can cause fragmentation in memory
+since reclaimed memory may not be contiguous. It typically involves
+stop-the-world pauses during the mark and sweep phases, which can lead
+to application pauses and reduced responsiveness in interactive
+applications. It doesn’t perform memory compaction, which means it may
+not efficiently utilize available memory space, especially in
+long-running applications.</p></li>
+</ul>
+<h3 id="garbage-collection-strategies">Garbage collection
+strategies</h3>
+<ol type="1">
+<li><p><strong>Serial Garbage Collector:</strong> The Serial Garbage
+Collector (also known as the Serial Collector) is the simplest garbage
+collector. It is best suited for single-threaded applications or
+small-scale applications with small heaps. This collector is also known
+for its simplicity and low overhead but can cause noticeable pauses
+during garbage collection, as it stops all application threads during
+the collection process. It uses a mark-and-sweep algorithm.</p></li>
+<li><p><strong>Parallel Garbage Collector:</strong> The Parallel Garbage
+Collector (also known as the Throughput Collector) is designed for
+multi-threaded applications and is the default garbage collector for the
+Java HotSpot VM. It uses multiple threads to perform garbage collection,
+which helps in reducing the pause times experienced by applications.
+This collector is suitable for applications where the goal is to
+maximize throughput and performance rather than minimizing pause times.
+It uses a mark-and-sweep algorithm.</p></li>
+<li><p><strong>Garbage-First (G1) Garbage Collector:</strong> The G1
+Garbage Collector is designed to provide both low-latency pauses and
+high throughput. It divides the heap into regions and performs garbage
+collection on these regions independently, allowing it to collect only
+the regions with the most garbage first. G1 aims to meet garbage
+collection pause time goals with predictable and consistent pause times.
+It is suitable for large heap applications and applications that require
+low-latency garbage collection.</p></li>
+<li><p><strong>Z Garbage Collector (ZGC):</strong> ZGC is a scalable
+garbage collector designed to provide low-latency performance for large
+heaps (multi-terabyte heaps). It is intended for applications requiring
+very low pause times, typically less than 10ms, even on very large
+heaps. ZGC uses concurrent algorithms for all major phases of garbage
+collection, including marking, reference processing, relocation, and
+evacuation. It is suitable for applications with stringent latency
+requirements, such as financial trading systems, gaming platforms, and
+real-time analytics.</p></li>
+</ol>
+<h1 id="trick-questions">Trick questions</h1>
+<ol type="1">
+<li><p>NullPointerException with Autoboxing:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Integer</span> i <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> j <span class="op">=</span> i<span class="op">;</span> <span class="co">// What happens here?</span></span></code></pre></div>
+<p>This code will throw a NullPointerException because autoboxing
+attempts to unbox a null reference to an int.</p></li>
+<li><p>ConcurrentModificationException with Iterators:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> list <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    list<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;a&quot;</span><span class="op">);</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    list<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;b&quot;</span><span class="op">);</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="bu">String</span> s <span class="op">:</span> list<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        list<span class="op">.</span><span class="fu">remove</span><span class="op">(</span>s<span class="op">);</span> <span class="co">// What happens here?</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<p>This code will throw a ConcurrentModificationException because you’re
+trying to modify the list while iterating over it without using an
+iterator’s remove() method.</p></li>
+<li><p>ArithmeticException with Division:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> result <span class="op">=</span> <span class="dv">5</span> <span class="op">/</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// What happens here?</span></span></code></pre></div>
+<p>This code will throw an ArithmeticException because dividing by zero
+is undefined in Java.</p></li>
+<li><p>IndexOutOfBoundsException with Arrays:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span><span class="op">[]</span> array <span class="op">=</span> <span class="kw">new</span> <span class="dt">int</span><span class="op">[</span><span class="dv">5</span><span class="op">];</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> value <span class="op">=</span> array<span class="op">[</span><span class="dv">5</span><span class="op">];</span> <span class="co">// What happens here?</span></span></code></pre></div>
+<p>This code will throw an IndexOutOfBoundsException because array
+indices in Java are zero-based, and trying to access index 5 in an array
+of length 5 is out of bounds.</p></li>
+<li><p>ClassCastException with Generics:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> strings <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span><span class="bu">Object</span><span class="op">&gt;</span> objects <span class="op">=</span> <span class="op">(</span><span class="bu">List</span><span class="op">&lt;</span><span class="bu">Object</span><span class="op">&gt;)</span> strings<span class="op">;</span> <span class="co">// What happens here?</span></span></code></pre></div>
+<p>This code will compile without error, but it will throw a
+ClassCastException at runtime because you cannot cast a generic type to
+another generic type with different type arguments due to type
+erasure.</p></li>
+<li><p>NullPointerException with String Comparison:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> str <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>str<span class="op">.</span><span class="fu">equals</span><span class="op">(</span><span class="st">&quot;hello&quot;</span><span class="op">))</span> <span class="op">{</span> <span class="co">// What happens here?</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Hello&quot;</span><span class="op">);</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<p>This code will throw a NullPointerException because you’re trying to
+call the equals() method on a null reference.</p></li>
+<li><p>NumberFormatException with String to Integer Conversion:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> str <span class="op">=</span> <span class="st">&quot;abc&quot;</span><span class="op">;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> num <span class="op">=</span> <span class="bu">Integer</span><span class="op">.</span><span class="fu">parseInt</span><span class="op">(</span>str<span class="op">);</span> <span class="co">// What happens here?</span></span></code></pre></div>
+<p>This code will throw a NumberFormatException because “abc” cannot be
+parsed into an integer.</p></li>
+<li><p>UnsupportedOperationException with Unmodifiable Collections:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> list <span class="op">=</span> <span class="bu">Collections</span><span class="op">.</span><span class="fu">emptyList</span><span class="op">();</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    list<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="st">&quot;item&quot;</span><span class="op">);</span> <span class="co">// What happens here?</span></span></code></pre></div>
+<p>This code will throw an UnsupportedOperationException because
+Collections.emptyList() returns an immutable (unmodifiable)
+list.</p></li>
+<li><p>StackOverflowError with Recursion:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">recursiveMethod</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>        <span class="fu">recursiveMethod</span><span class="op">();</span> <span class="co">// What happens here?</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<p>This code will cause a StackOverflowError because it creates an
+infinite recursion without an exit condition.</p></li>
+<li><p>IllegalArgumentException with Enum.valueOf():</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">enum</span> <span class="bu">Color</span> <span class="op">{</span> RED<span class="op">,</span> GREEN<span class="op">,</span> BLUE <span class="op">}</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Color</span> color <span class="op">=</span> <span class="bu">Enum</span><span class="op">.</span><span class="fu">valueOf</span><span class="op">(</span><span class="bu">Color</span><span class="op">.</span><span class="fu">class</span><span class="op">,</span> <span class="st">&quot;YELLOW&quot;</span><span class="op">);</span> <span class="co">// What happens here?</span></span></code></pre></div>
+<p>This code will throw an IllegalArgumentException because there is no
+enum constant named “YELLOW” in the Color enum.</p></li>
+<li><p>EmptyStackException from stack.pop()</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Stack</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> stack <span class="op">=</span> <span class="kw">new</span> <span class="bu">Stack</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> element <span class="op">=</span> stack<span class="op">.</span><span class="fu">pop</span><span class="op">();</span> <span class="co">// What happens here?</span></span></code></pre></div>
+<p>Trying to pop an element from an empty stack (pop() on an empty
+stack) will throw an EmptyStackException.</p></li>
+<li><p>Integer Overflow:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> value <span class="op">=</span> <span class="bu">Integer</span><span class="op">.</span><span class="fu">MAX_VALUE</span><span class="op">;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    value<span class="op">++;</span> <span class="co">// What happens here?</span></span></code></pre></div>
+<p>Incrementing Integer.MAX_VALUE will wrap around to Integer.MIN_VALUE,
+causing overflow.</p></li>
+<li><p>String Pool Behavior:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> s1 <span class="op">=</span> <span class="st">&quot;hello&quot;</span><span class="op">;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> s2 <span class="op">=</span> <span class="st">&quot;hello&quot;</span><span class="op">;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>s1 <span class="op">==</span> s2<span class="op">);</span> <span class="co">// What is the output?</span></span></code></pre></div>
+<p>Strings created using string literals are pooled, so s1 and s2 will
+refer to the same object, resulting in true when comparing them with
+==.</p></li>
+<li><p>Floating-Point Precision:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> result <span class="op">=</span> <span class="fl">0.1</span> <span class="op">+</span> <span class="fl">0.2</span><span class="op">;</span> <span class="co">// What is the value of result?</span></span></code></pre></div>
+<p>Due to floating-point precision, the result of 0.1 + 0.2 is not
+exactly 0.3 but a close approximation due to binary representation
+limitations.</p></li>
+<li><p>Equals Method with String and StringBuilder:</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> str1 <span class="op">=</span> <span class="st">&quot;hello&quot;</span><span class="op">;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">StringBuilder</span> str2 <span class="op">=</span> <span class="kw">new</span> <span class="bu">StringBuilder</span><span class="op">(</span><span class="st">&quot;hello&quot;</span><span class="op">);</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>str1<span class="op">.</span><span class="fu">equals</span><span class="op">(</span>str2<span class="op">));</span> <span class="co">// What is the output?</span></span></code></pre></div>
+<p>The equals() method in Java compares the content of objects. Since
+str1 is a String and str2 is a StringBuilder, they will not be equal
+even if they contain the same characters.</p></li>
+<li><p>Casting and Arithmetic Operations:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">byte</span> a <span class="op">=</span> <span class="dv">127</span><span class="op">;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">byte</span> b <span class="op">=</span> <span class="dv">127</span><span class="op">;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">byte</span> c <span class="op">=</span> a <span class="op">+</span> b<span class="op">;</span> <span class="co">// What happens here?</span></span></code></pre></div>
+<p>The result of adding two bytes (a and b) will be promoted to an int,
+so assigning it to a byte (c) without explicit casting will cause a
+compilation error.</p></li>
+<li><p>Object Comparison:</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Integer</span> x <span class="op">=</span> <span class="kw">new</span> <span class="bu">Integer</span><span class="op">(</span><span class="dv">100</span><span class="op">);</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Integer</span> y <span class="op">=</span> <span class="kw">new</span> <span class="bu">Integer</span><span class="op">(</span><span class="dv">100</span><span class="op">);</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>x <span class="op">==</span> y<span class="op">);</span> <span class="co">// What is the output?</span></span></code></pre></div>
+<p>Comparing x and y with == checks for reference equality. Since x and
+y are different objects (even though they contain the same value), the
+result will be false.</p></li>
+</ol>
+</body>
+</html>

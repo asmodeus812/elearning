@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>4-arrays-and-strings</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#introduction" id="toc-introduction">Introduction</a></li>
+<li><a href="#strings" id="toc-strings">Strings</a>
+<ul>
+<li><a href="#permutation-of-a-string"
+id="toc-permutation-of-a-string">Permutation of a string</a></li>
+<li><a href="#substring-permutation"
+id="toc-substring-permutation">Substring permutation</a></li>
+<li><a href="#unique-characters" id="toc-unique-characters">Unique
+characters</a></li>
+<li><a href="#permutation-check" id="toc-permutation-check">Permutation
+check</a></li>
+<li><a href="#palindrome-check" id="toc-palindrome-check">Palindrome
+check</a></li>
+<li><a href="#wraparound-substring"
+id="toc-wraparound-substring">Wraparound substring</a></li>
+</ul></li>
+<li><a href="#arrays" id="toc-arrays">Arrays</a>
+<ul>
+<li><a href="#reversing-array" id="toc-reversing-array">Reversing
+array</a></li>
+<li><a href="#rotating-array" id="toc-rotating-array">Rotating
+array</a></li>
+<li><a href="#move-zeroes" id="toc-move-zeroes">Move zeroes</a></li>
+<li><a href="#sum-target" id="toc-sum-target">Sum target</a></li>
+<li><a href="#sub-array" id="toc-sub-array">Sub array</a></li>
+<li><a href="#array-removal" id="toc-array-removal">Array removal</a>
+<ul>
+<li><a href="#swap-solution" id="toc-swap-solution">Swap
+solution</a></li>
+<li><a href="#shift-solution" id="toc-shift-solution">Shift
+solution</a></li>
+</ul></li>
+<li><a href="#array-insert" id="toc-array-insert">Array insert</a>
+<ul>
+<li><a href="#append-solution" id="toc-append-solution">Append
+solution</a></li>
+<li><a href="#shift-solution-1" id="toc-shift-solution-1">Shift
+solution</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="introduction">Introduction</h1>
+<p>One of the most used structures in programming problems, questions
+with strings usually revolve around working with string permutations, or
+checking for sub strings in a given string. Questions with arrays,
+revolve around traversing arrays, maybe mutating them by shifting
+elements left or right to make space for new elements or remove existing
+ones, sorting and searching is often also performed on static or dynamic
+arrays more often than on structures like linked lists for example.</p>
+<h1 id="strings">Strings</h1>
+<p>Most all languages that implement strings are providing immutable
+string objects, what that means is that that each mutation on the string
+produces a brand-new string, which is a copy of the original with the
+mutation applied. Keep that in mind and if the problem revolves around
+mutating a String, use the correct data structure for the language, for
+java that would be StringBuilder.</p>
+<h2 id="permutation-of-a-string">Permutation of a string</h2>
+<p>The problem here is usually how to find all permutations of a given
+string, the solution is usually recursive, the way it works, is by
+cutting the last or the first character from a string, and generating
+all permutations for that reduced string. Drill down until the input
+string is of length 1, then in the post recursive calls, stuff the cut
+character in the end, mid and start of each permutated string in the
+list of permutations</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> <span class="fu">permutate</span><span class="op">(</span><span class="bu">String</span> input<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>input<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">==</span> <span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>            <span class="co">// a string input with length 1, has no permutations</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="bu">Arrays</span><span class="op">.</span><span class="fu">asList</span><span class="op">(</span>input<span class="op">);</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">// pull the last element from the input, and remember it</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> suffix <span class="op">=</span> input<span class="op">.</span><span class="fu">substring</span><span class="op">(</span>input<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the new input string, is the original with the tail cut off</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> prefix <span class="op">=</span> input<span class="op">.</span><span class="fu">substring</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> input<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// generate list of permutations for the new substring(n - 1)</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> permutations <span class="op">=</span> <span class="fu">permutate</span><span class="op">(</span>prefix<span class="op">);</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// we hold the actual final result here</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> result <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// for each permutation of the smaller string, stick last element of</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the original at both ends first, and then in between the string</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">// too. thus the new string result will contain the last character</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// of the original in each position</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="bu">String</span> perm <span class="op">:</span> permutations<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>            <span class="co">// add at both ends of the permutated string</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>            result<span class="op">.</span><span class="fu">add</span><span class="op">(</span>perm <span class="op">+</span> suffix<span class="op">);</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>            result<span class="op">.</span><span class="fu">add</span><span class="op">(</span>suffix <span class="op">+</span> perm<span class="op">);</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>            <span class="co">// add it, in between the permutated strings</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> perm<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>                <span class="bu">String</span> head <span class="op">=</span> perm<span class="op">.</span><span class="fu">substring</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> i <span class="op">+</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>                <span class="bu">String</span> tail <span class="op">=</span> perm<span class="op">.</span><span class="fu">substring</span><span class="op">(</span>i <span class="op">+</span> <span class="dv">1</span><span class="op">,</span> perm<span class="op">.</span><span class="fu">length</span><span class="op">());</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>                result<span class="op">.</span><span class="fu">add</span><span class="op">(</span>head <span class="op">+</span> suffix <span class="op">+</span> tail<span class="op">);</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">// return the result</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> result<span class="op">;</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<h2 id="substring-permutation">Substring permutation</h2>
+<p>Another interesting problem, which might look like a tough one is to
+check if a long string contains a permutation of another shorter string
+within itself. What we need to realize here is that we can ‘undo’ the
+permutation in a predictable way, how ? Well by simply sorting the input
+short string. Then when we traverse the longer string, we take a
+sub-string of it, as long as the short string, sort that as well and we
+compare both, if they match then it is indeed a permutation.</p>
+<p>This problem is an extension of the clasic sub-string problem where
+we are asked to check if a given shorter string is a sub-string of
+another longer string.</p>
+<p>Here instead of linear, the complexity is
+<code>O(n * slog(s))</code>. Where N is the length of the long string,
+and S is the length of the short string. If we know that N is
+sufficiently bigger than S then we can drop this non-dominant term S.
+Meaning the complexity will converge to only O(N)</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="fu">subpermutation</span><span class="op">(</span><span class="bu">String</span> longString<span class="op">,</span> <span class="bu">String</span> shortString<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// sort the input, to make sure it is normalized the same way the window</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// string below will be, this we will make use in equalsIgnoreCase</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    shortString <span class="op">=</span> shortString<span class="op">.</span><span class="fu">chars</span><span class="op">()</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                    <span class="op">.</span><span class="fu">sorted</span><span class="op">()</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                    <span class="op">.</span><span class="fu">collect</span><span class="op">(</span><span class="bu">StringBuilder</span><span class="op">::</span><span class="kw">new</span><span class="op">,</span> <span class="bu">StringBuilder</span><span class="op">::</span>appendCodePoint<span class="op">,</span> <span class="bu">StringBuilder</span><span class="op">::</span>append<span class="op">)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                    <span class="op">.</span><span class="fu">toString</span><span class="op">();</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> listOfMatches <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> longString<span class="op">.</span><span class="fu">length</span><span class="op">();</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// take a sub-string of the original just as long as the input short string, which we will sort below</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// account for the fact that the left over of long-string might be less than short-string length</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> windowString <span class="op">=</span> longString<span class="op">.</span><span class="fu">substring</span><span class="op">(</span>i<span class="op">,</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">min</span><span class="op">(</span>longString<span class="op">.</span><span class="fu">length</span><span class="op">(),</span> i <span class="op">+</span> shortString<span class="op">.</span><span class="fu">length</span><span class="op">()));</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// unscamble the sub-string, of shortString.length chars, into</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// a predictable ordered sequence of chars this way we can be</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">// sure that whatever the permutation in windowString is, it</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// will be normalized, by sorting it, to be ready for comparison</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> sortedString <span class="op">=</span> windowString<span class="op">.</span><span class="fu">chars</span><span class="op">()</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>                        <span class="op">.</span><span class="fu">sorted</span><span class="op">()</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>                        <span class="op">.</span><span class="fu">collect</span><span class="op">(</span><span class="bu">StringBuilder</span><span class="op">::</span><span class="kw">new</span><span class="op">,</span> <span class="bu">StringBuilder</span><span class="op">::</span>appendCodePoint<span class="op">,</span> <span class="bu">StringBuilder</span><span class="op">::</span>append<span class="op">)</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>                        <span class="op">.</span><span class="fu">toString</span><span class="op">();</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// compare against the short string, which is also sorted.</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>shortString<span class="op">.</span><span class="fu">equalsIgnoreCase</span><span class="op">(</span>sortedString<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>            listOfMatches<span class="op">.</span><span class="fu">add</span><span class="op">(</span>windowString<span class="op">);</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// return the number of matches</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> listOfMatches<span class="op">.</span><span class="fu">size</span><span class="op">();</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The catch in this problem is to realize that a permutation can be
+converted to a normalized, predictable sequence, by sorting the items.
+And to also realize that if the sub-string extracted from the
+long-string contains a character originally not present in the input
+short-string, then the comparison would catch that and correctly report
+that these two cannot be permutations of one-another</p>
+<h2 id="unique-characters">Unique characters</h2>
+<p>Another problem in string space, might revolve around checking if a
+string has only unique characters. This problem similarly to the one
+above, can be normalized to make the task easier. Generally speaking
+when working with strings, we should either think about ‘sorting’ the
+string or ‘hashing’ the string.</p>
+<p>To check if a string contains only unique characters we would simply
+sort the string, and check if each pair of characters are different. The
+sorting will position the characters such that if we have repeating ones
+they would be next to one another, meaning that we can compare the
+<code>char[i] with char[i + 1]</code>. If we traverse the entire string
+without finding a matching pair we can simply conclude that the string
+contains only unique characters.</p>
+<p>Another solution is to put all characters in a hash map, count each
+occurance and check if we have a character that occurs more than once.
+This solution trades in space, for time complexity.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">boolean</span> <span class="fu">unique</span><span class="op">(</span><span class="bu">String</span> input<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// sort the string, this can be done with quick sort, to avoid using intermediary structures, and wasting space,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> sorted <span class="op">=</span> input<span class="op">.</span><span class="fu">chars</span><span class="op">()</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                    <span class="op">.</span><span class="fu">sorted</span><span class="op">()</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                    <span class="op">.</span><span class="fu">collect</span><span class="op">(</span><span class="bu">StringBuilder</span><span class="op">::</span><span class="kw">new</span><span class="op">,</span> <span class="bu">StringBuilder</span><span class="op">::</span>appendCodePoint<span class="op">,</span> <span class="bu">StringBuilder</span><span class="op">::</span>append<span class="op">)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                    <span class="op">.</span><span class="fu">toString</span><span class="op">();</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// one way to do it is to go through the sorted array and check if a there are any elements which are the same and are sequential</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> input<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>sorted<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">)</span> <span class="op">==</span> sorted<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i <span class="op">+</span> <span class="dv">1</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>            <span class="co">// at this point we know that there are duplicate characters in the string</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>            <span class="co">// therefore the string does not contain unique characters only</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="permutation-check">Permutation check</h2>
+<p>This is a common problem we already saw above, where we check if a
+given string is a permutation of another. This is a more generalized
+solution. Which instead of sorting (which will also work) we employ
+another approach, namely, storing one string (char wise) into a hash map
+and traversing the other string.</p>
+<p>The approach is simple, we store one of the string’s characters in a
+hash map, for each character is a key, and the value is the occurance
+count of that character.</p>
+<p>Then we traverse the second string, we check if the current character
+is contained in the hash map, if yes we subtract from the count, in the
+end if we end up with and empty hash map or all characters have a count
+of 0, we know that the same exact characters are contained in both
+strings, so that means that both strings are permutations of the same
+characters. If while traversing the second string we meet a character
+that is not contained in the hash map, we can early exit because the
+second string contains a character originally not present in the first
+string.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="dt">boolean</span> <span class="fu">permutation</span><span class="op">(</span><span class="bu">String</span> first<span class="op">,</span> <span class="bu">String</span> second<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// early exit, we know that this can not be true if both have different lengths to begin with</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>first<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">!=</span> second<span class="op">.</span><span class="fu">length</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// first collect all unique characters in a map, from the first string, this way we will have a count of all characters</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// contained in the string</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Map</span><span class="op">&lt;</span><span class="bu">Character</span><span class="op">,</span> <span class="bu">Integer</span><span class="op">&gt;</span> countMap <span class="op">=</span> <span class="kw">new</span> <span class="bu">HashMap</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> first<span class="op">.</span><span class="fu">length</span><span class="op">();</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(!</span>countMap<span class="op">.</span><span class="fu">containsKey</span><span class="op">(</span>first<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">)))</span> <span class="op">{</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>            countMap<span class="op">.</span><span class="fu">put</span><span class="op">(</span>first<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">),</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            <span class="bu">Integer</span> count <span class="op">=</span> countMap<span class="op">.</span><span class="fu">get</span><span class="op">(</span>first<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">));</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>            countMap<span class="op">.</span><span class="fu">put</span><span class="op">(</span>first<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">),</span> count <span class="op">+</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// use the count from the map and go through the second string, each time we meet a char that is present in the map that means</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// that it was present in the first string, decrement the count, if a characters exists in second string, but does not in the</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// first, then we can early exit and say that there is no possible way that the first string can be a permutation of the second</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> second<span class="op">.</span><span class="fu">length</span><span class="op">();</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>countMap<span class="op">.</span><span class="fu">containsKey</span><span class="op">(</span>second<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">)))</span> <span class="op">{</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>            <span class="co">// decrement the count of each unique character, in the end we have to end up with all counts being 0, meaning that not</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>            <span class="co">// only the same chars were present in the second string but also the same number of them as well</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>            <span class="bu">Integer</span> count <span class="op">=</span> countMap<span class="op">.</span><span class="fu">get</span><span class="op">(</span>second<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">));</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>count <span class="op">==</span> <span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>                countMap<span class="op">.</span><span class="fu">remove</span><span class="op">(</span>second<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">));</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>                countMap<span class="op">.</span><span class="fu">put</span><span class="op">(</span>second<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">),</span> count <span class="op">-</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">// check if the count map is empty, if yes, then that means we have removed all characters exactly count times, therefore both strings are permutations of one another</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> countMap<span class="op">.</span><span class="fu">isEmpty</span><span class="op">();</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="palindrome-check">Palindrome check</h2>
+<p>Yet another common problem is working with palindromes, words or
+strings which are spelt backwards and forwards the same. A problem
+involving a palindrome might ask of us to check if any permutations of a
+given string can produce a palindrome.</p>
+<p>To solve this issue we can simply take into account the fact that to
+have a palindrome we must meet the following conditions</p>
+<ul>
+<li>the input string is of even length - therefore each character MUST
+occur even number of times (e.g. <code>a a b b c c</code> -&gt;
+<code>a b c c b a</code>)</li>
+<li>the input string is of odd length - therefore only one character CAN
+occur odd number of times, the rest must be even
+(e.g. <code>a a b b c c c</code> -&gt; <code>a b c c c b a</code>)</li>
+</ul>
+<p>To make this check easy we can simply put all characters in a map and
+count them up, then we check if our string is of even length, all counts
+must be even, otherwise we can allow for at most one and only one
+character to have odd number of occurances in the string.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">boolean</span> <span class="fu">palindrome</span><span class="op">(</span><span class="bu">String</span> input<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// string of input one, has no permutations or we can say the string is it&#39;s own permutation and the string is a palindrome too</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>input<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">==</span> <span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// how to approach this problem, we know that a palindrom must have an even number of characters appearing in it, the only way</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// it can be a plindrome is if the same number of characters appear in the &quot;left&quot; and &quot;right&quot; halfs. This means that if the</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// input string&#39;s lendth is even i.e has an even number of characters, then all characters must appear even number of times, 2,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 4, 6, etc. If the input string length is not even, then at most one character from those can have a non even count.</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// count all char occurances, and store them in the map</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Map</span><span class="op">&lt;</span><span class="bu">Character</span><span class="op">,</span> <span class="bu">Integer</span><span class="op">&gt;</span> countMap <span class="op">=</span> <span class="kw">new</span> <span class="bu">HashMap</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> input<span class="op">.</span><span class="fu">length</span><span class="op">();</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(!</span>countMap<span class="op">.</span><span class="fu">containsKey</span><span class="op">(</span>input<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">)))</span> <span class="op">{</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>            countMap<span class="op">.</span><span class="fu">put</span><span class="op">(</span>input<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">),</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>            <span class="bu">Integer</span> count <span class="op">=</span> countMap<span class="op">.</span><span class="fu">get</span><span class="op">(</span>input<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">));</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>            countMap<span class="op">.</span><span class="fu">put</span><span class="op">(</span>input<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">),</span> count <span class="op">+</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// check how many non even characters are there hold them in the count, we do not care about the even characters, what we mean is that if we find 0 odd character occurances, therefore they are all even.</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> counter <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">var</span> entry <span class="op">:</span> countMap<span class="op">.</span><span class="fu">entrySet</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">// account only for the odd ones</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>entry<span class="op">.</span><span class="fu">getValue</span><span class="op">()</span> <span class="op">%</span> <span class="dv">2</span> <span class="op">!=</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>            counter<span class="op">++;</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">// when the input length is even, we can not have non-even count of characters, when the input length is non-even, at most one</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// character can have a non-even count in the original string, below we check for exactly those conditions.</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    <span class="dt">boolean</span> palindrome <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>input<span class="op">.</span><span class="fu">length</span><span class="op">()</span> <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        palindrome <span class="op">=</span> counter <span class="op">==</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>        palindrome <span class="op">=</span> counter <span class="op">==</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> palindrome<span class="op">;</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="wraparound-substring">Wraparound substring</h2>
+<p>A modification of the traditional sub-string check, where we try to
+find if a given sequence of characters is a sub-string inside another
+string, however while they are sequential, some characters might wrap
+around to the start of the string.</p>
+<p>For example, say we are looking for the sub-string
+<code>waffle</code> inside the given string
+<code>a waffle was found on the ground</code>. In this traditional
+example, the full sub-string is found in the same sequence in the string
+starting at range / positions with indices <code>[1-6]</code>.</p>
+<p>However let us take the same string but do a slight ‘rotation’ on it,
+and now we have <code>fle was found on the ground a wa</code> - The same
+sequence of <code>waffle</code> is still present however part of it is
+at the end of the string, another part is at the beginning.</p>
+<p>Another example where the input string is the same length as the
+sub-string, which is really just the same as the general case.</p>
+<ul>
+<li><code>waterbottle</code> &lt;-&gt; <code>erbottlewat</code> - is
+contained completely, but wraps around</li>
+<li><code>waterbottle</code> &lt;-&gt; <code>orbottlewat</code> - is not
+contained, a mismatching character</li>
+</ul>
+<p>To solve this issue we have to simply modify the sub-string
+algorithm, instead of looping through the string from start to finish,
+we loop through it with wrap around. The main thing to consider is that
+we might end up looping infinitely, to stop that we have to keep track
+of how many times we loop through the source string, the one inside
+which we are looking for a sub-string match. Worse case scenario is we
+loop through it at most 2 times, which is O(2*N) which is O(N), we can
+drop the constants.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">boolean</span> <span class="fu">substrting</span><span class="op">(</span><span class="bu">String</span> orig<span class="op">,</span> <span class="bu">String</span> rotated<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> loops <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> count <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// loop over the original string, and and check how many consequtive characters from the original match with the</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// rotated string, the caveat here is to just loop around the original, using mod, to make sure all characters</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// are inspected in the correct order. (we do simple wrap around)</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span>i <span class="op">&lt;</span> orig<span class="op">.</span><span class="fu">length</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// if two loops over the rotated string were made, and we still have not found the original string, then we can bail out,</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// there is no match</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>loops <span class="op">&gt;</span> <span class="dv">2</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// each time a full loop is made, account for it, a loop is made when the next j would become greater than the original</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">// length, and a wrap around would occur</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        loops <span class="op">+=</span> <span class="op">(</span>j <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="op">/</span> orig<span class="op">.</span><span class="fu">length</span><span class="op">();</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// check against the current pos in original and rotated, if not equal move the orig string pointer j</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// forward, accounting for index loop around, using mod</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>orig<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>i<span class="op">)</span> <span class="op">!=</span> rotated<span class="op">.</span><span class="fu">charAt</span><span class="op">(</span>j<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>            <span class="co">// when count is already bigger than 1</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>count <span class="op">&gt;</span> <span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>                <span class="co">// this case is mandatory to handle, since we have already started &#39;counting&#39; and we encounter a non-matching</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>                <span class="co">// character, that means that the string partially matched, but not the entire sub-string, we bail here</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>            j <span class="op">=</span> <span class="op">(</span>j <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="op">%</span> orig<span class="op">.</span><span class="fu">length</span><span class="op">();</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span><span class="op">;</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">// both chars at the given position match, increment the count, and move both pointers forward, at some</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">// point if count == orig.length == rotated.length we know that the rotation is valid</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>        j <span class="op">=</span> <span class="op">(</span>j <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="op">%</span> rotated<span class="op">.</span><span class="fu">length</span><span class="op">();</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>        i<span class="op">++;</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>        count<span class="op">++;</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    <span class="co">// reaching this point here if the count is exactly the length of the original sub-string, that means the rotated string</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">// contained the orig as a sub-string, somewhere in its representation</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count <span class="op">==</span> orig<span class="op">.</span><span class="fu">length</span><span class="op">();</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Since we are looking for a sequential sub-string, the moment we start
+incrementing the count, and we notice a non-matching character, we can
+early bail out, the sub-string sequence is broken, meaning it is not
+contained.</p>
+<h1 id="arrays">Arrays</h1>
+<h2 id="reversing-array">Reversing array</h2>
+<p>One of the most common algorithms, that is not that complex but comes
+up often and is something that should be understood. The approach
+basically walks the array from both ends, and swaps elements at both
+ends of the array, while the two pointers, end and start meet. The
+moment start overlaps with end we can stop with the swapping. Key thing
+to note here is that start has to become strictly bigger or equal than
+end</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span><span class="op">[]</span> <span class="fu">reverse</span><span class="op">(</span><span class="dt">int</span><span class="op">[]</span> input<span class="op">,</span> <span class="dt">int</span> start<span class="op">,</span> <span class="dt">int</span> end<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span>start <span class="op">&lt;</span> end<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">// general swap method, nothing special, swap the elements at both ends</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> tmp <span class="op">=</span> input<span class="op">[</span>start<span class="op">];</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        input<span class="op">[</span>start<span class="op">]</span> <span class="op">=</span> input<span class="op">[</span>end<span class="op">];</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        input<span class="op">[</span>end<span class="op">]</span> <span class="op">=</span> tmp<span class="op">;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// move start forward and end backward, do this until they basically meet</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        start<span class="op">++;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        end<span class="op">--;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> input<span class="op">;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>   [1, 2, 3, 4, 5, 6] s = 0, e = 5</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>   [6, 2, 3, 4, 5, 1] s = 1, e = 4</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>   [6, 5, 4, 5, 2, 1] s = 2, e = 3</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                      s = 3, e = 2</span></code></pre></div>
+<h2 id="rotating-array">Rotating array</h2>
+<p>This problem extends off of the base problem of rotating an array,
+what rotating an array means is rotating it such that the elements are
+pushed forward, from some position <code>k</code> and they loop around
+the end of the array and are <code>pushed</code> at the beginning of the
+array</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>   [1, 2, 3, 4, 5, 6]</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>   [5, 6, 1, 2, 3, 4]</span></code></pre></div>
+<p>In the example above the rotation factor <code>k</code> is 2, note
+that if the rotation factor is 0, that would imply we simply have to
+only reverse the array, and that is that. That is simply a special case
+of the rotation problem, but the rotation problem itself is solved by
+reversing the array around the rotation factor <code>k</code></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span><span class="op">[]</span> <span class="fu">rotate</span><span class="op">(</span><span class="dt">int</span><span class="op">[]</span> input<span class="op">,</span> <span class="dt">int</span> k<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// first reverse the entire array, this is the base case</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    input <span class="op">=</span> <span class="fu">reverse</span><span class="op">(</span>input<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> input<span class="op">.</span><span class="fu">length</span> <span class="op">-</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// then reverse from the start to the `k`-th element</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    input <span class="op">=</span> <span class="fu">reverse</span><span class="op">(</span>input<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> k <span class="op">-</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// finally reverse the elements from `k` to the end of the array</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    input <span class="op">=</span> <span class="fu">reverse</span><span class="op">(</span>input<span class="op">,</span> k<span class="op">,</span> input<span class="op">.</span><span class="fu">length</span> <span class="op">-</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> input<span class="op">;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>   [1, 2, 3, 4, 5, 6] - input starting array</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>   [6, 5, 4, 3, 2, 1] - reverse entire array</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>   [5, 6, 4, 3, 2, 1] - reverse from 0 - (k - 1)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>   [5, 6, 1, 2, 3, 4] - reverse from k - (l - 1)</span></code></pre></div>
+<h2 id="move-zeroes">Move zeroes</h2>
+<p>Another interesting problem, is moving all zero (or any other value)
+elements in an array at the end, in-place. The way this is achieved is
+by keeping a pointer where non-zero elements are placed, starting from
+the beginning of the array. When the current element is a zero and the
+next one is not, we put the non-zero element at the current pointer
+position <code>s</code>, then we move the pointer <code>s</code>
+forward, and zero out the next element i.e. <code>[i - 1]</code>. A side
+case that we need to handle is when the current element is non zero, we
+also need to move the pointer <code>s</code> forward, this will make
+sure that we skip over non-zero elements and both <code>i</code> and
+<code>s</code> are incrementing in sync, so we do not override the
+actual non-zero element later on.</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span><span class="op">[]</span> <span class="fu">movez</span><span class="op">(</span><span class="dt">int</span><span class="op">[]</span> input<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> s <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// pointer into last non zero element in the array</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> input<span class="op">.</span><span class="fu">length</span> <span class="op">-</span> <span class="dv">1</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>input<span class="op">[</span>i<span class="op">]</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">&amp;&amp;</span> input<span class="op">[</span>i <span class="op">+</span> <span class="dv">1</span><span class="op">]</span> <span class="op">!=</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>            <span class="co">// when the current element is a 0 and the next one is not,</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>            <span class="co">// swap with the 0th element, and move the current non-zero</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>            <span class="co">// element&#39;s pointer &#39;s&#39; forward</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>            input<span class="op">[</span>s<span class="op">]</span> <span class="op">=</span> input<span class="op">[</span>i <span class="op">+</span> <span class="dv">1</span><span class="op">];</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>            input<span class="op">[</span>i <span class="op">+</span> <span class="dv">1</span><span class="op">]</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>            s <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="cf">if</span> <span class="op">(</span>input<span class="op">[</span>i<span class="op">]</span> <span class="op">!=</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>            <span class="co">// when the current element is not a 0, simply move the pointer</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>            <span class="co">// forward, since it must not be moved from it&#39;s current position</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>            s <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> input<span class="op">;</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="sum-target">Sum target</h2>
+<p>Another problem which pops up real often is to find two elements in
+an array which sum to a given target sum. This is quite an interesting
+one, the way to solve it is to realize that we already have at least two
+of the variables, the target sum and one of the values,
+<code>s = x + y</code>. In this equation, the value of <code>x</code> is
+the current element from the array (while traversing), the value of
+<code>y</code> we can calculate by re-arranging it such that
+<code>y = s - x</code>. Meaning that we simply search in the array for
+the value of <code>y</code>. If there is such we simply remember the
+index of that value or print it out, whatever the solution requires. In
+these tasks it is often assumed that a pair will exist, meaning that if
+the current value of <code>x</code> is the same as the sum we have to
+find a <code>0</code> in the array, that would be the second part of the
+pair</p>
+<p>Note that in the inner loop where we look for the value, we already
+start from <code>i + 1</code>, why is that the case ? Well since
+<code>i</code> starts from the beginning of the array, we are always
+going to find the second value in the <code>i + 1</code> subarray. If
+such a value exists, of course. The break below is not needed, but we
+assume the elements are unique, in any case if they are not, the array
+can be made unique or the break can be removed</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span><span class="op">[]</span> <span class="fu">sum</span><span class="op">(</span><span class="dt">int</span><span class="op">[]</span> input<span class="op">,</span> <span class="dt">int</span> target<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> pairs <span class="op">=</span> <span class="kw">new</span> <span class="bu">LinkedList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> input<span class="op">.</span><span class="fu">length</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// since we have the target sum, and the current element</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// we can find the second element we need, by subtracting</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the current element from the target sum</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> result <span class="op">=</span> target <span class="op">-</span> input<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the result is the element we are going to look for in</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the sub-array from i - length. We also assume that</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// a pair should exist if the target == input[i], we should</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// look for an element with a value of 0 in the array</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> j <span class="op">=</span> i <span class="op">+</span> <span class="dv">1</span><span class="op">;</span> j <span class="op">&lt;</span> input<span class="op">.</span><span class="fu">length</span><span class="op">;</span> j<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>result <span class="op">==</span> input<span class="op">[</span>j<span class="op">])</span> <span class="op">{</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>                <span class="co">// add the pairs of elements which sum up to target</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>                <span class="co">// note that we assume the array does not contain</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>                <span class="co">// duplicates, for simplicty, break</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>                pairs<span class="op">.</span><span class="fu">add</span><span class="op">(</span>i<span class="op">);</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>                pairs<span class="op">.</span><span class="fu">add</span><span class="op">(</span>j<span class="op">);</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">// return the array of pairs where each two indices are pairs</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pairs<span class="op">.</span><span class="fu">stream</span><span class="op">().</span><span class="fu">mapToInt</span><span class="op">(</span><span class="bu">Integer</span><span class="op">::</span>intValue<span class="op">).</span><span class="fu">toArray</span><span class="op">();</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="sub-array">Sub array</h2>
+<p>Another very often asked problem is to find of sub-array which
+produces the biggest sum. While the array can have negative numbers. The
+way this solution works, is by tracking the current max sum, and
+resetting the sum every time a better sum is reached</p>
+<p>The most important part here is the current sum tracking. What
+happens is we compare the local sum accumulated so far with the current
+element, if the current element is greater than the local sum + current
+element, the sequence ‘resets’, at the current index <code>i</code>,
+otherwise the sequence continues. By resets, what we really mean is that
+the current element is greater than the local sum accumulated so far
+meaning that that accumulation can be discarded, we have found a better
+local sum sequence</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>    [-2, 1, -3, 4, -1, 2, 1, -5, 4]</span></code></pre></div>
+<p>Take the example above, starting off the local sum is
+<code>-2</code>, then the local sum will be summed with <code>1</code>,
+producing <code>-2 + 1 = -1</code>, however, the element itself is
+<code>1</code>, greater than the local sum, meaning that between the
+sequence of elements <code>-2, 1</code> and simply sequence starting at
+element <code>1</code>, the second one is producing a greater total sum
+= 1. Then in the next step we go to <code>-3</code>, where the current
+local sum will be <code>1 + (-3) = -2</code>, which is better than the
+element itself <code>-3</code>, meaning the sequence will be extended to
+elements <code>1, -3</code> not reset. Third step the element is
+<code>4</code>, the sum so far is <code>-2</code>, between
+<code>-2 + 4 = 2</code> and the element <code>4</code> itself, we can
+see the local sum will be greater if we reset the sequence to start at
+the current element <code>4</code>. This process of either extending the
+sequence or resetting it at the current element keeps going on until we
+finish with all elements, at the end the <code>max</code> value will
+hold the biggest local sum ever encountered</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="fu">subarray</span><span class="op">(</span><span class="dt">int</span><span class="op">[]</span> nums<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>nums <span class="op">==</span> <span class="kw">null</span> <span class="op">||</span> nums<span class="op">.</span><span class="fu">length</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> max <span class="op">=</span> nums<span class="op">[</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> current <span class="op">=</span> nums<span class="op">[</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;</span> nums<span class="op">.</span><span class="fu">length</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// either extend the current subarray or start a new subarray from nums[i]</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        current <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">max</span><span class="op">(</span>nums<span class="op">[</span>i<span class="op">],</span> current <span class="op">+</span> nums<span class="op">[</span>i<span class="op">]);</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// update the maximum sum found so far</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        max <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">max</span><span class="op">(</span>max<span class="op">,</span> current<span class="op">);</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> max<span class="op">;</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>A brief follow up of the steps above, could look like this</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>   inut-array: n[-2, 1, -3, 4, -1, 2, 1, -5, 4]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>   curr-sum:   c = -2</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>   max-sum:    m = -2</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>   looping i = 1 -&gt; l</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        c = max(1, -2 + 1) -&gt; 1 - seq reset, starts at i = 1</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        m = max(-2, 1) -&gt; 1 - new total max is found, set it</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>   looping i = 2 -&gt; l</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        c = max(-3, 1 + (-3)) -&gt; -2 - seq continues, starts at i = 1, ends in j = 2</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        m = max(1,  1) -&gt; 1 -&gt; total max is retained so far no bigger sum is found</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>   looping i = 3 -&gt; l</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>        c = max(4, -2 + 4) -&gt; 4 - seq resets, starts at i = 3</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        m = max(1, 4) -&gt; 4 -&gt; new total max is found, set it</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>   looping i = 4 -&gt; l</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>        c = max(-1, 4 + (-1)) -&gt; 3 - seq continues, starts at i = 3, ends in j = 4</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        m = max(4, 3) -&gt; 4 -&gt; total max is retained so far no bigger sum is found</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>   looping i = 5 -&gt; l</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>        c = max(2, 3 + 2) -&gt; 5 - seq continues, starts at i = 3, ends in j = 5</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>        m = max(4, 5) -&gt; 5 -&gt; new total max is found, set it</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>   the steps keep repeating, until the entire array is exhaused, and finally we find</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>   in the end the max sum is actually 5, produced by these 4 elements - [4, -1, 2, 1]</span></code></pre></div>
+<h2 id="array-removal">Array removal</h2>
+<p>There are basically two general ways to do array removal, for a given
+index element that has to be removed, assume that the implementations
+account for re-sizing the capacity of the array to reduce the capacity
+if needed</p>
+<ul>
+<li>swap the element to be removed with the last element, when order is
+not important</li>
+<li>shift down all elements right - left, starting from the index of the
+element to be removed</li>
+</ul>
+<h3 id="swap-solution">Swap solution</h3>
+<p>This is usually included in gotcha questins, where the order of array
+elements often does not matter, meaning that we can simply place the
+last element over the element to be removed, which is often enough to
+consider this implementation as ‘removal’</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="fu">remove</span><span class="op">(</span><span class="dt">int</span><span class="op">[]</span> n<span class="op">,</span> <span class="dt">int</span> i<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    n<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> n<span class="op">[</span>n<span class="op">.</span><span class="fu">size</span> <span class="op">-</span> <span class="dv">1</span><span class="op">];</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    n<span class="op">.</span><span class="fu">size</span><span class="op">--;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="shift-solution">Shift solution</h3>
+<p>Following elements are <code>pulled</code> down overriding elements
+starting at index <code>k</code>, which is the index to be removed, the
+element at that index is assigned the next element, and so on, until the
+end of the array, this has the effect of pulling down all elements by
+one, shifting them to the left.</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="fu">remove</span><span class="op">(</span><span class="dt">int</span><span class="op">[]</span> n<span class="op">,</span> <span class="dt">int</span> k<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> k<span class="op">;</span> i <span class="op">&lt;</span> n<span class="op">.</span><span class="fu">size</span> <span class="op">-</span> <span class="dv">1</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>        n<span class="op">[</span>k<span class="op">]</span> <span class="op">=</span> n<span class="op">[</span>k <span class="op">+</span> <span class="dv">1</span><span class="op">];</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    n<span class="op">.</span><span class="fu">size</span><span class="op">--;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="array-insert">Array insert</h2>
+<p>Similarly we have two options here, assume that the implementations
+account for re-sizing the capacity of the array to fit the new elements,
+if needed</p>
+<ul>
+<li>inserted at the end of the array, set element at [len - 1] = value,
+when array is big enough</li>
+<li>inserted at some given index position, where elements are shifted
+left - right, starting from the index to be inserted at</li>
+</ul>
+<h3 id="append-solution">Append solution</h3>
+<p>Simply append the element at the last possible, free position, which
+in this case is index <code>size</code>, that is the new last free space
+in the array.</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="fu">insert</span><span class="op">(</span><span class="dt">int</span><span class="op">[]</span> n<span class="op">,</span> <span class="dt">int</span> v<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    n<span class="op">[</span>n<span class="op">.</span><span class="fu">size</span><span class="op">]</span> <span class="op">=</span> v</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    n<span class="op">.</span><span class="fu">size</span><span class="op">++;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="shift-solution-1">Shift solution</h3>
+<p>In this solution the elements are pulled towards the end of the
+array, note that <code>size</code> below refers to the actual number of
+elements present in the array, we start off from index <code>size</code>
+due to the fact we are inserting one element, meaning that index
+<code>size</code> will be the new last index after the insertion is
+done.</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="fu">insert</span><span class="op">(</span><span class="dt">int</span><span class="op">[]</span> n<span class="op">,</span> <span class="dt">int</span> v<span class="op">,</span> <span class="dt">int</span> k<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> n<span class="op">.</span><span class="fu">size</span><span class="op">;</span> i <span class="op">&gt;</span> k<span class="op">;</span> <span class="op">--</span>i<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>        n<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> n<span class="op">[</span>i <span class="op">-</span> <span class="dv">1</span><span class="op">];</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    n<span class="op">[</span>k<span class="op">]</span> <span class="op">=</span> v<span class="op">;</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    n<span class="op">.</span><span class="fu">size</span><span class="op">++;</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</body>
+</html>

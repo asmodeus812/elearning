@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>0-language-and-features</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#java" id="toc-java">Java</a>
+<ul>
+<li><a href="#the-history" id="toc-the-history">The History</a></li>
+<li><a href="#changing-the-world" id="toc-changing-the-world">Changing
+the world</a></li>
+<li><a href="#byte-code-magic" id="toc-byte-code-magic">Byte code
+magic</a></li>
+<li><a href="#core-concepts" id="toc-core-concepts">Core
+concepts</a></li>
+<li><a href="#java-versions" id="toc-java-versions">Java
+Versions</a></li>
+<li><a href="#java-features" id="toc-java-features">Java Features</a>
+<ul>
+<li><a href="#java-beans" id="toc-java-beans">Java Beans</a></li>
+<li><a href="#awt-abstract-window-toolkit"
+id="toc-awt-abstract-window-toolkit">AWT (Abstract Window
+Toolkit)</a></li>
+<li><a href="#swing-swing-beyond-awt"
+id="toc-swing-swing-beyond-awt">Swing (Swing beyond AWT)</a></li>
+<li><a href="#jdbc-java-database-connectivity"
+id="toc-jdbc-java-database-connectivity">JDBC (Java Database
+Connectivity)</a></li>
+<li><a href="#rmi-remote-method-invocation"
+id="toc-rmi-remote-method-invocation">RMI (Remote Method
+Invocation)</a></li>
+<li><a href="#the-java-sound-api" id="toc-the-java-sound-api">The Java
+Sound API</a></li>
+<li><a href="#java-web-start" id="toc-java-web-start">Java Web
+Start</a></li>
+<li><a href="#java-logging-api" id="toc-java-logging-api">Java Logging
+API</a></li>
+<li><a href="#the-original-io" id="toc-the-original-io">The original
+I/O</a></li>
+<li><a href="#the-java-nio" id="toc-the-java-nio">The Java NIO</a></li>
+</ul></li>
+<li><a href="#release-cycle" id="toc-release-cycle">Release
+Cycle</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="java">Java</h1>
+<p>Java is a high-level, class-based, object-oriented programming
+language that is designed to have as few implementation dependencies as
+possible. It is a general-purpose programming language intended to let
+programmers write once, run anywhere (<code>WORA</code>), meaning that
+compiled Java code can run on all platforms that support Java without
+the need to recompile. Java applications are typically compiled to
+<code>bytecode</code> that can run on any Java virtual machine
+(<code>JVM</code>) regardless of the underlying computer architecture.
+The syntax of Java is similar to C and C++, but has fewer low-level
+facilities than either of them.</p>
+<h2 id="the-history">The History</h2>
+<p>Java was conceived by James Gosling, Patrick Naughton, Chris Warth,
+Ed Frank, and Mike Sheridan at Sun Microsystems, Inc. in 1991. It took
+18 months to develop the first working version. This language was
+initially called “Oak,” but was renamed “Java” in 1995. Between the
+initial implementation of Oak in the fall of 1992 and the public
+announcement of Java in the spring of 1995</p>
+<p>Instead, the primary motivation was the need for a
+platform-independent (that is, architecture-neutral) language that could
+be used to create software to be embedded in various consumer electronic
+devices, such as microwave ovens and remote controls. As you can
+probably guess, many different types of CPUs are used as controllers.
+The trouble with C and C++ (and most other languages) is that they are
+designed to be compiled for a specific target.</p>
+<h2 id="changing-the-world">Changing the world</h2>
+<p>Applets - An applet is a special kind of Java program that is
+designed to be transmitted over the Internet and automatically executed
+by a Java-compatible web browser. Furthermore, an applet is downloaded
+on demand, without further interaction with the user. If the user clicks
+a link that contains an applet, the applet will be automatically
+downloaded and run in the browser. Applets are intended to be small
+programs. They are typically used to display data provided by the
+server, handle user input, or provide simple functions, such as a loan
+calculator, that execute locally, rather than on the server. In essence,
+the applet allows some functionality to be moved from the server to the
+client.</p>
+<p>Servlets - Java on the Server Side As useful as applets can be, they
+are just one half of the client/server equation. Not long after the
+initial release of Java, it became obvious that Java would also be
+useful on the server side. The result was the servlet. A servlet is a
+small program that executes on the server. Just as applets dynamically
+extend the functionality of a web browser, servlets dynamically extend
+the functionality of a web server. Thus, with the advent of the servlet,
+Java spanned both sides of the client/server connection.</p>
+<p>Security - Java achieved this protection by confining an applet to
+the Java execution environment and not allowing it access to other parts
+of the computer. (You will see how this is accomplished shortly.) The
+ability to download applets with confidence that no harm will be done
+and that no security will be breached may have been the single most
+innovative aspect of Java</p>
+<p>Portability - Portability is a major aspect of the Internet because
+there are many different types of computers and operating systems
+connected to it. If a Java program were to be run on virtually any
+computer connected to the Internet, there needed to be some way to
+enable that program to execute on different systems.</p>
+<h2 id="byte-code-magic">Byte code magic</h2>
+<p>The output of a Java compiler is not executable code. Rather, it is
+bytecode. Bytecode is a highly optimized set of instructions designed to
+be executed by the Java run-time system, which is called the Java
+Virtual Machine (JVM). In essence, the original JVM was designed as an
+interpreter for bytecode. This may come as a bit of a surprise since
+many modern languages are designed to be compiled into executable code
+because of performance concerns. However, the fact that a Java program
+is executed by the JVM helps solve the major problems associated with
+web-based programs. Here is why.</p>
+<p>Translating a Java program into bytecode makes it much easier to run
+a program in a wide variety of environments because only the JVM needs
+to be implemented for each platform. Once the run-time package exists
+for a given system, any Java program can run on it. Remember, although
+the details of the JVM will differ from platform to platform, all
+understand the same Java bytecode. If a Java program were compiled to
+native code, then different versions of the same program would have to
+exist for each type of CPU connected to the Internet. This is, of
+course, not a feasible solution.</p>
+<p>The fact that a Java program is executed by the JVM also helps to
+make it secure.</p>
+<p>Although Java was designed as an interpreted language, there is
+nothing about Java that prevents on-the-fly compilation of bytecode into
+native code in order to boost performance. For this reason, the HotSpot
+technology was introduced not long after Java’s initial release. HotSpot
+provides a Just-In-Time (JIT) compiler for bytecode. When a JIT compiler
+is part of the JVM, selected portions of bytecode are compiled into
+executable code in real time, on a piece-by-piece, demand basis. It is
+important to understand that it is not practical to compile an entire
+Java program into executable code all at once, because Java performs
+various run-time checks that can be done only at run time. Instead, a
+JIT compiler compiles code as it is needed, during execution.</p>
+<h2 id="core-concepts">Core concepts</h2>
+<ul>
+<li>Secure</li>
+<li>Simple</li>
+<li>Portable</li>
+<li>Object-oriented</li>
+<li>Robust</li>
+<li>Multithreaded</li>
+<li>Architecture-neutral</li>
+<li>Interpreted</li>
+<li>High performance</li>
+<li>Distributed</li>
+<li>Dynamic</li>
+</ul>
+<h2 id="java-versions">Java Versions</h2>
+<p>Here is a brief synopses of the major features in each version of
+java, the release of java 5 is what would mark the language’s powers in
+the new age of programming</p>
+<ul>
+<li><p>Java 1.0 (1996) - Initial release of Java. Introduced basic
+language features, AWT (Abstract Window Toolkit), Applets, JVM, Garbage
+Collection, and multithreading support.</p></li>
+<li><p>Java 1.1 (1997) - Significant update with event handling model
+(delegation event model), inner classes, JavaBeans, JDBC (Java Database
+Connectivity), RMI (Remote Method Invocation), and deprecation of some
+methods from 1.0.</p></li>
+<li><p>Java 1.2 (Java 2) (1998) - Major update marking the beginning of
+“modern Java”. Introduced Swing GUI toolkit, Collections Framework, JIT
+Compiler integration into JVM, Java Plug-in, and Security
+Enhancements.</p></li>
+<li><p>Java 1.3 (2000) - Performance improvements, HotSpot JVM became
+the default, and added JavaSound API. Minor updates to collections and
+networking.</p></li>
+<li><p>Java 1.4 (2002) - Introduced assertions, regular expressions, NIO
+(New Input/Output), Java Web Start, logging API, and XML parsing.
+Focused on better core language support and more robust I/O.</p></li>
+<li><p>Java 1.5 (Java 5) (2004) - Introduced Generics, enhanced for
+loop, autoboxing/unboxing, varargs, annotations, enumerations, and the
+concurrency utilities package. Renamed as Java 5.0 to reflect major
+updates.</p></li>
+<li><p>Java 1.6 (Java 6) (2006) - Focused on performance improvements,
+added Scripting API, Compiler API, Web Services support (JAX-WS), and
+enhancements to JDBC 4.0.</p></li>
+<li><p>Java 1.7 (Java 7) (2011) - Introduced try-with-resources for
+better exception handling, diamond operator (&lt;&gt;), NIO.2 (enhanced
+file I/O), Fork/Join framework, switch statements with strings, and
+improvements to the JVM (invokedynamic bytecode).</p></li>
+</ul>
+<p>With the very important release of Java J2SE 5, it was revolutionary.
+Unlike most of the previous Java upgrades, which offered important, but
+measured improvements, J2SE 5 fundamentally expanded the scope, power,
+and range of the language.</p>
+<p>The importance of these new features is reflected in the use of the
+version number “5.” The next version number for Java would normally have
+been 1.5. However, the new features were so significant that a shift
+from 1.4 to 1.5 just didn’t seem to express the magnitude of the change.
+Instead, Sun elected to increase the version number to 5 as a way of
+emphasizing that a major event was taking place. Thus, it was named J2SE
+5, and the developer’s kit was called JDK 5. However, in order to
+maintain consistency, Sun decided to use 1.5 as its internal version
+number, which is also referred to as the developer version number. The
+“5” in J2SE 5 is called the product version number.</p>
+<p>This marks a significant milestone in the development of the language
+and it’s runtime, from then on the major version will be kept as a Java
+SE 5,6,7 etc. But the development version number format of 1._release_
+would be kept up until the release of Java 8 as Java SE 1.8</p>
+<p>The Java SE 7 was the first major release of Java since Sun
+Microsystems was acquired by Oracle. Java SE 7 made several additions to
+the Java API library. Two of the most important were the enhancements to
+the NIO Framework and the addition of the Fork/Join Framework. NIO
+(which originally stood for New I/O) was added to Java in version 1.4.
+However, the changes added by Java SE 7 fundamentally expanded its
+capabilities. So significant were the changes, that the term NIO.2 is
+often used.</p>
+<h2 id="java-features">Java Features</h2>
+<h3 id="java-beans">Java Beans</h3>
+<p>Set of conventions for creating reusable software components in Java.
+They are used to encapsulate many objects into a single object (the
+bean)</p>
+<ul>
+<li>Properties: JavaBeans use properties to store and retrieve data.
+These properties are accessed through getter and setter methods. For
+example:</li>
+<li>Default Constructor: JavaBeans must have a no-argument (default)
+constructor, which allows for easy instantiation without needing to
+provide parameters.</li>
+<li>Serializable: JavaBeans should implement the Serializable interface,
+which allows the bean to be easily serialized and deserialized. This is
+useful for storing or transmitting bean instances.</li>
+<li>Getter and Setter Methods: JavaBeans follow a naming convention for
+accessor methods. Getter methods retrieve property values and start with
+get followed by the property name (e.g., getName),</li>
+</ul>
+<h3 id="awt-abstract-window-toolkit">AWT (Abstract Window Toolkit)</h3>
+<p>AWT is the original Java GUI toolkit introduced in JDK 1.0. It
+provides a set of native, platform-dependent GUI components.</p>
+<ul>
+<li>Components: Includes basic components such as buttons, checkboxes,
+labels, text fields, and more.</li>
+<li>Rendering: AWT components are rendered by the native OS, which means
+they look like native components on different platforms.</li>
+</ul>
+<h3 id="swing-swing-beyond-awt">Swing (Swing beyond AWT)</h3>
+<p>Swing is a more advanced GUI toolkit introduced in JDK 1.2 as part of
+Java 2. It builds on AWT but provides a richer set of components.</p>
+<ul>
+<li>Components: Includes enhanced components like JButton, JLabel,
+JTable, JTree, JList, and many more, offering greater functionality and
+customization.</li>
+<li>Rendering: Swing components are rendered by Java and do not rely on
+the native OS. This provides a consistent look and feel across different
+platforms.</li>
+</ul>
+<h3 id="jdbc-java-database-connectivity">JDBC (Java Database
+Connectivity)</h3>
+<p>Is a Java API that allows Java applications to interact with
+relational databases. It provides a standard interface for connecting to
+databases, executing SQL queries, and retrieving results</p>
+<ul>
+<li>Database Connectivity: JDBC enables Java applications to connect to
+a wide variety of relational databases (e.g., MySQL, PostgreSQL, Oracle)
+using a database driver.</li>
+<li>SQL Execution: Through JDBC, you can execute SQL statements, such as
+queries (SELECT), updates (INSERT, UPDATE, DELETE), and more complex
+commands.</li>
+<li>Result Handling: JDBC allows you to process the results returned by
+SQL queries, including navigating through results, extracting data, and
+handling errors.</li>
+<li>Transaction Management: JDBC provides support for transaction
+management, allowing you to commit or rollback transactions to ensure
+data integrity.</li>
+</ul>
+<h3 id="rmi-remote-method-invocation">RMI (Remote Method
+Invocation)</h3>
+<p>Is a Java API that allows a Java program to invoke methods on an
+object located on a different Java Virtual Machine (JVM), whether it’s
+on the same machine or across a network, can communicate over the
+Internet</p>
+<ul>
+<li>Remote Communication: Allows objects to communicate over a network,
+enabling the development of distributed applications.</li>
+<li>Object Serialization: Transmits object states between JVMs using
+Java’s built-in serialization mechanism.</li>
+<li>Stubs and Skeletons: Clients use stubs to interact with remote
+objects, while the server side uses skeletons (deprecated in recent
+versions) to handle communication.</li>
+</ul>
+<h3 id="the-java-sound-api">The Java Sound API</h3>
+<p>Provides a set of classes and interfaces for handling audio in Java
+applications</p>
+<ul>
+<li>It allows developers to work with audio data for tasks such as
+playback, recording, and processing of audio.</li>
+<li>Provides access to audio system resources and manages audio data. It
+includes classes for audio mixing, playback, and recording.</li>
+<li>javax.sound.sampled.AudioSystem: A central class that provides
+methods for obtaining and managing audio line objects, including mixers,
+data lines, and audio input/output lines.</li>
+</ul>
+<h3 id="java-web-start">Java Web Start</h3>
+<p>Was a technology developed by Sun Microsystems (later Oracle) that
+allowed Java applications to be launched and run over a network from a
+web browser. It was introduced in Java 1.4 and was part of the Java
+Runtime Environment (JRE).</p>
+<ul>
+<li>Deployment: Simplified the deployment of Java applications by
+enabling users to launch Java programs directly from a web browser or
+desktop shortcut without needing to install them manually.</li>
+<li>Java Network Launch Protocol (JNLP): Used JNLP files to describe how
+to launch and manage the application. The JNLP file is an XML file that
+includes information such as the application’s main class, required
+libraries, and resources.</li>
+</ul>
+<p>How Java Web Start Worked</p>
+<ul>
+<li>Launching: When a user clicked on a link to a Java Web Start
+application, the JNLP file was downloaded and read by the Java Runtime
+Environment (JRE).</li>
+<li>Downloading: Java Web Start downloaded the application’s JAR files
+and other resources specified in the JNLP file.</li>
+<li>Caching: The application was cached locally on the user’s machine to
+improve performance on subsequent launches.</li>
+<li>Running: The JRE launched the application in its own process,
+providing a user interface as specified by the application.</li>
+</ul>
+<h3 id="java-logging-api">Java Logging API</h3>
+<p>Also known as the java.util.logging package. This API provides a
+standardized mechanism and the actual concrete implementation for
+logging information in Java applications</p>
+<p>Relationship:</p>
+<ul>
+<li>Java Logging API: Provides a concrete implementation of logging
+within the Java standard library. It’s a built-in logging framework with
+its own set of classes and methods for logging messages.</li>
+<li>SLF4J: Acts as a facade or abstraction layer. It provides a common
+API that allows you to switch between different logging implementations
+without changing your logging code.</li>
+</ul>
+<p>Usage:</p>
+<ul>
+<li>Java Logging API: Directly used by developers to create loggers and
+manage log messages.</li>
+<li>SLF4J: Used by developers to write logging code in a generic way,
+which can then be routed to different logging frameworks, including the
+Java Logging API, Log4j, Logback, etc.</li>
+</ul>
+<h3 id="the-original-io">The original I/O</h3>
+<p>API in Java, introduced in Java 1.0, is part of the java.io package.
+This API provides classes and interfaces for performing input and output
+operations, primarily with files, streams, and data</p>
+<ol type="1">
+<li>Byte Streams:</li>
+</ol>
+<ul>
+<li>InputStream: Base class for reading byte data.</li>
+<li>OutputStream: Base class for writing byte data.</li>
+</ul>
+<ol start="2" type="1">
+<li>Character Streams:</li>
+</ol>
+<ul>
+<li>Reader: Base class for reading character data.</li>
+<li>Writer: Base class for writing character data.</li>
+</ul>
+<ol start="3" type="1">
+<li>Data Streams:</li>
+</ol>
+<ul>
+<li>DataInputStream: Allows reading of primitive data types.</li>
+<li>DataOutputStream: Allows writing of primitive data types.</li>
+</ul>
+<ol start="4" type="1">
+<li>Object Streams:</li>
+</ol>
+<ul>
+<li>ObjectInputStream: Allows reading of serialized objects.</li>
+<li>ObjectOutputStream: Allows writing of serialized objects.</li>
+</ul>
+<ol start="5" type="1">
+<li>File I/O:</li>
+</ol>
+<ul>
+<li>File: Represents file and directory pathnames, enabling file and
+directory manipulation.</li>
+</ul>
+<h3 id="the-java-nio">The Java NIO</h3>
+<p>Introduced in Java 1.4 and found in the java.nio package, includes
+several key components designed for more efficient and flexible I/O
+operations</p>
+<ol type="1">
+<li>Buffers: Containers for data that allow for efficient reading and
+writing. Examples include ByteBuffer, CharBuffer, and IntBuffer.</li>
+<li>Channels: Represent connections to I/O devices and provide a way to
+read from and write to buffers. Examples include FileChannel,
+SocketChannel, and DatagramChannel.</li>
+<li>Selectors: Allow for non-blocking I/O operations by enabling a
+single thread to manage multiple channels. The Selector class is used
+for multiplexing I/O operations.</li>
+<li>Charsets: Support for character encoding and decoding. Key classes
+include Charset, CharsetEncoder, and CharsetDecoder.</li>
+</ol>
+<p>TODO: finish this</p>
+<p>Incoming HTTP Request Over a Socket Client Request:</p>
+<p>A client (e.g., a web browser or another application) sends an HTTP
+request to a server. This request is transmitted over the network using
+the HTTP protocol. Socket Communication:</p>
+<p>The HTTP request is sent over a <code>TCP/IP</code> connection. This
+involves creating a socket connection between the client and the server.
+On the server side, a socket is an endpoint for communication. The web
+server listens on a specific port (e.g., port 80 for HTTP or 443 for
+HTTPS) for incoming connections. Web Server Listening:</p>
+<p>The web server (e.g., Apache HTTP Server, Nginx) listens for incoming
+connections on its configured port. When a request arrives, the server
+accepts the socket connection and reads the incoming HTTP request data
+from the socket. 2. Request Handling by the Web Server Parsing the
+Request:</p>
+<p>The web server parses the HTTP request to extract the request method
+(GET, POST, etc.), URL, headers, and body (if present). Routing the
+Request:</p>
+<p>The server determines how to handle the request based on the URL and
+method. This may involve serving static content (like HTML files) or
+forwarding the request to an application server for dynamic content.
+Forwarding to Application Server (if needed):</p>
+<p>For dynamic content or web services, the web server forwards the
+request to a <code>Java EE</code> application server. This can be done
+using various methods, including proxying or direct communication. 3.
+Application Server Processing Receiving the Request:</p>
+<p>The application server (e.g., Apache Tomcat, JBoss EAP) receives the
+request from the web server. This server is capable of handling
+<code>Java EE</code> components. Request Dispatching:</p>
+<p>The application server dispatches the request to the appropriate
+component based on the configuration. For example, it might route the
+request to a <code>servlet</code> or a web service. 4. Web Service
+Invocation Service Locator:</p>
+<p>If the request is for a web service, the application server locates
+the appropriate service endpoint based on the request URL and method.
+Processing the Request:</p>
+<p>SOAP Web Services (<code>JAX-WS</code>): <code>WSDL</code>: The
+service is described using <code>WSDL</code> (Web Services Description
+Language). The server uses the <code>WSDL</code> to understand the
+request structure and determine how to process it. Service Endpoint: The
+application server uses <code>JAX-WS</code> to handle the SOAP request.
+It invokes the appropriate service method based on the SOAP message.
+<code>RESTful</code> Web Services (<code>JAX-RS</code>): Annotations:
+<code>RESTful</code> services use annotations to map HTTP methods to
+Java methods. The server uses <code>JAX-RS</code> to find the
+appropriate resource method. Processing: The application server
+processes the request, possibly involving business logic or database
+interactions, and prepares a response. Business Logic Execution:</p>
+<p>The web service might interact with other components like
+<code>EJBs</code> (Enterprise <code>JavaBeans</code>) or data access
+layers to perform the necessary business logic. 5. Generating and
+Sending the Response Response Preparation:</p>
+<p>The web service generates a response based on the request. For SOAP
+services, this involves creating a SOAP message. For
+<code>RESTful</code> services, it might be <code>JSON</code> or XML.
+Returning the Response:</p>
+<p>The response is sent back to the web server, which then forwards it
+to the client. The response includes the HTTP status code, headers, and
+body content. Socket Closure:</p>
+<p>Once the response is sent, the socket connection is closed if it is
+not kept alive for further requests.</p>
+<h2 id="release-cycle">Release Cycle</h2>
+<p>There are several reasons for the Six-Month Release Cycle Increased
+Agility - The rapid pace of technological advancement and evolving
+programming paradigms necessitate a more agile approach to language
+updates. A six-month cycle allows for quicker iterations on features and
+improvements.</p>
+<ul>
+<li><p>Feature-Driven Releases: By allowing smaller, more frequent
+updates, Java can incorporate new features, enhancements, and fixes
+without waiting for a major version release. This means developers can
+access improvements more frequently.</p></li>
+<li><p>Focus on Quality: The smaller scope of each release helps
+maintain quality. Instead of waiting for a large number of features to
+accumulate, each release can focus on a specific set of enhancements or
+bug fixes.</p></li>
+<li><p>Community Engagement: Regular releases encourage community
+involvement. Developers can provide feedback on new features more
+frequently, and their input can be integrated into upcoming
+releases.</p></li>
+<li><p>Predictability: A consistent release schedule helps organizations
+plan their upgrade paths and incorporate new features into their
+development processes.</p></li>
+</ul>
+<p>Future of the Six-Month Cycle As for whether this cycle will continue
+indefinitely, several points are worth noting</p>
+<ul>
+<li><p>Sustainability: The six-month cycle has been well-received and
+has proven sustainable over several years. There is no official
+indication from Oracle or the <code>OpenJDK</code> community that they
+plan to change this schedule in the near future.</p></li>
+<li><p>Continuous Improvement: The Java community regularly evaluates
+the release process and adapts as needed. If the community or the
+demands of modern software development change significantly, adjustments
+to the release cadence might be considered.</p></li>
+<li><p>Feature Proposals: The community continues to propose new
+features through the <code>JEP</code> (JDK Enhancement-Proposal)
+process. This iterative improvement mechanism fits well with a six-month
+release model.</p></li>
+</ul>
+</body>
+</html>

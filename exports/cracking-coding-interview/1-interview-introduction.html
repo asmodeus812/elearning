@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>1-interview-introduction</title>
+  <style>
+    html {
+      font-size: 12pt;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  \usepackage{listings}
+  \usepackage{xcolor}
+
+  \lstset{
+      basicstyle=\ttfamily,
+      backgroundcolor=\color{black!10},
+      showspaces=false,
+      showstringspaces=false,
+      showtabs=false,
+      tabsize=2,
+      captionpos=b,
+      breaklines=true,
+      breakautoindent=true,
+      linewidth=\textwidth
+  }
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#introduction" id="toc-introduction">Introduction</a></li>
+<li><a href="#the-interview" id="toc-the-interview">The
+interview</a></li>
+<li><a href="#the-questions" id="toc-the-questions">The Questions</a>
+<ul>
+<li><a
+href="#when-talking-about-yourself-try-to-answer-the-following-questions"
+id="toc-when-talking-about-yourself-try-to-answer-the-following-questions">When
+talking about yourself, try to answer the following questions</a></li>
+</ul></li>
+<li><a href="#the-process" id="toc-the-process">The process</a></li>
+<li><a href="#the-resume" id="toc-the-resume">The resume</a></li>
+<li><a href="#the-projects" id="toc-the-projects">The projects</a></li>
+<li><a href="#the-interviewer" id="toc-the-interviewer">The
+interviewer</a></li>
+</ul>
+</nav>
+<h1 id="introduction">Introduction</h1>
+<p>To crack the coding interview you need to prepare with real interview
+questions. You must practice on real problems and learn their patterns.
+It is about developing a fresh algorithm, not memorizing existing
+problems</p>
+<h1 id="the-interview">The interview</h1>
+<p>The interview is short, you might not be able to get through more
+than a couple of questions / tasks in the span of an hour or 45 mins. Do
+your best to explain your process while you try to solve the problem at
+hand. Talk out loud and explain your though process. The whiteboard part
+of the interview should not be pseudo code but rather a very shrunk down
+version of the real thing. Make as few errors as possible while writing
+the solution in code.</p>
+<ol type="1">
+<li>Analytical - did you need much help solving hte problem. How optimal
+was your solution, how long did it take you to arrive at a solution, if
+you had to design a new solution, did you structure the problem well and
+thing through the trade offs.</li>
+<li>Coding - were you able to successfully translate your algorithm to
+reasonable code ? Was it clean and well organized ? Did you think about
+potential errors, good style</li>
+<li>Technical knowledge - do you have a string foundation in computer
+science and the relevant technologies</li>
+<li>Experience - have you made good technical decisions in the past,
+have you built cool projects in the past, have you shown drive and
+initiative</li>
+<li>Culture fit - do you have good communication skills and do your
+values fit with the company and team</li>
+</ol>
+<h1 id="the-questions">The Questions</h1>
+<p>The questions are not pre selected, each interviewer selects their
+own questions, possibly even on the spot. Some companies like solution
+based questions, which involve algorithms, other focus on knowledge
+based questions, about technologies. The way questions are evaluated and
+their answers is based on all candidates they have been asked to. So it
+is relative, your performance depends on how well or unwell other
+candidates answered the same questions you have been asked. Experienced
+or novice candidates will often get the same type of problem solving
+questions, some companies might hold the experienced candidates to a
+lower standard, but that is not always given. If you have experience
+with enterprise systems and frameworks, but are not applying for such a
+role, you might have to show more technical skill to compensate for
+that. When answering questions, focus on yourself, not the team, tell
+them what you have accomplished, not the team.</p>
+<h2
+id="when-talking-about-yourself-try-to-answer-the-following-questions">When
+talking about yourself, try to answer the following questions</h2>
+<pre><code>- What is your current role in the company you are/were at - be brief
+- College / university background - what did you study, how did it go
+- Post education - brief history of your career, taken from the resume
+- Outside of work - what do you do, do you do projects in your spare time
+- Hobbies (something unique) - best if the hobby is technical</code></pre>
+<h1 id="the-process">The process</h1>
+<ol type="1">
+<li>Screening interview - over the phone or chat, might involve some
+problem solving or whiteboard problems. Do not take it lightly. Some
+companies might have online shared editors, or documents, some might
+want you to write the problem on paper and read it back to them. The
+screening interviews might be from 1 to 3.</li>
+<li>On site - in person interviews, from 3 to 6, some might be non
+technical, like over lunch etc. After that in the span of a week or two
+the candidate should expect some sort of feedback, more so if he is
+hired. No communication does not mean you have been rejected.</li>
+</ol>
+<h1 id="the-resume">The resume</h1>
+<ol type="1">
+<li>Keep it short, add the most impressive roles in your career thus
+far, the ones that will make you stand out. Add the most relevant
+technologies used by you and your team.</li>
+<li>For each role, try to list your accomplishments, using the format -
+accomplished x by implementing y which led to z</li>
+<li>Avoid listing too many technologies, or languages, you might not
+feel comfortable with, shrink the list down to the ones you like the
+most and feel the best in.</li>
+<li>Try to avoid any grammatical mistakes in the resume, some employers
+might throw away a resume just because it has them.</li>
+<li>Be careful with listing certifications, some companies might not
+like if a candidate has a certificate for specific technology or
+language, especially if the position you apply for is not relevant to
+that.</li>
+</ol>
+<h1 id="the-projects">The projects</h1>
+<p>Include at least 2 to 4 projects, which you deem are your most
+significant accomplishments, State what the project was and which
+languages or technologies it employed. Do not add too many projects, you
+have ever done. Have a deep understanding of the technology and stack of
+the projects you have developed and displayed / demonstrated to them, in
+the resume. Make sure they can’t catch you off guard with questions in
+regards to your own projects. Try to explain your projects, but do not
+go into too much detail, stick to the major points.</p>
+<h1 id="the-interviewer">The interviewer</h1>
+<p>There are some questions to ask them as well. Here are some, which
+might give you some better understanding of what it is like to work at
+the company</p>
+<ol type="1">
+<li>What is the ration of testers to developers. What is the interaction
+like, how does project planning goes ?</li>
+<li>What brought you to this company ? What has been most challenging
+for you ?</li>
+<li>I noticed that you use technology X, how do you handle problem Y
+?</li>
+<li>Why did the product choose to use the X technology instead of the Y
+one, I know it has benefits like ABC, but many companies choose not to
+use it because of D.</li>
+<li>Ask them what opportunities are there in the company to learn about
+a technology or a stack you are passionate about.</li>
+<li>Ask about technology you are not familiar with, ask them how they
+use it, in their projects</li>
+</ol>
+</body>
+</html>

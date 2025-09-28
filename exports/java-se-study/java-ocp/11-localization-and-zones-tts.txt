@@ -1,0 +1,130 @@
+Preface
+
+Computers and software are now so widespread that they are used everywhere in the world, supporting countless human activities. For any software to be truly relevant and useful to its users, it must be localized. Localization is the process of adapting software to the local language and customs of its users. In essence, localization is about making software relevant and usable for people from different cultures. This means customizing software for users from various countries or who speak different languages.
+
+How is this achieved? There are two important guidelines to follow when localizing a software application.
+
+First, do not hardcode text such as user messages or graphical user interface elements. Instead, separate these texts into external files or dedicated classes. By doing this, it becomes much easier to add support for a new locale in the software with minimal effort.
+
+Second, handle cultural-specific aspects such as date, time, and currency formatting with localization in mind. Rather than assuming a default locale, design your software so that it fetches and customizes itself according to the current locale.
+
+Locale
+
+A locale represents a place, which could be a country, a language, or a culture. For example, consider the Canada-French locale. French is spoken in many parts of Canada, and this combination could be considered a locale. If you want to sell software tailored for Canadians who speak French, you need to support this specific locale.
+
+In Java, this locale is represented by the code “fr underscore CA,” where “fr” stands for French, the language, and “CA” stands for Canada, the country code.
+
+There are several methods in Java’s Locale class that help you work with locales. For example, you can get a list of all available locales supported by the Java Virtual Machine, retrieve the default locale, or set a new default locale. You can also obtain the country code, the display name of the country, the language code, the display name of the language, the variant code, the display name of the variant, and a string representation of the locale that includes its language, country, and variant codes.
+
+Here is an example of how you might use these methods in Java. The code prints the default locale, then lists all available locales supported by the Java Virtual Machine, displaying both their codes and their human-readable names.
+
+This block prints out the default locale, then iterates through all available locales, displaying each locale’s code and its display name. This helps you see which locales are supported and how they are represented.
+
+Structure
+
+The output of the previous code snippet would look something like this. The default locale is shown first, followed by the number of available locales and a list of their codes and display names. For example, you might see entries like “ms underscore MY stands for Malay, Malaysia,” “ar underscore QA stands for Arabic, Qatar,” and so on. The list continues for all supported locales.
+
+There are several types of localization formats. For example, “hu” stands for Hungarian and uses just one code, which doubles as the language, country, and variant. “ms underscore MY” stands for Malay, Malaysia, using both a language and a country code. “no underscore NO underscore NY” stands for Norwegian, Norway, Nynorsk, using language, country, and region codes. More complex examples, like “th underscore TH underscore TH underscore hash u-nu-thai,” include language, country, variant, and an extension.
+
+The general format of a locale string combines different variations to create a locale. The format is: language, followed by an underscore, then country, another underscore, then variant and possibly a script or extension. Country codes and variants are always written in capital letters, while the language is in lowercase.
+
+Consider English, which is spoken in many countries. There are variations in English based on the country. For example, American English is different from British English, and there are many other versions. Here is a code snippet that prints all English-based localization formats.
+
+This block filters all available locales to those where the language is English, then prints each locale’s code and display name. This demonstrates the variety of English locales, such as English for Malta, the United Kingdom, Canada, the United States, South Africa, Singapore, Ireland, India, Australia, New Zealand, and the Philippines.
+
+Details
+
+The Locale class also provides methods to obtain information about the language, country, variant, and script extensions, all of which can be part of the locale string.
+
+In this example, the code sets the default locale to Canada French, then retrieves and prints the default locale, its language code and name, its country code and name, and its variant code and name.
+
+This code sets the default locale to Canada French, then prints out the default locale, the language code and its display name, the country code and its display name, and the variant code and its display name. In this case, the variant code is empty, so nothing is printed for it.
+
+What is the difference between methods like getCountry and getDisplayCountry? The getCountry method returns the country code, which is a two- or three-letter code based on the ISO thirty-one sixty-six standard. The getDisplayCountry method returns the human-readable name of the country. Similarly, getLanguage and getDisplayLanguage work for the language code, which is based on the ISO six thirty-nine standard.
+
+If there is no variant in the locale, nothing is printed for the variant. However, for some locales, there could be variant values, such as operating environments like “MAC” for Macintosh machines, or company names like “Sun” or “Oracle.” There are also less commonly used methods, such as getScript, which returns the script part code of the locale string if a script is present in the extra field format.
+
+
+The default locale is French for Canada. The default language code is “fr,” and the language name is “français.” The default country code is “CA,” and the country name is “Canada.” There is no default variant code or name.
+
+Instead of calling the getDisplayCountry method of the Locale class, which takes no arguments, you can use the overloaded version that accepts a Locale object as an argument. This allows you to print the name of the country as it is referred to in the specified locale. For example, calling Locale.GERMANY.getDisplayCountry() will print “Deutschland,” which is how Germans refer to their country. However, if you call Locale.GERMANY.getDisplayCountry(Locale.ENGLISH), the output will be “Germany,” which is how the British refer to the country.
+
+Creating Locale Objects
+
+There are several ways to create a Locale object. Here are four options for creating an instance of the Italian locale, which corresponds to the language code “it.” 
+
+The first approach creates a new Locale with the language code “it,” and empty strings for country and variant. The second approach creates a Locale with just the language code “it.” The third approach uses the Locale.Builder class to set the language tag to “it” and then builds the Locale. The fourth approach uses the predefined constant Locale.ITALIAN.
+
+The method you choose to create a Locale depends on your needs. If the language tag comes from user input, you should use the constructors. Otherwise, you can use the predefined constants.
+
+Resource Bundles
+
+Resource bundles are closely related to Locale objects. They are designed to hold resources that are specific to a particular locale, allowing you to customize your program’s behavior based on the user’s locale.
+
+One simple solution for localization is to check the default locale, and if it is Italy, print “Ciao.” While this works, it is neither flexible nor scalable. If you want to support other locales, such as Saudi Arabia or Thailand, you would need to find and replace all locale-specific strings throughout your code. This approach quickly becomes unmanageable, especially in large applications with thousands of strings and many supported locales.
+
+In Java, resource bundles provide a solution to this problem. A resource bundle is a set of classes or property files that define keys and map those keys to locale-specific values. The abstract class ResourceBundle provides the foundation for resource bundles in Java. It has two main subclasses: PropertyResourceBundle and ListResourceBundle.
+
+PropertyResourceBundle is a concrete class that supports multiple locales using property files. For each locale, you specify keys and values in a property file. When you use the ResourceBundle.getBundle() method, the appropriate property file for the current locale is automatically loaded, provided you follow the required naming conventions.
+
+ListResourceBundle is used when you want to add support for a new locale by extending this class. In your subclass, you override the getContents method, which returns a two-dimensional array of objects. The keys must be strings, and the values can be any type—such as strings, sound clips, video clips, URLs, or images.
+
+Usage
+
+If your application is designed with localization in mind from the start, you can add support for new locales without changing your code. Property files define strings as key-value pairs, with each pair on a separate line. For example, you might have a property file that maps the key “classpath” to the value “C colon backslash Program Files backslash Java backslash jre8.”
+
+In localization, you use property files to map the same key strings to different value strings for each locale. In your program, you use the key strings, and by loading the appropriate property file for the current locale, you fetch the corresponding values.
+
+The naming of these property files is important. For example, you might have a default resource bundle named ResourceBundle.properties, an Arabic bundle named ResourceBundle_ar.properties, and an Italian bundle named ResourceBundle_it.properties. Each file contains a key-value pair for the greeting message: “Hello” in the default, “As-salamu Alaykum” in Arabic, and “Ciao” in Italian.
+
+When you run your program, you can load the appropriate resource bundle for the current locale. For example, you can get the default locale, load the resource bundle named “ResourceBundle,” and print the greeting message. If the locale is set to Italy, the Italian property file will be loaded. If no matching file is found, the default is used.
+
+Manually setting the locale is not recommended, as the Java Virtual Machine, or JVM, typically determines the locale based on system settings. However, you can specify the locale when starting your application by passing system properties such as user.language and user.region.
+
+For example, running “java LocalizedHello” prints “Hello.” Running “java dash Duser.language equals it LocalizedHello” prints “Ciao.” Running “java dash Duser.language equals ar LocalizedHello” prints “As-Salamu Alaykum.” By default, the locale is assumed to be US English, and the corresponding property file is loaded.
+
+The name of the resource bundle file must follow a specific convention. The base name is always “ResourceBundle,” and the suffix matches the locale format string.
+
+ListResourceBundle is used when you want to support a new locale by extending this class. When you extend ListResourceBundle, you override the abstract getContents method, which returns a two-dimensional array of objects. The keys must be strings, but the values can be any type. This allows you to store not just strings, but also numbers, images, or other objects.
+
+Resource bundles can be created by extending the ListResourceBundle class, or by using property files with PropertyResourceBundle. When you extend ListResourceBundle, you can specify any type of object as a value. With PropertyResourceBundle, the values are restricted to strings.
+
+For example, you might have a default US English version of a resource bundle as a class that extends ListResourceBundle. In the getContents method, you return an array containing the movie name “Avatar,” the gross revenue as a long value, and the year as an integer. For the Italian version, you create a class named ResBundle_it_IT, which also extends ListResourceBundle. In this version, the movie name is “Che Bella Giornata,” the gross revenue is forty-three million, and the year is two thousand eleven.
+
+Finally, you might have a class called LocalizedBoxOfficeHits with a method printMovieDetails. This method takes a ResourceBundle, retrieves the movie name, revenue, and year, and prints out a message showing the movie’s name, year, and gross revenue.
+
+In summary, resource bundles in Java provide a powerful and flexible way to localize your applications, allowing you to support multiple languages and regions without changing your code. By using property files or extending ListResourceBundle, you can manage locale-specific resources efficiently and maintainably.
+
+
+Let’s walk through the main method and the concepts around resource bundles in Java.
+
+The main method begins by creating an instance of a class called LocalizedBoxOfficeHits. It then retrieves the default locale, which is typically set to United States English, and prints the details of the largest box-office hit movie for that locale. After that, it switches to the Italian locale and prints the movie details for Italy as well.
+
+The important thing to note here is that resource bundle classes are not instantiated directly. Instead, they are loaded dynamically at runtime when the getBundle method is called. Internally, Java uses reflection to create instances of classes that extend ListResourceBundle, based on the required locale. These instances are cached for efficiency, since the locale usually remains constant during the program’s execution. However, this is not always guaranteed. For this reason, it is not advisable to cache the current ResourceBundle object in your own code. Instead, you should call getBundle each time you need the resource bundle, or wrap that call in a static utility method. Do not cache the ResourceBundle instance itself, because the locale might change during execution.
+
+Next, let’s discuss a common pitfall when working with ListResourceBundle. When you retrieve an object from the resource bundle using a string key, the returned value is of type Object. This means it can be any type. For example, if the GrossRevenue value is stored as a Long, you cannot simply cast it to an Integer. Attempting to do so will result in a ClassCastException. Instead, you need to convert the Long to an int using the appropriate method, such as toInt. This is not about casting primitive types, but rather about casting between incompatible class instances.
+
+Another common error is using the wrong key name when fetching a value from the resource bundle. The key must match exactly, including case sensitivity. If you make a typo or use the wrong case, a MissingResourceException will be thrown. This applies to both PropertyResourceBundle and ListResourceBundle types.
+
+Now, let’s talk about how resource bundles are loaded. The process of finding a matching resource bundle is the same for classes that extend ListResourceBundle as it is for property files used with PropertyResourceBundle. For class-based resource bundles, Java uses reflection to find and load the class. The class must be public and visible so that reflection can locate it.
+
+Naming conventions for resource bundles are enforced by Java. The name of the resource bundle is constructed from the package qualifier, the bundle name, and locale information such as language, country, variant, script, and extensions. Only through these names does Java load the relevant locales, so it is important to follow the naming convention when creating resource bundles for localization.
+
+Given that there can be many resource bundles for a single bundle name, Java follows a specific search sequence to determine which resource bundle to load. The search starts by looking for an exact match for the resource bundle with the full name. If no match is found, the last component of the name is dropped, and the search is repeated with the shorter name. This process continues, gradually broadening the scope, until only the base bundle name remains. If still no match is found, the search moves to the default locale, and finally to the base bundle name without any locale information. If no suitable bundle is found after all these steps, a MissingBundleException is thrown.
+
+This exhaustive search sequence ensures that as long as there is a default or broader-scope bundle, it will be found, even if there is no specific bundle for the current locale. This guarantees that applications will continue to function, even if a specific or niche locale is not available for the current user or system.
+
+Let’s summarize the key points.
+
+Reading and setting the locale:
+A locale represents a language, culture, or country. The Locale class in Java provides an abstraction for this concept. Each locale can have three entries: language, country, and variant. There are no standard tags for variants. The getter methods in the Locale class, such as getLanguage, getCountry, and getVariant, return codes. The display methods, such as getDisplayName and getDisplayLanguage, return human-readable text representations. The getDefault method in Locale returns the default locale set in the Java Virtual Machine. This default locale can be changed using the setDefault method. There are several ways to create or obtain a Locale object, including using a constructor, the forLanguageTag method, Locale.Builder, or predefined constants.
+
+Creating and using properties files:
+A resource bundle is a set of classes or property files that define keys and map those keys to locale-specific values. The ResourceBundle class has two main subclasses: PropertyResourceBundle and ListResourceBundle. To obtain a resource bundle, use the ResourceBundle.getBundle method for a given locale or the default one. The PropertyResourceBundle class supports multiple locales through property files, where each file contains keys and values as strings. To add support for a new locale, extend the ListResourceBundle class and override the getContents method to return an array of keys and values. The keys must be strings, and the values can be of any type. When fetching a value from the resource bundle using getObject, ensure that the key matches exactly, including case sensitivity. Otherwise, a MissingResourceException will be thrown. The naming convention for a fully qualified resource bundle name is the package qualifier plus the locale format string.
+
+Building resource bundles:
+The process of finding a matching resource bundle is the same for classes that extend ListResourceBundle and for property files used with PropertyResourceBundle. Java uses a special search sequence, starting from the most specific bundle name based on the current locale and gradually broadening the scope to the default ResourceBundle. The getBundle method can also take a ResourceBundle.Control object as an additional parameter. By extending this class and passing an instance, you can customize the resource bundle searching and loading process.
+
+In summary, understanding how resource bundles work, how they are loaded, and how to structure and name them is essential for localizing Java applications effectively. Always be careful with key names and data types, and follow the recommended practices for retrieving and managing resource bundles.
+
+
