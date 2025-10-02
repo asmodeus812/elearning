@@ -1,0 +1,89 @@
+Primitives
+
+Java defines eight primitive types of data. These are byte, short, int, long, char, float, double, and boolean. These primitive types are also commonly referred to as simple types.
+
+Number Types
+
+Java provides several numeric primitive types, each with a specific width and range. The long type is sixty-four bits wide and can represent values from negative nine quintillion, two hundred twenty-three quadrillion, three hundred seventy-two trillion, thirty-six billion, eight hundred fifty-four million, seven hundred seventy-five thousand, eight hundred eight, up to positive nine quintillion, two hundred twenty-three quadrillion, three hundred seventy-two trillion, thirty-six billion, eight hundred fifty-four million, seven hundred seventy-five thousand, eight hundred seven.
+
+The int type is thirty-two bits wide, with a range from negative two billion, one hundred forty-seven million, four hundred eighty-three thousand, six hundred forty-eight, up to positive two billion, one hundred forty-seven million, four hundred eighty-three thousand, six hundred forty-seven.
+
+The short type is sixteen bits wide, ranging from negative thirty-two thousand, seven hundred sixty-eight, up to positive thirty-two thousand, seven hundred sixty-seven.
+
+The byte type is eight bits wide, with a range from negative one hundred twenty-eight to positive one hundred twenty-seven.
+
+For floating-point numbers, double is sixty-four bits wide and can represent values from approximately four point nine times ten to the negative three hundred twenty-fourth power, up to one point eight times ten to the three hundred eighth power.
+
+The float type is thirty-two bits wide, with a range from about one point four times ten to the negative forty-fifth power, up to three point four times ten to the thirty-eighth power.
+
+Boolean
+
+The boolean type in Java can have only one of two possible values: true or false. This is the type returned by all relational operators, such as comparisons.
+
+Character
+
+In Java, the data type used to store characters is called char. However, if you are coming from C or C plus plus, be aware that char in Java is not the same as char in those languages. In C and C plus plus, char is eight bits wide. In contrast, Java uses Unicode to represent characters, which is a fully international character set capable of representing all characters found in all human languages. Unicode is a unification of dozens of character sets, including Latin, Greek, Arabic, Cyrillic, Hebrew, Katakana, Hangul, and many more. At the time Java was created, Unicode required sixteen bits. Therefore, in Java, char is a sixteen-bit type. The range of a char is zero to sixty-five thousand five hundred thirty-six. It holds two bytes and has the same range as an unsigned short in other languages.
+
+Literals
+
+Literals are special types of values that can be represented directly in code. They are usually stored in a special way as part of the program's data segment or the stack. What is important to note is that literals are immutable and identical. For example, a number literal one is identical to another number literal one elsewhere in the code. The same applies to string literals. A literal of "hello" is the same as "hello" in another part of the code. This is unlike some other languages, where string literals do not exist or are not treated at compile time.
+
+Types of Literals
+
+Integer literals can be written in several bases. In base ten, examples include one, two, three, four, one hundred, and nine hundred ninety-nine. In base sixteen, examples are zero x F E, zero x D E, and zero x A zero. In base eight, examples are zero seventy-three and zero twelve. In base two, examples are zero b one zero one zero and zero b one one one one.
+
+Boolean literals are simply false or true.
+
+Floating-point literals can be double, such as nine point five four, or float, such as nine point five four f.
+
+Character literals can be represented using Unicode, for example, backslash u zero zero six one.
+
+String literals are sequences of characters enclosed in double quotes, such as "value".
+
+String Literal Interning
+
+When you declare a string using double quotes, for example, String str1 equals "hello", and String str2 equals "hello", both variables refer to the same string object in memory. This is because Java maintains a pool of string literals on the heap. When a string literal is created, the Java Virtual Machine checks if that string already exists in the pool. If it does, the existing object is reused; otherwise, a new one is created. String literals are also immutable.
+
+This process is called automatic string interning. However, if you create a string using the new keyword, such as String str equals new String of "hello", the string is not automatically interned. This creates a new string object on the heap.
+
+Compile-time constant string literals that are concatenated are optimized during the bytecode compilation step. For example, if you write String s1 equals "hello" plus " " plus "world", and String s2 equals "hello world", both s1 and s2 will refer to the same string literal, as the compiler optimizes them into a single string.
+
+String literals are treated as constants, meaning they can be used where constants are expected, such as in switch statements or final variables.
+
+Range and Default Types
+
+By default, all integer literals you specify are of type int, and all decimal or floating-point literals, such as nine point five four, default to type double. To signify a literal of another type, you must add a suffix. For example, use l for long and f for float. Otherwise, a compilation error will occur. For instance, assigning a large hexadecimal value to a long variable requires the l suffix. Assigning the same value to an int without the suffix will cause a compilation error. Similarly, assigning a large value to a byte variable without casting will also result in a compilation error.
+
+Separation with Underscores
+
+Starting with Java seven, it is possible to add underscores for spacing in integer literals to improve readability. For example, you can write int readable equals nine hundred ninety-nine underscore nine hundred ninety-nine underscore nine hundred ninety-nine, or use multiple underscores for grouping. This feature also works with other radix types, such as hexadecimal, and is applicable for double, float, and so on.
+
+Escape Sequences
+
+Java supports several escape sequences for representing special characters. For example, backslash followed by three digits represents an octal character. Backslash u followed by four hexadecimal digits represents a Unicode character. Other escape sequences include backslash single quote for a single quote, backslash double quote for a double quote, backslash backslash for a backslash, backslash r for carriage return, backslash n for a new line, backslash f for form feed, backslash t for tab, and backslash b for backspace.
+
+Casting
+
+In Java, the language runtime will perform automatic casting when two types are compatible or when the destination type is of a higher order than the source. For example, an int is always big enough to hold a byte, but the inverse is not true. Also, char and boolean are not compatible and cannot be converted from one to the other.
+
+If you want to convert from a higher order type to a lower order type, you must use a cast operator to explicitly tell Java to perform what is called a narrowing cast or conversion. For example, assigning the value one thousand twenty-four to a byte variable without casting will produce a compile-time error. Using a cast, such as byte right equals cast to byte of one thousand twenty-four, will work, but may result in overflow. Similarly, casting a float to an int will assign only the integer part to the variable.
+
+Promotion
+
+When evaluating expressions, Java will automatically promote types as needed. For example, if you multiply two byte variables, the result may exceed the size of a byte. Java will automatically promote the result to a higher type, such as int, to prevent overflow.
+
+Consider the following scenario: you have three byte variables, a, b, and c, and you compute int d equals a times b divided by c. The multiplication of a and b will be promoted to int during compile time, ensuring the result fits without overflowing.
+
+However, if you try to assign the result of b times two directly to a byte variable, you will get a compile-time error. This is because the result of b times two is promoted to int, and assigning an int to a byte without casting is not allowed.
+
+Automatic Promotion Rules
+
+First, all byte, short, and char values are promoted to int. Then, if one operand is a long, the whole expression is promoted to long. If one operand is a float, the entire expression is promoted to float. If any of the operands are double, the result is double.
+
+For example, consider a calculation involving variables of different types: byte b equals forty-two, char c equals lowercase a, short s equals one thousand twenty-four, int i equals fifty thousand, float f equals five point six seven f, and double d equals zero point one two three four. The result is computed as double result equals f times b plus i divided by c minus d times s.
+
+In this calculation, f times b promotes b to float, and the result is float. i divided by c promotes c to int, and the result is int. d times s promotes s to double, and the result is double. When these intermediate values are combined, float plus int results in float, and then float minus double is promoted to double.
+
+This demonstrates how Java handles type promotion in mixed-type expressions to ensure accuracy and prevent data loss.
+
+

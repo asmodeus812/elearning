@@ -1,0 +1,59 @@
+Operators
+
+Let’s begin with operators in Java.
+
+Arithmetic operators are used for basic mathematical operations. These include addition, subtraction, multiplication, division, and modulus. Java also provides increment and decrement operators, as well as assignment versions of these operations. For example, you can add and assign in one step using the plus-equals operator.
+
+Bitwise operators allow you to manipulate individual bits within an integer value. These include bitwise NOT, AND, OR, exclusive OR, and various shift operations. Java supports both left and right shifts, as well as assignment versions of these bitwise operations.
+
+Caveats
+
+Beyond the standard arithmetic and bitwise operators, Java introduces two special shift operators: the unsigned right shift, written as three greater-than signs, and the unsigned left shift, written as three less-than signs. The regular shift operators in Java, which are double greater-than or double less-than, take the sign of the number into account. This means that when you shift a number, the sign bit is preserved. For example, shifting a positive number to the right fills the top bits with zeros, while shifting a negative number fills the top bits with ones to maintain the two’s complement representation.
+
+To illustrate, if you shift the binary value for thirty-five to the right by two, you lose the two least significant bits, and the result is eight. Similarly, shifting negative eight to the right by one divides it by two, resulting in negative four. In both cases, the sign bit is preserved.
+
+However, if you want to shift bits without preserving the sign, Java provides the unsigned shift operators. These triple shift operators perform the shift without filling the higher order bits with the sign bit. This behavior is similar to what most other languages provide by default.
+
+Representation
+
+All of Java’s integer types, except for the character type, are signed integers. This means they can represent both negative and positive values. Java uses a system called two’s complement to encode negative numbers. In two’s complement, you represent a negative number by inverting all the bits of its positive counterpart and then adding one. For example, negative forty-two is represented by inverting the bits of forty-two, which gives you a new binary value, and then adding one to that result.
+
+To decode a negative number, you invert all the bits and add one. This system avoids the problem of having both positive and negative zero, which can occur in other encoding schemes like one’s complement. In two’s complement, negative zero is the same as zero, and the encoding for negative one is all ones. This approach is used for all integer types in Java, not just bytes.
+
+Statements
+
+If
+
+The if statement in Java is used to direct program execution along two different paths based on a condition. Its behavior is standard and similar to other programming languages.
+
+While
+
+The while and do-while statements in Java also behave as you would expect from other languages. They repeatedly execute a block of code as long as a condition remains true.
+
+Switch
+
+The switch statement is Java’s way of handling multi-way branching. It allows you to execute different parts of your code depending on the value of an expression. Traditionally, switch statements in Java only accepted constant or literal values, but recent versions have expanded their capabilities.
+
+A typical switch statement checks the value of an expression and matches it against a series of cases. If a match is found, the corresponding block of code is executed. The break statement is often used to exit the switch after a case is handled. If you omit the break, execution will continue into the next case, which is a common source of bugs.
+
+Switch statements are usually more efficient than a series of nested if statements. This is because the Java compiler creates a jump table for the cases, allowing for faster selection of the execution path.
+
+Jumps
+
+Break
+
+The break statement in Java serves three main purposes. First, it can terminate a case in a switch statement. Second, it can be used to exit a loop early. Third, it can act as a controlled form of the goto statement by using labels.
+
+For example, you can label a block of code and use break with that label to exit out of nested blocks or loops. In the provided example, a labeled break exits from the second block when a condition is met, skipping the remaining statements in that block.
+
+Continue
+
+The continue statement is similar to a goto that jumps to the end of a loop, causing the next iteration to begin. In while and do-while loops, continue transfers control directly to the loop’s conditional expression.
+
+You can also use labels with continue. For instance, in a nested loop, if a certain condition is met, continue with a label can skip the rest of the inner loop and proceed with the next iteration of the outer loop. This is useful for controlling complex loop flows, such as printing a step-like structure where the inner loop is exited early under certain conditions.
+
+Return
+
+The return statement is used to exit a method and return control to the caller. It can either return a value or, in the case of a void method, simply exit without returning anything. The behavior of return in Java is straightforward and similar to other languages, with no hidden special cases.
+
+

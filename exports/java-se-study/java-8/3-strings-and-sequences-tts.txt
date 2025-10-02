@@ -1,0 +1,27 @@
+Sequences
+
+In the Java programming language, there are three main types that behave like strings and help us build dynamic sequences of characters. These types allow us to represent and manipulate text in various ways.
+
+It is important to understand that, in Java, a string is an object. However, strings have some special properties. For example, Java uses a technique called interning, which means that string literals are optimized and pooled by the Java Virtual Machine. This optimization is possible because strings are used so frequently in Java programs.
+
+The three main string-like types in Java are as follows.
+
+First, there is String. This is an immutable type in Java. Each string object can be created dynamically using the new keyword, or defined as a literal. The String class provides an application programming interface, or API, that allows you to inspect the contents of a string. However, you cannot change the state of a string object after it is created. Instead, any method from the String API that appears to modify a string will actually create a new copy, and return that copy, leaving the original unchanged.
+
+Second, there is StringBuffer. This type will be discussed in more detail later.
+
+String
+
+Strings in Java can be created in a variety of ways. The two most common approaches are through interning, or through dynamic allocation.
+
+For example, when you write the following line, the string is interned by the Java runtime:
+
+A string variable is assigned the value, “this is a test,” using a string literal. This means the string is stored in a special pool, and reused if the same literal appears elsewhere.
+
+If you use the new keyword, as in the next example, a new string object is created dynamically, even if the contents are technically the same as an existing string.
+
+Finally, if you assign the same literal again, as in the third example, Java will reuse the interned string from the pool. This means that the first and third string variables will actually refer to the same object in memory.
+
+Java defines one operator for string objects: the plus sign. This operator is used to concatenate, or join, two strings together. For example, if you write a statement that adds the strings “I,” “ like,” and “Java,” the result will be a new string containing the phrase, “I like Java.”
+
+

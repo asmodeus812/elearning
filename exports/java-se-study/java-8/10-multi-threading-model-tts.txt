@@ -1,0 +1,309 @@
+Threading
+
+Threading is generally divided into two main categories that most people are familiar with.
+
+The first is process multi-threading. This is supported by virtually every modern operating system. It refers to the operating system’s ability to run multiple processes at the same time. Each process has its own separate address and data space, and is unrelated to other processes. The operating system manages how much CPU time each process gets.
+
+The second category is thread-based multi-threading. This involves having multiple threads running within a single process or program. It allows a program to perform several tasks at once. In Java, this is managed by the Java Virtual Machine, or JVM.
+
+Thread
+
+A thread in Java can be in several states, such as running, stopped, or paused and blocked.
+
+Each thread in Java is assigned a priority. This is an integer value that helps determine how much execution time the thread should get. This is similar to how operating systems handle multitasking with processes. For example, if a process has been idle for a while, it might be given more CPU time the next time it is scheduled, to help it catch up.
+
+Both thread priority and process priority can change dynamically during their lifetime.
+
+When switching from one thread to another, the runtime performs what is called a context switch. This is the same term used in operating systems when one process is paused and another is given control.
+
+There are two ways a thread context switch can happen.
+
+First, a thread can voluntarily give up control. This usually happens when the thread explicitly yields, sleeps, or blocks while waiting for input or output. When this happens, a higher priority thread can be picked from the pool and its execution resumes.
+
+Second, a thread can be preempted. This occurs when a higher priority thread needs to run. As soon as a higher priority thread is ready, it can interrupt and take over from a lower priority thread that is currently running.
+
+Synchronization
+
+A common problem in multi-threaded programming is when multiple threads want to operate on the same data or object. In these cases, some form of resource locking is needed. Without it, there is no guarantee what will happen to the state of the object or data if multiple threads start modifying it at the same time.
+
+The Java runtime provides a way to guard against this with synchronization. Synchronization is the process by which a given object or some of its methods can be locked for access by other threads. This lock remains until the current thread gives up control of the synchronized block, method, or data.
+
+When a thread enters a synchronized block, it locks the resource. Any other thread that tries to enter a synchronized block on the same resource will have to wait until the lock is released.
+
+This model is called the monitor model. Each Java object has an internal monitor associated with it.
+
+Whenever you have a method, or a group of methods, that change the internal state of an object in a multi-threaded situation, you should use the synchronized keyword to protect the state from race conditions. Once a thread enters any synchronized method on an instance, no other thread can enter any other synchronized method on that same instance.
+
+To synchronize a class or object, there are two main options, each with different capabilities.
+
+The first option is to use the synchronized keyword in front of relevant class members, such as variables or methods.
+
+The second option is to wrap an instance of the object in a synchronized block. This allows you to synchronize a class that is not already synchronized.
+
+For example, consider a class called Synced. In one approach, you can declare a method as synchronized, which means the entire method is locked, and the whole instance of Synced is locked by its own monitor. In another approach, you can use a synchronized block inside a method, locking the object only for a specific section of code. This allows for more fine-grained control, and you can have non-synchronized code in the same method.
+
+Communication
+
+Building on the synchronization model, Java provides a way for multiple threads to communicate with each other when certain conditions are met.
+
+The Object class in Java has three special final methods: wait, notify, and notifyAll. These methods allow threads to coordinate and transfer control when specific conditions arise. Instead of having a thread constantly check for a state, the thread can pause when a condition is not met. When the condition changes, the thread can be woken up and continue execution from where it left off.
+
+The wait method tells the calling thread to give up the monitor and go to sleep until another thread enters the same monitor and calls notify or notifyAll.
+
+The notify method wakes up a thread that previously called wait on the same object.
+
+The notifyAll method wakes up all threads that called wait on the same object, but only one of them will be granted access.
+
+Although wait usually waits until notify or notifyAll is called, there is a rare possibility that a waiting thread could be awakened for no apparent reason. This is called a spurious wakeup. Because of this, Oracle recommends that calls to wait should be placed inside a loop that checks the condition the thread is waiting for.
+
+For example, consider a class called Queue. This class has a value and a flag indicating whether a value is set. The put method is synchronized and waits if a value is already set, only proceeding when it is safe to set a new value. The get method is also synchronized and waits if there is no value set, only proceeding when it is safe to retrieve a value. Both methods use notifyAll to wake up any waiting threads when the state changes.
+
+There are also Producer and Consumer classes. The Producer repeatedly adds items to the queue, while the Consumer repeatedly retrieves items from the queue. Both run in their own threads. This setup allows the producer and consumer to work together without wasting CPU time polling for state changes. Instead, threads are suspended and only resume when necessary.
+
+Control
+
+Now, let’s move on to the next topic.
+
+
+In the early days of Java, around the time of JDK 2 and earlier, the Thread class included several additional methods—specifically, suspend, stop, and resume. These methods allowed direct control over a thread’s state. However, they were eventually deprecated because they introduced serious design issues. For example, using them could cause the entire program, or even the Java runtime itself, to terminate unexpectedly.
+
+To address these problems, the recommended approach shifted. Instead of using those problematic methods, developers now rely on the wait method and explicit state checks. Starting with Java 2, it became standard practice for the run method of a thread to check a state or flag. Based on this flag, the thread can decide to pause itself using wait. This approach keeps the API simple and leverages existing mechanisms for thread control.
+
+Let’s look at an example that demonstrates this pattern.
+
+In this example, we have a class called MyProcess that implements the Runnable interface. Inside, there is a thread object, a boolean flag called needsSuspend, and another flag called workNeedsToBeDone. The constructor creates a new thread and starts it. The run method contains a loop that continues as long as workNeedsToBeDone is true. Inside the loop, the code synchronizes on the current object. If needsSuspend is true, the thread calls wait, effectively pausing itself until another thread changes the flag and calls notifyAll. There are also synchronized methods called suspend and resume. These methods set the needsSuspend flag and, in the case of resume, call notifyAll to wake up the waiting thread.
+
+With this design, after creating an instance of MyProcess, you can control when the thread is paused or resumed by calling the provided suspend and resume methods. This approach avoids the pitfalls of the old suspend and resume methods, and it gives you fine-grained control over thread execution.
+
+Model
+
+The Java thread model is built around the Thread class and its companion, the Runnable interface. The Thread class provides various methods that allow you to interact with and manage the state of a thread. The actual Thread object is typically created by other means, which we’ll discuss shortly.
+
+Some of the key methods provided by the Thread class include getName, which returns the thread’s name; getPriority, which returns its priority; isAlive, which checks if the thread is still running; join, which waits for a thread to finish; run, which is the entry point for the thread’s execution; sleep, which suspends the thread for a specified period; and start, which begins the thread’s execution by calling its run method.
+
+Main
+
+The very first thread that is automatically created by the Java runtime is called the main thread. This thread is created first and, in most cases, is the last one to terminate. You can obtain a reference to the current thread from any context by calling the static method currentThread on the Thread class. This method always returns the thread that is currently executing.
+
+For example, in a main method, you can call Thread.currentThread to get the current thread object. You can then print information about the thread, change its name, or perform other operations. The example also demonstrates using Thread.sleep to pause the thread for one second in a loop, and handling InterruptedException in case another thread interrupts the current one.
+
+Creating Threads
+
+There are two main ways to create a thread in Java. The first option is to subclass the Thread class directly. However, this is generally not ideal, because when we create a thread, we usually want to execute some specific code, not just extend the Thread class.
+
+The preferred approach is to implement the Runnable interface, which contains a single method called run. This method represents the code that will be executed by the thread. When you create a new Thread object, you pass an instance of your Runnable implementation to its constructor. The thread does not start immediately; you must call the start method to begin execution.
+
+For example, consider a class called NewThread that implements Runnable. In its constructor, it creates a new Thread object, passing itself as the target Runnable, and starts the thread. The run method contains a loop that prints a message and sleeps for half a second. In the main method, a new instance of NewThread is created, and the main thread also prints messages and sleeps for one second in a loop. Both threads handle InterruptedException in case they are interrupted.
+
+Alternatively, you can subclass Thread directly. The Thread class itself implements Runnable, and its default run method checks if a target Runnable was provided. If so, it calls the run method of that target. This means you can create a Thread object that does nothing by passing null as the target Runnable.
+
+It’s important to note that catching InterruptedException is only necessary in exceptional cases. If a thread is blocked, the runtime will automatically pass control to another thread while the current one is sleeping or otherwise occupied. This does not cause an InterruptedException. The exception is only thrown if another thread explicitly interrupts or kills the current thread, which is a situation you must handle if you expect to terminate the thread prematurely.
+
+Join
+
+Now, let’s discuss the join method. This method allows one thread to wait for another thread to finish before continuing. It’s useful when you need to ensure that a particular thread has completed its work before proceeding.
+
+Priority
+
+Thread priority determines how the Java runtime treats a given thread when it comes time to pause or preempt threads. In the examples above, all threads are created with the default priority. In general, all threads should be given an equal amount of execution time, but this behavior depends on the underlying operating system and cannot be relied upon.
+
+If the operating system does not support preempting—meaning it cannot interrupt the execution of the current thread in favor of one with higher priority—then setting thread priority is largely meaningless. To set a thread’s priority, use the setPriority method of the Thread class. This method takes an integer value between MIN_PRIORITY and MAX_PRIORITY, which are currently one and ten, respectively. To reset a thread to the default priority, use NORM_PRIORITY, which is currently five. These constants are defined as static final variables within the Thread class.
+
+It’s generally best not to rely on thread priorities for controlling execution. Instead, let threads automatically yield or gain control as needed.
+
+State
+
+Finally, the getState method on a thread provides detailed information about the thread’s current state at the time of invocation. There are also other methods for checking a thread’s status, such as isAlive, isDaemon, and isInterrupted.
+
+In summary, modern Java thread management relies on explicit state checks, the wait and notify mechanism, and careful handling of thread priorities and states. This approach avoids the pitfalls of earlier methods and provides a robust foundation for concurrent programming.
+
+
+Thread States
+
+Let’s begin by discussing the different states a thread can be in.
+
+A thread can be in the BLOCKED state when it has suspended execution because it is waiting to acquire a lock.
+
+A thread is in the NEW state if it has not begun execution yet.
+
+The RUNNABLE state means a thread is either currently executing or will execute as soon as it gains access to the CPU.
+
+A thread is in the TERMINATED state once it has completed execution.
+
+The TIMED_WAITING state occurs when a thread has suspended execution for a specified period of time. This can happen, for example, when it calls the sleep method, or when a timeout version of wait or join is called.
+
+Finally, the WAITING state is when a thread has suspended execution because it is waiting for some action to occur. For instance, it might be waiting due to a call to a non-timeout version of wait or join.
+
+To summarize, threads move between these states as they acquire locks, wait for events, or complete their tasks.
+
+Volatile
+
+Now, let’s talk about the volatile keyword, which is a very interesting modifier that can be placed on member variables.
+
+In a multithreaded environment, when an object is shared between multiple threads, each thread might create its own local copy of each variable it accesses. This typically happens at the CPU core level, in the L-level caches. However, this can be error-prone.
+
+The problem is that if only one thread modifies a variable and every other thread reads it, the changes made by the writing thread might not become immediately visible to the reading threads. The volatile keyword ensures that all threads see the same value. In other words, the value is not cached, and is instead written out to main memory and read from memory on each access. This can be somewhat slow, so use the volatile keyword with caution.
+
+It’s important to note that when a synchronized block is exited, member variables are updated, the cache is flushed, and data is written out to main memory. However, this can be excessive for simple reader threads that do not wish to lock the entire object just to guarantee they see the most up-to-date value.
+
+This is where volatile comes in handy. It operates on a per-member basis, instead of flushing the entire object. It does not force the entire object to be written out to memory and out of the CPU cache.
+
+For example, consider a class called MyClass. In this class, there is an integer variable b, which is not marked as volatile. This means that writes to b might not be immediately visible to other reading threads. There is also a byte variable k, which is marked as volatile. This ensures that k is not cached in the CPU’s L-level cache, and all threads see the most recent value.
+
+The key rule is: writes to a volatile variable happen-before subsequent reads of that volatile variable by any thread.
+
+Built-in Concurrency Utilities
+
+The standard concurrency library provides ways to wrap common threading patterns around well-defined interfaces and classes.
+
+One such interface is Executor, and its more advanced sibling, ExecutorService. These interfaces allow you to execute tasks concurrently without worrying about the underlying implementation.
+
+Executor is the top-level interface, providing a single method to execute a Runnable task. ExecutorService, on the other hand, offers more sophisticated features.
+
+With ExecutorService, you can submit Runnable and Callable tasks for execution. It provides methods to control the lifecycle of the executor, such as starting, stopping, and checking if it is terminated. ExecutorService also returns Future objects that represent the result of asynchronous computations, allowing you to retrieve results or handle exceptions. Additionally, it can manage a pool of threads, enabling efficient reuse and reducing the overhead of thread creation.
+
+ThreadPerTaskExecutor
+
+The most basic executor is called ThreadPerTaskExecutor. It implements the Executor interface, but not ExecutorService, which means it exposes only one method: execute. Each task is run on a separate thread. This approach is generally not recommended for production environments.
+
+ThreadPoolExecutor
+
+A more sophisticated version is the ThreadPoolExecutor. This executor uses a pool of threads to execute tasks. It is suitable for short-lived, non-repeatable tasks. The pool can be configured with a specific number of threads and other parameters.
+
+For example, you can create a ThreadPoolExecutor with a core pool size of five, a maximum pool size of ten, a keep-alive time of sixty seconds for extra threads, and a linked blocking queue for tasks. You can then submit tasks for execution, and finally shut down the executor when done.
+
+ScheduledThreadPoolExecutor
+
+The ScheduledThreadPoolExecutor is a subclass of ThreadPoolExecutor. It is designed for executing tasks after a given delay, or for executing tasks periodically at a fixed interval.
+
+For instance, you can create a scheduled executor with five threads, and schedule a task to execute after ten seconds. After scheduling, you can shut down the scheduler.
+
+CachedThreadPool
+
+The CachedThreadPool implementation creates a new thread for each task, but will reuse previously constructed threads when available. It is unbounded, meaning it can grow to accommodate as many threads as needed. This is suitable for many short-lived tasks where creating a thread per task is justified.
+
+The cached thread pool still uses pooling, but unlike ThreadPoolExecutor, which has a fixed number of threads, the cached thread pool can grow its internal pool based on throughput. The more tasks that come in, the more threads are created. If a thread is not reused within a certain period after finishing a task, it is removed from the pool. This allows the cached thread pool to scale the thread count based on the number of incoming tasks, something the fixed ThreadPoolExecutor cannot do.
+
+FixedThreadPool
+
+The FixedThreadPool implementation is similar to ThreadPoolExecutor, as it also provides a fixed number of threads in a pool to execute tasks. However, FixedThreadPool offers less flexibility in configuration. You can only specify the number of threads in the pool, and not much else, whereas ThreadPoolExecutor provides a wider variety of configuration options.
+
+SingleThreadExecutor
+
+The SingleThreadExecutor creates a single thread to execute tasks sequentially. Tasks are queued, and after one finishes, the next is scheduled for execution. This is useful when you need to execute tasks in a particular order, or when the output of one task is used as the input for the next, requiring them to be executed in sequence.
+
+ForkJoinPool
+
+Next, we will discuss the ForkJoinPool.
+
+
+This executor service implementation is a specialized version of the ExecutorService interface, designed specifically for work-stealing algorithms and tasks. The main advantage of using a ForkJoinPool is its support for work-stealing.
+
+A ForkJoinPool, by default, is created with a fixed number of threads, similar to a ThreadPoolExecutor. However, it differs in how it manages tasks. Each thread in the pool is assigned its own queue of tasks, typically distributed in a round-robin fashion. If a thread finishes all the tasks in its queue, it can steal tasks from the queues of other threads that still have pending work. This work-stealing mechanism helps balance the workload across threads, ensuring that no thread remains idle while there are still tasks to be completed.
+
+The ForkJoinPool is especially useful for recursive tasks. Since tasks can be distributed evenly and threads can pull work from each other, the pool remains active and efficient. This is particularly beneficial for divide-and-conquer algorithms, such as merge sort or quick sort, which naturally break down into smaller recursive tasks. In contrast, a ThreadPoolExecutor does not redistribute tasks among free threads. In that model, a free thread only picks up new work when a new task is submitted. With ForkJoinPool, threads continue to find work until all tasks are finished, making it ideal for algorithms that can be split into multiple stages.
+
+In summary, ForkJoinPool is best suited for tasks that can be broken down into smaller, interdependent pieces, while ThreadPoolExecutor is more appropriate for independent, long-running tasks.
+
+Future
+
+The Future interface is closely related to the Executor and ExecutorService interfaces. It provides an API for wrapping a unit of computation, allowing the client to obtain the result without blocking the current thread, check if the task is completed, or determine if an exception occurred.
+
+Generally, methods in ExecutorService return some form of Future implementation. These act as promises, which can be queried for results or status. The Future interface and Executor work together to provide a complete solution for asynchronous task management.
+
+When you submit a task to an ExecutorService using the submit method, it returns a Future object representing the pending result. This allows you to check the status of the task and retrieve the result once it has completed.
+
+FutureTask
+
+The FutureTask class is an implementation of the Future interface that acts as a wrapper around both Runnable and Future. It allows you to create a self-canceling runnable task. While the submit method on ExecutorService returns a Future that can be used to cancel a running task, the task itself cannot cancel itself from within. FutureTask, however, provides the ability for a task to terminate itself during execution. For example, if a certain state or result is reached, the task can stop its own execution.
+
+In the provided example, a callable task is defined that simulates a long-running operation by sleeping for two seconds and then returning a string. A FutureTask is created with this callable, and an ExecutorService with a single thread is used to submit the FutureTask. The result is retrieved using the get method, which blocks until the result is available. Finally, the executor is shut down.
+
+CompletableFuture
+
+CompletableFuture is a more advanced implementation of the Future interface. It allows you to chain and transform computation operations that will run in an executor. By default, CompletableFuture uses a ForkJoinPool for execution.
+
+Similar to Java Streams, CompletableFutures support two types of operations: finalizing and composing. Finalizing operations block the current thread until the future completes, while composing operations allow you to chain futures together. When you register a composing operation, it schedules the operation to run on the executor. If further chaining is done, each new operation is registered on the previous instance. If the previous future is already complete, the new operation starts immediately.
+
+The chaining pattern in CompletableFuture is similar to how Stream chaining works. However, unlike streams, processing in CompletableFuture begins as soon as the previous future in the chain completes, rather than waiting for a terminating operation.
+
+Finalizing operations
+
+Some of the key finalizing operations include:
+
+The get method waits for the future to complete and retrieves its result, blocking the calling thread if necessary.
+
+The join method is similar to get, but throws an unchecked CompletionException if the computation fails.
+
+The thenAccept method consumes the result without returning a new CompletableFuture, making it useful for performing side effects.
+
+The thenRun method runs a Runnable after the computation is complete, regardless of the result.
+
+The whenComplete method executes a BiConsumer after the completion of the future, providing both the result and any exception.
+
+The handle method is similar to whenComplete, but allows for recovery or transformation of the result if an exception occurs.
+
+Composing operations
+
+Key composing operations include:
+
+The thenApply method applies a function to the result of the future, returning a new CompletableFuture with the transformed result.
+
+The thenCompose method chains another CompletableFuture that depends on the result of the current one, allowing for dependent asynchronous tasks.
+
+The thenCombine method combines the results of two CompletableFutures when both complete, using a function to produce a final result.
+
+The thenAcceptBoth method applies a BiConsumer to the results of two futures without returning a result.
+
+The applyToEither method applies a function to whichever of two futures completes first.
+
+The acceptEither method is similar to applyToEither, but applies a Consumer to the first result without returning a new future.
+
+The exceptionally method returns a new CompletableFuture that handles exceptions and can provide a fallback value.
+
+Factory operations
+
+There are several factory operations available:
+
+The supplyAsync method starts execution of a task that produces a result, with a generic return type.
+
+The runAsync method starts execution of a task that does not produce a result, essentially having a void return type.
+
+The completedFuture method returns a future that is already completed with a specified value. This simulates a future that has already run, completed, and produced a result.
+
+The newIncompleteFuture method creates a new completable future without a task. You can use composing and finalizing operations to complete it.
+
+It is important to note that these factory operations provide ways to create a CompletableFuture in different states. Typically, there are two main states: one where the future is already running a given task, and another where it is not initialized with any task and must be registered into an executor service to begin execution.
+
+
+Understanding CompletableFuture Chaining and Asynchronous Execution
+
+In this example, we explore how to chain multiple CompletableFuture tasks in Java, where each task depends on the result of the previous one. The chaining is achieved using the thenCompose method, which allows the output of one asynchronous computation to be used as the input for the next. Although each task is executed asynchronously, they are processed in a specific order, ensuring that each step waits for the previous one to complete before starting.
+
+When you call supplyAsync on a CompletableFuture, the associated task is scheduled for execution right away. This method returns a new CompletableFuture instance, which can be further chained with additional supplyAsync calls. If you chain another supplyAsync, it will either wait for the previous future to complete before scheduling the next task, or, if the previous future is already done, the new task will be scheduled immediately.
+
+It is important to note that calling get on a CompletableFuture will block the current thread until the computation is finished. To avoid wasting resources, it is best to perform other long-running tasks between the thenAccept and get calls, so the current thread is not left idle.
+
+Remember, only the very first supplyAsync in the chain starts immediately. All subsequent tasks will begin as soon as the previous future is complete.
+
+Now, let's walk through the code and its structure.
+
+The main method creates an instance of OrderProcessing and calls the processOrder method with an order ID.
+
+Inside processOrder, the following sequence occurs:
+
+First, fetchUserDetails is called with the order ID. This method returns a CompletableFuture that, when executed, simulates a delay, prints a message about fetching user details, and returns a new User object.
+
+Next, thenCompose is used to chain processPayment to the result of fetchUserDetails. This means that once the user details are fetched, processPayment is called with the User object. This method also simulates a delay, prints a message about processing the payment, and returns a Payment object.
+
+After that, thenAccept is used to chain sendConfirmation to the result of processPayment. Once the payment is processed, sendConfirmation is called with the Payment object. This method simulates a delay and prints a message about sending a confirmation email.
+
+At this point, all the asynchronous tasks are already running in the background, managed by the thread executor pool. The main thread is not blocked and can perform other work while waiting for the final result.
+
+Finally, confirmationFuture.get is called to wait for the entire chain to complete. Once all tasks are done, a message is printed indicating that the order was processed successfully. If any exceptions occur, they are caught and printed.
+
+The sleep method is a utility that pauses execution for a given number of seconds, simulating delays in each step.
+
+In summary, this example demonstrates how to chain asynchronous tasks using CompletableFuture in Java, ensuring that each step depends on the result of the previous one, while allowing the main thread to remain unblocked until the final result is needed.
+
+

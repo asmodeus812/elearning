@@ -1,0 +1,118 @@
+Input and Output in Java
+
+All input and output operations in Java are performed using streams. These streams are generally divided into two main types, based on the kind of data they handle: byte streams and character streams.
+
+It is important to remember that in Java, a byte is eight bits, or one byte in size. A character, on the other hand, is usually two bytes wide. This allows it to represent UTF-16 characters and support a wide range of text encodings. Because of this, when you are reading a text file, you will typically want to use the character stream API instead of the byte stream API. However, if you are reading output from a device or working with data that is not text, you should use the byte stream.
+
+Byte Streams
+
+At the top of the byte stream class hierarchy are two major classes: InputStream and OutputStream. These are abstract base classes from which all other byte stream classes are derived.
+
+InputStream is an abstract class that describes stream input for bytes. OutputStream is an abstract class that describes stream output for bytes.
+
+There are several important subclasses and related classes:
+
+BufferedInputStream and BufferedOutputStream are used to wrap around other stream objects and buffer their content. This buffering can improve performance by reducing the number of read and write operations.
+
+ByteArrayInputStream and ByteArrayOutputStream allow you to read from and write to byte arrays as if they were streams.
+
+DataInputStream and DataOutputStream provide methods for reading and writing Java’s standard primitive data types, such as integers and floating-point numbers.
+
+FileInputStream and FileOutputStream are used to read from and write to files at the byte level.
+
+FilterInputStream and FilterOutputStream are designed to wrap other stream objects and proxy all calls to the wrapped stream, allowing for additional processing or filtering.
+
+ObjectInputStream and ObjectOutputStream are used for reading and writing objects, enabling object serialization and deserialization.
+
+PipedInputStream and PipedOutputStream are used for inter-thread communication, allowing one thread to write data that another thread can read.
+
+PushbackInputStream supports a one-byte “unget” operation, which allows a byte to be returned to the input stream.
+
+SequenceInputStream allows you to combine two or more input streams so that they are read sequentially, one after the other.
+
+Character Streams
+
+At the top of the character stream class hierarchy are the Reader and Writer classes. These are abstract base classes for all character stream input and output.
+
+Reader is an abstract class that describes character stream input. Writer is an abstract class that describes character stream output.
+
+Some of the key subclasses and related classes include:
+
+BufferedReader and BufferedWriter wrap around other stream objects and buffer their content, improving efficiency for character-based input and output.
+
+CharArrayReader and CharArrayWriter allow you to read from and write to character arrays as if they were streams.
+
+FileReader and FileWriter are used to read from and write to files at the character level.
+
+FilterReader and FilterWriter are used to wrap other stream objects and proxy all calls to the wrapped stream, similar to their byte stream counterparts.
+
+InputStreamReader translates bytes to characters, allowing you to read byte streams as character data. OutputStreamWriter does the reverse, translating characters to bytes.
+
+PipedReader and PipedWriter are used for inter-thread communication with character data.
+
+StringReader and StringWriter allow you to read from and write to strings as if they were streams.
+
+PrintWriter is an output stream that provides convenient print and println methods for formatted output.
+
+PushbackReader allows characters to be returned to the input stream, supporting lookahead operations.
+
+LineNumberReader is an input stream that counts lines as they are read, which can be useful for processing text files.
+
+Predefined Streams
+
+By default, Java provides some predefined, already-instantiated streams through the System object, which is located in the java.lang package. This package is imported automatically. The System object provides three streams: in, out, and err. These represent the standard input, output, and error streams, respectively. By default, these streams are linked to the console or terminal.
+
+For a lower-level understanding, the Java Virtual Machine, or JVM, links these streams to actual file descriptors that are managed by the operating system. The operating system is responsible for interacting with the underlying input and output devices.
+
+Mapping
+
+The next section will discuss how the JVM maps these streams to file descriptors and how the operating system manages the actual interaction with input and output devices.
+
+
+System Input, Output, and Error Streams
+
+System.in is mapped to the underlying standard input stream of the operating system, which is typically used for reading from the terminal. System.out is mapped to the standard output stream, which is used for writing to the terminal. System.err is mapped to the standard error stream, which is also used for writing error messages to the terminal.
+
+Interaction with the Operating System
+
+On Linux and Unix systems, the Java Virtual Machine, or JVM, uses native system calls such as read and write to interact with file descriptors for standard input, standard output, and standard error. These file descriptors are zero, one, and two, respectively. On Windows, the JVM uses the ReadFile and WriteFile functions, working with the default operating system file descriptor handles, which are STD_INPUT_HANDLE and STD_OUTPUT_HANDLE.
+
+In the System class, the in, out, and err streams are defined as static variables. These are automatically initialized by the JVM when it starts, so they are ready to use immediately. Specifically, System.in is an InputStream, while System.out and System.err are PrintStream objects.
+
+Reading from Standard Input
+
+To read characters from standard input, you can use the System.in stream wrapped in a BufferedReader. The reason for this is that BufferedReader represents a character stream, while System.in is a simple byte stream. For example, calling the readLine method on a BufferedReader will buffer and read chunks from System.in until it reads a new line or up to eight kilobytes of data. Additionally, it ensures that while it reads bytes from System.in, it converts them to readable two-byte wide characters using UTF encoding.
+
+Nothing prevents you from reading directly from System.in, but in that case, you will be reading plain bytes. This means you must manually convert these bytes to a readable string and correctly handle line feeds and other formatting. Wrapping one stream into another helps translate one type of data to another and bridges the gap between a byte stream and a character stream, which is a significant convenience.
+
+For example, you might create a BufferedReader using an InputStreamReader that wraps System.in. You can then call readLine to block the program until a new line is read from standard input, or call read to read a single character from standard input.
+
+System.in is buffered on new lines to prevent too many system calls between the JVM and the operating system. It would be inefficient if the operating system was polled for every new byte written to System.in.
+
+Writing to Standard Output
+
+To write characters or text, the easiest way is to use the default System.out, which is a PrintStream directly connected to standard output. The PrintStream is connected to the operating system file descriptor representing standard output. Java does not use a plain OutputStream here because of buffering. The runtime does not want to write each byte to the output and issue a system call for every byte. Instead, PrintStream wraps the OutputStream linked to standard output and buffers the input. Usually, it is buffered on line feed characters or when the buffer reaches a maximum capacity, typically eight kilobytes.
+
+Keep in mind that PrintStream can also wrap around a FileOutputStream, allowing you to write to a file instead of standard output. Some logging frameworks use this feature to route logs to files, in addition to or instead of standard output. These logs can also be routed over pipes and so on. The interface Java provides is quite flexible in this regard.
+
+For example, you might use System.out.println to write an entire line along with a new line character, or use System.out.write to write a single byte to output. Writing a new line character can also trigger flushing of the standard output.
+
+When creating an instance of PrintStream, you can specify the autoFlush strategy. By default, this forces a flush on new line characters. Otherwise, flushing is performed when the buffer reaches a certain size. At that point, the contents of the internal buffer stored in the Java runtime are sent down to the underlying operating system.
+
+Working with Files
+
+To read from and write to files at a basic level, Java exposes two byte stream-based classes: FileInputStream and FileOutputStream. Both classes have constructors that take the file name of the file to be opened. Internally, Java obtains the file descriptor, which is used to issue native system calls to the operating system to read or write bytes to the file.
+
+For example, you might use a FileInputStream to read bytes from a file. The read method returns an integer, not a byte. This is because all positive values from zero to two hundred fifty-five are valid bytes that the file might contain. However, the return type still needs a way to indicate reaching the end of the file or if the file cannot be read further. In these cases, the return value is negative one. If the return type was a byte, Java would have no way to represent the end of file.
+
+When you are done with a file, you must close it. This is done by calling the close method, which is implemented by both FileInputStream and FileOutputStream.
+
+To write to a file, you can use a FileOutputStream. You can write single bytes to the file, and you can also specify an additional boolean argument called append when opening the file. This tells the runtime to open the file in write-append mode, meaning the cursor is positioned at the end of the file and writing starts from there. If no append flag is provided, the cursor is put at the start of the file, effectively deleting the original content.
+
+The output stream can be manually flushed based on your use case. However, it is almost always guaranteed that the stream will be flushed when it is closed. In the example above, using try-with-resources, the stream will be closed once the flow exits the try block.
+
+Serialization
+
+In Java, by default, all types of classes and their data can be serialized. However, you might wish to serialize only part of a class. In that case, you can use the transient keyword. Marking a member field in a class as transient ensures that when the class is serialized, all transient fields will not be written out. Similarly, if you are reading an object from a file, transient fields will not be read in.
+
+

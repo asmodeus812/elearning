@@ -1,0 +1,194 @@
+Net.io
+
+Networking
+
+Let’s begin with the basics of networking, which revolve around the concept of sockets. A socket is a fundamental building block in the networking world. Each machine can open any number of socket connections, allowing other machines to connect to it or to receive information from it.
+
+The socket, sometimes called the Berkeley Socket, was invented during the UNIX era in the nineteen seventies. Its main purpose is to represent an endpoint for both receiving and sending information. This duplex mode means it can handle both directions of communication at the same time.
+
+A socket is defined by two main components. The first is the IP address, which provides a unique address for the device on the network. The second is the port number, which identifies a specific process or service running on that device.
+
+The IP address of a machine is usually defined by either the IPv4 or IPv6 versions. Both serve the same purpose, but the main difference is the range of addresses each can represent. IPv4 can only represent four octets, which totals thirty-two bytes, or about four billion unique combinations. In contrast, IPv6 can represent many more—about one hundred twenty-six bytes of information—allowing for trillions of unique addresses.
+
+The typical socket lifecycle starts when an application, such as a web server, creates a socket on a specific port. This means the application will be listening on that port for incoming connections and information. It can also send information on the same socket, which is common for web servers.
+
+When a socket is created, it is said to be bound. This means the underlying operating system starts listening for incoming connections on that port. When a client wants to connect to the server application, it must create its own socket using the server’s unique IP address and the port number that identifies the application it wants to communicate with.
+
+The operating system on the server may accept or deny the connection. Furthermore, the process running on that port—such as the web server—might also deny the connection unless certain conditions are met.
+
+Once the connection is established between the client and server sockets, the communication process can begin.
+
+There are two main types of sockets in wide use on the internet, each using different protocols to transmit data. While the IP protocol is used at a lower level to transmit data, it does not guarantee data integrity. It simply streams data from one socket to another, whether from server to client or vice versa.
+
+To guarantee data transmission, two widely used protocols exist.
+
+The first is TCP, or Transmission Control Protocol. TCP provides reliable, ordered, and error-checked delivery of a stream of bytes. It is mostly used in applications where the delivery of information is crucial, such as web browsing and file transfers.
+
+The second is UDP, or User Datagram Protocol. Unlike TCP, UDP is not a streaming-based protocol. It sends messages without establishing a connection, resulting in lower overhead. UDP is suitable for applications that require fast, real-time communication, such as video streaming or online gaming, where some data loss is acceptable.
+
+TCP and IP sockets are used to implement reliable, bidirectional, persistent, point-to-point, stream-based connections between hosts on the internet. A socket can be used to connect Java’s input and output system to other programs, whether they reside on the local machine or on any other machine on the internet.
+
+InetAddress
+
+The InetAddress class is used to encapsulate both the numerical IP address and the domain name for that address. You can interact with this class using the name of the IP host, which is more convenient and understandable than using its IP address directly. InetAddress can handle both IPv4 and IPv6 addresses.
+
+To create an instance of InetAddress, you use one of its factory methods, since it does not have a public constructor. These static methods allow you to create an instance from a given host name or domain name. Internally, the implementation uses DNS lookup to resolve the actual IP address for the given host. In Java, this is done by asking the underlying operating system to resolve the domain name to an IP address.
+
+The operating system uses the configured DNS server to contact the appropriate server and resolve the address. Typically, your internet service provider, or ISP, supplies default DNS servers, which are automatically configured when your machine connects to the internet. This configuration is handled through DHCP, or Dynamic Host Configuration Protocol.
+
+DHCP is a network management protocol. It is the first exchange that occurs when a machine connects to the internet. The machine requests an IP address and other configuration settings from the network, including the default DNS server address. This DNS server is usually owned by the ISP, which may also provide additional features, such as parental controls or an internet control panel.
+
+Here’s how the DHCP process works:
+
+First, when you connect your device—such as a computer, smartphone, or tablet—to a network, whether wired or wireless, it sends a broadcast message to the local network, requesting an IP address and other configuration settings.
+
+Next, the device sends a DHCP Discover message to find available DHCP servers on the network.
+
+Any DHCP server that receives this Discover message responds with a DHCP Offer message. This offer includes an available IP address, subnet mask, default gateway, and DNS server information.
+
+The device may receive one or more DHCP offers and selects one of them. It then sends a DHCP Request message back to the selected server, indicating that it has accepted the offer.
+
+The DHCP server acknowledges the request with a DHCP Acknowledgment, or ACK, message, confirming that the device can use the provided IP address and other settings, including the DNS server information.
+
+Once the DHCP ACK is received, the device configures itself with the IP address, subnet mask, default gateway, and DNS server or servers as specified by the DHCP server. The DNS server address is now set for use in resolving domain names to IP addresses.
+
+Java includes support for both IPv4 and IPv6 addresses. To accommodate this, two subclasses of InetAddress were created: Inet4Address and Inet6Address. Inet4Address represents a traditional IPv4 address, while Inet6Address encapsulates a newer IPv6 address. Because both are subclasses of InetAddress, a reference to InetAddress can refer to either type. This approach allowed Java to add IPv6 functionality without breaking existing code or introducing many new classes. For most purposes, you can simply use InetAddress when working with IP addresses, since it can handle both styles.
+
+Byte order — Endianness
+
+The order in which bytes are transmitted on a network is also well defined. In computing, there are two ways to order bytes.
+
+First, there is big endianness. In this approach, a multi-byte value is ordered from the lowest to the highest bytes. In other words, the lower bytes of a multi-byte value are placed at a lower address than the higher ones. For example, the hexadecimal value twelve thirty-four fifty-six would be represented as the three bytes: twelve, thirty-four, fifty-six.
+
+Second, there is little endianness. Here, a multi-byte value is ordered from the highest to the lowest bytes. The higher bytes are placed at a lower address than the lower ones. Using the same example, the hexadecimal value twelve thirty-four fifty-six would be represented as the three bytes: fifty-six, thirty-four, twelve.
+
+In the networking world, the big endianness approach is always used. This means that the order of bytes in multi-byte values matches their actual representation.
+
+Sockets
+
+In Java, there are two types of sockets, each meant for different purposes. One is the ServerSocket, and the other is the Socket class for clients. The main difference is that the ServerSocket is blocking, since it acts as a listener. It waits for clients to connect to it, because otherwise, there would be no one to serve information to.
+
+
+When a client socket is created in Java, it automatically tries to establish a connection to the server socket at the specified address. There are no separate methods to explicitly connect after creating the socket. If the socket is created successfully, you can immediately start sending data through it.
+
+There are several constructors for the Socket class. For example, you can create a socket by providing an Internet address and a port, or by specifying a host name and a port. If you use a host name, the constructor will resolve it to an IP address. If the connection cannot be established, these constructors will throw exceptions such as IOException or UnknownHostException.
+
+Here is a simple example that demonstrates how to connect to the public WHOIS server at internic dot net on port forty-three. The code creates a socket, then obtains input and output streams from it. The output stream is used to send a request, and the input stream is used to read the response from the server.
+
+In this example, a class called Whois is defined. Inside the main method, a socket is created and connected to whois dot internic dot net on port forty-three. The input and output streams are obtained from the socket. A request string is constructed, which is either the domain name "MHProfessional dot com" or a value provided as a command-line argument, followed by a newline character. This string is converted to bytes and sent through the output stream. The program then reads the response from the input stream, character by character, and prints it to the console. Finally, the socket is closed.
+
+The output of this program will be the WHOIS information for the requested domain. This includes details such as the domain name, registry domain ID, registrar information, creation and expiry dates, name servers, and other registration data.
+
+WHOIS is a protocol used for querying databases that store registered domain names and IP addresses. It allows you to retrieve information about who owns a domain or an IP address, as well as registration dates, contact details, and the registrar responsible for the domain.
+
+Now, let's talk about URLs.
+
+A Uniform Resource Locator, or URL, is a way to locate a specific resource on the internet and provides a means to interact with that resource. A URL consists of several components.
+
+First, there is the scheme. This is the first part of the URL and specifies which protocol should be used to access the resource. Common schemes include HTTP, HTTPS, file, gopher, and FTP.
+
+Next is the host. This component is in the middle of the URL and specifies the host or domain name where the resource can be found. The host is usually resolved to an IP address using DNS, but you can also use an IP address directly in the URL.
+
+The port is another component, but it is optional. If omitted, the port is usually inferred based on the protocol. For example, HTTP uses port eighty by default, HTTPS uses port four hundred forty-three, and FTP uses port twenty-one. The first one thousand twenty-four ports are reserved for special purposes.
+
+Here are some examples of protocols and their default ports. HTTP uses port eighty, so a typical URL would be "http://example.com". HTTPS uses port four hundred forty-three, as in "https://example.com". FTP uses port twenty-one, as in "ftp://ftp.example.com". The file protocol does not use a port, and an example would be "file:///C:/example.txt". SFTP uses port twenty-two, SMTP uses ports twenty-five and five hundred eighty-seven, Telnet uses port twenty-three, and WebSocket uses ports eighty and four hundred forty-three.
+
+The Java networking package provides tools for constructing URL objects. The base class is called URL, and it has several overloaded constructors. You can create a URL from a string, or by specifying the protocol, host, port, and path separately. You can also create a URL by resolving a relative URL within a base context, or by providing a custom stream handler.
+
+All of these constructors can throw a MalformedURLException if the provided string does not represent a valid URL.
+
+Here is an example that demonstrates how to use the URL class. The code creates a URL object for "http://www.HerbSchildt.com/WhatsNew". It then prints out the protocol, port, host, path, and the external form of the URL.
+
+When you run this code, you will see output like the following. The protocol is HTTP. The port is negative one, which means the default port is used. The host is "www.HerbSchildt.com". The path is "/WhatsNew". The external form is "http://www.HerbSchildt.com/WhatsNew".
+
+The URLConnection class is a special type of object that can be obtained from a URL instance by calling the openConnection method. This method creates a URLConnection object, which establishes a connection to the URL. For protocols like HTTP, HTTPS, and FTP, this often involves creating a socket connection to the server. The socket is responsible for sending and receiving data.
+
+URLConnection is a high-level abstraction that uses protocol handlers. For HTTP and HTTPS, it wraps around the Socket API. For other protocols, different handlers are used. This abstraction allows you to communicate with resource servers without worrying about the details of the underlying protocol.
+
+A connection is established when you call connect, getInputStream, or getOutputStream on the URLConnection. This sets up a communication link between your application and the remote server.
+
+Here is an example of making a regular GET request to fetch data from a target URL. The code creates a URL object for "http://www.example.com", opens a connection, and obtains an input stream. It then reads the response line by line and prints each line to the console. Finally, the reader is closed.
+
+Next, let's look at how to make a POST request and send data to the target URL.
+
+
+Let’s begin by describing the Java code example.
+
+This code demonstrates how to make an HTTP POST request to a login page using Java’s HttpURLConnection class. It sets the request method to POST, specifies the content type as form URL encoded, and writes the username and password as form data to the request body. The code then sends this data to the server for authentication.
+
+Now, let’s discuss the different classes that implement the URLConnection interface.
+
+There are several classes in Java that handle connections to different types of resources, each tailored to a specific protocol or resource type. The HttpURLConnection class is designed for HTTP connections and provides features for handling HTTP methods like GET and POST, as well as managing headers and responses. HttpsURLConnection extends HttpURLConnection to support secure HTTPS connections, enabling encrypted communication using SSL or TLS. JarURLConnection is used for accessing resources inside JAR files, allowing you to read entries from those archives. FileURLConnection is for accessing local files using the file protocol, making it possible to read files from the local filesystem. FtpURLConnection is designed for file transfers over the FTP protocol. Finally, DataSourceURLConnection is used for reading data from DataSource objects, which is common in JavaMail for accessing resources.
+
+Next, let’s talk about the URI class.
+
+The URI class in Java represents a Uniform Resource Identifier, which is a general way to identify a resource. It is a super-type of the URL class. While a URI simply identifies a resource, a URL goes further by describing how to locate and access that resource. In other words, a URI is an identifier, and a URL is a locator. For example, a URI that includes a scheme locator, such as “https://www.example.com,” is considered a URL. On the other hand, a URI that contains a name identifier, like “urn:isbn:one two three four five,” is called a URN, or Uniform Resource Name.
+
+Now, let’s move on to cookies.
+
+Cookies are a mechanism for maintaining a stateful connection between a server and a client. A cookie is typically sent with each request and response, serving as a unique identifier that allows the server to recognize individual clients. During each interaction, the server sends a cookie header in the response, and the client returns the same cookie in subsequent requests. This process enables the server to distinguish between different clients.
+
+In addition to regular cookies, there are companion cookies such as CSRF tokens, which are used to secure cookies and ensure that requests are coming from legitimate clients rather than malicious actors. In Java, the HttpCookie class provides a generic implementation for HTTP cookies. This class works with the CookieStore interface and the CookieManager class. The CookieManager acts as a bridge between HttpURLConnection and HttpCookie, using a CookieStore internally to manage cookies for multiple HTTP requests and responses.
+
+To set up a default CookieHandler, you would typically use the CookieHandler.setDefault method with a new CookieManager instance. This ensures that all HTTP requests and responses are automatically routed through the specified CookieManager. The actual integration between HttpURLConnection and the CookieManager happens in the platform-specific implementation, which uses CookieHandler.getDefault to retrieve the default CookieManager. This mechanism ensures that each HttpURLConnection instance is properly populated with cookies.
+
+The HttpCookie class provides several constructors for creating cookies with different parameters, such as name, value, header, and creation time. The HttpURLConnection class also has constructors for creating connections to specific URLs, with optional host and port parameters.
+
+The relationship between these classes can be summarized as follows. The CookieHandler is used by HttpURLConnection. The CookieManager implements CookieHandler and uses CookiePolicy, HttpCookie, and CookieStore. The CookieStore manages the storage of cookies, and there is an internal in-memory implementation for storing cookies.
+
+Here’s an example of how to use CookieManager and HttpURLConnection together in Java.
+
+First, a CookieManager is created and set as the default CookieHandler. Then, an HTTP connection is made to a specified URL. When a request is sent, any applicable cookies from the store are automatically included. After receiving the response, the code checks for any cookies sent by the server and prints them out. Finally, it retrieves the stored cookies for the same URL from the CookieStore and prints them as well.
+
+Now, let’s discuss CSRF tokens.
+
+Cross-Site Request Forgery, or CSRF, tokens are a critical security feature for web applications. They protect against unauthorized actions initiated by third-party sites. By embedding a unique, unpredictable token in each state-changing request and validating it on the server side, web applications ensure that only legitimate actions performed by authenticated users are allowed. CSRF tokens are tied to both the user’s session and the specific site. Since an attacker’s website cannot access the legitimate site’s CSRF token, it cannot include the correct token in any malicious request.
+
+The typical process works as follows. When a user loads a page, the server sets two cookies: one HTTP-only cookie for the session, and another HTTP-only cookie for the CSRF token. When the user makes an API call, such as with fetch or XMLHttpRequest, the browser reads the CSRF token cookie and includes it in a special header, often called X-CSRF-Token. The server then verifies both the session and the CSRF token to ensure the request is legitimate.
+
+Next, let’s talk about CORS.
+
+Cross-Origin Resource Sharing, or CORS, is a security feature built on top of the Same-Origin Policy. It allows web servers to explicitly permit cross-origin requests. When a website needs to request a resource from another domain, the browser uses CORS to check if the server allows that request. The browser determines if a request is cross-origin based on the protocol, domain, and port of both the requesting page and the requested resource.
+
+If the server does not respond with the appropriate CORS headers or explicitly denies access, the browser blocks the response from being made available to JavaScript. The request may still be sent, but the browser will refuse to pass the response data to the page’s JavaScript if the CORS policy is not satisfied.
+
+The process works as follows. When a script, such as an AJAX call or a fetch request, tries to access a resource from a different origin, the browser first checks if the request adheres to the Same-Origin Policy. If the request is cross-origin, the browser may send a special HTTP request called a preflight request to the server, asking if the actual request is allowed.
+
+This concludes the overview of Java’s URL and HTTP connection handling, cookies, CSRF tokens, and CORS security features.
+
+
+Let’s walk through the process of a CORS preflight request and then move on to Java’s Datagram socket implementation.
+
+First, when a browser needs to make a cross-origin request, it sends what’s called a preflight request. This is an HTTP OPTIONS request sent to the server. The request includes headers such as Host, Origin, Access-Control-Request-Method, and Access-Control-Request-Headers. These headers tell the server which origin is making the request, what HTTP method will be used, and which custom headers will be included.
+
+The purpose of this preflight request is to ask the server if it allows cross-origin requests from the specified origin, using the specified method and headers.
+
+If the server is configured to allow these cross-origin requests, it responds with specific CORS headers. These include Access-Control-Allow-Origin, Access-Control-Allow-Methods, and Access-Control-Allow-Headers. The response might look like a two hundred four No Content status, with the allowed origin, methods, and headers specified.
+
+The browser then checks the returned CORS headers to ensure the request is permitted. If the headers are missing or do not match the request—for example, if the origin is not allowed—the browser will block the response. In this case, the JavaScript on the page will not be able to read the response.
+
+Now, let’s shift to the Datagram socket in Java.
+
+Unlike the regular Socket class, which is designed for TCP packet communication, the Datagram socket implementation is meant for UDP-style packets. The Datagram API provides several ways to construct a Datagram socket. The constructors are similar to those for regular TCP sockets. You can create a Datagram socket by specifying a port, a host address, both, or with no arguments at all. If you use no arguments, the socket binds to the first available port on the machine that is not reserved.
+
+The Datagram socket class provides methods to send and receive packets. The send method transmits a DatagramPacket, while the receive method waits for a packet to arrive and fills the provided DatagramPacket with the received data.
+
+The DatagramPacket class is used to hold the data being sent or received. When constructing a DatagramPacket, you must provide a buffer to store the data. The first two constructors are used when receiving data, as they only require a buffer and its size. The last two constructors are used when sending data, since you need to specify the recipient’s address and port.
+
+To summarize, when receiving data, you create a DatagramPacket with just a buffer. When sending data, you create a DatagramPacket with a buffer, the recipient’s address, and the port number.
+
+Now, let’s look at an example Java class called WriteServer. This class demonstrates both server and client behavior using Datagram sockets.
+
+The WriteServer class defines constants for the server port, client port, and buffer size. It also creates a DatagramSocket and a byte buffer.
+
+TheServer method reads input from the server’s standard input, one character at a time. When the user presses Enter, it sends the accumulated input as a DatagramPacket to the client’s port. If the end of input is reached, the server prints a message and closes the socket.
+
+TheClient method waits to receive DatagramPackets from the server. When a packet arrives, it prints the received data to the screen.
+
+The main method determines whether to start the application as a server or a client based on the number of command-line arguments. If one argument is provided, it starts as a server and binds to the server port. Otherwise, it starts as a client and binds to the client port.
+
+To use this application as both the server and the client, you simply run the program with or without a dummy argument. Running “java WriteServer” starts the client, while running “java WriteServer 1” starts the server.
+
+This example demonstrates how to use Datagram sockets in Java for simple UDP communication between a server and a client.
+
+

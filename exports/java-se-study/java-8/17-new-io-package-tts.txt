@@ -1,0 +1,226 @@
+NIO Java
+
+NIO, which stands for "new input output," is an improved implementation of the standard Java input and output library. This new approach, which was significantly enhanced in Java version one point seven, allows developers to work with input and output streams in a non-blocking way. This can greatly reduce the load on systems such as web servers.
+
+For example, in a typical scenario, each new request to a web server creates a new thread, or uses a free thread from a pool. With the old Java input and output implementation, the entire thread would be blocked while waiting for an input or output operation to complete. In contrast, with the new approach, you can use Java NIO to open a channel to a file in a non-blocking way. When the file or device is ready to be read, the operation proceeds, freeing up system resources in the meantime.
+
+Reading
+
+Let’s look at how reading from a file works in both the old and new APIs. In both cases, the implementation is blocking, but the new NIO API is much cleaner. It handles most of the work internally and provides short, convenient methods to deliver the data. However, it offers less control over how the data stream is read.
+
+The first example defines a class that reads lines from a file called "example dot t x t" using the traditional approach. It uses a buffered reader to read each line and print it to the console.
+
+The second example shows the NIO approach. Here, the code reads all lines from "example dot t x t" into a list of strings using the Files dot readAllLines method, and then prints each line. This method is more concise and easier to read.
+
+Writing
+
+Now, let’s compare writing to a file using both the old and new APIs. Again, both implementations are blocking, but the NIO API is more streamlined and handles much of the complexity internally.
+
+The first example demonstrates the traditional approach. It creates a buffered writer to write two lines of text to "example dot t x t," adding a new line between them.
+
+The second example uses the NIO API. It creates a list of strings and writes them to "example dot t x t" in one step using the Files dot write method. This approach is simpler and more readable.
+
+Memory-mapping
+
+Next, let’s discuss memory-mapped files, a feature provided by the NIO library. Memory mapping allows you to map a file resource directly into virtual memory. The operating system can then serve the file contents as if they were in main memory, making reading memory-mapped files more efficient. This technique is also common in languages like C and C plus plus.
+
+The example provided defines a class that opens a file channel for reading, maps the entire file into memory as a read-only buffer, and then iterates through the buffer to print each character. This demonstrates how to efficiently read large files using memory mapping.
+
+Async
+
+Now, let’s explore asynchronous file operations with NIO. The following examples show how to read from and write to a file asynchronously, meaning the thread is not blocked while waiting for the operation to complete.
+
+The first example demonstrates asynchronous file reading. It opens an asynchronous file channel, allocates a buffer, and starts a read operation. While the read is in progress, the program can perform other tasks. Once the read is complete, it retrieves the number of bytes read, rewinds the buffer, copies the data into a byte array, and prints the file content.
+
+The second example shows asynchronous file writing. It opens an asynchronous file channel for writing, creates a buffer, writes the letters A through Z into the buffer, rewinds it, and writes the buffer to the output file. This approach allows the program to initiate the write operation without blocking the current thread.
+
+Path
+
+Finally, another key feature added to the NIO library is the Path class. This class serves as a bridge between the native Java File class and the new NIO packages. The Path class provides various methods for working with system paths and is a fundamental part of the NIO package.
+
+
+Path Methods Overview
+
+Let's begin with an overview of the most important methods available in the Path class in Java's NIO library.
+
+The compareTo method allows you to compare one Path object to another, using lexicographical order.
+
+The endsWith method can be used in two ways. You can check if a Path ends with another Path, or you can check if it ends with a specific string, which is treated as a sequence of name elements.
+
+The equals method checks if this Path is equal to another object.
+
+The getFileName method returns the file name, or the last name element, of the Path.
+
+With getName and an index, you can retrieve a specific name element from the Path.
+
+The getNameCount method tells you how many name elements are present in the Path.
+
+The getParent method returns the parent path, or null if there is no parent.
+
+The getRoot method returns the root component of the Path, if it exists.
+
+The hashCode method provides a hash code for the Path, useful for collections.
+
+The isAbsolute method returns true if the Path is absolute.
+
+The iterator method gives you an iterator over the name elements of the Path.
+
+The normalize method returns a normalized version of the Path, removing redundant elements such as dot and double dot.
+
+The of method can be used to create a Path from one or more strings, or from a URI.
+
+The register method allows you to register the Path with a WatchService, so you can monitor file system events. There is also an overloaded version that accepts additional modifiers for more control.
+
+The relativize method constructs a relative path from this Path to another Path.
+
+The resolve method appends another Path, or one or more paths, or a string, to this Path. There are several overloaded versions to handle different input types.
+
+The resolveSibling method resolves the Path against its parent, either with another Path or with a string representing a sibling.
+
+The startsWith method checks if the Path starts with another Path, or with a given string.
+
+The subpath method returns a subpath from a specified begin index to an end index.
+
+The toAbsolutePath method converts the Path to an absolute path.
+
+The toFile method converts the Path to a File object.
+
+The toRealPath method returns the real path, resolving symbolic links and verifying the file's existence.
+
+The toString method returns the string representation of the Path.
+
+Finally, the toUri method converts the Path to a URI.
+
+When updating legacy code bases, it is possible to convert from the old File class to the new Path class, and vice versa, by calling the toPath or toFile methods. These methods perform the conversion directly.
+
+Files Class Overview
+
+Now, let's move on to the Files class. The Files class mostly contains static methods, and it is designed to work closely with the Path class. Like Path, the Files class is a cornerstone of the NIO library in Java.
+
+Some of the most notable methods from the Files class are listed below.
+
+
+Java NIO File Methods Overview
+
+This section provides an overview of various methods available in the Java NIO file API, focusing on file and directory operations, attribute management, and stream handling. Each method is described in terms of its purpose and typical usage.
+
+The copy method, when used with an input stream and a target path, copies data from the input stream to the specified file location. When used with a source path and an output stream, it copies the contents of a file to the output stream. There is also a version that copies a file from one path to another, allowing for optional copy behaviors such as replacing existing files.
+
+The createAndCheckIsDirectory method creates a directory at the specified path and verifies that the directory was successfully created.
+
+The createBufferedReaderLinesStream method produces a stream of strings, where each string represents a line read from a buffered reader.
+
+The createDirectories method creates a directory and any necessary but nonexistent parent directories along the specified path.
+
+The createDirectory method creates a new directory at the given path, but only if it does not already exist.
+
+The createFile method creates a new file at the specified path, with optional file attributes such as permissions.
+
+The createFileChannelLinesStream method generates a stream of lines from a file channel, using a specified character set for decoding.
+
+The createLink method establishes a hard link between two file paths, effectively creating another reference to the same file data.
+
+The createTempDirectory method creates a temporary directory in a given location, optionally using a prefix for the directory name.
+
+The createTempFile method creates a temporary file in a specified directory, with optional prefix and suffix for the file name.
+
+The delete method removes the file or directory at the specified path.
+
+The deleteIfExists method attempts to delete the file or directory at the given path, but does nothing if the target does not exist.
+
+The exists method checks whether a file or directory exists at the specified path.
+
+The find method searches for files in a directory tree, returning those that match a given condition, which is defined by a bi-predicate.
+
+The followLinks method configures whether symbolic links should be followed during file operations.
+
+The getAttribute method retrieves a specific attribute of a file, such as its size or creation time.
+
+The getFileStore method returns information about the file store, such as the disk partition, where the file resides.
+
+The getLastModifiedTime method retrieves the last time the file at the given path was modified.
+
+The getOwner method returns the owner of the file at the specified path.
+
+The getPosixFilePermissions method retrieves the POSIX file permissions for the file, which is relevant on Unix-like systems.
+
+The isAccessible method checks whether the file can be accessed with the specified access modes, such as read or write.
+
+The isDirectory method checks if the path refers to a directory.
+
+The isExecutable method checks if the file at the given path is executable.
+
+The isHidden method checks if the file is hidden according to the file system’s conventions.
+
+The isReadable method checks if the file can be read.
+
+The isRegularFile method checks if the path refers to a regular file, as opposed to a directory or symbolic link.
+
+The isSameFile method determines whether two paths refer to the same file on disk.
+
+The isWritable method checks if the file can be written to.
+
+The lines method returns a stream of all lines in the file at the specified path.
+
+The lines method, when used with a character set, returns a stream of lines decoded using that character set.
+
+The list method returns a stream of all entries in the directory at the given path.
+
+The move method moves a file from one path to another, with optional move behaviors such as replacing existing files.
+
+The notExists method checks if the file or directory does not exist at the specified path.
+
+The read method reads up to a specified number of bytes from an input stream.
+
+The readAllBytes method reads the entire contents of a file into a byte array.
+
+The readAllLines method reads all lines from a file into a list of strings.
+
+The readAllLines method, when used with a character set, reads all lines using the specified character encoding.
+
+The readAttributes method reads the file attributes as an instance of a specified class, which extends basic file attributes.
+
+The readAttributes method, when used with a string, reads a set of file attributes identified by that string.
+
+The readString method reads the entire contents of a file into a single string.
+
+The readString method, when used with a character set, reads the file contents into a string using the specified encoding.
+
+The setAttribute method sets a file attribute for the file at the given path.
+
+The setLastModifiedTime method sets the last modified time of the file at the specified path.
+
+The setOwner method sets the owner of the file at the given path.
+
+This concludes the overview of key Java NIO file methods, which provide a comprehensive toolkit for file and directory management, attribute handling, and efficient data streaming in Java applications.
+
+
+Let’s review several important file operations and methods, focusing on what each one does and why it’s useful.
+
+The setOwner method allows you to set the owner of a file at a specific path. This is important for managing file permissions and access control.
+
+The setPosixFilePermissions method lets you set POSIX file permissions for a file at a given path. This is essential for controlling who can read, write, or execute a file on systems that use POSIX permissions.
+
+The size method returns the size of the file at the specified path. This is useful when you need to know how much data a file contains.
+
+The walk method returns a stream of paths as it walks through the directory tree, starting at the given path. This is helpful for processing or searching through files and directories recursively.
+
+A variation of the walk method allows you to specify a maximum depth, so you can limit how deep into the directory tree the walk goes.
+
+The walkFileTree method walks a file tree starting from a given path, visiting each file using a FileVisitor. This approach gives you more control over how files and directories are processed during the traversal.
+
+Another version of walkFileTree lets you specify additional options and a depth limit, providing even finer control over the traversal process.
+
+The write method, when given an iterable of character sequences, writes those sequences to a file using a specified character set. This is useful for writing text data to files in a controlled encoding.
+
+A similar write method allows you to write an iterable of character sequences to a file, using the default character set.
+
+There is also a write method that writes a byte array directly to a file at the specified path. This is commonly used for binary data.
+
+The writeString method writes a character sequence to a file using a specified character set, making it easy to store text data with the desired encoding.
+
+Finally, another version of writeString writes a character sequence to a file using the default character set.
+
+Each of these methods provides a different way to interact with files and directories, giving you flexibility and control over file system operations in your applications.
+
+

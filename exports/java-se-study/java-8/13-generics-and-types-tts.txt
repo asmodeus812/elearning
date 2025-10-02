@@ -1,0 +1,96 @@
+Generics
+
+Generics in Java are a way to provide compile-time, type-safe parameterization and generalization of algorithms and data structures. In earlier versions of Java, developers would use the Object type to achieve generic behavior. However, this approach was not type-safe, required explicit type casting, and was prone to errors that could only be detected at runtime.
+
+With the introduction of generics, Java allows you to define classes, interfaces, and methods with type parameters. The syntax uses angle brackets, such as less than T greater than, where T is a type parameter. For example, you might define a class called Generic with a type parameter T. Inside this class, you can use T to declare member variables, method parameters, and return types. This means you can write code that works with any reference type, while still maintaining type safety.
+
+It’s important to note that generics in Java only work with reference types. You cannot create a generic class that uses primitive types like int or double directly. Additionally, you cannot assign references between different parameterizations of the same generic class. For example, a Generic of Integer is not the same as a Generic of Double. The type parameter becomes an integral part of the class definition.
+
+Erasure
+
+A key aspect of Java generics is that all generic type information is erased at runtime. This process is known as type erasure. The reason for this design was to maintain compatibility with older versions of Java and the Java Virtual Machine. Generic code had to work seamlessly with preexisting, non-generic code.
+
+When your Java code is compiled, all information about generic type parameters is removed. The compiler replaces type parameters with their bound types. If no explicit bound is specified, Object is used as the default. The compiler also inserts the necessary type casts to ensure type compatibility, based on the type arguments you provided. As a result, no type parameters exist at runtime—generics are purely a compile-time feature.
+
+Ambiguity
+
+Ambiguity can arise with generics due to type erasure. For example, if you define a generic class with two type parameters, T and V, and then try to overload methods that differ only by these parameters, you may encounter a compile-time error. Suppose you have a class with two methods, both named set, one accepting a parameter of type T and the other of type V. If you create an instance of this class with both type parameters set to String, the two methods become indistinguishable after type erasure, leading to a compilation error. However, if the type parameters are different, such as String and Integer, the methods remain distinct and the code compiles successfully.
+
+This issue can be avoided by providing bounding restrictions, ensuring that T and V derive from different type hierarchies. That way, the methods remain distinguishable even after type erasure.
+
+Bounded Generics
+
+Generics become especially powerful when you provide more information to the compiler through bounds. If you define a generic type parameter without any bounds, the compiler knows very little about what methods or properties are available on that type. By specifying a bound, you tell the compiler that the type parameter must extend a particular class or implement a specific interface.
+
+For example, you might define a class called Sum with a type parameter T that extends Number. This tells the compiler that T will always be a subclass of Number, so you can safely use methods defined in the Number class, such as integerValue. This allows you to create a generic class that can sum values of any numeric type, such as Double, Integer, or Short.
+
+Unbound and Wildcards
+
+There are situations where a generic class might want to interact with another generic class that is also parameterized, but you do not know the exact type parameter in advance. Java provides wildcards, represented by a question mark, to handle these cases.
+
+For instance, you might have a class called Sum with a type parameter T that extends Number. Inside this class, you can define a method that takes another Sum object with an unknown type parameter, using the wildcard. This allows you to compare two Sum objects, even if their type parameters are different, while still maintaining type safety because both are guaranteed to extend Number.
+
+It’s important to note that you cannot overload methods based solely on wildcard parameters. The compiler does not have enough information to distinguish between them.
+
+Wildcards can also be bounded, meaning you can specify an upper or lower boundary for the types they represent. For example, you might have a class hierarchy with Base, LevelOne, LevelTwo, and LevelThree, all parameterized by a type T. You can then define a class Usage with a type parameter that extends Base of Number. This allows you to create Usage objects for LevelOne, LevelTwo, or LevelThree, all parameterized by Number.
+
+Upper Boundary
+
+An upper boundary specifies the highest class or type in the hierarchy that can be used in place of the wildcard. Any subclass of the specified boundary is also allowed. For example, if you define a method that takes a Usage object with a wildcard extending LevelTwo, you can pass in any object that is LevelTwo or a subclass of LevelTwo, such as LevelThree.
+
+Lower Boundary
+
+A lower boundary specifies the lowest class in the hierarchy that can be used. Any superclass of the specified boundary is allowed. For example, if you define a method that takes a Usage object with a wildcard super LevelTwo, you can pass in LevelTwo, LevelOne, Base, or even Object.
+
+Methods
+
+Generics are not limited to classes; methods can also be generic. You can define a generic method inside a non-generic class, providing even greater flexibility. For example, you might have a method that takes two type parameters, T and V, with T extending Comparable of T, and V extending T. This means that T must be comparable, and V must be a subclass of T. As a result, you can compare values of type T and V, as long as both are compatible and implement the Comparable interface.
+
+This approach allows you to write highly flexible and reusable code, where the method can operate on a wide range of types, as long as they meet the specified constraints.
+
+Constructors
+
+Now, let’s move on to constructors.
+
+
+Just as with methods, constructors in Java can also be defined as generic, even if their enclosing class is not. This approach provides a more flexible and convenient way to initialize objects, allowing them to be constructed from a wide variety of input types.
+
+In the following example, a class called NoGenericClass is defined. Its constructor is generic and accepts any type that extends the Number class. Inside the constructor, the value is converted to a double. This means you can create instances of NoGenericClass using any numeric type, such as integers, longs, floats, or doubles. Thanks to Java’s autoboxing feature, you can even use primitive types directly.
+
+This design allows you to instantiate NoGenericClass with different numeric types, making object creation more versatile.
+
+Inheritance
+
+When inheriting from or implementing a generic class or interface, there is a specific requirement regarding type boundaries. If a generic class or interface specifies a boundary for its type parameter, any subclass or implementing class must specify the same or a more restrictive boundary.
+
+For example, consider an interface called MinMax, which uses a type parameter T that must extend Comparable. Any class that implements MinMax must also declare T with at least the same boundary. You can make the boundary more restrictive, but not less. If you try to use a less restrictive boundary, the compiler will produce an error.
+
+This ensures type safety and consistency across the inheritance hierarchy.
+
+Raw Types
+
+To support older code written before generics were introduced, Java allows you to use a generic type without specifying type parameters. This is known as using a raw type. When you do this, all type safety checks are disabled, and the generic type is treated as an Object. This can lead to runtime errors if types are misused.
+
+For example, you can declare a variable of a generic type without specifying its parameter, but this is not recommended. Instead, you should always specify the type parameter to ensure type safety.
+
+Inference
+
+Java provides a feature called type inference, which allows the compiler to deduce the type arguments needed for a generic class or method. When creating an instance of a generic class, you can use the diamond operator—represented by empty angle brackets—to let the compiler infer the types.
+
+For instance, when you write MyClass of Integer and String, followed by the diamond operator and the constructor arguments, the compiler automatically determines the correct types. This makes the code shorter and easier to read, especially when dealing with long or complex type declarations.
+
+Restrictions
+
+There are several important restrictions when working with generics in Java.
+
+First, type parameters cannot be instantiated directly. The type parameter, such as T, is just a placeholder, and the compiler does not have enough information to create an instance of it. For example, trying to use new T inside a generic class will result in a compile-time error.
+
+Second, you cannot declare static members that use the type parameter in a generic class. This is because type parameters are defined on a per-instance basis, and static members are shared across all instances. As a result, the compiler cannot determine the correct type for static members.
+
+Third, creating arrays of generic types is not allowed. If you try to create a new array of a generic type, the compiler will produce an error due to insufficient type information. However, you can assign an existing array reference to a generic array variable, or use wildcard types with arrays, thanks to type erasure.
+
+Finally, a generic class cannot extend Throwable. This means you cannot create generic exception classes in Java.
+
+These restrictions are in place to maintain type safety and ensure that generics work reliably within the Java language.
+
+

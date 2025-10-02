@@ -1,0 +1,45 @@
+Methods
+
+Overloading
+
+Method overloading, also known as compile-time polymorphism, allows you to define multiple methods with the same name but different parameter lists. This is called compile-time polymorphism because the method signatures and their behaviors are determined when the code is compiled.
+
+The overloaded methods must share the same name, but they can differ in the type or number of arguments. The return type can be the same, but it is not required to be. The main idea is that, at runtime, the compiler selects the correct version of the overloaded method based on the arguments provided.
+
+For example, consider a class called OverloadDemo. In this class, there are several methods named test. One version takes no parameters, another takes a single integer, a third takes two integers, and a fourth takes a single double. Each method prints out a message indicating which version was called. The version that takes a double also returns the square of its argument.
+
+To use these overloaded methods, you would create an instance of OverloadDemo and call the test method with different arguments. For example, calling test with no arguments, with one integer, with two integers, or with a double. The compiler will route each call to the correct method implementation.
+
+However, there are some caveats. If you try to call test with two doubles, and there is no such method defined, you will get a compile-time error. On the other hand, if you call test with a float, and there is a method that takes a double, Java will automatically promote the float to a double and call the double version.
+
+Constructors can also be overloaded in the same way as methods. The rules are the same: the constructor name stays the same, and each version must have a unique combination of parameter types and numbers. Type promotion can also occur with overloaded constructors.
+
+Invocation
+
+In Java, all arguments are passed by value. This means that a copy of the argument is made and pushed onto the stack before the method is called. However, there is an important detail when it comes to objects. When you pass an object as a parameter, the reference to the object is copied, not the object itself. Both the original and the parameter point to the same object in memory, even though the reference is passed by value.
+
+For primitive types such as numbers, booleans, and characters, the value itself is simply copied.
+
+Returning
+
+When returning values from methods, Java also uses pass-by-value. The returned value is copied back onto the call stack. For object references, the reference itself is copied, but both the caller and the callee point to the same object in memory.
+
+You can also return a new object from a method. For example, you might have a method called createBox that returns a new Box object. If you assign the result to a variable, that variable will point to the new Box, and the garbage collector will not remove it as long as there is at least one reference to it. If you call createBox and do not use the result, the object is eligible for garbage collection.
+
+Arguments
+
+A particularly useful feature in Java is the variable arguments list, or varargs. This allows a method to accept an unknown, possibly zero, number of arguments of the same type. You define a varargs parameter using three dots after the type. For example, a method called vamethod might take an int followed by three dots, indicating it can accept any number of integers.
+
+You can call this method with one argument, several arguments, or no arguments at all. Internally, the compiler treats the varargs parameter as an array, so inside the method you can access the length property and iterate over the arguments.
+
+A method can have both normal parameters and a variable-length parameter, but the varargs parameter must be the last one declared. You cannot declare more than one varargs parameter in a single method.
+
+Varargs methods can also be overloaded. For example, you can define versions of vamethod that take different types of varargs, such as int, boolean, double, or float. You can also overload a varargs method by adding one or more normal parameters. For instance, you might have one version of vamethod that takes a string, and another that takes a string followed by a variable number of integers.
+
+In essence, varargs are just syntactic sugar for an array of a given type. This means you can call a varargs method by passing an array directly, although this is rarely necessary.
+
+However, you cannot define two methods where one takes an array and the other takes a varargs parameter of the same type, because the compiler treats them as equivalent. This will result in a compile-time error.
+
+There can also be ambiguity when overloading varargs methods. For example, if you define two methods, one taking a variable number of integers and the other a variable number of booleans, and then call the method with no arguments, the compiler cannot decide which method to use, resulting in a compile-time error. Similarly, if you have one method that takes a variable number of integers and another that takes one integer followed by a variable number of integers, calling the method with a single integer will also cause a compile-time error due to ambiguity.
+
+

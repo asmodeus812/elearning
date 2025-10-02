@@ -1,0 +1,173 @@
+Enumeration
+
+Java provides a feature called enumeration, which is similar to what languages like C or C plus plus offer. Enumeration allows a program to define a set of constants that are logically related. However, unlike most other languages where an enumeration is essentially an integer or ordinal value, in Java, an enumeration—also known as an enum—is actually a type. More specifically, it is a class. This design brings many benefits, since enums in Java can have methods and even instance variables, just like regular classes.
+
+It is important to remember that Java enumerations are instances of the enum, which itself is a simple class type. The runtime does not treat them in any special way. They implicitly inherit from the Enum class.
+
+Declaration
+
+To declare an enum in Java, you use the enum keyword, followed by a block where the enum values are listed. These values are separated by commas and can be written on a single line or across multiple lines. Since enumerations are classes, the list of enums defined inside are actually instances of the enumeration class itself. In essence, you create instances of, for example, Apples, which are immutable and defined at compile time.
+
+By default, the enum instances defined in an enumeration are public, static, and final. However, these modifiers are implied and handled by the compiler. The enum class or type itself is also implicitly public and static. It is generally recommended that enumeration constants are either all uppercase or follow the standard type naming convention, such as PascalCase.
+
+For example, the code defines an enum called Apples with several varieties as its values. Each value, such as Johnatan or GoldenDel, is an instance of the Apples enum.
+
+It is important to note that you are not allowed to specify any modifiers for the enumerated entries inside the enum. Attempting to do so will result in a compile-time error.
+
+Usage
+
+Since enumerations are instances of a class type, to access an element, you must reference the enumeration type first. For example, you might assign Apples.RedDel to a variable of type Apples.
+
+Enumerations are compile-time constants, which means they can be used in switch statements. Inside a switch statement, you can use a constant identifier that does not evaluate to an expression. For example, you can switch on a variable of type Apples and use cases like GoldenDel or RedDel without prefixing them with the enum type.
+
+Restrictions
+
+There are some restrictions enforced on Java annotations, which, if not met, will produce a compile-time error. Enumerations cannot be generic or declared with generic type parameters. Annotations cannot inherit from other annotations using the extends keyword. All methods of an annotation must return a type and accept no arguments. Annotation method return types can be primitive types, String, Class, enum, annotation, or an array of any of these types.
+
+Comparison
+
+As mentioned earlier, the enumerations within an enum type are defined at compile time. Each time you use the combination of enum type and enumeration value, you refer to the same instance of the enum class. Because of this, it is possible to compare them using the double equals operator. The double equals operator still performs a reference comparison, but since the instances are immutable and always refer to the same object, the comparison will always be true for the same enumeration value.
+
+For example, if you assign Apples.GoldenDel to two different variables and compare them with double equals, the result will be true. This works because all references to an enumeration refer to the same object instance, which was created when the enum was first loaded by the Java Virtual Machine.
+
+Enums are not treated with any special attention when it comes to the usual operations that can be performed on them. They are simply a convenient way and a convention to create immutable, final, static instances of a class that can be globally referred to.
+
+Methods
+
+Every enumeration in an enum type implicitly inherits from the Enum class in the java.lang package. This class provides several useful methods.
+
+The ordinal method returns the position of the enumeration in the list, as defined in the source code, starting from zero. For example, calling ordinal on GoldenDel in the Apples enum will return one, since it is the second entry.
+
+The compareTo method compares one enumeration to another by comparing their ordinal values. It returns the difference between the current instance's ordinal and the other enumeration's ordinal. The result is negative if the current ordinal is less than the other, positive if it is greater, and zero if they are equal.
+
+The values method returns an array of all values of the given enum type. This method exists both on the enum type itself and on the enumeration, and produces the same result.
+
+The valueOf method can take the name of the enumeration value as a string, or it can take a class and the enumeration value name. This method also exists on both the enumeration and its type, as well as on the base Enum class.
+
+Members
+
+Since enumerations are instances of the enum, which is a normal Java class type, it is also possible to define instance member variables and methods for them.
+
+For example, you can define an enum called Apple, where each enumeration value has an associated price. The constructor for the enum is implicitly private, which ensures that the only instances that can be created are those defined in the enum itself. Member variables are by default private if no modifier is specified, and member methods are package-private by default. The constructor is always private.
+
+It is important to note that if any members are defined for an enum, the list of enumerations must be terminated with a semicolon. Otherwise, it is a compile-time error. Just like any other Java class, you can also define static and final members in enum class types, and they work the same way as in regular classes.
+
+Wrappers
+
+The Java language provides basic primitive types, such as byte, short, int, long, float, double, boolean, and char. For each of these, the language provides what are called wrapper classes. These wrapper classes represent the same primitive value, but they are not primitives themselves—they are fully formed Java class types. The wrapper classes are Byte, Short, Integer, Long, Float, Double, Boolean, and Character.
+
+These wrappers are often very useful because Java has a special feature called auto-boxing. Auto-boxing allows the wrapper class and the primitive type to be used interchangeably. The compiler automatically converts between the primitive and its wrapper class when needed. For example, if a method accepts an Integer but you pass an int, Java will automatically box the primitive into its wrapper class.
+
+For instance, if you have a method that accepts an Integer and you call it with the value five, Java will box the primitive int into an Integer. Similarly, if you have a method that accepts a Double and you call it with five point five, Java will box the primitive double into a Double.
+
+Extraction
+
+Each of the wrapper classes has a method that can be used to extract the unboxed, raw primitive value inside the wrapped class. These methods follow the naming pattern of the primitive type followed by the word "Value." For example, the Boolean wrapper has a method called booleanValue, and the Character wrapper has a method called charValue.
+
+
+Let’s begin by discussing the value conversion methods available in Java’s wrapper classes.
+
+The Byte, Short, Integer, Long, Float, and Double classes each provide methods to convert their values to other primitive types. For example, Byte has a method called byteValue, Short has shortValue, Integer has integerValue, and so on. These methods are inherited from the Number class, which means you can call, for instance, Byte’s doubleValue or Integer’s floatValue. These methods return the value of the boxed type as the requested primitive type.
+
+For example, if you have an Integer object with the value eight hundred fifty, calling byteValue on it will cause an overflow and return eighty-two, since the byte type cannot represent eight hundred fifty. Calling doubleValue will return eight hundred fifty point zero as a double, and floatValue will return eight hundred fifty point zero as a float.
+
+Now, let’s talk about boxing.
+
+Boxing refers to the process where Java automatically converts a primitive value into its corresponding wrapper object. This is called auto boxing. The reverse process, where a wrapper object is converted back to a primitive, is called unboxing. These conversions happen at runtime and are not particularly efficient, because the runtime must create new wrapper objects or extract primitive values as needed.
+
+For example, if you write Integer k equals one, Integer f equals two, and then Integer r equals k times f, the runtime will first unbox k and f into primitive integers, perform the multiplication, and then box the result back into an Integer object for r. This means that many temporary wrapper objects might be created during such operations, which can negatively impact performance. Therefore, it’s generally better to use raw primitives whenever possible.
+
+Auto boxing and unboxing also interact with type promotion. For instance, if you multiply an integer and a double, the result is automatically promoted to a double. If you assign this result to a Double object, everything works as expected. However, if you try to assign the result to an Integer object, you’ll get a compile-time error, because Java cannot automatically downcast a double to an integer.
+
+Auto boxing and unboxing also work with Boolean wrappers. This means you can use a Boolean object in an if statement. However, be careful—if the Boolean object is null, auto unboxing will fail with a null pointer exception, because Java tries to call booleanValue on a null object.
+
+For example, if you have Boolean b1 set to null and Boolean b2 set to true, and you write assert b1 and b2, the auto unboxing of b1 will fail with a null pointer exception.
+
+Now, let’s move on to annotations.
+
+Annotations in Java are a way for a program to define metadata about itself. This metadata can be accessed at runtime using reflection, allowing you to obtain information about the program and its code implementation.
+
+To declare an annotation, you use the special at-interface keyword. Each annotation contains only methods, but these methods have no bodies. The implementation is provided by Java itself. In this way, an annotation is similar to a regular interface.
+
+For example, you might declare an annotation called Annotation with a method int val.
+
+The Annotation interface is the super-interface of all annotations. It is declared in the java.lang.annotation package. It overrides the hashCode, equals, and toString methods from Object, and it also specifies annotationType, which returns a Class object representing the annotation.
+
+Let’s talk about retention.
+
+Each annotation can specify a retention policy, which tells the compiler at which stage of the program’s lifecycle the annotation should be kept. The retention policy is itself an annotation, called Retention, located in the java.lang package.
+
+There are three retention policies:
+
+Source, where the annotation is only kept in the source code and discarded during bytecode generation.
+
+Class, where the annotation information is retained after bytecode generation and stored in the class file.
+
+Runtime, where the information is kept throughout the runtime of the program and can be accessed during execution.
+
+For example, you can declare an annotation with runtime retention by writing at-Retention with RetentionPolicy dot RUNTIME.
+
+Next, let’s discuss how to obtain annotation information.
+
+You can use Java’s reflection mechanisms to extract information about annotations defined on classes, methods, and other elements. For example, you can define a class called Meta with two methods, each annotated with the Annotation annotation. In your main method, you can use reflection to get the Method objects for these methods, retrieve their annotations, and print out the values specified in the annotations.
+
+This allows you to obtain annotation information for methods with and without arguments, as specified in their declarations.
+
+You can also obtain all annotations for a given target using the getAnnotations method, which returns a list of Annotation instances. The Annotation API provides a way to check if a given annotation exists on a target using the isAnnotationPresent method, which returns a boolean flag.
+
+Let’s briefly cover the main types involved in the annotation system.
+
+Annotation is the base class for all annotations.
+
+AnnotatedElement is the base interface for elements that can be annotated, such as methods, packages, and classes.
+
+AnnotatedType is reserved for annotations placed on arguments or return types.
+
+Now, let’s talk about inheriting annotations.
+
+By default, methods that obtain annotation information will try to get all annotations, including inherited ones. However, annotations are not inherited unless they are explicitly marked as such. You can make an annotation inheritable by annotating it with the at-Inherited annotation. When you use the getAnnotations method, the reflection implementation will walk up the class hierarchy, collecting inherited annotations. If you only want the annotations present at the current level, use the getDeclaredAnnotations method or other declared variants.
+
+For example, you can declare an annotation as inheritable by writing at-Inherited before the annotation declaration.
+
+Next, let’s discuss annotation targets.
+
+The target annotation specifies what kind of program element an annotation can be applied to. By default, an annotation without a target can be applied anywhere, but often you want to restrict it to specific elements, such as methods, fields, or classes.
+
+Some of the possible targets include annotation types, constructors, fields, local variables, methods, packages, parameters, types such as classes or interfaces, type parameters, and type use. The type use target, introduced in Java eight, allows you to annotate both the return type and arguments of a method, which is especially powerful.
+
+For example, you can restrict an annotation to fields and local variables by specifying at-Target with ElementType dot FIELD and ElementType dot LOCAL_VARIABLE.
+
+Now, let’s move on to the next topic.
+
+
+The functional interface annotation
+
+The functional interface annotation in Java is used to indicate that an interface is functional. This means the interface contains only one single method that must be implemented. A classic example is the Runnable interface. By marking an interface as functional, the compiler can optimize and simplify the bytecode generation. It also allows you to use lambda expressions wherever such an interface is expected.
+
+For example, consider an interface named Functional with a single method called work. There is also a class named Concrete, which has a method that takes a Functional interface as a parameter. You can then create an instance of Concrete and call its method, passing in a lambda expression that implements the work method. This approach lets you provide the implementation inline, without needing to create a separate class.
+
+It is important to note that any interface with just one abstract, non-implemented method is automatically treated as a functional interface, even if you do not explicitly use the annotation. The annotation simply makes this intent clear, but it is not required for the interface to be used as a functional interface.
+
+Type
+
+With Java eight, a new feature called type annotation was introduced. This allows annotations to be placed on method return types, argument types, and even in the throws declaration of a method, right in front of an exception type. You can also annotate the implicit this parameter that is passed to object method invocations.
+
+For example, imagine a class called Concrete. It has a method named methodOne that throws a NullPointerException, and the exception type is annotated. Another method, methodTwo, returns an Integer with an annotation on the return type, and also annotates the implicit this parameter, which is of type Concrete. This demonstrates that not only the return type, but also the throws declaration and the implicit this parameter, can be annotated.
+
+Several custom annotations can be defined for different targets. For instance, you can create an annotation that applies to type use, another for type parameters in generics, one for field declarations, one for method declarations, and one for types such as classes, enums, or interfaces.
+
+As an example, consider a class called SomeClass that uses these annotations. The type parameter T is annotated, the member field variable is annotated, and the method method is annotated in several places. The method annotation targets the method declaration, while the type use annotation targets the return type, the method argument, and even local variables inside the method. This shows how annotations can be applied to various elements within a class.
+
+It is important to remember that an annotation can be placed anywhere around the identifier. However, only the target specified by the annotation determines what is actually being annotated. Placing an annotation on a different line above the identifier does not change its scope or target.
+
+Repeating
+
+By default, Java annotations can only appear once on a given target. If you want to use the same annotation multiple times on the same element, the annotation must be marked as repeatable. To do this, you first mark the annotation with the Repeatable meta-annotation, and then create a special container annotation to hold the repeated annotations.
+
+For example, suppose you have an annotation called MyAnno that you want to repeat. You mark it as repeatable and specify a container annotation called MyRepeatedAnnos. The container simply holds an array of MyAnno annotations. You can then declare multiple MyAnno annotations on the same target, such as a method.
+
+When you retrieve annotations at runtime, you can obtain the container annotation, which will hold all the repeated annotations of the specified type. Alternatively, you can directly retrieve all annotations of the repeated type using the appropriate method.
+
+This approach allows you to use the same annotation multiple times on a single element, and the compiler will handle grouping them into the container annotation automatically.
+
+

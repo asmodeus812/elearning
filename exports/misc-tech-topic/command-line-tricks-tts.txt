@@ -1,0 +1,89 @@
+Practical Terminal Commands Every Developer Should Know
+
+Level up your command-line skills with these practical terminal tricks. These tips can save you time, help you fix mistakes quickly, and assist with debugging without needing extra tools. Whether you are a beginner or a power user, there is something here for everyone.
+
+Repeat the Last Command
+
+If you forget to use sudo, there is no need to retype your entire command. The double exclamation mark, pronounced as “bang bang,” reruns your last command. For example, if you try to install a package and get a permission denied error, you can simply type sudo followed by bang bang to rerun the previous command with elevated privileges. This is especially handy for correcting permission issues.
+
+Reuse the Last Argument
+
+You can automatically insert the last argument from your previous command using exclamation mark followed by a dollar sign. For instance, if you create a directory called logs and then want to change into it, you can type cd, followed by exclamation mark and dollar sign. The shell will substitute logs for you, saving time and keystrokes.
+
+Fix Typos Quickly
+
+To fix the first occurrence of a typo in your last command and rerun it, use the caret symbol. For example, if you accidentally type cat fole dot t x t, you can correct it by typing caret fole caret file. The shell will replace the typo and execute the corrected command. This is great for minor typo corrections.
+
+Cycle Through Last Arguments
+
+On most systems, pressing Alt and the period key, or Escape and period on a Mac, will pull the last argument from previous commands and let you cycle through them. For example, if you recently edited a file called server underscore config dot y m l, you can use this shortcut to insert that filename into your next command. This is useful for reusing file names without retyping them.
+
+Turn Output into Arguments with xargs
+
+The xargs command lets you pass a list of items as arguments to another command. For example, if you want to delete all files ending in dot log, you can list them and pipe the output to xargs with the remove command. This will delete all log files efficiently.
+
+Save Output While Still Seeing It with tee
+
+The tee command splits output so you can see it on your screen and save it to a file at the same time. For example, if you are building a project and want to log the output while watching the progress, you can pipe the build command into tee and specify a log file. This is useful for keeping records without missing real-time updates.
+
+Search Inside Files Recursively with grep
+
+To find all occurrences of a pattern in the current directory and its subdirectories, use grep with the dash capital R option. For example, searching for the word TODO will scan all files and show you every match. This is ideal for scanning source code or configuration files for specific terms.
+
+Edit and Rerun Your Last Command with fc
+
+The fc command opens your last command in your default text editor, allowing you to modify and rerun it. This is especially helpful for editing long or complex commands without retyping them from scratch.
+
+Reuse a Specific Argument from the Last Command
+
+You can extract a specific argument from your previous command using double exclamation mark, colon, and the argument number. For example, if you echo the words one, two, three, and then type echo double exclamation mark colon two, the shell will use the second argument, which is two. This is useful for reusing parts of previous commands.
+
+Jump to Line Start or End with Keyboard Shortcuts
+
+Pressing Control and the letter A moves your cursor to the beginning of the line. Pressing Control and the letter E moves it to the end. These shortcuts boost your navigation speed when editing commands.
+
+Delete Words or Lines with Keyboard Shortcuts
+
+Pressing Control and the letter W deletes the word before the cursor. Pressing Control and the letter U deletes the entire line before the cursor. These shortcuts are helpful for quickly cleaning up commands as you type.
+
+Global Replace in Last Command
+
+To replace all instances of a word in your last command, use double exclamation mark, colon, g s, slash old word, slash new word, and another slash. For example, if you echo world world and then use this substitution to replace world with universe, both instances will be changed. This is perfect for mass substitutions in your command history.
+
+Check Disk Usage
+
+To find out what is using your storage, use the disk free command with the dash h option for human-readable output. This shows available disk space. To see the size of all files and folders in your current directory, use the disk usage command with dash s h and an asterisk. This helps you identify large files or directories.
+
+See What’s Using a Port
+
+To find the process locking a specific port, use the list open files command with dash i and the port number. For example, checking port eight thousand eighty will show you which process is using it, so you know what to kill or restart.
+
+Test if a Port is Open
+
+To quickly check if a port is open on a host, use the netcat command with dash z v, followed by the host and port. For example, testing google dot com on port four hundred forty-three will tell you if the connection is possible. This is useful for debugging networking issues.
+
+Jump Back to Previous Directory
+
+The command cd dash acts like an undo for changing directories. If you move from project A to project B, typing cd dash will take you back to project A. This makes switching between directories much faster.
+
+Clear the Screen Instantly
+
+Instead of typing the clear command, you can press Control and the letter L to instantly clear your terminal screen.
+
+Bonus Tips
+
+View Command History
+
+The history command shows all your past commands. You can also rerun a specific command by typing an exclamation mark followed by its number in the list.
+
+Stack Navigation for Directories
+
+The pushd and popd commands let you switch between directories using a stack. For example, you can push folder A onto the stack, then push folder B, and later pop back to the previous directory. This is useful for managing multiple working directories.
+
+Repeatedly Run a Command
+
+The watch command, with the dash n option and a number, lets you run another command at regular intervals. For example, running watch dash n two ls dash l will execute the list command every two seconds. This is great for monitoring file changes in real time.
+
+With these practical terminal commands, you can work more efficiently, fix mistakes quickly, and debug with confidence.
+
+

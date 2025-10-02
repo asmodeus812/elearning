@@ -1,0 +1,208 @@
+Java dot lang — The core library which exposes most of the basic language features, classes, and functionalities.
+
+Runtime
+
+The Runtime class encapsulates the run-time environment of Java. You cannot directly create a Runtime object. Instead, you obtain a reference to the current Runtime object by calling the static method, Runtime dot getRuntime. Once you have this reference, you can use several methods to control the state and behavior of the Java Virtual Machine.
+
+For example, there are methods that allow you to execute external programs as separate processes. One method executes a program specified by its name. Another allows you to execute a program with a specific environment. A third method executes a command line specified as an array of strings. These capabilities are powerful, but applets and other untrusted code typically cannot use them for security reasons.
+
+Codepoints
+
+Relatively recently, major additions were made to the Character class. Starting with Java Development Kit version five, the Character class includes support for thirty-two bit Unicode characters. Previously, all Unicode characters could be represented with sixteen bits, which matches the size of a char in Java. These values ranged from zero to FFFF in hexadecimal.
+
+However, the Unicode character set has expanded, and now more than sixteen bits are required. Characters can now range from zero to ten FFFFF in hexadecimal. There are three important terms to know. A code point is any character in the range from zero to ten FFFFF. Characters with values greater than FFFF are called supplemental characters. The basic multilingual plane, or BMP, includes characters between zero and FFFF.
+
+The expansion of the Unicode character set created a challenge for Java, because a supplemental character has a value greater than what a char can hold. Java addressed this in two ways. First, it uses two chars to represent a supplemental character. The first char is called the high surrogate, and the second is the low surrogate. New methods, such as codePointAt, were added to help translate between code points and supplemental characters.
+
+Object
+
+The clone method generates a duplicate copy of the object on which it is called. Only classes that implement the Cloneable interface can be cloned. The Cloneable interface does not define any members; it simply indicates that a class allows a bitwise copy of an object, or a clone, to be made. If you try to call clone on a class that does not implement Cloneable, a CloneNotSupportedException is thrown.
+
+When a clone is made, the constructor for the object being cloned is not called. As implemented by Object, a clone is simply an exact copy of the original.
+
+Some other notable methods exposed by the Object class include the following. The clone method, which creates a new object that is the same as the invoking object. The equals method, which returns true if the invoking object is equivalent to another object. The finalize method, which is called before an unused object is recycled. The getClass method, which obtains a Class object that describes the invoking object. The hashCode method, which returns the hash code associated with the invoking object. The notify and notifyAll methods, which resume execution of threads waiting on the invoking object. And finally, the toString method, which returns a string that describes the object.
+
+Class
+
+The Class type encapsulates the run-time state of a class or interface. Objects of type Class are created automatically when classes are loaded. You cannot explicitly declare a Class object. Generally, you obtain a Class object by calling the getClass method defined by Object.
+
+Here are some important methods provided by the Class type.
+
+First, getDeclaredMethods returns an array of Method objects for each method declared by the class or interface represented by the invoking object. Inherited methods are ignored.
+
+Second, getField returns a Field object that represents the public field specified by name for the class or interface.
+
+Third, getFields returns an array of Field objects for each public field of the class or interface.
+
+Fourth, getInterfaces returns an array of interfaces implemented by a class, or extended by an interface.
+
+Fifth, getMethod returns a Method object that represents the public method specified by name and parameter types.
+
+Sixth, getMethods returns an array of Method objects for each public method of the class or interface.
+
+Seventh, getName returns the complete name of the class or interface.
+
+Eighth, getProtectionDomain returns the protection domain associated with the invoking object.
+
+Ninth, getSuperclass returns the superclass of the type represented by the invoking object. The return value is null if the represented type is Object or not a class.
+
+Tenth, isInterface returns true if the type represented by the invoking object is an interface, and false otherwise.
+
+Eleventh, newInstance creates a new instance of the type represented by the invoking object, using the default constructor. This method will fail if the type is abstract, not a class, or does not have a default constructor.
+
+Twelfth, toString returns the string representation of the type represented by the invoking object or interface.
+
+Thirteenth, getClasses returns a Class object for each public class and interface that is a member of the class represented by the invoking object.
+
+Fourteenth, getClassLoader returns the ClassLoader object that loaded the class or interface.
+
+Fifteenth, getConstructor returns a Constructor object that represents the constructor for the class with the specified parameter types.
+
+Sixteenth, getConstructors returns an array of Constructor objects for each public constructor of the class.
+
+The abstract class ClassLoader defines how classes are loaded. Your application can create subclasses that extend ClassLoader and implement its methods. This allows you to load classes in ways other than the default Java run-time system. However, this is not something you will normally need to do.
+
+Iterable
+
+The Iterable interface is next, but its details are not included in this section.
+
+
+The Iterable Interface
+
+The Iterable interface in Java allows any class that implements it to be used with the for-each loop structure provided by the language. This means that classes implementing Iterable can be easily iterated over, making them compatible with a wide variety of Java features, not just the standard for-each loop. For example, they can be passed as arguments to the collections or stream libraries in the java.lang package.
+
+To achieve this, a class must implement a method called iterator. This method returns an instance of the Iterator interface, which itself must be implemented to enable the actual iteration process.
+
+The Iterator interface requires a few key methods. First, there is hasNext, which checks if there is another element to iterate over. If there are no more elements, it returns false. Next, there is the next method, which retrieves the next element in the sequence and advances the internal pointer. There is also a default method called forEachRemaining, which applies a given action to all remaining elements in the iterator.
+
+To use an iterator, you typically call hasNext and next in a while loop. This pattern allows you to process each element in sequence until there are no more elements left.
+
+The Iterable interface gained an additional feature in Java 8 called the Spliterator. This type of iterator is designed for concurrent iteration, allowing a data structure to be split into multiple independent chunks. Each chunk can be iterated over separately, which can greatly improve efficiency in parallel processing scenarios.
+
+A Spliterator must ensure that its sub-iterators do not overlap. In other words, two Spliterators should never return the same element from the original collection.
+
+The Spliterator interface provides several important methods. The tryAdvance method combines the functionality of hasNext and next, advancing the iterator and applying a given action if there is another element. The trySplit method attempts to split the current Spliterator into two, returning a new Spliterator for one half and keeping the other half. The estimateSize method provides an estimate of the number of elements remaining.
+
+The general pattern for using Spliterators is to repeatedly call trySplit until it returns null, indicating that further splitting is not possible. Alternatively, you can use estimateSize to decide when to stop splitting, which helps avoid creating too many small iterators. Once you have all your Spliterators, you can process each one in parallel using tryAdvance.
+
+For example, imagine you have a list of names and want to process them in parallel. You would first create a Spliterator from the list, then repeatedly split it into smaller Spliterators. After collecting all the Spliterators, you can process each one, such as by printing all the names it contains.
+
+The Collection Interface
+
+At the top of the Java collections hierarchy is the Collection interface. This interface defines the basic operations that all collections must support, such as adding and removing elements, checking for containment, and iterating over elements.
+
+Some of the most important methods in the Collection interface include size, which returns the number of elements in the collection, and isEmpty, which checks if the collection has any elements. The contains method checks if a specific element is present, using the equals method for comparison. The iterator method returns an iterator for the collection, while toArray methods convert the collection to an array in various ways.
+
+You can add elements to a collection using the add method, and remove them with the remove method. The containsAll method checks if all elements from another collection are present, and addAll adds all elements from another collection. The removeAll and retainAll methods allow you to remove or retain elements based on another collection. The clear method removes all elements from the collection.
+
+The spliterator method returns a Spliterator for the collection, enabling parallel iteration. The stream and parallelStream methods convert the collection into a stream or a parallel stream, respectively, for use with the Java Streams API.
+
+The List Interface
+
+The List interface extends Collection and represents a sequential collection of elements. It adds several methods that make working with ordered sequences easier.
+
+For example, the get method retrieves an element by its index, while set updates an element at a specific index. The add method can insert an element at a particular position, and remove deletes an element at a given index. The indexOf and lastIndexOf methods find the first or last occurrence of an element in the list.
+
+The Set Interface
+
+The Set interface is another extension of Collection, designed to represent a collection of unique elements. Sets do not allow duplicate elements. There is also a variation called SortedSet, which extends Set and maintains its elements in a sorted order.
+
+The most important method for SortedSet is comparator, which returns the comparator used to order the elements. This method must be implemented by any class that wants to be considered a sorted set.
+
+It is important to note that null elements are not allowed in a Set or SortedSet, as this would violate the definition of a set.
+
+Queue
+
+Next, we move on to the Queue interface, which builds on the concepts introduced so far.
+
+
+Queue Interface
+
+This interface is an extension of the Collection interface in Java. Like other specialized interfaces, it provides a specific behavior on top of the standard Collection. In the case of the Queue interface, it defines a collection where elements are managed in a first-in, first-out order.
+
+The Queue interface provides several key methods. The offer method adds a new element at the end of the queue and returns true if successful, or false otherwise. The add method works similarly to offer, but if the queue has a capacity limit and is full, it throws an exception instead of returning false. The poll method removes and returns the oldest element from the queue. The remove method also removes the oldest element, but throws an exception if the queue is empty. The peek method allows you to look at the oldest element at the front of the queue without removing it. The element method is similar to peek, but throws an exception if the queue is empty.
+
+It is important to note that null elements are not allowed in a Queue. Therefore, some methods, such as add, will throw an exception if you try to insert a null value. Additionally, as mentioned above, some methods will throw an exception if the queue is empty and you try to obtain an element from it, or if the queue has a capacity limit and you try to insert into it.
+
+Special Types of Queues
+
+There are some special types of queues implemented in the Java standard library. One example is the PriorityQueue, which is essentially a min-heap or max-heap data structure. In a PriorityQueue, the element with the highest or lowest priority is always at the top of the queue. The PriorityQueue uses a comparator function to determine the order of elements. If no comparator is specified when the queue is created, the default ordering of the elements is used. This means that the elements must implement the Comparable interface for ordering to work correctly. If the elements do not implement Comparable, an exception will be thrown.
+
+Another variation of the Queue is the ArrayDeque. This is a double-ended queue structure, which allows you to add or remove elements at both the front and the end of the queue. The ArrayDeque is usually implemented using an ArrayList or LinkedList, which allows for quick insertion and removal at both ends. Another name for this type of queue is a deck. The methods provided by this class help you work with both ends of the queue, unlike the regular Queue interface.
+
+Key Methods of the Deque Interface
+
+The Deque, or double-ended queue, interface provides several important methods. You can insert an element at the front of the deque using addFirst, or at the end using addLast. The offerFirst and offerLast methods also insert elements at the front or end, but return true if successful or false otherwise. To remove and return the first element, use removeFirst, or use removeLast for the last element. Both of these methods throw an exception if the deque is empty. The pollFirst and pollLast methods also remove and return the first or last element, but return null if the deque is empty.
+
+To retrieve, but not remove, the first element, use getFirst, or getLast for the last element. These methods throw an exception if the deque is empty. The peekFirst and peekLast methods also retrieve the first or last element without removing it, but return null if the deque is empty. You can remove the first occurrence of a specific element using removeFirstOccurrence, or the last occurrence using removeLastOccurrence.
+
+Map Interface
+
+The Map interface provides a way to associate a key with a value. Both the key and value can be of any class type, which makes the map a powerful data structure. There are many implementations of the Map interface, based on different underlying data structures such as trees, lists, and hash buckets. Some of the most notable implementations include TreeMap, HashMap, and others.
+
+EnumMap is a specialized map meant to be used with enum type keys. TreeMap is a map implementation based on a red-black tree. HashMap is a hash code-based implementation. SortedMap provides sorted behavior for its keys. Hashtable is a synchronized version of HashMap. WeakHashMap is a map where the key-value pair will be removed if the key is no longer in ordinary use. NavigableMap provides methods for returning the closest matches for a given search target. LinkedHashMap is a linked list-based implementation.
+
+Generally, all types of elements are allowed in a map, as long as they comply with the requirements of the specific map implementation. For example, in a HashMap, a key must have the hashCode method overridden correctly. For a tree-based map implementation, the equals method must also be overridden, and the elements must implement the Comparable interface or provide a comparator function.
+
+The Map interface provides several general methods, in addition to those inherited from the root Collection interface.
+
+
+Map Interface Methods
+
+Let’s review the main methods available in the Map interface, which is a core part of Java’s collections framework. Each method allows you to interact with key-value pairs in a map in different ways.
+
+The containsKey method checks if a specific key exists in the map, returning true if it does.
+
+The containsValue method checks if one or more keys in the map are associated with a specific value, also returning true if found.
+
+The get method retrieves the value mapped to a given key. If the key is not present, it returns null.
+
+The getOrDefault method is similar, but if the key is not found, it returns a default value that you provide.
+
+The put method associates a specified value with a specified key in the map, adding or updating the entry.
+
+The putIfAbsent method only adds the key-value pair if the key is not already present in the map.
+
+The remove method deletes the mapping for a given key if it exists.
+
+The clear method removes all key-value pairs from the map, leaving it empty.
+
+The values method returns a collection view of all the values stored in the map.
+
+The keySet method returns a set view of all the keys in the map.
+
+The entrySet method returns a set view of all the key-value pairs, also known as entries, in the map.
+
+There is also a remove method that takes both a key and a value. It removes the entry only if the key is currently mapped to that specific value.
+
+The replace method comes in two forms. One replaces the value for a key only if it is currently mapped to a specific old value. The other replaces the value for a key if it is mapped to any value.
+
+The computeIfAbsent method checks if a key is missing from the map. If so, it computes a value using a provided function and adds it to the map.
+
+The computeIfPresent method checks if a key is present and mapped to a non-null value. If so, it computes a new value and updates the entry.
+
+The compute method attempts to compute a new mapping for a key, using its current value or null if it is not present.
+
+The merge method combines a given value with the existing value for a key, if any, using a remapping function.
+
+Map.Entry Interface
+
+Now, let’s talk about Map.Entry. This is an interface that represents a single key-value pair in a map. It provides several methods for working with these pairs.
+
+The getKey method returns the key from the entry.
+
+The getValue method returns the value from the entry.
+
+The setValue method replaces the value in the entry with a new one you provide.
+
+The equals method checks if another object is equal to this entry.
+
+The hashCode method returns a hash code for the entry, which is useful for storing entries in hash-based collections.
+
+There are also several comparator methods for sorting entries. The comparingByKey method returns a comparator that sorts entries by their keys in natural order. The comparingByValue method does the same, but sorts by values.
+
+You can also provide your own comparator. The comparingByKey method with a comparator argument sorts entries by key using your custom logic. Similarly, the comparingByValue method with a comparator argument sorts entries by value using your custom logic.
+
+In summary, the Map interface and its Entry sub-interface provide a rich set of methods for managing and manipulating key-value pairs in Java collections.
+
+

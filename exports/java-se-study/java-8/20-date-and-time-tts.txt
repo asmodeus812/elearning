@@ -1,0 +1,251 @@
+Date and Time in Java Eight
+
+With Java version eight, the standard library introduced several new top-level classes for handling dates and date transformations. These classes are called LocalDate, LocalTime, and LocalDateTime. As their names suggest, each class is designed to represent and work with a specific aspect of date and time.
+
+All of these classes are located in the top-level package called java dot time. However, there are additional packages under the java time umbrella that provide more detailed control for modifying and transforming date and time formats.
+
+It is important to note that none of the new date and time related class types define a public constructor. Instead, they are meant to be created using static factory methods provided by the runtime. This approach is consistent with the design of other new types introduced in the Java runtime.
+
+The Relationship Between Classes and Interfaces in java dot time
+
+The new java dot time package, introduced in Java Development Kit eight, defines a set of interfaces and classes for working with dates and times. At the core is the Temporal interface, which serves as a foundation for other types.
+
+TemporalUnit is an interface that represents a unit of date-time, such as days or hours. Measurement of time is built on these units, including years, months, days, hours, minutes, and seconds. Implementations of this interface represent those units.
+
+ChronoUnit is an enumeration that implements TemporalUnit, providing standard units like days, months, and years.
+
+TemporalField is another interface, representing fields of date-time, such as day of month or month of year. ChronoField is an enumeration that implements TemporalField, offering standard fields.
+
+Chronology is an abstract class that provides calendar system support.
+
+LocalDate, LocalTime, and LocalDateTime are concrete classes for representing dates, times, and combined date-times, respectively. ZonedDateTime is another class that includes time zone information.
+
+LocalDate
+
+The LocalDate class represents a date without a time or time zone. Internally, it uses the Gregorian calendar and follows the ISO 8601 standard. By default, the format for LocalDate is year, month, and day, written as four digits for the year, two digits for the month, and two digits for the day.
+
+Key Methods in LocalDate
+
+LocalDate dot now returns the current date based on the system clock.
+
+LocalDate dot of allows you to create an instance of LocalDate for a specified year, month, and day.
+
+LocalDate dot ofYearDay returns a LocalDate from a given year and the day of the year, where the day ranges from one to three hundred sixty-five or three hundred sixty-six.
+
+LocalDate dot parse can create a LocalDate from a text string, such as two thousand twenty-three dash ten dash twenty-six.
+
+You can also use LocalDate dot parse with a DateTimeFormatter to parse a date using a specific format.
+
+The plusDays, plusMonths, and plusYears methods return a copy of the LocalDate with the specified number of days, months, or years added.
+
+Similarly, minusDays, minusMonths, and minusYears return a copy with the specified amount subtracted.
+
+The isBefore and isAfter methods check if this LocalDate is before or after another date.
+
+The isLeapYear method checks if the year of this LocalDate is a leap year.
+
+getDayOfWeek returns the day of the week, such as Monday or Tuesday.
+
+getDayOfMonth returns the day of the month, from one to thirty-one.
+
+getMonth returns the Month enumeration for the month, such as January or February.
+
+getMonthValue returns the month as an integer, from one to twelve.
+
+lengthOfMonth returns the number of days in the month.
+
+lengthOfYear returns the number of days in the year, either three hundred sixty-five or three hundred sixty-six.
+
+Example Usage
+
+Here is an example of how to use LocalDate to get the current date and print it in a human-readable format.
+
+This code creates a LocalDate object representing the current date, then prints it. The output will be in the format year dash month dash day, such as two thousand twenty-three dash ten dash twenty-six.
+
+LocalTime
+
+Next, we will discuss LocalTime.
+
+
+LocalTime Methods and Their Descriptions
+
+Let’s review the key methods available in the LocalTime class, which is part of Java’s date and time API. These methods allow you to create, manipulate, and query time values without any date component.
+
+The method now returns the current time based on your system clock.
+
+The of method is overloaded. You can use it to create a LocalTime instance by specifying just the hour and minute, or by including the second, or even the nanosecond for more precision.
+
+The parse method lets you create a LocalTime from a text string, such as “twelve thirty-four fifty-six.” You can also provide a custom DateTimeFormatter if your input string uses a different format.
+
+There are several methods for time arithmetic. The plusHours, plusMinutes, plusSeconds, and plusNanos methods each return a new LocalTime with the specified amount of time added. Similarly, minusHours, minusMinutes, minusSeconds, and minusNanos return a new LocalTime with the specified amount of time subtracted.
+
+To compare times, use isBefore and isAfter. These methods check if the current LocalTime is before or after another LocalTime instance.
+
+To extract specific parts of the time, use getHour, getMinute, getSecond, and getNano. These return the hour, minute, second, and nanosecond components, respectively.
+
+For calculations, toSecondOfDay returns the total number of seconds since midnight, and toNanoOfDay returns the total number of nanoseconds since midnight.
+
+Now, let’s look at a practical example.
+
+This code creates a LocalTime object called curTime, set to the current system time. When you print curTime, it displays the time in a human-readable format, typically hours, minutes, seconds, and fractions of a second.
+
+Next, we’ll move on to LocalDateTime.
+
+
+LocalDateTime Methods and Usage
+
+Let’s begin with the LocalDateTime class in Java, which represents a date and time without a time zone. Here are some of the most important methods and how they are used.
+
+The now method, written as LocalDateTime dot now, returns the current date and time based on your system clock.
+
+You can create a specific date and time using the of method. For example, LocalDateTime dot of, with parameters for year, month, day of month, hour, and minute, creates an instance with those exact values. There is also an overloaded version that includes seconds, allowing you to specify the year, month, day, hour, minute, and second.
+
+If you already have a LocalDate and a LocalTime, you can combine them into a LocalDateTime using the of method that takes both as arguments.
+
+To convert a string into a LocalDateTime, use the parse method. For example, LocalDateTime dot parse, with a string like “twenty twenty-three dash ten dash twenty-six T ten colon fifteen colon thirty,” will create a LocalDateTime instance from that text. You can also provide a custom DateTimeFormatter to the parse method for more control over the input format.
+
+For manipulating date and time, there are several plus and minus methods. The plusDays, plusHours, plusMinutes, plusSeconds, and plusNanos methods each return a copy of the LocalDateTime with the specified amount of time added. Similarly, minusDays, minusHours, minusMinutes, minusSeconds, and minusNanos subtract the specified amount of time.
+
+To compare two LocalDateTime instances, use isBefore or isAfter. These methods check if the current instance is before or after another date-time.
+
+You can extract just the date or just the time from a LocalDateTime using toLocalDate and toLocalTime, respectively.
+
+To access individual components, use getYear for the year, getMonth for the month as an enum, getDayOfMonth for the day, getHour for the hour in twenty-four hour format, getMinute for the minute, getSecond for the second, and getNano for the nanosecond part.
+
+Here’s a practical example. When you call LocalDateTime dot now, you get the current date and time. Printing this object will display it in a human-readable format, such as “twenty twenty-three dash ten dash twenty-six T ten colon fifteen colon thirty.”
+
+DateTimeFormatter
+
+Next, let’s talk about formatting and parsing dates and times. The DateTimeFormatter class allows you to define how dates and times are converted to and from strings.
+
+You can create a formatter with a specific pattern using the ofPattern method. For example, DateTimeFormatter dot ofPattern, with a pattern like “day day dash month month dash year year year year,” will format dates as “twenty-six dash ten dash twenty twenty-three.” You can also specify a locale for language-specific formatting.
+
+There are built-in formatters for standard ISO formats. ISO_LOCAL_DATE formats as “year year year year dash month month dash day day.” ISO_LOCAL_TIME formats as “hour hour colon minute minute colon second second.” ISO_LOCAL_DATE_TIME combines both, using a “T” to separate date and time.
+
+To format a date or time, use the format method, passing in the temporal object you want to convert to a string.
+
+To parse a string into a date or time, use the parse method, providing the text and, optionally, a resolver style or pattern.
+
+Pattern Indicators
+
+When defining a pattern for formatting or parsing, you use specific letters to represent different parts of the date or time. For example, “a” is for the AM or PM indicator, “d” for the day in the month, “E” for the day of the week, “h” for the hour on a twelve-hour clock, “H” for the hour on a twenty-four-hour clock, “M” for the month, “m” for minutes, “s” for seconds, and “y” for the year.
+
+The number of times you repeat a letter in the pattern affects the output. For instance, using “M” alone gives you the month as a number, “MM” gives you a two-digit month, “MMM” gives you the short month name, and “MMMM” gives you the full month name. So, “M MM MMM MMMM” would output “four, zero four, Apr, April.”
+
+Formatter Example
+
+Here’s how you might use a formatter in practice. First, you define a pattern with DateTimeFormatter dot ofPattern, such as “day day dash month month dash year year year year.” Then, you create a LocalDate instance for October twenty-sixth, twenty twenty-three. Formatting this date with your formatter produces the string “twenty-six dash ten dash twenty twenty-three.” Conversely, you can parse a string like “twenty-six dash ten dash twenty twenty-three” back into a LocalDate using the same formatter.
+
+ZonedDateTime
+
+Now, let’s move on to ZonedDateTime, which extends the concept of LocalDateTime by including time zone information. This allows you to represent a date and time in a specific region or offset from Coordinated Universal Time, or UTC.
+
+With these tools, you can handle dates and times in Java with precision, flexibility, and clarity, whether you’re working with local values or need to account for time zones and formatting requirements.
+
+
+ZonedDateTime
+
+This is a special type of LocalDateTime, which allows you to represent an actual time zone along with the rest of the information about a date and time. The ZonedDateTime class lets you convert from regular LocalDate, LocalTime, and LocalDateTime to ZonedDateTime, and back again.
+
+In the following example, a LocalDate is created for October twenty-sixth, twenty twenty-four. A LocalTime is set for two thirty PM. These are combined to create a LocalDateTime. The code then prints this LocalDateTime.
+
+Next, the LocalDateTime is converted to a ZonedDateTime using the America slash New York time zone. This ZonedDateTime is printed, showing the date and time with the time zone applied.
+
+After that, the ZonedDateTime is converted back to a LocalDateTime, and this result is printed as well.
+
+Finally, a ZonedDateTime is created directly for the current moment in the Europe slash London time zone, and this is printed.
+
+The key takeaway is that ZonedDateTime allows you to work with date and time values that are aware of time zones, making it possible to accurately represent and convert between different time zones.
+
+The string representation of a ZonedDateTime is very similar to the regular LocalDateTime string, but with zone information included at the end. The zone is enclosed in square brackets, for example: year, month, day, T, hour, minute, second, period, nanoseconds, then the zone ID in brackets. This is important because the zone information can affect the actual date and time, so an accurate representation is necessary.
+
+Note that the default printout for ZonedDateTime always includes nanoseconds, unlike LocalDateTime, which does not show nanoseconds by default.
+
+TemporalAmount
+
+The TemporalAmount is a framework-level interface that defines an amount of time, such as six hours, eight days, or two years and three months. This is the base interface type for amounts of time. An amount is distinct from a date or time of day, because it is not tied to any specific point on the timeline. There are several implementations of this interface, which are described below.
+
+Period
+
+A Period is defined based on a date amount, measured in years, months, or days. It is useful for representing a period of time based on dates. There are several methods that allow you to work with LocalDate or LocalDateTime, which are the relevant temporal units that support math with the Period type. The Period class is based on years, months, and days.
+
+One example is the between method, which calculates the period between two dates. For instance, Period dot between, with a start and end LocalDate, returns a Period representing the difference. This period instance can then be converted to any scale that the Period class supports, such as days, months, or years.
+
+Duration
+
+The Duration class models a quantity or amount of time in terms of seconds and nanoseconds. It can also be accessed using other duration-based units, such as minutes and hours. In addition, the ChronoUnit dot DAYS unit can be used and is treated as exactly equal to twenty-four hours, ignoring daylight savings effects.
+
+Instant
+
+The Instant class represents a moment on the timeline, typically used to capture a timestamp. It is the closest equivalent to an absolute point in time in Java, and is often measured in milliseconds or nanoseconds since the Unix epoch, which is January first, nineteen seventy, at midnight UTC. Instant is commonly used when you need an exact, machine-based time representation, such as for timestamps or logging. Instant is immutable and thread-safe.
+
+Usage
+
+The basic API of the temporal amount implementations—such as Period, Duration, and Instant—is designed so that they can easily interoperate with each other, as well as with other implementations of TemporalAmount and TemporalUnit, like LocalTime, LocalDate, and LocalDateTime.
+
+It is important to note that most TemporalUnit implementation classes provide methods that work with and interoperate with the TemporalAmount interface. This design allows for flexible and accurate manipulation of time-based values in Java.
+
+
+Java Time API: Key Methods and Their Descriptions
+
+Let's walk through some of the most important methods in the Java Time API, focusing on LocalDate, LocalDateTime, Duration, Instant, and Period. These methods help you work with dates, times, durations, and periods in a clear and reliable way.
+
+Starting with LocalDate:
+
+The method atStartOfDay converts a LocalDate to a LocalDateTime, setting the time to the very start of the day.
+
+The minus method, when used with a Period, returns a new LocalDate that is earlier by the specified period.
+
+Similarly, the plus method adds a given Period to the LocalDate, returning a new date in the future.
+
+For LocalDateTime:
+
+The toInstant method converts a LocalDateTime to an Instant, using a specified ZoneOffset to determine the exact moment in time.
+
+Now, let's look at Duration:
+
+The between method calculates the duration between two Instant objects, giving you the amount of time that has passed.
+
+The ofDays, ofHours, ofMinutes, and ofSeconds methods each create a Duration representing a specific number of days, hours, minutes, or seconds, respectively.
+
+The toHours method converts a Duration to a total number of hours.
+
+The toMillis method converts a Duration to a total number of milliseconds.
+
+Moving on to Instant:
+
+The isAfter method checks if one Instant is after another.
+
+The isBefore method checks if one Instant is before another.
+
+The minus method returns a new Instant that is earlier by a specified Duration.
+
+The now method obtains the current Instant from the system clock.
+
+The ofEpochMilli method creates an Instant from a timestamp in milliseconds since the epoch, which is January first, nineteen seventy, at midnight UTC.
+
+The ofEpochSecond method creates an Instant from a timestamp in seconds since the epoch.
+
+The plus method returns a new Instant that is later by a specified Duration.
+
+The toEpochMilli method converts an Instant to the number of milliseconds since the epoch.
+
+The toEpochSecond method converts an Instant to the number of seconds since the epoch.
+
+Finally, let's discuss Period:
+
+The between method calculates the period between two LocalDate objects, giving you the difference in years, months, and days.
+
+The minus method returns a new Period that is shorter by the specified Period.
+
+The ofDays, ofMonths, and ofYears methods each create a Period representing a specific number of days, months, or years.
+
+The plus method returns a new Period that is longer by the specified Period.
+
+The toString method returns a string representation of the Period.
+
+The toTotalMonths method converts a Period to the total number of months it represents.
+
+These methods form the foundation for working with dates, times, durations, and periods in Java, making it easier to perform calculations and conversions in your applications.
+
+

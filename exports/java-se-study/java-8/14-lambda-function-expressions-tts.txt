@@ -1,0 +1,118 @@
+Lambda
+
+The lambda expression is a form of an anonymous class, or more specifically, another form of a functional interface. In other words, it represents a unit of executable action. Lambda expressions are also called closures. The term “closure” comes from the fact that they can enclose some kind of state. Lambdas are a special case of callback functions, but with an important difference: while callbacks usually only operate on the state passed to them through function parameters, lambdas can also capture and use state from their surrounding context.
+
+Structure
+
+A lambda expression consists of two main components. The first is the argument definition list, and the second is the lambda body. This structure is similar to how you would define a callback. However, as mentioned earlier, lambdas are not the same as callbacks. Lambdas have the unique ability to capture state that is not explicitly provided to them as arguments. The two structural parts—the argument list and the lambda body—are connected using the arrow operator. In Java, this operator is used only for constructing lambda expressions.
+
+For example, a typical lambda expression in Java is defined by specifying the arguments in parentheses, followed by the arrow, and then the body enclosed in curly braces. This allows you to define a block of code that can be executed later, possibly with access to variables from the surrounding scope.
+
+Interfaces
+
+With Java 8, the language introduced the concept of a functional interface. A functional interface is an interface that has only one method, and that method is not a default method. In other words, it has only one method without an implementation. This feature works well with lambda expressions, since a lambda is essentially an anonymous class with a single function—the lambda itself. As a result, functional interfaces and lambdas are closely related.
+
+For example, you might define a functional interface with a single method, and then create a lambda expression that implements this method. The lambda can then be assigned to a variable of the functional interface type. When a lambda expression appears in a context where a specific type is expected, Java automatically creates an instance of a class that implements the functional interface.
+
+Declaration
+
+When using a lambda expression, it must always be assigned to a well-defined type. This means the lambda must be assigned to a variable or parameter whose type is known. For example, if you try to assign a lambda to a variable using Java’s automatic type inference with the “var” keyword, the compiler will produce an error because it cannot determine the type. However, if you explicitly specify the functional interface type, the assignment is valid.
+
+Syntax
+
+There are several rules that govern the syntax of lambda definitions and declarations in Java.
+
+First, when a lambda has only one parameter, you do not need to enclose the parameter in parentheses.
+
+Second, you do not need to explicitly define the argument types; they are inferred from the functional interface’s method signature.
+
+Third, if the body of the lambda consists of a single statement, you do not need to surround it with curly braces.
+
+Finally, when the lambda body is a single statement without curly braces, the compiler automatically provides an implicit return.
+
+For example, you might define a functional interface with a single method that takes an integer and returns an integer. You can then create a lambda that takes a single parameter, omits the parentheses, and returns a constant value. When you invoke the method on the lambda, it returns the specified value.
+
+It is important to note that if you need to explicitly provide the type for one of the lambda arguments, you must provide the type for all arguments. Otherwise, the compiler will produce an error.
+
+Generics
+
+One important point to remember is that lambda expressions themselves cannot be generic. However, the functional interface they implement can be generic. This makes sense because the functional interface defines the contract, while the lambda expression provides the implementation. Therefore, the type must be specified when the lambda is created or assigned.
+
+For example, you might define a generic functional interface with a method that takes and returns a value of type T. You can then create specialized lambda instances for different types, such as Integer or Double. When you invoke the method on these lambda instances, the argument types must match exactly. Automatic type promotion does not work with lambda expressions, so the argument types must match the method signature precisely.
+
+Exceptions
+
+Lambdas can throw exceptions. If a lambda might throw a checked exception, the exception must be declared in the “throws” clause of the functional interface’s method. For example, you can define a functional interface whose method declares that it throws a specific exception. When you create a lambda instance of this interface, you must handle the exception appropriately, such as by using a try-catch block when invoking the method.
+
+Captures
+
+There are strict rules about what a lambda can capture from its surrounding scope. While a lambda can capture local variables and member variables from the enclosing class, there are some important restrictions.
+
+First, lambdas can capture local variables, but those variables must be effectively final. This means they cannot be reassigned within the lambda body.
+
+Second, lambdas can capture the “this” reference of the enclosing class and can mutate non-final member variables.
+
+Third, a lambda defined in a static context, such as a static method, does not have access to the “this” reference of the enclosing class.
+
+Finally, lambdas can reference static member variables of the enclosing class or other classes.
+
+For example, consider a class with both static and instance member variables. Inside a non-static method, you can create a lambda that accesses these member variables. However, if you try to modify a local variable captured by the lambda, the compiler will produce an error unless the variable is effectively final. You can, however, modify member variables of the enclosing class from within the lambda.
+
+References
+
+Java provides another feature related to lambda expressions called method references. This allows you to capture a reference to an existing method that matches the signature of the functional interface. When you use a method reference, Java automatically creates an anonymous class instance and a lambda from the referenced method. The special reference operator, double colon, is used for this purpose. On the left side of the operator, you specify the target or instance reference, which can be either a class instance variable or a class type.
+
+Instance
+
+To obtain a reference to an instance method, you use the instance variable as a prefix to the reference operator. For example, if you have a String instance, you can create a functional interface that matches the signature of the String’s charAt method. By assigning the method reference to the functional interface, the lambda internally captures the instance and invokes the method on it. When you call the method on the functional interface, it returns the character at the specified position in the string.
+
+Static
+
+You can also use method references with static methods. For example, you might reference the static join method in the String class, which takes a delimiter and elements to join. Even if the method signature uses a superclass, such as CharSequence instead of String, the lambda signature can specify the subclass, and Java will resolve the reference correctly. This is not a compile-time error, as the method reference is compatible with the functional interface’s method signature.
+
+
+Let’s begin by looking at the original function signature for the join method from the String class in Java.
+
+The join method is defined to take a delimiter, which is a character sequence, and a variable number of elements, also character sequences. It returns a single string that joins all the elements together, separated by the delimiter.
+
+Next, consider an example using a functional interface. Here, an interface called Functional is defined, with a method named concat. This method takes a delimiter and a variable number of string elements, and returns a string.
+
+Suppose you have a string variable with the value “hello-world.” You can create a reference to the join method of the String class by assigning String double colon join to a variable of type Functional. This means that the concat method of the Functional interface will use the join method from String to concatenate the entries, separated by the specified delimiter.
+
+Now, let’s talk about generics.
+
+It is possible to provide a generic reference to a method. The syntax is mostly the same, but there is a small caveat: the type argument of the generic needs to be specified as well.
+
+For example, the Comparator interface from the Java standard library is a functional interface used to compare two values of the same type. It returns an integer to signify the result: negative if the first is less, zero if they are equal, or positive if the first is greater.
+
+Suppose you have a class called CustomComparator, which defines a static method named comp. This method is generic and takes two arguments, both extending the Number class. It returns the difference between their integer values.
+
+If you have a list of integers, you can use the max method from the Collections library to find the maximum entry. The max method is generic and takes a reference to a Comparator. By passing a reference to the CustomComparator’s comp method, you can use your custom comparison logic to determine the maximum value in the list.
+
+In this example, the method signature of comp matches the one in Comparator, which allows you to pass the function reference CustomComparator double colon comp as a parameter to the max method of Collections.
+
+Now, let’s discuss constructor references.
+
+It is also possible to create references to class constructors. The idea is similar to regular methods, but there are some differences. When referencing a constructor as a functional interface, the signature that needs to be matched is specific: the return type is the class type, and the input is the list of arguments the constructor accepts.
+
+For example, suppose you have a functional interface with a method called create, which takes an integer and returns an Integer object. You can assign Integer double colon new to a variable of this interface type, effectively referencing the constructor of the Integer class. Calling the create method will then create new Integer instances with the specified values.
+
+Next, let’s look at predefined functional interfaces in the Java core library.
+
+Java provides several functional interfaces that cover most use cases for lambda expressions and method references. These interfaces are designed to handle common patterns and operations.
+
+UnaryOperator takes an object of type T, applies a unary operation, and returns a result of the same type. Its method is called apply.
+
+BinaryOperator takes two objects of type T, applies an operation, and returns a result of the same type. Its method is also called apply.
+
+Consumer takes an object of type T and performs an operation on it. Its method is called accept.
+
+Supplier returns an object of type T. Its method is called get.
+
+Function takes an object of type T, applies an operation, and returns a result of type R. Its method is called apply.
+
+Predicate determines if an object of type T fulfills a certain constraint. It returns a boolean value indicating the outcome, and its method is called test.
+
+These predefined interfaces make it easy to use lambda expressions and method references in a wide variety of scenarios, without needing to define your own functional interfaces for common patterns.
+
+

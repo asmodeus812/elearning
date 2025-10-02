@@ -1,0 +1,21 @@
+OOP Principles
+
+Encapsulation is the mechanism that binds together code and the data it manipulates, keeping both safe from outside interference and misuse. You can think of encapsulation as a protective wrapper. This wrapper prevents code and data from being accessed arbitrarily by other code defined outside of it.
+
+Inheritance is the process by which one object acquires the properties of another object. This concept is important because it supports hierarchical classification. As mentioned earlier, most knowledge is made manageable by organizing it in a top-down, hierarchical manner.
+
+Polymorphism in Java allows objects of different classes to be treated as objects of a common superclass. The term means “many forms.” Polymorphism enables a single method to behave differently depending on the specific object it is acting upon.
+
+Technical Requirements
+
+Let’s talk about creating Java programs. The first thing to know is that the name you give to a source file is very important. In Java, a source file is officially called a compilation unit. This is a text file that contains, among other things, one or more class definitions. For now, we will use source files that contain only one class. The Java compiler requires that a source file use the dot java filename extension.
+
+To compile a Java program, you use the Java compiler, called javac. You specify the name of the source file on the command line. For example, you would run the javac command followed by the filename with the dot java extension. This tells the compiler to process your source file.
+
+When you compile your program, the javac compiler creates a file with the same name as your source file, but with a dot class extension. This new file contains the bytecode version of your program.
+
+To actually run the program, you use the Java application launcher, which is called java. This tool is part of the binaries provided by the Java runtime, along with the compiler and other utilities. You run the java command followed by the name of your class, without the extension. This tells the launcher to execute your program.
+
+When Java source code is compiled, each individual class is put into its own output file, named after the class and using the dot class extension. This is why it is a good idea to give your Java source files the same name as the class they contain. That way, the name of the source file will match the name of the class file. When you execute the java command as described, you are actually specifying the name of the class you want to run. The launcher will automatically search for a file by that name with the dot class extension.
+
+

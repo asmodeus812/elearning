@@ -1,0 +1,184 @@
+Introduction
+
+One of the most commonly used structures in programming problems is the string. Questions involving strings often focus on generating all possible permutations of a string, or checking whether a substring exists within a larger string. When it comes to arrays, the typical challenges involve traversing the array, mutating it by shifting elements left or right to make space for new elements or to remove existing ones, and performing sorting or searching operations. These tasks are more frequently performed on static or dynamic arrays than on structures like linked lists.
+
+Strings
+
+In almost all programming languages, strings are implemented as immutable objects. This means that every time you modify a string, a brand-new string is created, which is a copy of the original with the mutation applied. Keep this in mind—if your problem requires mutating a string, you should use the appropriate data structure for your language. For example, in Java, you would use StringBuilder for efficient string mutations.
+
+Permutation of a String
+
+A common problem is finding all permutations of a given string. The typical solution is recursive. The idea is to remove either the last or the first character from the string, then generate all permutations for the reduced string. You continue this process until the input string has a length of one. Then, as you return from the recursive calls, you insert the removed character at every possible position in each of the smaller permutations.
+
+In the provided Java code, a function called permutate is defined. It takes a string as input and returns a list of all its permutations. The function works by recursively generating permutations for a substring with one character removed, then inserting the removed character at every possible position in each permutation. This approach ensures that all possible arrangements of the original string are generated.
+
+Substring Permutation
+
+Another interesting problem is checking whether a long string contains a permutation of a shorter string within itself. The key insight here is that you can normalize permutations by sorting the characters. To solve this, you sort the short string. Then, as you traverse the longer string, you extract substrings of the same length as the short string, sort each substring, and compare it to the sorted short string. If they match, you have found a permutation.
+
+This problem is an extension of the classic substring search, but instead of looking for an exact match, you are looking for any permutation. The time complexity is O of N times S log S, where N is the length of the long string and S is the length of the short string. If N is much larger than S, the complexity is dominated by N.
+
+The Java code provided defines a function called subpermutation. It sorts the short string, then iterates through the long string, extracting and sorting substrings of the same length. If a sorted substring matches the sorted short string, it is counted as a match. The function returns the number of such matches found.
+
+The main takeaway is that a permutation can be converted to a predictable, normalized sequence by sorting. If a substring from the long string contains a character not present in the short string, the comparison will fail, correctly indicating that the two are not permutations of each other.
+
+Unique Characters
+
+Another common string problem is checking whether a string contains only unique characters. This problem, like the previous one, can be simplified by normalizing the string. Generally, when working with strings, you should consider either sorting or hashing.
+
+To check for unique characters, you can sort the string and then check if any adjacent characters are the same. Sorting brings duplicate characters together, so you only need to compare each character with its neighbor. If you find a matching pair, the string does not have all unique characters.
+
+Alternatively, you can use a hash map to count occurrences of each character. If any character appears more than once, the string is not unique. This approach uses more space but can be faster in some cases.
+
+The Java code for this problem defines a function called unique. It sorts the input string, then iterates through it, checking for any adjacent duplicate characters. If it finds any, it returns false, indicating that the string does not contain only unique characters. Otherwise, it returns true.
+
+Permutation Check
+
+This is a generalization of the earlier permutation problem, where you check if one string is a permutation of another. Instead of sorting, this approach uses a hash map.
+
+The idea is to store the characters of one string in a hash map, with each character as a key and its occurrence count as the value. Then, you traverse the second string, checking if each character exists in the hash map. If it does, you decrement the count. If you encounter a character not in the hash map, you can exit early, as the strings cannot be permutations of each other. At the end, if all counts are zero, the strings are permutations.
+
+The Java code for this solution defines a function called permutation. It first checks if the two strings have the same length—if not, it returns false immediately, since strings of different lengths cannot be permutations of each other. The rest of the logic, which would involve building and checking the hash map, follows this early exit.
+
+This approach is efficient and avoids the need to sort the strings, trading space for time by using a hash map to track character counts.
+
+
+First, let’s walk through the logic for checking if two strings are permutations of each other.
+
+The code begins by collecting all unique characters from the first string into a map, counting how many times each character appears. This way, we know exactly which characters and how many of each are present in the first string.
+
+Next, the code iterates through the second string. For each character, if it exists in the map, the count for that character is decremented. If a character from the second string does not exist in the map, the function immediately returns false, since the two strings cannot be permutations of each other.
+
+After processing, if the map is empty, it means all characters matched exactly, both in type and count. Therefore, the two strings are permutations of each other. If not, they are not permutations.
+
+Now, let’s move on to palindrome checks.
+
+Palindrome check
+
+A palindrome is a word or string that reads the same forwards and backwards. Sometimes, you may be asked to check if any permutation of a given string can form a palindrome.
+
+To solve this, consider the following conditions. If the input string has an even length, every character must appear an even number of times. For example, the string “a a b b c c” can be rearranged into “a b c c b a.” If the input string has an odd length, only one character can appear an odd number of times; the rest must appear an even number of times. For example, “a a b b c c c” can be rearranged into “a b c c c b a.”
+
+The code for this check first handles the trivial case where the input is a single character, which is always a palindrome.
+
+Then, it counts the occurrences of each character in the string using a map. After counting, it checks how many characters have an odd count. If the string length is even, there should be zero characters with an odd count. If the string length is odd, there should be exactly one character with an odd count.
+
+If these conditions are met, the function returns true, indicating that some permutation of the string can form a palindrome. Otherwise, it returns false.
+
+Next, let’s discuss the wraparound substring problem.
+
+Wraparound substring
+
+This is a variation of the traditional substring check. Here, you want to find if a given sequence of characters appears as a substring inside another string, but with a twist: the substring can wrap around from the end of the string back to the beginning.
+
+For example, if you are looking for the substring “waffle” inside the string “a waffle was found on the ground,” you can find it in the usual way. But if the string is rotated, such as “fle was found on the ground a wa,” the sequence “waffle” still appears, but it wraps from the end to the start.
+
+Another example is with the strings “waterbottle” and “erbottlewat.” Here, “waterbottle” is a wraparound substring of “erbottlewat.” However, “waterbottle” is not a wraparound substring of “orbottlewat,” because the sequence does not match.
+
+To solve this, the algorithm modifies the standard substring search. Instead of looping through the string from start to finish, it loops with wraparound, using modular arithmetic to handle the rotation. The algorithm ensures it does not loop infinitely by keeping track of how many times it has looped through the source string. In the worst case, it loops at most twice, which is still linear time.
+
+The function works by comparing characters from the original and rotated strings. If characters match, it increments a count and moves both pointers forward, wrapping around as needed. If a mismatch occurs after some matches, it breaks out early, since the substring sequence is broken. If the count equals the length of the original substring, it means the rotated string contains the original as a wraparound substring.
+
+In summary, this approach efficiently checks for wraparound substrings by simulating the rotation and matching process, while avoiding unnecessary repeated work.
+
+Now, let’s move on to the next topic: arrays, starting with reversing an array.
+
+
+Let’s begin with a classic algorithm that is both simple and frequently encountered: reversing an array in place.
+
+The approach involves walking through the array from both ends, swapping elements at the start and end positions. Two pointers are used—one at the beginning, called start, and one at the end, called end. As you swap elements at these positions, you move the start pointer forward and the end pointer backward. This process continues until the start pointer meets or passes the end pointer. The key detail is that swapping stops when start becomes greater than or equal to end.
+
+In code, this is implemented as a function that takes an array and two indices, start and end. Inside a loop, as long as start is less than end, it swaps the elements at these positions, then increments start and decrements end. The function returns the reversed array.
+
+For example, consider the array one, two, three, four, five, six. Initially, start is zero and end is five. After the first swap, the array becomes six, two, three, four, five, one, with start at one and end at four. After the next swap, it becomes six, five, three, four, two, one, with start at two and end at three. One more swap results in six, five, four, three, two, one, and the pointers cross, so the process stops.
+
+Now, let’s move on to rotating an array.
+
+Rotating an array means shifting its elements forward by a certain number of positions, called the rotation factor, k. Elements that move past the end of the array wrap around to the beginning. For example, rotating the array one, two, three, four, five, six by two positions results in five, six, one, two, three, four.
+
+If the rotation factor is zero, the array remains unchanged, which is a special case of the rotation problem. The general solution involves three steps, each using the reverse function described earlier.
+
+First, reverse the entire array. Next, reverse the first k elements. Finally, reverse the remaining elements from position k to the end. This sequence of reversals achieves the desired rotation.
+
+For instance, starting with one, two, three, four, five, six, reversing the entire array gives six, five, four, three, two, one. Reversing the first two elements results in five, six, four, three, two, one. Finally, reversing the elements from position two to the end gives five, six, one, two, three, four.
+
+Next, let’s discuss the problem of moving zeroes to the end of an array.
+
+The goal is to move all zero elements to the end of the array, in place, while preserving the order of non-zero elements. This is achieved by maintaining a pointer, s, which tracks the position where the next non-zero element should be placed. Starting from the beginning of the array, you iterate through each element.
+
+When you encounter a zero followed by a non-zero, you place the non-zero element at position s, set the current position to zero, and move s forward. If the current element is non-zero, you simply move s forward, ensuring that non-zero elements are not overwritten.
+
+The function implementing this logic iterates through the array, updating elements as described, and returns the modified array with all zeroes moved to the end.
+
+Now, let’s look at the sum target problem.
+
+This problem asks you to find two elements in an array that add up to a given target sum. The solution leverages the fact that, for each element x in the array, the other element y needed to reach the target is simply target minus x.
+
+As you traverse the array, for each element, you calculate the required complement and search for it in the remaining part of the array. If found, you record the indices of the pair. The process assumes that a valid pair exists and that the array does not contain duplicates, although these assumptions can be adjusted as needed.
+
+The function for this problem iterates through the array with two nested loops. The outer loop selects each element, and the inner loop searches for the complement in the subarray that follows. When a pair is found, their indices are added to a list, which is returned at the end.
+
+Finally, let’s cover the subarray with the maximum sum problem.
+
+This is a common interview question, often referred to as the maximum subarray problem. The task is to find the contiguous subarray within a one-dimensional array of numbers that has the largest sum, even if the array contains negative numbers.
+
+The solution involves tracking the current sum and the maximum sum found so far. As you iterate through the array, you decide at each step whether to extend the current subarray or start a new one at the current element. If the current element alone is greater than the sum of the current element and the accumulated sum, you reset the sequence at the current index. Otherwise, you continue the sequence.
+
+For example, given the array negative two, one, negative three, four, negative one, two, one, negative five, four, you start with a local sum of negative two. Adding one gives negative one, but since one is greater than negative one, you reset the sequence at one. This process continues, updating the maximum sum whenever a higher value is found.
+
+The function implementing this logic initializes the maximum and current sums to the first element. It then iterates through the array, updating the current sum and maximum sum as described. The final result is the largest sum found among all possible subarrays.
+
+In summary, these algorithms—reversing an array, rotating an array, moving zeroes, finding pairs that sum to a target, and finding the maximum subarray sum—are foundational techniques that come up frequently in programming interviews and real-world applications. Understanding their logic and implementation will strengthen your problem-solving skills.
+
+
+Let’s continue with the explanation of the array maximum subarray sum, and then move on to array removal and insertion techniques.
+
+As the loop continues, when the index i is four, the current value c is calculated as the maximum between negative one, and the sum of four plus negative one, which results in three. This means the sequence continues, starting at index three and ending at index four. The maximum value m is updated as the maximum between four and three, which remains four. So, the total maximum is retained, since no bigger sum has been found yet.
+
+Next, when looping at index five, the current value c is the maximum between two, and the sum of three plus two, which gives five. The sequence continues, starting at index three and ending at index five. The maximum value m is now the maximum between four and five, which is five. This means a new total maximum is found, and it is set.
+
+These steps keep repeating until the entire array is exhausted. Finally, we find that the maximum sum is actually five, produced by the four elements: four, negative one, two, and one.
+
+Now, let’s discuss array removal.
+
+Array removal
+
+There are basically two general ways to remove an element from an array at a given index. Assume that the implementations also handle resizing the capacity of the array if needed.
+
+The first method is to swap the element to be removed with the last element, which is suitable when the order of array elements does not matter.
+
+The second method is to shift all elements to the left, starting from the index of the element to be removed.
+
+Swap solution
+
+This approach is often used in situations where the order of elements is not important. You simply place the last element over the element to be removed. This is often enough to consider the element as removed.
+
+In code, this is implemented by assigning the value of the last element to the position of the element to be removed, and then decreasing the size of the array by one.
+
+Shift solution
+
+In this approach, all following elements are pulled down, overriding elements starting at the index to be removed. The element at that index is assigned the next element, and so on, until the end of the array. This has the effect of pulling down all elements by one, shifting them to the left.
+
+In code, this is done by looping from the index to be removed up to the second-to-last element, assigning each element the value of the next one. Finally, the size of the array is decreased by one.
+
+Now, let’s move on to array insertion.
+
+Array insert
+
+Similarly, there are two options for inserting elements into an array. Assume that the implementations also handle resizing the capacity of the array if needed.
+
+The first option is to insert the element at the end of the array, by setting the element at the last free position to the new value, when the array is big enough.
+
+The second option is to insert the element at a given index position, where elements are shifted to the right, starting from the index to be inserted at.
+
+Append solution
+
+This approach simply appends the element at the last possible free position, which is the index equal to the current size of the array. After inserting the new value, the size of the array is increased by one.
+
+Shift solution
+
+In this solution, the elements are pulled towards the end of the array to make space for the new element. The size variable refers to the actual number of elements present in the array. The process starts from the current size, since inserting one element means that the new last index will be at the current size after the insertion is done.
+
+In code, this is done by looping from the current size down to the index where the new element will be inserted, shifting each element one position to the right. Then, the new value is assigned at the target index, and the size of the array is increased by one.
+
+

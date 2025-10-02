@@ -1,0 +1,112 @@
+CharSequence
+
+CharSequence is the foundational interface in the Java core library for anything that represents a string or a sequence of characters. Any class that deals with sequences of characters, such as String, StringBuilder, or StringBuffer, implements this interface. At its core, CharSequence requires implementations to provide methods for getting the length of the sequence, converting it to a string, checking if it is empty, and accessing characters at specific positions, among many other methods.
+
+Strings
+
+Constructors
+
+When you create a String in Java, unless you specify otherwise, the Java runtime uses the system’s default character encoding to interpret character or byte arrays. This encoding is typically UTF-8 or UTF-16.
+
+There are several ways to construct a String:
+
+First, you can use a constructor that takes an array of two-byte characters, or chars, to create a new String object.
+
+Second, you can use a constructor that takes an array of bytes, where each element is one byte in size.
+
+Third, you can use a constructor that copies the contents of a StringBuilder into a new String object.
+
+Finally, you can use string literals. These are special String objects defined directly in your source code, such as the word “literal” in double quotes. The Java runtime pools these literals, allowing them to be reused efficiently.
+
+Basics
+
+Concatenation
+
+In Java, you can only use the plus operator to concatenate strings. Arithmetic operators other than plus are not allowed for strings. When you concatenate multiple string literals, the Java runtime combines them into a single string object, which is then stored in the string pool.
+
+For example, if you write a line that combines the words “one,” “two,” and “three” using the plus operator, Java will create one pooled string object containing the result.
+
+It’s important to be careful when concatenating strings with other types. Since Java evaluates expressions from left to right and does not have operator precedence for the plus operator in this context, you might get unexpected results. For instance, if you write “four” plus two plus two, you will get the string “four 22.” But if you use parentheses around the numbers, you will get “four 4.”
+
+When concatenating, Java uses the toString or valueOf methods to convert non-string objects to their string representations. This is how Java can concatenate objects that are not strings.
+
+Extraction
+
+To extract characters from a string, Java provides several methods.
+
+The charAt method allows you to get a single character at a specific index in the string.
+
+The getChars method lets you extract a range of characters from a string and copy them into a character array.
+
+The getBytes method converts the string into its byte representation, typically using the system’s default encoding.
+
+The toCharArray method converts the entire string into a character array.
+
+Comparison
+
+To compare the contents of two string objects, rather than their references, you should use the equals or equalsIgnoreCase methods. These compare the strings character by character, either respecting or ignoring case.
+
+The regionMatches method compares a specific region of one string to another, and can be set to ignore case.
+
+The startsWith and endsWith methods check if a string begins or ends with another string. These are specialized cases of regionMatches.
+
+The compareTo and compareToIgnoreCase methods compare strings lexicographically, which means in alphabetical order.
+
+Searching
+
+To search within a string, you can use the indexOf method to find the first occurrence of a character or substring, or the lastIndexOf method to find the last occurrence. Both methods return the index if found, or negative one if not.
+
+Reducing
+
+Strings in Java are immutable, which means you cannot modify them directly. Any operation that appears to change a string actually creates a new string object. To create a new string from part of an existing one, you can use the substring methods, which generate a new string starting at a given index, and optionally ending at another index.
+
+The concat method allows you to join two strings together, and is equivalent to using the plus operator.
+
+The replace method creates a new string by replacing a character or substring with another value.
+
+The trim method returns a copy of the string with all leading and trailing whitespace removed, including tabs and other Unicode whitespace characters.
+
+The join method combines multiple strings into one, separated by a specified delimiter.
+
+Finally, the toUpperCase and toLowerCase methods return copies of the original string with all characters converted to upper or lower case.
+
+StringBuffer and StringBuilder
+
+If you need a mutable string object, StringBuilder is the standard choice. It allows you to efficiently append or prepend to a string without the overhead of creating new string objects each time, because it uses an internal dynamic array. StringBuffer is similar, but it is synchronized, making it thread-safe. This is similar to the difference between Integer and AtomicInteger in the Java core library.
+
+Both StringBuilder and StringBuffer can be constructed with a default size, a specified initial capacity, or from an existing CharSequence such as a String.
+
+Because these classes allow mutation, their APIs provide methods to expand or shrink the string, append or insert other strings, and explicitly set the length. The internal buffer has a capacity property, which determines how much unused space is available before the buffer needs to be reallocated. You can shrink the buffer to match the current string length using the trimToSize method.
+
+Key methods include:
+
+capacity, which returns the current capacity of the buffer.
+
+length, which returns the actual length of the string contained.
+
+ensureCapacity, which increases the buffer’s capacity if needed.
+
+charAt and setCharAt, which allow you to get or set a character at a specific position.
+
+setLength, which changes the length of the string, filling with null characters if the new length is greater, or truncating if it is smaller.
+
+append, which adds a string to the end of the buffer.
+
+prepend, which adds a string to the beginning of the buffer.
+
+insert, which inserts a string at a specified index.
+
+trimToSize, which reduces the buffer’s capacity to match the string’s length.
+
+reverse, which reverses the contents of the string efficiently, without reallocating memory.
+
+In summary, CharSequence and its implementations provide a rich set of tools for working with strings and character sequences in Java, from immutable strings to mutable buffers, with a wide range of methods for creation, manipulation, comparison, and searching.
+
+
+Delete and Replace Methods
+
+The delete and delCharAt methods allow you to remove parts of a string buffer. The delete method takes two numbers—a start index and an end index—and deletes the substring between those positions. The delCharAt method removes a single character at a specified position.
+
+The replace method lets you substitute a section of the buffer with a new string. You provide the start and end positions for the range you want to replace, along with the replacement string. The method then overrides the specified range with the new content. This is useful for updating or modifying parts of a string without rebuilding the entire buffer.
+
+

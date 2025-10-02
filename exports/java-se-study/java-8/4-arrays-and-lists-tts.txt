@@ -1,0 +1,25 @@
+Arrays
+
+The basic way to declare an array in Java is to specify the type, followed by the variable name and empty square brackets. However, to actually create the array in memory, you must also initialize it using the new keyword, specifying the type and the desired size.
+
+For example, the code defines an integer array called integers, and then allocates space for one hundred integer values. The variable integers now refers to this array object in memory.
+
+Initialization lists for arrays use curly braces to specify the elements. Unlike string literals, these initialization lists are not interned. This means that if you create two arrays with the same initialization list, they will not refer to the same object in memory. Each array will have its own reference, even if the contents are identical and known at compile time.
+
+Arrays in Java are mutable. You can change the value of any element in the array after it is created. However, you cannot change the length of the array. If you need a different size, you must create a new array.
+
+For example, the code shows two arrays, month_days and month_days2, both initialized with the same list of integers. However, comparing their references will return false, because they are two separate objects. This is different from how string literals are handled in Java, where identical literals may share the same reference due to interning.
+
+When you allocate an array using the new keyword, the elements are automatically initialized. Numeric types are set to zero, reference types are set to null, and boolean types are set to false.
+
+Multidimensional arrays can be created by stacking square brackets. There is no strict limit to the number of dimensions you can define, but you must specify at least one. For example, you can create a two-dimensional array with four rows and five columns, where each element is initialized to zero. Alternatively, you can create an array where only the first dimension is specified, and the inner arrays are left uninitialized, meaning they are set to null and must be created manually.
+
+The code demonstrates several ways to declare and initialize multidimensional arrays. For instance, array1 is a two-dimensional array with four rows and five columns, all initialized to zero. Array2 is a two-dimensional array with four rows, but the columns are not yet allocated. Array3 is a three-dimensional array with four elements in the first dimension, but the inner arrays are not initialized. You can then manually initialize a specific row, such as setting the first row to a two-dimensional array of size one by one.
+
+Initialization lists for multidimensional arrays work similarly to one-dimensional arrays. Each entry in the list is itself a list, representing a row or a sub-array. Again, interning is not performed for these arrays, so each initialization creates a new object.
+
+There are also alternate ways to declare arrays. For example, you can write the square brackets after the type or after the variable name. This allows you to declare multiple arrays on the same line. If you write int nums[], nums2[], nums3[], all three variables are arrays. If you write int nums, nums2[], nums3, only nums2 is an array, while the others are simple integers.
+
+In summary, arrays in Java are objects that must be explicitly created and initialized. They are mutable in terms of their contents, but their size is fixed once created. Initialization lists provide a convenient way to set initial values, but do not result in shared references. Multidimensional arrays offer flexibility in structure, and declaration syntax can vary to suit your needs.
+
+

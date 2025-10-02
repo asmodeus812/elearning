@@ -1,0 +1,104 @@
+Exceptions
+
+Exceptions are a way for programmers to capture both expected and unexpected events that might occur during the execution of a program. They provide a mechanism to safely recover from unusual situations or to take an alternative execution path when something goes wrong.
+
+In Java, there are five keywords used in the context of exceptions: try, catch, throw, throws, and finally. These keywords are used to define exception handling cases and to emit exceptions when necessary.
+
+All exceptions in Java are subclasses of a class called Throwable. From Throwable, there are two main types of subclasses: Exception and Error. Each serves a different purpose.
+
+The Exception class, which inherits from Throwable, is the base for all normal types of exceptions. Most exceptions that you will handle in your code inherit from Exception.
+
+The Error class, also inheriting from Throwable, is meant to represent very serious problems or errors in the program’s execution flow. These usually come from the Java runtime itself, not from your program. Errors are not supposed to be caught by your code and are generally considered unrecoverable.
+
+To visualize the hierarchy, imagine Throwable at the top, branching into Exception and Error. Exception further branches into RuntimeException and IOException, while Error branches into types like LinkerException and CompilerException.
+
+The Throwable class has an overloaded constructor that can take a human-readable message as a string, and also another Throwable as the cause. This allows you to wrap or create a new exception in certain cases, while retaining information about the original cause. By wrapping the cause inside a custom exception, you do not lose context about what triggered the error in the first place.
+
+Exception
+
+The Exception class is further subclassed by others, such as RuntimeException. RuntimeException is intended for unrecoverable exceptions in the process, which are usually not expected to be handled by the program. However, whether you handle them depends on the scenario and the type of exception.
+
+All subclasses of RuntimeException are called unchecked exceptions. This means you are not required to catch them. By default, all other classes that inherit from Exception are considered checked exceptions. For checked exceptions, the compiler will emit errors if a method declares that it throws such an exception but does not handle it appropriately.
+
+Why are RuntimeExceptions not required to be handled? It is not because they are special, but because they are handled by the default exception handler provided by the Java runtime. The compiler recognizes that a class is a subclass of RuntimeException and does not require the program to handle it. Instead, it knows that the default handler will take care of it. All exceptions that inherit from Exception, but are not RuntimeExceptions, are technically handled by the program.
+
+Error
+
+As mentioned, classes inheriting from Error are mostly related to exceptional cases produced by the Java Virtual Machine runtime, not by your program. These exceptions are not only not expected to be caught and handled, but they often signal a critical error that is unrecoverable. The program might terminate execution or might not even start.
+
+Handling
+
+The default handler in the Java runtime usually prints or displays what is called a stack trace. The stack trace is the call stack of all functions between the start of the program and the place where the exception occurred. This helps you track the flow the program took to arrive at the exceptional case.
+
+The call stack contains links and references to the original source code, including file names and line numbers. This information helps you discover exactly where the error occurred in the source.
+
+In the following example, a class called Exceptional is defined with a main method. Inside the main method, a try block attempts to divide forty-two by zero, which triggers an exception. The catch block handles the ArithmeticException, printing a message about division by zero. The finally block always executes, printing a message regardless of whether an exception was caught. After the try-catch-finally sequence, another message is printed, showing that the program continues execution.
+
+This example demonstrates how a custom handler can be created, instead of relying on the default one, which would terminate the program. By handling the exception, you can safely deal with a division by zero without killing the program.
+
+The Throwable class overrides the toString method, which means you can pass a Throwable object or exception to a print procedure to display a human-readable error description.
+
+The actual implementation of the toString method in the Throwable class gets the class name and the localized message. It returns a string that combines the class name and the message, or just the class name if no message is present.
+
+Catching
+
+Catching an exception can be done with single or multiple catch clauses. When using multiple catch clauses, there are some important caveats. The catch clauses are inspected in the order they appear.
+
+For example, if you have a try block that might throw an exception, and you first catch the generic Exception class, followed by a catch for ArithmeticException, the compiler will throw an error. This is because Exception is a superclass of ArithmeticException, so the first catch will always handle any ArithmeticException, making the second catch unreachable. This is known as dead code.
+
+When you use multiple catch statements, it is important to remember that exception subclasses must come before any of their superclasses. This is because a catch statement that uses a superclass will catch exceptions of that type plus any of its subclasses.
+
+Nesting
+
+It is allowed to nest try-catch pairs within each other. It is also allowed to skip the catch block of a try statement, meaning that the outer try-catch pair will then intercept any exception emitted from the inner try block.
+
+For example, in a main method, you might have an outer try block that handles division by zero, and an inner try block that handles array index out-of-bounds exceptions. If the inner block throws a division by zero exception, the outer catch will capture it. This is perfectly valid, but something to keep in mind.
+
+Throwing
+
+Throwing an exception from a program is straightforward. You use the throw keyword, followed by an object or instance of a Throwable. This can be any custom or existing exception already defined in the runtime.
+
+For example, you might throw a new NullPointerException with a message of "demo".
+
+Throws
+
+The throws keyword is similar but serves a different purpose. It defines if a given method throws an exception but does not handle it. If a method throws an exception that is a RuntimeException or a subclass of it, it does not need to notify the caller with throws. However, if the exception is an instance of Exception, it is considered a checked exception by default. This means the method must specify all checked exceptions that it does not handle, otherwise a compile-time error will occur.
+
+
+ThrowsDemo class and exception handling in Java
+
+This section demonstrates how Java handles exceptions using the ThrowsDemo class. The class defines three static methods, each illustrating different exception handling scenarios.
+
+The first method, throwOne, declares that it throws an IllegalAccessException. This exception is a checked exception, meaning it must be either caught or declared in the method signature. Inside the method, a message is printed, and then an IllegalAccessException is thrown with the message "demo".
+
+The second method, throwTwo, throws a NullPointerException. This exception is a subclass of RuntimeException, which is an unchecked exception. Because of this, there is no need to specify a throws clause in the method signature, and there will be no compile-time error. The method prints a message and then throws the NullPointerException.
+
+The third method, throwThree, attempts to throw a ParseException, which is also a checked exception. However, it does not declare this in its method signature. This will result in a compile-time error, because checked exceptions must be either caught or declared with a throws clause.
+
+In the main method, throwOne is called inside a try block. If an IllegalAccessException is thrown, it is caught and a message is printed indicating the exception was caught.
+
+Finally
+
+The finally clause in Java provides a way to always execute a specific block of code after a try or catch block, regardless of whether an exception was thrown. This is especially useful for releasing resources or resetting temporary state.
+
+The finally block executes immediately after the try or catch blocks, and before any code that follows the finally block.
+
+For example, consider a main method that calls a method which might throw an exception. If an exception is caught, a message is printed. Regardless of whether an exception occurred, the finally block will execute and print "Finally". After the finally block, the program continues and prints "After".
+
+Chaining exceptions
+
+Since Java version one point four, the Throwable class supports exception chaining. This allows you to provide a cause for an exception when constructing it. The cause is another instance of Throwable, representing the original reason for the current exception.
+
+This is useful when you want to create your own custom exception with a specific message, but still retain information about the original exception that triggered it. By passing the original exception as the cause, you make it possible to discover and recover the original information.
+
+For example, in a main method, you might catch a NullPointerException and then throw a custom exception called CustomSpecialDomainException, passing both a message and the original exception as the cause. This ensures that information about the actual cause is not lost.
+
+Autoclose and try-with-resources
+
+Starting with Java eight, it is possible to automatically close resources without explicitly handling them in a finally block. This is achieved using the try-with-resources statement, which can only be used with resources that implement the AutoCloseable interface, defined in java dot lang. This interface defines the close method. The Closeable interface in java dot io inherits from AutoCloseable.
+
+It is important to note that resources declared in the try-with-resources statement are implicitly final. This means you cannot assign a new value to the resource after it has been created. Additionally, the scope of the resource is limited to the try-with-resources statement.
+
+For example, you can open two file output streams inside a try-with-resources block. These streams are only accessible within the block, and they are automatically closed when the block is exited, even if an exception occurs. If there is an issue opening the files, an IOException can be caught and handled. After the try block, the file streams are closed automatically, ensuring proper resource management.
+
+

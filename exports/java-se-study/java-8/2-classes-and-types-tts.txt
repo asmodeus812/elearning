@@ -1,0 +1,186 @@
+Classes
+
+In Java, classes are a fundamental internal component of the language. Unlike some other programming languages where classes are optional, in Java, the class is the central structure around which the entire language is built and continues to evolve.
+
+A class in Java consists of two main components: class methods and class variables.
+
+The general structure of a class includes a class name, a list of instance variables, and a set of methods. Each method can take parameters and contains the logic for the class’s behavior. The instance variables define the state of each object created from the class.
+
+Constructors
+
+Constructors are a special type of class method. They do not have an explicit return type, but implicitly, the return type of a constructor is the class itself. By default, Java provides a no-argument constructor if you do not define any constructors yourself. However, if you define at least one constructor, the default constructor is not provided automatically.
+
+A constructor is always the first method invoked when a new instance of the class is created. This allows you to initialize or set up the object before it is used.
+
+For example, consider a class called Box with three double variables: width, height, and depth. The constructor for Box takes three parameters and assigns them to the instance variables. This means that when you create a new Box object, you must provide all three dimensions. If you try to create a Box without any arguments, it will result in a compile-time error because the default constructor has been overridden by the explicit one.
+
+It is possible to invoke another constructor from within a constructor using the this keyword, but there are important restrictions. The call to this must be the very first statement in the constructor. You cannot use any instance variables in the this call, and you cannot have both this and super calls in the same constructor, since both must be the first statement.
+
+For example, in a class called TestThis, you might have a default constructor and two overloaded constructors that each call the default constructor using this. This pattern allows you to centralize initialization logic.
+
+Methods
+
+Class member methods differ from constructors mainly in their naming and the fact that they usually have an explicit return type, even if it is void. Methods cannot have the same name as the class, as that name is reserved for constructors. Methods can accept any number of arguments.
+
+It is important to note that every non-static class member method implicitly receives a reference to the current instance of the class as its first argument. This allows the method to operate on the specific object it was called on.
+
+For example, in the Box class, you might have a method called volume that returns the product of width, height, and depth. When you call b.volume(), it is actually compiled to Box.volume(b), where b is the instance.
+
+Caveats
+
+The this keyword is an important detail that is often overlooked. It provides a way to explicitly reference the current instance of the class from within its constructors or methods. The most common use case is to avoid ambiguity between constructor or method arguments and class member variables.
+
+For example, in the Box constructor, you might have parameters named width, height, and depth. By using this.width, this.height, and this.depth, you ensure that you are assigning the values to the instance variables, not just the local parameters. If you omit the this keyword, the assignments would only affect the local variables, leading to what is called instance variable hiding.
+
+Destructors
+
+Java provides a mechanism similar to destructors in other languages, but with important differences. In languages like C++, the destructor is called when an object goes out of scope or is explicitly deleted. In Java, the finalize method is called by the garbage collector when it determines that there are no more references to the object.
+
+However, the timing of the finalize method is non-deterministic. You cannot predict exactly when it will be called, so you should not rely on it for critical resource management. The finalize method is typically used to free non-Java resources, such as loaded textures, fonts, or images, to avoid memory or resource leaks.
+
+Access
+
+Access modifiers control the visibility of class members. The main access levels in Java are default, public, private, and protected.
+
+When a member is declared public, it can be accessed by any other code. If it is private, it can only be accessed by other members of the same class. Protected members are mainly used in inheritance situations, allowing subclasses to access or override them.
+
+If no access modifier is specified, the member is package-private, meaning it is accessible only within the same package. This is also known as default access.
+
+For example, if you have two classes, ClassA and ClassB, in the same package, ClassB can access the default method of ClassA. However, if you try to access ClassA from a class in a different package, such as ClassC, you will get a compilation error because ClassA is not visible outside its package.
+
+It is important to note that top-level classes can only be defined with default or public modifiers. Attempting to define a top-level class as private or protected will result in a compilation error.
+
+Static
+
+There are two types of static class members: static methods and static variables. Both have the same restrictions regarding access to other members of the class.
+
+Static members cannot access the this keyword, since they are not tied to any particular instance of the class. They also cannot call or use the super constructor. Static members can only manipulate other static members, whether variables or methods.
+
+To initialize static variables after their declaration, you can use a static block. As soon as the class is loaded, its static blocks and static members are initialized. This is an important detail to keep in mind.
+
+For example, in a class called Type, you might have a static integer variable and a static block that initializes it. You can also define static methods that operate on static variables.
+
+Final
+
+The next topic is the final keyword, which will be discussed in detail.
+
+
+Final Members
+
+Final members in Java are essentially constants. They can only be assigned a value in one of two ways: either directly at the moment of declaration, or within the constructor of the class. If a final field is not given a value by either of these methods, it results in a compile-time error, and the compiler will notify you.
+
+For example, consider a class where one final variable is initialized at declaration, and another is set in the constructor. Both approaches are valid. The choice depends on your use case. If you are creating immutable but constructible objects, you might prefer to use the constructor for more control. On the other hand, if you are building something like a math library, it makes sense to initialize a constant such as pi directly at the point of declaration, since its value will never change.
+
+Applying Final to Methods
+
+When you apply the final keyword to a method, it has a different meaning. It indicates that the method cannot be overridden by subclasses. In Java, all methods are eligible for overriding by default, except for private ones. However, you can mark a protected or public method as final in the superclass to prevent subclasses from overriding it. If you attempt to override a final method in a subclass, the compiler will produce an error.
+
+For instance, imagine a class A with a final method called method. If a subclass B tries to override this method, the compiler will flag it as an error because the method in the superclass is declared as final.
+
+Final methods can sometimes offer a performance benefit. The compiler is allowed to inline calls to final methods because it knows they cannot be overridden. This means that, for small final methods, the Java compiler can insert the bytecode for the method directly into the calling code, eliminating the overhead of a method call. This optimization is only possible for final methods.
+
+Normally, Java resolves method calls dynamically at runtime, a process known as late binding. However, since final methods cannot be overridden, calls to them can be resolved at compile time, which is called early binding.
+
+Applying Final to Classes
+
+If you declare a class as final, it means that no other class can inherit from it. This does not provide any special compile-time or runtime optimizations, but it does ensure that the class is well-encapsulated and protected from further extension. It is important to note that you cannot declare a class as both abstract and final at the same time.
+
+For example, if you have a final class A and then try to create a class B that extends A, the compiler will produce an error.
+
+Nesting
+
+A powerful feature of the Java language is the ability to declare nested classes within other classes. Each nested class has direct access to all members of the class in which it is nested, including private members. However, the enclosing class does not have access to the private members of its nested classes.
+
+There are two ways to define a nested class: as static or as non-static. These two approaches have very different meanings and implications.
+
+A static nested class cannot access the members of the enclosing class unless it has an instance of the enclosing class. No instance of the static nested class is created automatically when a new instance of the outer class is created. Instead, creating an instance of the static nested class is under the programmer’s control.
+
+A non-static nested class, also known as an inner class, is bound to an instance of the enclosing class. This means it can access the members of the enclosing class directly. When a new instance of the outer class is created, it can also create an anonymous instance of the inner non-static class.
+
+This behavior is intuitive if you consider how static and non-static members work in general. Non-static members are bound to a particular class instance, while static members are not.
+
+The static nested class approach is often used to create a related utility class within a top-level class. For example, if you have a Cart class, it makes sense to define a nested Item class inside it, since the two are closely related. In this scenario, the Item class is defined as static, and it can be used within the Cart class. If you expect to operate on individual items through a method like getItems, you should not make the Item class private, otherwise you would not be able to declare variables of type Item outside the Cart class.
+
+The non-static nested class approach is used when you want to provide encapsulation for the outer class and a logical separation between structures. Non-static inner classes have direct access to the instance members of the outer class, since they are bound to an instance of the enclosing class.
+
+For example, an inner class can directly use a private member of the outer class, but this only works within the scope of an instance of the outer class. In contrast, a static nested class does not require an instance of the outer class.
+
+It is also possible to define inner classes within any block scope, such as within a method or even inside a loop. For example, you can define a nested class inside a for loop, and that inner class can access members of the enclosing class.
+
+Shadowing in inner non-static classes can occur when both the outer and inner classes have members with the same name. This can be resolved by using a special notation: the name of the outer class followed by the keyword this. This is similar to how you access static members by using the class name followed by the member name.
+
+There is an important caveat when combining non-static nested classes with static members. You cannot define a static member inside a non-static, non-top-level class. Attempting to do so will result in a compile-time error.
+
+Inheritance
+
+Java’s inheritance model is inspired by languages like C plus plus. However, unlike C plus plus, where a class can inherit from multiple base classes, Java only allows a class to inherit from one non-interface base class. This restriction helps avoid the diamond problem in inheritance.
+
+For example, consider a Box class with width, height, and depth fields, and a constructor to initialize them. Then, a BoxWeight class extends Box and adds a weight field. The BoxWeight constructor calls the superclass constructor using the super keyword to initialize the inherited fields, and then sets its own weight field.
+
+Assigning a superclass variable to a subclass instance means that a variable of the superclass type can reference an object of the subclass. This concept is related to the Liskov Substitution Principle, which states that objects of a superclass should be replaceable with objects of its subclasses without affecting the correctness of the program. In the example, assigning a Box variable to a BoxWeight object does not change the behavior of the program.
+
+
+Let’s begin by discussing how subclass and superclass references work in Java.
+
+First, consider a scenario where you have a class called Box, and a subclass called BoxWeight. You can assign a variable of the superclass type, Box, to reference an instance of the subclass, BoxWeight. This is valid because a superclass reference can point to a subclass object. However, the reverse is not allowed. You cannot assign a superclass object to a subclass reference variable. In other words, you can assign a BoxWeight object to a Box variable, but not the other way around.
+
+Next, let’s talk about member variable shadowing and the use of the super keyword.
+
+When a subclass defines a member variable with the same name as one in its superclass, the subclass variable shadows the superclass variable. To avoid ambiguity and explicitly refer to the superclass member, you can use the super keyword, much like you use this to refer to the current class’s members. For example, if both the base class and the child class have a variable called member, you can use super.member to refer to the base class’s version, and this.member to refer to the child’s version.
+
+Here’s how this works in practice. Imagine you have a base class with a protected integer called member, initialized to zero in its constructor. The child class also defines a protected integer called member. In the child class’s constructor, you can set the base class’s member to one using super.member, and the child’s member to two using this.member.
+
+It’s important to note that when constructing a child class, the superclass constructor is always called first, whether explicitly or implicitly. This means the base class’s member variable is set to zero first, then the child class’s constructor sets the base member to one, and finally sets the child’s own member to two. Constructors in a class hierarchy always execute in order from superclass to subclass. The call to super must be the first statement in a subclass constructor. If you don’t explicitly call super, the default or parameterless constructor of the superclass is executed.
+
+Now, let’s move on to method overriding.
+
+Method overriding is a fundamental concept in Java that enables dynamic method dispatch. This is the mechanism by which a call to an overridden method is resolved at runtime, not at compile time. Dynamic method dispatch is crucial for implementing runtime polymorphism.
+
+In a class hierarchy, if a subclass defines a method with the same name and type signature as a method in its superclass, the subclass method overrides the superclass method. When you call this method on a child class object, the overridden version in the child class is invoked. Method overriding only occurs when both the name and the type signature of the methods are identical. If they differ, the methods are simply overloaded, not overridden.
+
+For example, suppose you have a class A with two integer fields and a method called show that prints their values. Class B extends A, adds a third integer field, and overrides the show method to print all three values. It also overloads show with a version that takes an integer parameter. When you create an instance of A and call show, it prints the values from A. When you create an instance of B and call show, it prints the values from both A and B, demonstrating overriding. If you call the overloaded show method with an integer argument, it first calls the overridden show method, then prints the additional value.
+
+It’s important to remember that if you want to call the superclass’s version of a method from within an overridden method, you must use the super keyword. If you omit super and call the method by name, you’ll end up calling the overridden version in the child class, which can lead to infinite recursion.
+
+Let’s now discuss polymorphism.
+
+Polymorphism, also known as dynamic or runtime method dispatch, is one of the most powerful features of object-oriented design. It allows a superclass reference variable to refer to a subclass object. When you call an overridden method through a superclass reference, Java determines which version of the method to execute based on the actual type of the object being referred to at runtime, not the type of the reference variable.
+
+For example, suppose you have a superclass called Figure with a method called area. Two subclasses, Rectangle and Triangle, each override the area method to provide their own implementations. You can create an array of Figure references, assign a Triangle object to one element and a Rectangle object to another. When you iterate over the array and call area on each element, Java will execute the correct version of area for each object, based on its actual type. This demonstrates how dynamic dispatch works in practice and why it’s such a powerful tool for code reuse and robustness.
+
+Now, let’s talk about abstract classes.
+
+Sometimes, you want to define a class that should not be instantiated directly, but still provides common methods and variables for its subclasses. Instead of using interfaces, which only specify method signatures, you can use abstract classes. An abstract class is one that contains at least one abstract method—a method without an implementation. This makes the class uninstantiable on its own, but it can still have concrete method implementations.
+
+For example, you might define an abstract class A with a protected integer and an abstract method called callme. It also has a concrete method called callmetoo. A subclass B extends A and provides an implementation for callme, which can also call the concrete method from the base class. Note that you cannot call super.callme from B, because callme is abstract in the base class and has no implementation.
+
+You cannot create an instance of an abstract class directly. However, you can declare a variable of the abstract class type and assign it a reference to a subclass object that provides implementations for all abstract methods. For example, you can create a variable of type A and assign it a new B object. But you cannot instantiate A directly, since it is abstract.
+
+Finally, let’s mention the special Object class.
+
+In Java, there is a special class called Object. All other classes are subclasses of Object, either directly or indirectly. This means that a reference variable of type Object can refer to an object of any other class. This is the root of the class hierarchy in Java.
+
+
+Here is a list of important methods, along with their purposes.
+
+The clone method creates a new object that is identical to the object being cloned.
+
+The equals method determines whether one object is equal to another.
+
+The finalize method is called before an unused object is recycled by the system.
+
+The getClass method obtains the class of an object at run time.
+
+The hashCode method returns the hash code associated with the object that is invoking the method.
+
+The notify method resumes execution of a thread that is waiting on the object that invoked the method.
+
+The notifyAll method resumes execution of all threads that are waiting on the invoking object.
+
+The toString method returns a string that describes the object.
+
+There are three versions of the wait method. Each one causes the current thread to wait for another thread of execution. The first version waits indefinitely, the second waits for a specified number of milliseconds, and the third waits for a specified number of milliseconds and nanoseconds.
+
+It is important to note that the methods getClass, notify, notifyAll, and all versions of wait are declared as final. This means you cannot override them. However, you may override the other methods in this list.
+
+
