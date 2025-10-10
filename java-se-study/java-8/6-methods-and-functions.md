@@ -38,7 +38,7 @@ ob.test(123.25);
 
 Note that there are `caveats`, from the implementation above we can see that, we are correctly calling the test method,
 without parameters, with one int or two int parameters or one double. However what would happen if we instead called the
-test method with two double paramters, or with a float one.
+test method with two double parameters, or with a float one.
 
 ```java
 OverloadDemo ob = new OverloadDemo();

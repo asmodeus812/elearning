@@ -189,6 +189,3 @@ The return statement is used to explicitly return from a method. That is, it cau
 the caller of the method. As such, it is categorized as a jump statement. The general workings of return are not much
 different than those in other languages, there are no hidden special cases, we can either return without a value,
 `void`, or return a specific return type from the control block
-
-
-

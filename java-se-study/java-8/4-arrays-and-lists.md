@@ -58,5 +58,3 @@ following example
     int[] nums, nums2, nums3; // all variables declared on this line are arrays
     int nums, nums2[], nums3; // only the nums2 on this line is actually an array
 ```
-
-
