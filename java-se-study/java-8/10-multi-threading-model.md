@@ -2,13 +2,13 @@
 
 Basically threading is split into two major categories, with which most people are familiar
 
--   process multi-threading - this is virtually supported by any modern OS out there, this is the ability of the
-    operating system to run multiple processes concurrently, each of which has it's own address and data space, unrelated to
-    the other process, each process shares a specific amount of CPU time and all that is governed by the operating system.
+- process multi-threading - this is virtually supported by any modern OS out there, this is the ability of the
+  operating system to run multiple processes concurrently, each of which has it's own address and data space, unrelated to
+  the other process, each process shares a specific amount of CPU time and all that is governed by the operating system.
 
--   thread based - this one is related to having multiple threads execute in the process or the program itself, this
-    allows the program to perform multiple tasks concurrently, usually this is controlled by the run-time the program is
-    running on, for our case this is the JVM.
+- thread based - this one is related to having multiple threads execute in the process or the program itself, this
+  allows the program to perform multiple tasks concurrently, usually this is controlled by the run-time the program is
+  running on, for our case this is the JVM.
 
 ### Thread
 
@@ -21,12 +21,12 @@ dynamic, meaning that it can change during the execution or lifetime of the thre
 another, the run-time does a context switch, this is the same term used in operating systems when one process is paused
 before control is given to another. There are two ways a thread context switch can occur
 
--   A thread can voluntarily relinquish control - this is usually done explicitly by the thread, yielding, sleeping or
-    blocking on pending I/O. Then a higher priority thread is picked from the pool and it's execution is re-started
+- A thread can voluntarily relinquish control - this is usually done explicitly by the thread, yielding, sleeping or
+  blocking on pending I/O. Then a higher priority thread is picked from the pool and it's execution is re-started
 
--   A thread can be preempted - this is done when a higher priority thread can cause a lower priority thread. As soon as
-    a higher priority thread desires to be run, it "overrides" any lower priority thread that might be running at the
-    current time
+- A thread can be preempted - this is done when a higher priority thread can cause a lower priority thread. As soon as
+  a higher priority thread desires to be run, it "overrides" any lower priority thread that might be running at the
+  current time
 
 ### Synchronization
 
@@ -49,8 +49,8 @@ To synchronize a class or object we have two options really, which provide diffe
 go with, in either case we have to know that when an object is locked on, either in synchronize block or a synchronized
 method is called, the entire object is locked by the lock monitor
 
--   Provide synchronize keyword in front of the relevant class members - variables and/or methods
--   Wrap an instance of the object in a synchronized block - a way to synchronize a non-synchronized class
+- Provide synchronize keyword in front of the relevant class members - variables and/or methods
+- Wrap an instance of the object in a synchronized block - a way to synchronize a non-synchronized class
 
 ```java
 class Synced {
@@ -84,13 +84,13 @@ met, in effect instead of having a thread poll for a state, the thread is paused
 condition has changed or has been fulfilled, the thread can be woken up, and continue its execution the next time the
 scheduler picks it up, starting exactly from the position `wait` was called
 
--   `wait()` tells the calling thread to give up the monitor and go to sleep until some
-    other thread enters the same monitor and calls notify() or notifyAll().
+- `wait()` tells the calling thread to give up the monitor and go to sleep until some
+  other thread enters the same monitor and calls notify() or notifyAll().
 
--   `notify()` wakes up a thread that called wait() on the same object.
+- `notify()` wakes up a thread that called wait() on the same object.
 
--   `notifyAll()` wakes up all the threads that called wait() on the same object. One of
-    the threads will be granted access.
+- `notifyAll()` wakes up all the threads that called wait() on the same object. One of
+  the threads will be granted access.
 
 `Although wait() normally waits until notify() or notifyAll() is called, there is a possibility that in very rare
 cases the waiting thread could be awakened due to a spurious wakeup. In this case, a waiting thread resumes without
@@ -615,15 +615,15 @@ calling a terminating operation with Streams`
 
 ##### Factory operations
 
--   `supplyAsync` - Starts execution of a task that produces a result, has a generic return type of T
+- `supplyAsync` - Starts execution of a task that produces a result, has a generic return type of T
 
--   `runAsync` - Starts execution of a task that does not produce a result i.e. has a void return type
+- `runAsync` - Starts execution of a task that does not produce a result i.e. has a void return type
 
--   `completedFuture` - Returns a future that is already completed with a specified value. This works as if a future was
-    created, task was run, completed and a result was produced.
+- `completedFuture` - Returns a future that is already completed with a specified value. This works as if a future was
+  created, task was run, completed and a result was produced.
 
--   `newIncompleteFuture` - Creates a new complete-able future, without a task, use `composing` and `finalizing`
-    operations to complete it
+- `newIncompleteFuture` - Creates a new complete-able future, without a task, use `composing` and `finalizing`
+  operations to complete it
 
 `Note, the factory operations above provide means of creating a completeable future, in different states, there are
 mostly two - already running a given task, or one that is not initialized with any task and has to be registered into an
@@ -657,7 +657,6 @@ public void processOrder(int orderId) {
     // after calling `supplyAsync`, the future tasks are already being executed, inside the thread executor pool
     // therefore the current thread is not blocked and more tasks can be run at this point while the result of the
     // `confirmationFuture` is being computed
-
     try {
         confirmationFuture.get(); // obtain the final result
         System.out.println("Order processed successfully.");
@@ -695,4 +694,3 @@ private void sleep(int seconds) {
     }
 }
 ```
-

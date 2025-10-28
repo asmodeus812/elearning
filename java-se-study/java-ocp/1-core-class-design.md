@@ -22,7 +22,7 @@ only within the containing package`
 ```java
 // com/java/core/subpackage/DefaultAccessClass/java
 
-package com.java.core.subpackage;
+package com.core.subpackage;
 
 // the DefaultAccessClass, is declared with `default` access, meaning only classes within the `subpackage` can access it
 // and its methods.
@@ -36,8 +36,8 @@ class DefaultAccessClass {
 
 // com/java/core/TopLevelClass.java
 
-package com.java.core;
-package com.java.core.subpackage;
+package com.core;
+package com.core.subpackage;
 
 public class TopLevelClass {
 

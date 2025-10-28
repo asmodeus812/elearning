@@ -261,7 +261,3 @@ try(FileOutputStream fout = new FileOutputStream("file.txt");
 }
 // after exiting the try block, `fout` stream will be closed automatically
 ```
-
-
-
-
