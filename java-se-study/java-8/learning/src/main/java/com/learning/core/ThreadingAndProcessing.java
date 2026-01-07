@@ -19,7 +19,7 @@ public class ThreadingAndProcessing {
     private static final InstanceMessageLogger LOGGER = new InstanceMessageLogger(ThreadingAndProcessing.class);
 
     /**
-     * This class is meant to represent a consume of the queue, it will be responsible for pulling data from the queue
+     * This class is meant to represent a consumer of the queue, it will be responsible for pulling data from the queue
      */
     public static class Consumer implements Runnable {
 
@@ -82,18 +82,28 @@ public class ThreadingAndProcessing {
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         AtomicIncrementingVariable atomicVariable = new AtomicIncrementingVariable();
 
+        // using either one of these pools shows that both implement the ExecutorService, and share the same basic interface, the service
+        // has basic methods to accept runnables to execute in its internal thread pool
         THREAD_POOL_EXECUTOR.execute(atomicVariable::incrementSyncBlock);
         THREAD_POOL_EXECUTOR.execute(atomicVariable::incrementSyncMethod);
 
+        FIXED_THREAD_EXECUTOR.execute(atomicVariable::incrementSyncBlock);
+        FIXED_THREAD_EXECUTOR.execute(atomicVariable::incrementSyncMethod);
+
+        // using the fork join pool interface here which provides a much richer capabilities revolving around the direct usage of the Future
+        // interface and its derivatives, that allow us to chain and combine future results into a more complex sequence of operations
         Future<Integer> future = WORK_STEALING_POOL.submit(atomicVariable::incrementSyncMethod);
         LOGGER.logInfo(String.format("Result from the future is %d", future.get()));
 
+        // here we are using the more featureful capabilities of the work stealing pool to provide a work splitting job, that is recursive
+        // divide and conquer sequence sum of an array of elements
         int[] array = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
         BinarySummatingTask summer = new BinarySummatingTask(array, 0, array.length);
         WORK_STEALING_POOL.execute(summer);
 
-        // we craete the shared monitor object, that will be use across the consumer and the producer, this is simply a monitor wrapper that
-        // tells our conumer and producer when / what conditions do we enter on in the different scenarios
+        // we craete the shared monitor object, that will be used across the consumer and the producer, this is simply a monitor wrapper
+        // that
+        // tells our consumer and producer when / what conditions do we enter on in the different scenarios
         MultiThreadeadQueue queue = new MultiThreadeadQueue();
 
         // both the consumer and the producer lock and sync around the same monitor object, that in this case is the quee object which has

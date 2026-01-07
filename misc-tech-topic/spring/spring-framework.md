@@ -477,7 +477,7 @@ execute this process:
 
 1. **We start by running the jar**:
    ```sh
-   $ java -jar your-app.jar
+   $java -jar your-app.jar
    ```
 
 2. **Java virtual machine reads `META-INF/MANIFEST.MF`**:
@@ -572,16 +572,17 @@ external party, in this case it will be the web server - tomcat in our example.
 
 ```xml
 <project>
-  <packaging>war</packaging>
-  <dependencies>
-    <!-- Mark shared dependencies as 'provided' -->
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
-      <version>6.1.0</version>
-      <scope>provided</scope>  <!-- Server will supply this -->
-    </dependency>
-  </dependencies>
+    <packaging>war</packaging>
+    <dependencies>
+        <!-- Mark shared dependencies as 'provided' -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>6.1.0</version>
+            <!-- Server will supply this -->
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>
 ```
 

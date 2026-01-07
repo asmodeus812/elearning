@@ -1,7 +1,10 @@
 package com.learning.utils;
 
+import java.io.InputStream;
+import java.security.InvalidParameterException;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public class InstanceMessageLogger {
@@ -42,5 +45,14 @@ public class InstanceMessageLogger {
 
     private static final String getMessage(Object object) {
         return Optional.ofNullable(object).map(Object::toString).orElse("[nil]");
+    }
+
+    public static final void configureLogger(InputStream in) {
+        LogManager manager = LogManager.getLogManager();
+        try {
+            manager.readConfiguration(in);
+        } catch (Exception e) {
+            throw new InvalidParameterException(e.getMessage());
+        }
     }
 }

@@ -311,16 +311,16 @@ replacing strategy has to be provided to the move method, otherwise it will fail
 Files.move(pathSource, pathDestination, StandardCopyOption.REPLACE_EXISTING);
 ```
 
--   if a syn-link is being moved, the symbolic-link will be moved not the file or directory itself, there is a way to
-    move the file itself, by suing the FOLLOW_LINKS option instead.
+- if a syn-link is being moved, the symbolic-link will be moved not the file or directory itself, there is a way to
+  move the file itself, by suing the FOLLOW_LINKS option instead.
 
--   a non empty directory can be moved if moving the directory does not require moving the containing files or directories,
-    for instance moving a directory from one location to another may be unsuccessful if moving directory is successful then
-    all the contained files and directories are moved too.
+- a non empty directory can be moved if moving the directory does not require moving the containing files or directories,
+  for instance moving a directory from one location to another may be unsuccessful if moving directory is successful then
+  all the contained files and directories are moved too.
 
--   move can be specified as an atomic operation, ATOMIC_MOVE copy option, with this option either the entire move
-    completes successfully or the source continues to be present, and not moved, if move is not performed as atomic
-    operation, and it fails while in process of moving, the state of both files or directories is unknown, and undefined
+- move can be specified as an atomic operation, ATOMIC_MOVE copy option, with this option either the entire move
+  completes successfully or the source continues to be present, and not moved, if move is not performed as atomic
+  operation, and it fails while in process of moving, the state of both files or directories is unknown, and undefined
 
 ## Deleting
 
@@ -341,13 +341,13 @@ Files.delete(pathSource);
 
 Some general notes, in relation to the classes already reviewed
 
--   Do not confuse File with Files and Path with Paths: those are very different. File is an old class, that represents file
-    or directory path names, whereas Files was introduced in Java 7 as a utility class with comprehensive support for IO.
-    The Path interface presents a file or directory path unit, and defines a useful list of methods. However Paths is a
-    utility class that offers only two methods - to get construct path objects
+- Do not confuse File with Files and Path with Paths: those are very different. File is an old class, that represents file
+  or directory path names, whereas Files was introduced in Java 7 as a utility class with comprehensive support for IO.
+  The Path interface presents a file or directory path unit, and defines a useful list of methods. However Paths is a
+  utility class that offers only two methods - to get construct path objects
 
--   The file or directory represented by a Path object may not exist. Other than methods such as toRealPath methods in Path
-    do not require that the underlying file or directory be present for a Path object.
+- The file or directory represented by a Path object may not exist. Other than methods such as toRealPath methods in Path
+  do not require that the underlying file or directory be present for a Path object.
 
 ## Streaming
 
@@ -436,40 +436,40 @@ try(Stream<String> lines = Files.lines(Paths.get(filePath))) {
 
 Path interface & operations
 
--   A Path object is a programming abstraction to represent the path of a file/directory.
+- A Path object is a programming abstraction to represent the path of a file/directory.
 
--   You can get an instance of Path using the `get()` method of the Paths class.
+- You can get an instance of Path using the `get()` method of the Paths class.
 
--   Path provides two methods to compare Path objects: `equals()` and `compareTo()`. Even if two Path objects point to the
-    same file/directory, the `equals()` method is not guaranteed to return true.
+- Path provides two methods to compare Path objects: `equals()` and `compareTo()`. Even if two Path objects point to the
+  same file/directory, the `equals()` method is not guaranteed to return true.
 
 Read, delete, copy, move, manage `metadata`
 
--   You can check the existence of a file using the `exists()` method of the Files class.
+- You can check the existence of a file using the `exists()` method of the Files class.
 
--   The Files class provides the methods `isReadable()`, `isWritable()`, and `isExecutable()` to check the ability of the
-    program to read, write, and execute programmatically, respectively.
--   You can retrieve the attributes of a file using the `getAttributes()` method.
+- The Files class provides the methods `isReadable()`, `isWritable()`, and `isExecutable()` to check the ability of the
+  program to read, write, and execute programmatically, respectively.
+- You can retrieve the attributes of a file using the `getAttributes()` method.
 
--   You can use the `readAttributes()` method of the Files class to read file attributes in bulk.
+- You can use the `readAttributes()` method of the Files class to read file attributes in bulk.
 
--   The `copy()` method can be used to copy a file from one location to another. Similarly, the `move()` method moves a file
-    from one location to another.
+- The `copy()` method can be used to copy a file from one location to another. Similarly, the `move()` method moves a file
+  from one location to another.
 
--   While copying, all the directories (except the last one, if you are copying a directory) on the specified path must
-    exist to avoid a `NoSuchFileException`.
+- While copying, all the directories (except the last one, if you are copying a directory) on the specified path must
+  exist to avoid a `NoSuchFileException`.
 
--   Use the `delete()` method to delete a file; use the `deleteIfExists()` method to delete a file only if it exists.
+- Use the `delete()` method to delete a file; use the `deleteIfExists()` method to delete a file only if it exists.
 
 Stream & NIO.2
 
--   The Files.`list()` method returns a `Stream<Path>`. It does not recursively traverse the directories in the given Path.
+- The Files.`list()` method returns a `Stream<Path>`. It does not recursively traverse the directories in the given Path.
 
--   The Files.`walk()` method returns a `Stream<Path>` by recursively traversing the entries from the given Path; in one of
-    its overloaded versions, you can also pass the maximum depth for such traversal and provide `FileVisitOption.FOLLOW_LINKS`
-    as the third option.
+- The Files.`walk()` method returns a `Stream<Path>` by recursively traversing the entries from the given Path; in one of
+  its overloaded versions, you can also pass the maximum depth for such traversal and provide `FileVisitOption.FOLLOW_LINKS`
+  as the third option.
 
--   The Files.`find()` method returns a `Stream<Path>` by recursively traversing the entries from the given Path; it also
-    takes the maximum depth to search, a `BiPredicate`, and an optional `FileVisitOption` as arguments.
+- The Files.`find()` method returns a `Stream<Path>` by recursively traversing the entries from the given Path; it also
+  takes the maximum depth to search, a `BiPredicate`, and an optional `FileVisitOption` as arguments.
 
--   Files.`lines()` is a very convenient method to read the contents of a file. It returns a `Stream<String>`.
+- Files.`lines()` is a very convenient method to read the contents of a file. It returns a `Stream<String>`.
