@@ -131,8 +131,8 @@ all be summed up together and produce a result even though they are concretely d
 Generally speaking most languages have two different types of polymorphism, static and dynamic. Each is evaluated during
 different stage of the `lifecycle` of the program and its execution.
 
--   `Static` - when different forms of a single entity are resolved at compile time (early binding). Function overloading is
-    an example of static polymorphism
+- `Static` - when different forms of a single entity are resolved at compile time (early binding). Function overloading is
+  an example of static polymorphism
 
     ```java
     class Square {
@@ -150,8 +150,8 @@ different stage of the `lifecycle` of the program and its execution.
     System.out.println(shape2.area(10, 5));
     ```
 
--   `Dynamic` - when different forms of a single entity are resolved at run time (late binding). Function overriding is an
-    example of dynamic polymorphism
+- `Dynamic` - when different forms of a single entity are resolved at run time (late binding). Function overriding is an
+  example of dynamic polymorphism
 
     ```java
     class Shape {
@@ -234,18 +234,18 @@ or in some cases not even possible to do.
 
 Class type rules
 
--   `Integer` -> can be upcasted to Number (Integer is a child class of Number)
--   `Integer` -> can be upcasted to Object (All classes are child classes of Object)
--   `String` -> can be upcasted to CharSequence (String is a child class of CharSequence)
--   `String` -> can be upcasted to Object (All classes are child classes of Object)
+- `Integer` -> can be upcasted to Number (Integer is a child class of Number)
+- `Integer` -> can be upcasted to Object (All classes are child classes of Object)
+- `String` -> can be upcasted to CharSequence (String is a child class of CharSequence)
+- `String` -> can be upcasted to Object (All classes are child classes of Object)
 
 Primitive type rules
 
--   `byte` -> `short` -> `int` -> `long` (Primitive upcasting rules and procedures)
+- `byte` -> `short` -> `int` -> `long` (Primitive upcasting rules and procedures)
 
 Cross type rules
 
--   `autoboxing` - primitive types will be autoboxed to their Class equivalents or upcasted Class equivalents
+- `autoboxing` - primitive types will be autoboxed to their Class equivalents or upcasted Class equivalents
 
 In the example below the overloaded methods are ordered in a way which aims to represent the order in which the
 overloaded methods can be resolved, starting from the narrowest (byte) type, to the widest (Object)
@@ -342,23 +342,23 @@ aMethod((int) 9, (long) 10);
 By default all classes and types defined by the user or the standard library, extend from the implicit Object type,
 which provides several important methods which usually should be overridden when a new type is defined, those are:
 
--   `String toString()` - defines how a class should be expressed when printed out, in a human readable format
--   `int hashCode()` - creates an integer hash of the class instance, using the instance fields
--   `boolean equals(Object)` - compares the current instance with another one
+- `String toString()` - defines how a class should be expressed when printed out, in a human readable format
+- `int hashCode()` - creates an integer hash of the class instance, using the instance fields
+- `boolean equals(Object)` - compares the current instance with another one
 
 There are several others which are not mandatory, or required to be overridden, but can also be useful in certain
 situations
 
--   `Object clone()` - clone the state of the current instance into a new object
--   `void finalize()` - is the inverse version of the constructor, used to free resources which the instance might use to
-    avoid leaking them
+- `Object clone()` - clone the state of the current instance into a new object
+- `void finalize()` - is the inverse version of the constructor, used to free resources which the instance might use to
+  avoid leaking them
 
 Several others which are not allowed to be overridden, because they are defined as final, are the methods like
 
--   `void wait() and its overloaded counterparts` -
--   `void notify()` -
--   `void notifyAll()` -
--   `Class<?> getClass()` -
+- `void wait() and its overloaded counterparts` -
+- `void notify()` -
+- `void notifyAll()` -
+- `Class<?> getClass()` -
 
 ```java
     // this will produce compile time error, since toString is declared as public, in the Object class, it is not possible
@@ -458,9 +458,12 @@ used to compare and distinguish different instances of a given class. They repre
 generate a unique identifier for a given state of a given class instance, and also a consistent way to compare different
 instances, and their state.
 
-`The methods hashCode() and equals() need to be conssitent for a class. For parctical purposes, ensure that you follow
-this one rule: the hashCode method MUST return the same hash value for two objects if the equals method returns true for
-them. This is a general rule of thumb that has to be followed to ensure correctness across the program`
+`The methods hashCode() and equals() need to be conssitent for a class. For parctical purposes, ensure that you
+follow this one rule: the hashCode method MUST return the same hash value for two objects if the equals method
+returns true for them. But it is not required for the hashCode to return different values for the casess where
+equals returns false between two objects. This is because hashCode merely tells you in which 'bucket' this object
+goes, while generally hash code collisions are accepted, equals tells you that these two objects are strictly the
+same or equal. This is a general rule of thumb that has to be followed to ensure correctness across the program`
 
 Usually both `hashCode` and `equals` use the members of a given class to generate the respective hashCode or check the
 equality of an object.
@@ -476,7 +479,8 @@ class Point {
     }
 
     public boolean equals(Object arg) {
-        // perform some basic checks between the two instances, which can early exit with a clear answer
+        // perform some basic checks between the two instances, which can early exit with a clear answer, these
+        // are mandatory for equals, and should always be considered when doing a full equals implementation
         if(arg == null) return false;
         if(this == arg) return true;
 
@@ -676,6 +680,31 @@ The slightly modified example above shows how to use a conditional locking, it d
 only when the instance is not initialized. This saves on extra performance in every other scenario, which is like 99% of
 the cases - the singleton is created, and only used, where locking is not required.
 
+- The pattern is used to manage a cache of re-usable objects or data in memory, e.g. a Map that holds key/value pairs.
+
+- Provide control and access over configuration files of an application and manage write access to log files, which
+  usually require a single point of read/write access, even more importantly when multiple threads are involved
+  and multiple threads might be writing to that file.
+
+- Singleton requires the constructor of the class that is being considered singleton to be private, that is because
+  it is mandated that only one instance of this class should exist in a given scope/context, either global app
+  context, or some localized one, in either way the creation of the instance is controlled carefully
+
+- The pattern ensures that only one instance of this instance exists in memory, that way we can safely use this
+  instance in multiple threads context, between multiple classes and so on.
+
+- It requires that the method that creates the instance or retrieves the instance is public static, the singleton
+  class itself should/may also be defined as final to ensure that the class is well sealed from external behavior
+  changes.
+
+- Method that retrieves the singleton instance or creates it could be synchronized if it is expected for that piece
+  of code to be called by multiple threads, it is important to avoid having multiple threads race for the creation of
+  the singleton instance
+
+- The singleton pattern does NOT put any restrictions on the naming of the class, method or static member variable
+  but it is a good practice usually to name them accordingly. The class could be suffixed with `Singleton`, the method
+  named `getInstance` and the static member variable named `instance`.
+
 ## Immutability
 
 An immutable class is such that once created, its state can never be altered, none of the methods or interface the class
@@ -689,23 +718,23 @@ Such classes are quite powerful, because they ensure a functional type approach 
 are more robust, easy to use and reason about, however they can also be the source or root of performance and other
 problems when misused or abused.
 
--   immutable objects are safer to use, once the value is checked or known, it can not be changed, and remains constant
--   immutable objects are thread safe, they do not require any locking since no state can be changed, no matter how many threads use it
--   immutable objects that have the same state or share some of the state internally can be cached or optimized out by sharing
+- immutable objects are safer to use, once the value is checked or known, it can not be changed, and remains constant
+- immutable objects are thread safe, they do not require any locking since no state can be changed, no matter how many threads use it
+- immutable objects that have the same state or share some of the state internally can be cached or optimized out by sharing
 
 `There is a good rule of thumb, which states that all classes should be immutable, unless there is a very good reason to
 make them mutable, and in practice that is usually the case`
 
 To define an immutable class, and make sure it stays the same there are really two main points to consider,
 
--   make the fields final and initialize them in the constructor - this can be taken to extreme levels by making the
-    class itself final, and the methods as well, that would ensure that the class is very much closed to being extended, or
-    the methods overridden, completely never allowing any external party to produce a child class which silently mutates the
-    instance state in the interface implementation
+- make the fields final and initialize them in the constructor - this can be taken to extreme levels by making the
+  class itself final, and the methods as well, that would ensure that the class is very much closed to being extended, or
+  the methods overridden, completely never allowing any external party to produce a child class which silently mutates the
+  instance state in the interface implementation
 
--   ensure that methods never mutate the state of the members - extra care should be taken in case the Immutable type
-    itself includes through composition mutable reference types, such types which through their interface can or would
-    mutate the internal state of the instance/object.
+- ensure that methods never mutate the state of the members - extra care should be taken in case the Immutable type
+  itself includes through composition mutable reference types, such types which through their interface can or would
+  mutate the internal state of the instance/object.
 
 ```java
 public final class ImmutableValue {
@@ -796,20 +825,20 @@ constructor for the class type itself, in a way, semantically they have a very s
 
 There are several rules which apply to static context and static methods in particular, listed below, these are:
 
--   Static methods can not use the this keyword, since that would imply referencing an instance, however in a static
-    context, there is no class instance to speak of
+- Static methods can not use the this keyword, since that would imply referencing an instance, however in a static
+  context, there is no class instance to speak of
 
--   Static methods can not use the super keyword, for the very same reason mentioned above, it invokes a base class method
-    in an instance context
+- Static methods can not use the super keyword, for the very same reason mentioned above, it invokes a base class method
+  in an instance context
 
--   Static methods can not be overridden, since overriding is a run time, late binding process, which is only applicable
-    to instance methods
+- Static methods can not be overridden, since overriding is a run time, late binding process, which is only applicable
+  to instance methods
 
--   Static methods are mostly suited for utility purposes and actions, since they can not access member variables of an
-    instance, they should not be used to mutate static state
+- Static methods are mostly suited for utility purposes and actions, since they can not access member variables of an
+  instance, they should not be used to mutate static state
 
--   Main method must always be defined static, otherwise there is no way for the run-time to locate the entry point for
-    the program, and execute it
+- Main method must always be defined static, otherwise there is no way for the run-time to locate the entry point for
+  the program, and execute it
 
 # Summary
 
@@ -817,73 +846,73 @@ Let us briefly review the key points from each objective in this chapter
 
 ## Implement encapsulation
 
--   Encapsulation: Combining data and the functions operating on it as a single unit.
--   You cannot access the private methods of the base class in the derived class.
--   You can access the protected method either from a class in the same package (just
-    like package private or default) as well as from a derived class.
--   You can also access a method with a default access modifier if it is in the same
-    package.
--   You can access public methods of a class from any other class.
+- Encapsulation: Combining data and the functions operating on it as a single unit.
+- You cannot access the private methods of the base class in the derived class.
+- You can access the protected method either from a class in the same package (just
+  like package private or default) as well as from a derived class.
+- You can also access a method with a default access modifier if it is in the same
+  package.
+- You can access public methods of a class from any other class.
 
 ## Implement inheritance
 
--   Inheritance: Creating hierarchical relationships between related classes. Inheritance
-    is also called an "IS-A" relationship.
--   You use the super keyword to call base class methods.
--   Inheritance implies IS-A and composition implies HAS-A relationship.
--   Favor composition over inheritance.
+- Inheritance: Creating hierarchical relationships between related classes. Inheritance
+  is also called an "IS-A" relationship.
+- You use the super keyword to call base class methods.
+- Inheritance implies IS-A and composition implies HAS-A relationship.
+- Favor composition over inheritance.
 
 ## Implement polymorphism
 
--   Polymorphism: Interpreting the same message (i.e., method call) with different
-    meanings depending on the context.
--   Resolving a method call based on the dynamic type of the object is referred to as
-    runtime polymorphism.
--   Overloading is an example of static polymorphism (early binding) while overriding is
-    an example of dynamic polymorphism (late binding).
--   Method overloading: Creating methods with same name but different types and/or
-    numbers of parameters.
--   You can have overloaded constructors. You can call a constructor of the same class in
-    another constructor using the this keyword.
--   Overload resolution is the process by which the compiler looks to resolve a call when
-    overloaded definitions of a method are available.
--   In overriding, the name of the method, number of arguments, types of arguments,
-    and return type should match exactly.
--   In covariant return types, you can provide the derived class of the return type in the
-    overriding method.
+- Polymorphism: Interpreting the same message (i.e., method call) with different
+  meanings depending on the context.
+- Resolving a method call based on the dynamic type of the object is referred to as
+  runtime polymorphism.
+- Overloading is an example of static polymorphism (early binding) while overriding is
+  an example of dynamic polymorphism (late binding).
+- Method overloading: Creating methods with same name but different types and/or
+  numbers of parameters.
+- You can have overloaded constructors. You can call a constructor of the same class in
+  another constructor using the this keyword.
+- Overload resolution is the process by which the compiler looks to resolve a call when
+  overloaded definitions of a method are available.
+- In overriding, the name of the method, number of arguments, types of arguments,
+  and return type should match exactly.
+- In covariant return types, you can provide the derived class of the return type in the
+  overriding method.
 
 ## Override hashCode, equals, and toString
 
--   You can override clone(), equals(), hashCode(), toString() and finalize()
-    methods in your classes. Since getClass(), notify(), notifyAll(), and the
-    overloaded versions of wait() method are declared final, you cannot override these
-    methods.
--   If you're using an object in containers like HashSet or HashMap, make sure you
-    override the hashCode() and equals() methods correctly. For instance, ensure that
-    the hashCode() method returns the same hash value for two objects if the equals()
-    method returns true for them.
+- You can override clone(), equals(), hashCode(), toString() and finalize()
+  methods in your classes. Since getClass(), notify(), notifyAll(), and the
+  overloaded versions of wait() method are declared final, you cannot override these
+  methods.
+- If you're using an object in containers like HashSet or HashMap, make sure you
+  override the hashCode() and equals() methods correctly. For instance, ensure that
+  the hashCode() method returns the same hash value for two objects if the equals()
+  method returns true for them.
 
 ## Singleton and immutable classes
 
--   A singleton ensures that only one object of its class is created.
--   Making sure that an intended singleton implementation is indeed singleton is a
-    nontrivial task, especially in a multi-threaded environment.
--   Once an immutable object is created and initialized, it cannot be modified.
--   Immutable objects are safer to use than mutable objects; further, immutable objects
-    are thread safe; further, immutable objects that have same state can save space by
-    sharing the state internally.
--   To define an immutable class, make it final. Make all its fields private and final.
-    Provide only accessor methods (i.e., getter methods) but don't provide mutator
-    methods. For fields that are mutable reference types, or methods that need to mutate
-    the state, create a deep copy of the object if needed.
+- A singleton ensures that only one object of its class is created.
+- Making sure that an intended singleton implementation is indeed singleton is a
+  nontrivial task, especially in a multi-threaded environment.
+- Once an immutable object is created and initialized, it cannot be modified.
+- Immutable objects are safer to use than mutable objects; further, immutable objects
+  are thread safe; further, immutable objects that have same state can save space by
+  sharing the state internally.
+- To define an immutable class, make it final. Make all its fields private and final.
+  Provide only accessor methods (i.e., getter methods) but don't provide mutator
+  methods. For fields that are mutable reference types, or methods that need to mutate
+  the state, create a deep copy of the object if needed.
 
 ## Static initialize blocks, variables, methods, and classes
 
--   There are two types of member variables: class variables and instance variables.
-    All variables that require an instance (object) of the class to access them are
-    known as instance variables. All variables that are shared among all instances and
-    are associated with a class rather than an object are referred to as class variables
-    (declared using the static keyword).
--   All static members do not require an instance to call/access them. You can directly
-    call/access them using the class name.
--   A static member can call/access only a static member of the same class.
+- There are two types of member variables: class variables and instance variables.
+  All variables that require an instance (object) of the class to access them are
+  known as instance variables. All variables that are shared among all instances and
+  are associated with a class rather than an object are referred to as class variables
+  (declared using the static keyword).
+- All static members do not require an instance to call/access them. You can directly
+  call/access them using the class name.
+- A static member can call/access only a static member of the same class.

@@ -4,9 +4,14 @@ A significant portion of the questions is usually related to changes introduced 
 in java 8. This chapter covers lambda expression, which form the foundation for understanding Streams and the new
 facilities available in the Java 8 release
 
+`Design principles and patterns are two different core stipulations of the java world. While the design principles
+define what rules have to be applied throughout the lifecycle of creating an application, design patterns are aimed
+at solving different problems that occur often during the development of an application. They both tend to produce
+code that is easier to maintain and easier for other developers to read`
+
 ## Abstract
 
-They provide a way to specify an abstraction, without prodviding implementation details, an abstract class can be
+They provide a way to specify an abstraction, without providing implementation details, an abstract class can be
 more suitable in certain cases instead of interfaces, since they can provide not only behavior (like interfaces) but
 also the abstraction semantics as well. An abstract class defines a common functionality and also a more stringent
 definition, for the type.
@@ -37,14 +42,14 @@ extended off of. Final methods can not be overridden and final variables can not
 
 Declaring a class as final has several benefits, which are usually overlooked, but are very well quite important
 
--   Discussed in the immutability chapter, it is a good idea to define a class `final` to make sure that it is never
-    sub-classes, which would in turn make sure that the behavior of the class is never changed, in a way sealing the class
-    from any external 3rd party interference, which might misuse the interface.
+- Discussed in the immutability chapter, it is a good idea to define a class `final` to make sure that it is never
+  sub-classes, which would in turn make sure that the behavior of the class is never changed, in a way sealing the class
+  from any external 3rd party interference, which might misuse the interface.
 
--   Added performance - since the compiler sees that the class is final, meaning that it can not be sub-classed, that can
-    be used to optimize the calls to the member methods of the class. This is because for a final class there is no way to
-    have dynamic `polymorphism` (late binding), therefore the calls to the methods can be optimized out during byte code
-    generation.
+- Added performance - since the compiler sees that the class is final, meaning that it can not be sub-classed, that can
+  be used to optimize the calls to the member methods of the class. This is because for a final class there is no way to
+  have dynamic `polymorphism` (late binding), therefore the calls to the methods can be optimized out during byte code
+  generation.
 
 ### Methods
 
@@ -68,34 +73,34 @@ A nested class is such a class that is defined in an enclosing class. There are 
 These classes are defined in a static context bound to the class type itself. There are several rules on how they can be
 used and what they can access from the enclosing class or type.
 
--   Every static inner nested class is associated `with the enclosing class type itself`.
+- Every static inner nested class is associated `with the enclosing class type itself`.
 
--   The accessibility of the static class is defined by the outer class - meaning that even if the static inner class is
-    defined as public, if the outer class is package protected / default access, then the static inner class will not be
-    publicly accessible, even though it has a public modifier
+- The accessibility of the static class is defined by the outer class - meaning that even if the static inner class is
+  defined as public, if the outer class is package protected / default access, then the static inner class will not be
+  publicly accessible, even though it has a public modifier
 
--   The name of the inner static class is expressed inthe context of the wrapping outer class name - meaning that to
-    use the nested static inner class one has to use the following syntax - `uOuterClassName.InnerClassName` it is also
-    possible to staticly import the inner class, to avoid this long expression of class name chaining
+- The name of the inner static class is expressed in the context of the wrapping outer class name - meaning that to
+  use the nested static inner class one has to use the following syntax - `uOuterClassName.InnerClassName` it is also
+  possible to statically import the inner class, to avoid this long expression of class name chaining
 
--   When a inner static class or interface is defined inside an enclosing interface they are defined as implicitly
-    static, there is no way to define a local inner class or interface inside an interface, for the obvious reasons,
-    the same is NOT true for abstract classes however.
+- When a inner static class or interface is defined inside an enclosing interface they are defined as implicitly
+  static, there is no way to define a local inner class or interface inside an interface, for the obvious reasons,
+  the same is NOT true for abstract classes however.
 
--   Static nested classes can be declared abstract or final, they can also be used as base classes for other clases,
-    or they can also extend off of another class type, even the enclosing one they are in
+- Static nested classes can be declared abstract or final, they can also be used as base classes for other classes,
+  or they can also extend off of another class type, even the enclosing one they are in
 
--   Static nested classes can have static members, which is not true for all types of nested classes.
+- Static nested classes can have static members, which is not true for all types of nested classes.
 
--   Static nested classes can ONLY access static members of the enclosing class, however if the static inner class has a
-    reference to an instance object of the enclosing class it can access its members, no matter the access modifier -
-    private or otherwise.
+- Static nested classes can ONLY access static members of the enclosing class, however if the static inner class has a
+  reference to an instance object of the enclosing class it can access its members, no matter the access modifier -
+  private or otherwise.
 
--   Enclosing classes can access the static members of the inner static class, and also if they have a reference to an
-    instance of the inner static class, their member variables, irrespective of the access modifiers - private or otherwise
+- Enclosing classes can access the static members of the inner static class, and also if they have a reference to an
+  instance of the inner static class, their member variables, irrespective of the access modifiers - private or otherwise
 
--   To instantiate a static inner class one has to use the following syntax, referencing the outer class name first
-    then the static member class - `OuterClassName.InnerClassName instance = new OuterClassName.InnerClassName()`
+- To instantiate a static inner class one has to use the following syntax, referencing the outer class name first
+  then the static member class - `OuterClassName.InnerClassName instance = new OuterClassName.InnerClassName()`
 
 An example of the relationship between the Outer and Inner static classes
 
@@ -140,31 +145,41 @@ public class Outer {
 Outer.Inner innerInstance = new Outer.Inner();
 ```
 
-### Inner classes
+### Non-static Inner classes
 
 These are a specialized case of the static inner class, where the inner class is defined as non-static member inside
 another class. The most important difference for the non-static inner class, compared to the static one is that the
 instance in this case is not bound to the Class type itself, but to every instance of that class. Each instance of the
 class has its own instance of the non-static inner class
 
--   Every non-static inner nested class is associated with `an instance of the enclosing class type`. Which is different
-    than the static inner class, which is bound to the class type definition itself, see above.
+- Every non-static inner nested class is associated with `an instance of the enclosing class type`. Which is different
+  than the static inner class, which is bound to the class type definition itself, see above.
 
--   The inner class can access the members (non static ones) of the enclosing class without needing a reference to an
-    instance of the enclosing class, this is because the inner non-static nested class is bound to the instance of a class
-    not the class itself, see above.
+- The inner class can access the members (non static ones) of the enclosing class without needing a reference to an
+  instance of the enclosing class, this is because the inner non-static nested class is bound to the instance of a class
+  not the class itself, see above.
 
--   The outer class can not access member variables of the nested inner class without declaring an instance of it,
-    obviously.
+- The outer class can not access member variables of the nested inner class without declaring an instance of it,
+  obviously.
 
--   The inner non-static class can not have static members defined, this is due to the fact that the class type
-    definition itself is tied to an instance of the enclosing outer class, and since static members are bound to the class
-    type not an instance, `the inner class type definition does not exist independently of the outer class instance`.
+- The inner non-static class can not have static members defined, this is due to the fact that the class type
+  definition itself is tied to an instance of the enclosing outer class, and since static members are bound to the class
+  type not an instance, `the inner class type definition does not exist independently of the outer class instance`.
+
+- The inner non-static class can access member variables of the outer class, and actually assign them directly in
+  its own member declaration and definition, that is possible because by the time the Inner instance exists, the outer
+  is guaranteed to exists as well, and be bound with the Inner instance - `private int innerInitalizedMember =
+Outer.this.outerInitializedMember`, is perfectly valid way to use the value of the outer class inside the inner class
+
+- Inner class member variables can shadow outer ones, that is something that has to be considered when accessing
+  member variables between the inner and the outer class.
 
 ```java
 public class Outer {
 
     private static final int outerStaticMember = 5;
+
+    private int outerInitializedMember = 10;
 
     private int outerMember;
 
@@ -179,7 +194,7 @@ public class Outer {
 
     public class Inner {
 
-        private static final int innerStaticMember = 5;
+        private int innerInitalizedMember = Outer.this.outerInitializedMember;
 
         private int innerMember;
 
@@ -203,12 +218,12 @@ Outer.Inner innerInstance = outerInstance.new Inner();
 The local classes are named class definitions which exist only in the local scope or definition of the current code
 block, they are only local and are not bound to the class type or class instance within which they are located.
 
--   Local interfaces can not be created inside methods, constructors or initialization blocks, however this restriction
-    was removed in later versions of Java
+- Local interfaces can not be created inside methods, constructors or initialization blocks, however this restriction
+  was removed in later versions of Java
 
--   Local inner classes
+- Local inner classes
 
--   It is not possible to return an instance of a locally defined class type directly,
+- It is not possible to return an instance of a locally defined class type directly,
 
     ```java
         // this is a compile time error, since the new class type only exists in the local scope of the method and not
@@ -225,9 +240,9 @@ block, they are only local and are not bound to the class type or class instance
         }
     ```
 
--   Every local variable accessed in the scope of a local class type, is effectively final, for the whole scope of the
-    function, even outside the local class, meaning that it can not be assigned to, the reference can not be changed, or
-    in case of primitives they can not be mutated (incremented, decremented)
+- Every local variable accessed in the scope of a local class type, is effectively final, for the whole scope of the
+  function, even outside the local class, meaning that it can not be assigned to, the reference can not be changed, or
+  in case of primitives they can not be mutated (incremented, decremented)
 
     ```java
     static Color getDescriptiveColor(Color color) {
@@ -264,14 +279,12 @@ instance-creation expression. They are also referred to as simply anonymous. The
 much the same cases where one would use local class. They are the same construct semantically as the local class, with
 the only difference being that they have no name.
 
--   Anonymous classes can not have explicit constructors, since the constructor is named after the name of the class, and
-    they have no name, therefore there is no way to create a constructor for an anonymous class
+- Anonymous classes can not have explicit constructors, since the constructor is named after the name of the class, and
+  they have no name, therefore there is no way to create a constructor for an anonymous class
 
--   The anonymous is defined in the new expression itself
+- The anonymous is defined in the new expression itself
 
--   Anonymous classes can not extend other classes or implement interfaces
-
--
+- Anonymous classes can not extend other classes or implement interfaces
 
 ```java
 public void method() {
@@ -319,6 +332,72 @@ public void method() {
 
 `Local anonymous classes were for the most part superseded by the introduction of lambda expressions, since the use of
 an anonymous was almost always expansively done to implement @FunctionalInterface interfaces, in practice.`
+
+### Instanceof
+
+It is important to understand how this operator or keyword actually works, in general the `instanceof` keyword does
+not validate if a given instance or object is a direct actual instance of the given class on the right, actually it
+checks if that object on the left can be cast or assigned to the type given on the right
+
+Imagine a scenario where we have a class Child and a class Parent where the Parent class is a direct super class of
+the Child class or in other words the Child class extends the Parent. It does not matter if we mean or talk about
+interfaces, concrete or abstract classes. The `instanceof` keyword works the same in any case.
+
+```java
+// here is the class hierarchy that we will investigate, we have one parent and one main child class the rest of the
+// child{n} classes extend the base child class but by proxy they also extend parent, and are also serializable,
+// transiently
+public class Parent implements Serializable {}
+public class Child extends Parent {}
+public class Child1 extends Child {}
+public class Child2 extends Child {}
+public class Child3 extends Child {}
+```
+
+Now what question does `instanceof` answer here really, it does not tell us if the instance is of the same exact type
+as whatever is on the right of the `instanceof` operator. It merely asks and answers if we can cast from one type to
+another safely. Here we actually ask if `Child3` `instanceof` Child and yes it is, because `Child3` extends Child, which
+itself extends Parent and so on.
+
+```java
+Parent s = new Child3("test")
+if (s instanceof Child) {
+    Child s1 = (Child) s;
+}
+```
+
+How do we tell then which is the exact class that this instance belongs to. Since as already stated `instanceof` can
+not be used to actually determine the concrete type for an instance or an object to do this we have to use other
+means like `getClass()` and compare that to a specific class type.
+
+```java
+Parent s = new Child3("test");
+if (s.getClass() == Child3.class) {
+    Child3 s1 = (Child3) s;
+}
+```
+
+There is one more thing that is incredibly useful and important, a feature of `instanceof` that is very much related
+to the java compiler. One might think that all checks for `instanceof` happen at compile time but that is actually not
+the case, the compiler will preemptively check the condition during compile time. That is also only true for classes,
+not interfaces.
+
+```java
+Child3 s = new Child3("test")
+if (s instanceof String) {
+    Child s1 = (Child) s;
+}
+```
+
+Here is a very crude example this will fail early at compile time. Why is that the case, well unlike for interfaces,
+the java compiler can do a quick check and verify that these two classes have a common hierarchy or not. If they do
+not the compiler will throw an error since during runtime that is going to be dead code anyway. In this snippet
+above, String's hierarchy does not in any way intersect with the `Child3` hierarchy, on top of that the String class
+and the `Child3` class are both defined and declared as final, so there is no way `Child3` or String are `subclassed`,
+therefore they share no common hierarchy, therefore that condition will never be true during runtime
+
+Finally one more note to take into account is the following expression - `null instanceof Chipmunk`, that will not
+fail at compile time, but will actually never be true.
 
 ## Enums
 
@@ -369,21 +448,132 @@ not be bound to class instance, i.e they can not be defined as non-static inner 
 There are several rules which apply to enumerations in Java, here are some important points to keep in mind, which
 differentiate enumerations and their constants from class types and class instances.
 
--   An enum can not be created with the `new` keyword, they are created by the run-time based on their definition in the
-    enum type itself
+- An enum can not be created with the `new` keyword, they are created by the run-time based on their definition in the
+  enum type itself
 
--   Enumerations are comparable with the == operator, this is due to the fact that every enum instance of a given enum
-    type exists and is created only once, by the run-time (see point one above).
+- The ordinal method that can be called on any of the enumeration elements of an enum class returns an index 0
+  based value that expresses the position of the enumeration element inside the enum class declaration. Those can
+  of course change at any time by modifying the source code, so one should not rely on them for program
+  correctness. They can be used though to index elements inside the result of calling the values() method.
 
--   Enumerations from the same type can also be compared using the equals operator, which is equivalent to the == unless
-    overridden
+- Enumerations can only be used in switch statements with their enumeration constant names, they can not be cased by
+  their ordinal index
 
--   By default the `toString()` of an enum type is printing the name of the enumeration entry itself, however the
-    `toString()` method can be overridden just like for any other class type
+    ```java
+    // the following example demonstrates that this is not valid and will not pass a compiler check, to make
+    // this valid either replace the cases {d} with their correct enumeration element naming, or make int f =
+    // Flavors.STRAWBERRY.ordinal(), which will then be allowed but is not robust and prone to bugs
+    // Flavors f = Flavors.STRAWBERRY;
+    switch (f) {
+        case 0: System.out.println("vanilla");
+        case 1: System.out.println("chocolate");
+        case 2: System.out.println("strawberry");
+        break;
+        default: System.out.println("missing flavor");
+    }
+    ```
 
--   Using the values() method on the enumeration type, is used to obtain an array of enumeration constants for this specific type.
+- Enumerations are comparable with the == operator, this is due to the fact that every enum instance of a given enum
+  type exists and is created only once, by the run-time (see point one above).
 
--   Enumeration constants / entries can not be cloned, the clone() method by default is throwing a `CloneNotSupportedException`
+- Enumerations from the same type can also be compared using the equals operator, which is equivalent to the == unless
+  overridden
+
+- By default the `toString()` of an enum type is printing the name of the enumeration entry itself, however the
+  `toString()` method can be overridden just like for any other class type
+
+- Using the values() method on the enumeration type, is used to obtain an array of enumeration constants for this specific type.
+
+- Enumeration constants / entries can not be cloned, the clone() method by default is throwing a `CloneNotSupportedException`
+
+- Enumeration classes can have abstract methods, but it is mandated by the compiler that all enumerations defined in
+  the enum class implement the said abstract method. As we know enumerations inside an enum class are merely instances
+  of this enum class
+
+- It is a compiler error to define the constructor of an enum class anything but private, that is why it is
+  often omitted because it is private by default anyway
+
+- If enum class defines members - properties, methods etc, after the enumeration constants are listed they have to be followed by semicolon - ';', otherwise the compiler will throw an error
+
+## Inheritance
+
+In java by default all classes extend form the java.lang.Object class that class defines and declares multiple core
+methods and interfaces that are used across the language. The few we have already looked at are hashCode andequals
+which define core features for the objects instances in java, allowing them to be checked for equality. However
+there are other methods related to multi-threading processing - wait, and resource acquisition - finalize, as well
+as means of displaying or printing out an object in a human readable format - toString().
+
+Java as already stated is following a single class inheritance model, that is to say a class can only extend form
+one other class - concrete or abstract one. This prevents many issues that can arise with multiple inheritance, it
+is important to note that this rule does not apply to interfaces since they only provide behavior and not state.
+
+One caveat when extending in java is that one can re-declare and re-define a member variable and member methods.
+Re-declaring member methods usually means that we override or overload that member method within the child class,
+re-defining and/or re-declaring the member variable actually allows us to change that member variable completely in
+the child class
+
+```java
+// the following shows how we can not only completely re-define a member variable changing the default
+// initialization but also re-declare it effectively changing the return type of that variable as well
+public class Parent {
+    private int k = 10;
+    public void print() {
+    }
+}
+
+public class Child extends Parent {
+    private float k = 15.5f;
+    public void print() {
+        // the actual parent variable is not erased from existence and can still be referenced by the child
+        // class freely, that is quite powerful as this behavior is very much similar to how we can reference
+        // parent methods from the child as well, see below
+        System.out.print("sum: " + super.k + this.k);
+        super.print();
+    }
+}
+```
+
+During method overriding we have to follow a few rules, that are required for us to be able to actually override a
+method and not cause a compile time error or worse, overload a method instead of overriding it, silently introducing
+bugs
+
+```java
+public class LearnToWalk {
+    public CharSequence toddle() throws Exception {
+        return "";
+    }
+}
+public class BabyRhino extends LearnToWalk {
+    @Override
+    public String toddle() throws IOException, InvalidParameterException {
+        return "";
+    }
+}
+```
+
+`Covariance, is the action of replacing a more generic parent type with a sub-type, child that inherits or is part
+of the child hierarchy of that parent type, it does not need to be immediate child of the parent type.`
+
+`Visibility modification is the action of increasing the visibility modifier on a member method, making it more
+'visible' in the overriding child type than what it was declared as in the parent.`
+
+- When overriding a method, we have to exactly match the same types of arguments as they were defined in the parent
+  method that we are overriding, otherwise we will overload the method instead
+
+- Overriding signature must match the exception signature of the parent method we override as well, meaning that if
+  the methods throws Exception, we must also declare that the overriding method throws Exception or throws any number
+  of class types that inherit form Exception - this is called type covariancy
+
+- We can not change the visibility of the method making it more strict, i.e. from a public method in the parent to
+  make it private in the child. That is partly because of having to follow the basics of the Liskov substation
+  principle, which stipulates that subtypes must be replace-able with their super types without changing the behavior
+  of the program. Another reason is that by reducing the visibility in the child class we imply that this method
+  should not be part of the interface which is effectively changing the contract which the child is not allowed to do
+  since it does not define the contract to begin with
+
+`As already mentioned composition is preferred over inheritance in most situations, however it is no always the best
+approach. Sometimes composition can simply not replace inheritance and both approaches must be used in the
+appropriate places.`
 
 ## Interfaces
 
@@ -414,33 +604,33 @@ default void forEachRemaining(Consumer<? super E> action) {
 
 Several key points to remember about interfaces and how they are different from regular classes
 
--   Interfaces can extend from other interfaces, one or more, using the `extends` keyword, however they can not extend
-    from abstract or concrete classes
+- Interfaces can extend from other interfaces, one or more, using the `extends` keyword, however they can not extend
+  from abstract or concrete classes
 
--   Interfaces can not be instantiated they can not have constructors declared or defined, however a reference variable
-    to an interface can refer to an object which implements it => `Iterator it = new IteratorImpl();`
+- Interfaces can not be instantiated they can not have constructors declared or defined, however a reference variable
+  to an interface can refer to an object which implements it => `Iterator it = new IteratorImpl();`
 
--   Interfaces do not contain non-static instance variables, due to the reason above, if a data member is defined in an
-    interface it will actually be implicitly declared as `public static final`
+- Interfaces do not contain non-static instance variables, due to the reason above, if a data member is defined in an
+  interface it will actually be implicitly declared as `public static final`
 
--   An interface can have `abstract (implicit), default and static methods` - all methods in an interface are by default
-    abstract, there is no need to explicitly provide that keyword, it is used in abstract classes usually to make sure the
-    method without implementation is marked accordingly, however in interfaces the default is that methods do not have
-    implementation.
+- An interface can have `abstract (implicit), default and static methods` - all methods in an interface are by default
+  abstract, there is no need to explicitly provide that keyword, it is used in abstract classes usually to make sure the
+  method without implementation is marked accordingly, however in interfaces the default is that methods do not have
+  implementation.
 
--   An interface can be declared within another interface or class, and it is always by default `static`, known as nested
-    interface, there is no notion of non-static nested interface, it would not make sense, since non-static nested types
-    are linked to an instance
+- An interface can be declared within another interface or class, and it is always by default `static`, known as nested
+  interface, there is no notion of non-static nested interface, it would not make sense, since non-static nested types
+  are linked to an instance
 
--   An interface `can have an empty body`, usually those interfaces are called marker interfaces, left over for future
-    extension, or just used during reflection stages to identify certain behavior
+- An interface `can have an empty body`, usually those interfaces are called marker interfaces, left over for future
+  extension, or just used during reflection stages to identify certain behavior
 
--   If an abstract class implements an interface, it does not have to implement the methods immediately, however the
-    concrete implementations of that class have to.
+- If an abstract class implements an interface, it does not have to implement the methods immediately, however the
+  concrete implementations of that class have to.
 
--   Only public member methods of an interface are allowed, after all the interface would be useless if it has a hidden
-    state that is not accessible from the outside, the idea of an interface is to be as open as possible exposing an action
-    or behavior, it should not be used, and can not be used to hide actions or behavior
+- Only public member methods of an interface are allowed, after all the interface would be useless if it has a hidden
+  state that is not accessible from the outside, the idea of an interface is to be as open as possible exposing an action
+  or behavior, it should not be used, and can not be used to hide actions or behavior
 
     ```java
     // both the interface and the method are by default implicitly defined public, there is no reason to provide a
@@ -457,9 +647,9 @@ Several key points to remember about interfaces and how they are different from 
     }
     ```
 
--   Default methods can not be qualified as synchronized, this is because the qualifier synchronized on the method,
-    requires the runtime to lock the current object/instance, however interfaces are not instantiate-able, however it is
-    possible to use a synchronized block inside the default method, which locks around `this`
+- Default methods can not be qualified as synchronized, this is because the qualifier synchronized on the method,
+  requires the runtime to lock the current object/instance, however interfaces are not instantiate-able, however it is
+  possible to use a synchronized block inside the default method, which locks around `this`
 
     ```java
     // synchronizing around an interface method, can be done within the body, or if the method is overridden in the
@@ -482,6 +672,85 @@ Several key points to remember about interfaces and how they are different from 
         }
     }
     ```
+
+- Using the abstract keyword on a method in an interface is not an error, they are by default all abstract methods that is why we can omit this keyword
+
+- The `equals` and `hashCode` methods can be redefined in an interface methods and they are not going to be required to
+  be overridden by their implementations but they have to exactly match the signature of the actual `equals` and
+  `hashCode` that are defined in the Object class in `java.lang`
+
+    ```java
+    // notice that this interface is technically empty it contains no methods to implement, even though we see
+    // two here that have no body, this is because these two methods redefine the same methods that by default all
+    // classes have a default implementation inherited by the Object class for these methods.
+    public interface Empty {
+
+        public boolean equals(Object test);
+
+        public int hashCode();
+    }
+    ```
+
+- Interfaces can not define static member methods that have no body, unlike non-static member methods which by
+  default are required to have no implementation, static methods can not be abstract.
+
+- Defining a body for non-default method in an interface is a compiler error, use the modifier keyword `default`, if
+  a body has to be present for an interface member non-static method
+
+    ```java
+    public interface Herbivore {
+        // note that this method here is not defined as default yet it has a body, that is not valid and the
+        // compiler will immediately throw an error
+        public int chew() {
+            return 13;
+        }
+    }
+    ```
+
+## Java Bean
+
+What is a java bean really ? Java bean is a standard defined by the java specification. It refers to a special type
+of class that has certain properties. Defines a reusable java object, but should not be confused with a library
+class which have a looser less strict rules for defining them.
+
+- Java Beans provide a getter and a setter member methods, that are usually plain and do not perform any significant business logic.
+
+- The interface or properties of the java bean are defined by the setter and getter methods they declare, not by the
+  internal data members. That is to say, a setter/getter may exist for a property that technically is never or not at
+  all declared for the java bean. The internal state is independent of the interface
+
+- The member state or member variables are usually defined as private as they aim to encapsulate and never leak the
+  internal state or governance rules for the java bean and the user is supposed to use the public interface of the
+  java bean which is defined and shaped by the getter/setter member methods
+
+- The rules for the member getter/setter methods are simple getter methods must follow the pattern of
+  `getXxx`, where xxx stands for the name of the property, this name has to start with a capital letter,
+  sometimes boolean properties are expressed as `isXxx`. setter methods follow similar rules where they have the
+  shape of `setxxx` where xxx is again the name of the property.
+
+- Even pattern, a special feature of java beans is that they are event driven, they usually define and fire event in their
+  getter/setter using the `PropertyChangeSupport` and `PropertyChangeListener`, every listener is allowed to prevent a
+  property from being set/changed.
+
+- Member variables or state can be defined final depending on the use case, or getter/setter methods might not be
+  present for every internal member property or data state.
+
+```java
+// an example of a java bean definition, that follows the rules mentioned above
+public class Person implements Serializable {
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    private String name;                                // private field
+    public Person() {}                                  // public no-arg constructor
+    public String getName() { return name; }            // accessor defines the property
+    public void setName(String newName) {               // setter mutates the property
+        String old = this.name;
+        this.name = newName;
+        pcs.firePropertyChange("name", old, newName);   // bound property notification
+    }
+    public void addPropertyChangeListener(PropertyChangeListener l) { pcs.addPropertyChangeListener(l); }
+    public void removePropertyChangeListener(PropertyChangeListener l) { pcs.removePropertyChangeListener(l); }
+}
+```
 
 ### Diamond pattern
 
@@ -651,19 +920,20 @@ One of the most important features not just of the Java 8 release, but in genera
 functions, which are one of the most powerful features, that the language exposes. The lambda expression are like
 closures, they are an easy way for one to provide a stateful callback or action behavior
 
-There are several coordinated changes in the language, the virtual machine and the libraries that were made to create the new feature of lambda reference functions and make that possible.
+There are several coordinated changes in the language, the virtual machine and the libraries that were made to
+create the new feature of lambda reference functions and make that possible.
 
--   First a new operator was added to introduce the creation of the lambda expression which is the `->`, this operator
-    is used to define and declare lambda references in user space (code)
+- First a new operator was added to introduce the creation of the lambda expression which is the `->`, this operator
+  is used to define and declare lambda references in user space (code)
 
--   The function reference operator was also introduced, which directly related to lambda expressions and allows functions
-    to be converted to lambda expressions, which in tern are simple function interfaces
+- The function reference operator was also introduced, which directly related to lambda expressions and allows functions
+  to be converted to lambda expressions, which in tern are simple function interfaces
 
--   Then the default keyword was introduced, used in interfaces and most importantly used to make sure that one can
-    easily convert certain interfaces into functional interfaces while still retaining backwards compatiblity
+- Then the default keyword was introduced, used in interfaces and most importantly used to make sure that one can
+  easily convert certain interfaces into functional interfaces while still retaining backwards compatibility
 
--   The streams library and the integration of the collections library with streams, this change made the streams
-    library interop with collections library very smooth and without any significant friction.
+- The streams library and the integration of the collections library with streams, this change made the streams
+  library interoperability with collections library very smooth and without any significant friction.
 
 The introduction of lambda expression, introduced a slight paradigm shift in the way programs are developed, allowed by
 passing behavior or actions in the form function arguments, the lambda expressions represent some sort of stateless
@@ -675,33 +945,33 @@ lisp or scheme. It promotes functions and actions into user accessible and write
 
 Key concepts of functional programming
 
--   `Pure functions` - each function should always give the same output if given the same input, without relying on or
-    changing the state of internal or external data the function has access to.
+- `Pure functions` - each function should always give the same output if given the same input, without relying on or
+  changing the state of internal or external data the function has access to.
 
--   `State immutability` - data is not changed directly. Instead of modifying existing data in-place, functions create
-    and return new data, based on the original data, This approach avoids side effects, where one part of the program
-    changes something that affects another part in unexpected way.
+- `State immutability` - data is not changed directly. Instead of modifying existing data in-place, functions create
+  and return new data, based on the original data, This approach avoids side effects, where one part of the program
+  changes something that affects another part in unexpected way.
 
--   `First class functions` - the functions are first class objects, and are treated like any other variables, you can
-    pass them as arguments to other functiosn, return them from functions or assign them to variables. This flexibility lets
-    you write more modular and expressive code
+- `First class functions` - the functions are first class objects, and are treated like any other variables, you can
+  pass them as arguments to other functions, return them from functions or assign them to variables. This flexibility lets
+  you write more modular and expressive code
 
--   `High order functions` - those functions are functions which take other functions as input or argument or return
-    functions as output. Common examples are functions like map, filter or reduce which apply other functions to a
-    collection of data in useful ways.
+- `High order functions` - those functions are functions which take other functions as input or argument or return
+  functions as output. Common examples are functions like map, filter or reduce which apply other functions to a
+  collection of data in useful ways.
 
 Lambda syntax and declaration. The lambda expression is defined by 2 main elements, the argument list, and the body,
 they are separated by the special arrow operator ->.
 
--   (type variable) = () -> 5; - simple one line return statements, do not need to explicitly wrap the statement in curly block
+- (type variable) = () -> 5; - simple one line return statements, do not need to explicitly wrap the statement in curly block
 
--   (type variable) = x -> x \* x; - single argument lambda expressions where type is not provided for the argument can omit the brackets
+- (type variable) = x -> x \* x; - single argument lambda expressions where type is not provided for the argument can omit the brackets
 
--   (type variable) = (arg1, arg2) -> { return 5; } - arguments are specified in the list, and the type can often be omitted, due to type deduction based on the left hand side
+- (type variable) = (arg1, arg2) -> { return 5; } - arguments are specified in the list, and the type can often be omitted, due to type deduction based on the left hand side
 
--   (type variable) = (String arg1, String arg2) -> { return arg1 + arg2; } - when types need to be provided, all types have to be provided in the list, not just some of them
+- (type variable) = (String arg1, String arg2) -> { return arg1 + arg2; } - when types need to be provided, all types have to be provided in the list, not just some of them
 
--   (type variable) = (String arg1, String arg2) -> { action(); } - lambda expression do not have to always return a value, they can simply execute another action and exit
+- (type variable) = (String arg1, String arg2) -> { action(); } - lambda expression do not have to always return a value, they can simply execute another action and exit
 
 `Lambda expression are always linked to some sort of a type - that can be either a user defined FunctionalInterface, or
 some of the existing FunctionalInterfaces which the java.lang standard library has created over the years - Function,
@@ -846,6 +1116,44 @@ not subject to such restrictions, the lambda automatically captures `this` and a
 `this` explicitly, however `this` can be used to be more verbose of course, so can `super`, since the lambda captures
 the immediate instance which is enclosing it
 
+```java
+public class MemberLambdaCapture {
+
+    // the lambda will capture this instance variable in the non-static method changeMemberVariable below. Note
+    // that by default the lambda captures implicitly `this` reference
+    private int k = 5;
+
+    private void changeMemberVariable() {
+        // the lambda will also capture this local variable, but as we have already stated multiple times it will
+        // be forced to effectively final, meaning that it will be treated as final unless assigned somewhere,
+        // that means that it is not required to mark it as final explicitly
+        int f = 200;
+        Runnable r = () -> {
+            // accessing this.k is valid as we can also re-assign it that is because member variables in java
+            // are correctly shared between threads and are located on the heap this is effectively equal to doing
+            // the following ===> this.k = 12
+            k = 12;
+            // this is not possible the local variable in the lambda and the function are not stored in the same
+            // place so we actually reference a copy of the variable and allowing re-assignment will be confusing.
+            f = 300;
+        };
+
+        // here is another possible caveat, by default the lambda arguments are not final however we can mark it
+        // as such which will actually prevent us from doing any further re-assignment into the lambda body.
+        Consumer<String> c = (final String v) -> {
+            String v1 = v.toString();
+            // since the argument is marked as final it is not allowed to re-assign it however if it were not
+            // final that is perfectly valid to re-assign
+            v = "";
+        };
+
+        r.run();
+        c.accept("");
+    }
+
+}
+```
+
 `Only local variables and function arguments are required to be treated as effectively final, due to the reasons above,
 if a lambda expression references a member variable, it is not subject to these restrictions, due to the reasons
 mentioned above, related to the way the memory model works in java, which means that member variables will be mutable,
@@ -855,75 +1163,75 @@ and re-assignable outside and inside the lambda body, this is important to remem
 
 Abstract classes and methods
 
--   An abstraction specifying functionality supported without disclosing finer level details.
+- An abstraction specifying functionality supported without disclosing finer level details.
 
--   You cannot create instances of an abstract class.
+- You cannot create instances of an abstract class.
 
--   Abstract classes enable run-time polymorphism, and run-time polymorphism in turn enables loose coupling.
+- Abstract classes enable run-time polymorphism, and run-time polymorphism in turn enables loose coupling.
 
 Final variables & methods
 
--   A final class is a non-inheritable class (i.e., you cannot inherit from a final class).
+- A final class is a non-inheritable class (i.e., you cannot inherit from a final class).
 
--   A final method is a non-overridable method (i.e., subclasses cannot override a final method).
+- A final method is a non-overridable method (i.e., subclasses cannot override a final method).
 
--   All methods of a final class are implicitly final (i.e., non-overridable).
+- All methods of a final class are implicitly final (i.e., non-overridable).
 
--   A final variable can be assigned only once.
+- A final variable can be assigned only once.
 
 Inner, local and anonymous classes
 
--   Java supports four types of nested classes: static nested classes, inner classes, local inner classes, and anonymous
-inner classes.
+- Java supports four types of nested classes: static nested classes, inner classes, local inner classes, and anonymous
+  inner classes.
 
--   Static nested classes may have static members, whereas the other flavors of nested classes can't.
+- Static nested classes may have static members, whereas the other flavors of nested classes can't.
 
--   Static nested classes and inner classes can access members of an outer class (even private members). However, static
-nested classes can access only static members of outer classes.
+- Static nested classes and inner classes can access members of an outer class (even private members). However, static
+  nested classes can access only static members of outer classes.
 
--   Local classes (both local inner classes and anonymous inner classes) can access all variables declared in the outer
-scope (whether a method, constructor, or a statement block). Use enumerated types including methods, and constructors in
-an enum type
+- Local classes (both local inner classes and anonymous inner classes) can access all variables declared in the outer
+  scope (whether a method, constructor, or a statement block). Use enumerated types including methods, and constructors in
+  an enum type
 
--   Enums are a typesafe way to achieve restricted input from users.
+- Enums are a typesafe way to achieve restricted input from users.
 
--   You cannot use new with enums, even inside the enum definition.
+- You cannot use new with enums, even inside the enum definition.
 
--   Enum classes are by default final classes.
+- Enum classes are by default final classes.
 
--   All enum classes are implicitly derived from java.lang.Enum.
+- All enum classes are implicitly derived from java.lang.Enum.
 
 Interfaces and Overriding
 
--   An interface can have three kinds of methods: abstract methods, default methods, and static methods.
+- An interface can have three kinds of methods: abstract methods, default methods, and static methods.
 
--   The "diamond problem" occurs when a derived type inherits two method definitions in the base types that have the
-same signature.
+- The "diamond problem" occurs when a derived type inherits two method definitions in the base types that have the
+  same signature.
 
--   If two super interfaces have the same method name and one of them has a definition, the compiler will issue an
-error; this conflict has to be resolved manually.
+- If two super interfaces have the same method name and one of them has a definition, the compiler will issue an
+  error; this conflict has to be resolved manually.
 
--   If a base class and a base interface define methods with the same signature, the method definition in the class is
-used and the interface definition is ignored.
+- If a base class and a base interface define methods with the same signature, the method definition in the class is
+  used and the interface definition is ignored.
 
--   A functional interface consists of exactly one abstract method but can contain any number of default or static
-methods.
+- A functional interface consists of exactly one abstract method but can contain any number of default or static
+  methods.
 
--   A declaration of a functional interface results in a "functional interface type" that can be used with lambda
-expressions.
+- A declaration of a functional interface results in a "functional interface type" that can be used with lambda
+  expressions.
 
--   For a functional interface, declaring methods from Object class in an interface does not count as an abstract
-method.
+- For a functional interface, declaring methods from Object class in an interface does not count as an abstract
+  method.
 
 Lambda expressions
 
--   In a lambda expression, the left side of the -> provides the parameters; the right side, the body. The arrow
-operator ("->") helps in concise expressions of lambda functions.
+- In a lambda expression, the left side of the -> provides the parameters; the right side, the body. The arrow
+  operator ("->") helps in concise expressions of lambda functions.
 
--   You can create a reference to a functional interface and assign a lambda expression to it. If you invoke the
-abstract method from that interface, it will call the assigned lambda expression.
+- You can create a reference to a functional interface and assign a lambda expression to it. If you invoke the
+  abstract method from that interface, it will call the assigned lambda expression.
 
--   Compiler can perform type inferences of lambda parameters if omitted. When declared, parameters can have modifiers
-such as final.
+- Compiler can perform type inferences of lambda parameters if omitted. When declared, parameters can have modifiers
+  such as final.
 
--   Variables accessed by a lambda function are considered to be effectively final.
+- Variables accessed by a lambda function are considered to be effectively final.

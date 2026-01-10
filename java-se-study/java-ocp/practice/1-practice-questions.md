@@ -594,7 +594,7 @@ checked exceptions, and add as many unchecked as we wish since those are not rea
 
 ```java
 public class LearnToWalk {
-    public CharSEquence toddle() throws Exception { return ""; }
+    public CharSequence toddle() throws Exception { return ""; }
     class BabyRhino extends LearnToWalk {
         @Override
         public String toddle() throws IOException, InvalidParameterException { return ""; }

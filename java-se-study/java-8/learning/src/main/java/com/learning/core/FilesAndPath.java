@@ -26,7 +26,6 @@ import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -455,5 +454,4 @@ public class FilesAndPath {
         LOGGER.logInfo(String.format("The relative path is %s", relativeFileLocation));
         LOGGER.logInfo(String.format("The absolute path is %s", relativeFileLocation.toAbsolutePath().normalize()));
     }
-
 }

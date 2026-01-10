@@ -208,7 +208,7 @@ to an `ArrayList` instance which holds only Integers.
 
 ### Wildcards
 
-To overcome issue above, wild card type parameters are used, they do not specify the exact type in the left hand side
+To overcome issue above, wild card type parameters are used, they do NOT specify the exact type in the left hand side
 expression.
 
 ```java
@@ -220,9 +220,9 @@ List<?> wildCardList = new ArrayList<Integer>();
 
 Wild cards have different semantic meaning, they are not a replacement for the `raw` type, or `Object`, the wild card
 does NOT tell the compiler that `List` holds different types of elements (heterogeneous), what the wild card tells the
-compiler is that that variable references a generic `List` type of homogeneous elements that can hold any type of
+compiler is that that variable references a generic `List` type of `homogeneous` elements that can hold any type of
 argument - `List<Integer>, List<String>, List<Float> etc`, meaning the underlying generic List instance is always
-containing/referencing the same type of elements
+containing/referencing the same type of elements, but the compiler does not know which one.
 
 `Wildcards are not replacement for Object or Raw types, they have very special meaning, they imply that a variable is
 referencing a generic of an unknown type, but still the instance is of generic class and of a specific homogeneous type`
@@ -235,11 +235,11 @@ wildCardList.add(1); // Compile error - cannot add to List<?>
 
 The above would fail because the wild card is unbound, why is that a problem. When one uses wildcard type, the code
 implies to the compiler that the type information is ignored, so <?> stands for unknown type. Every time one tries to
-apss arguments to a generic type, the java compiler tries to infer the type of the passed in argument as well, as the
+pass arguments to a generic type, the java compiler tries to infer the type of the passed in argument as well, as the
 type of the generics and to justify the type safety. Now calling add method to insert an element in the list, is not
-valid, since the variable references a list that holds unknown types (specified by the wild card). The compiler does not
+valid, since the variable references a list that holds `unknown types` (defined by the wild card). The compiler does not
 know which type to infer. That is why it just errors out. If it did not, one might end up adding String, to the list,
-which was already established will fail at run-time the compiler tries to be pro-active and warn about issues as early
+which was already established will fail at run-time the compiler tries to be proactive and warn about issues as early
 as possible, since generics were added to the language to ensure type safety, replacing the old approach of using Object
 to achieve the same, not forego it.
 
@@ -247,34 +247,147 @@ to achieve the same, not forego it.
 methods which can still be called that access the object's state, for the example with the list above methods like
 .get() .size() .empty() and so on, are still valid and can be called safely`
 
+Wild cards can be also bounded. Adding a boundary to the wild card parameter can loosen the hands of the compiler a
+little bit because we specify certain upper/lower boundaries that we know the type is going to be of
+
+```java
+// what this tells the compiler is that the concrete type contained inside this list extends number for sure, so at the
+// very least the Number interface will be the shared common point of entry, the compiler still has no clue which exact
+// sub-type implementation of number this list holds, it may even hold instances of Number itself, that is not known or
+// relevant, what is important to always remember is that the type held is always one, generics are not co-variant,
+List<? extends Number> wildNumber1 = new ArrayList<Integer>();
+List<? extends Number> wildNumber2 = new ArrayList<Float>();
+List<? extends Number> wildNumber3 = new ArrayList<Double>();
+List<? extends Number> wildNumber4 = new ArrayList<Number>();
+```
+
+In the example above we define 4 different lists each expressed with a wild card capture yet each holds a completely
+different type of element inside itself. Now due to the fact that the compiler does not know the exact type just the
+upper boundary, `Number` in this case, we can only use non-mutating member methods on the list, or in other words such
+methods that do `not take an argument of type T`. But we can use methods that `return T because those are going to be of
+type Number`.
+
+```java
+// so this is valid and the type of this variable must be declared of the bounding type, Number, because that is the
+// only thing we can guarantee will be true at compile and runtime for type safety
+Number number1 = wildNumber1.get(3);
+
+// this however is NOT valid, the compiler can not deduce the argument, Why ? The add method in the Collection
+// interface is defined to be add(E e), where E is the generic type. That is enough type information for the compiler
+// to resolve the calling method.
+wildNumber1.add(new Integer(5));
+```
+
+Another type of wild card boundary is the `super` keyword one, that one defines that the type is a super or a parent
+of the given type on the right
+
+```java
+// what this tells the compiler is that this list contains types that are super classes of RuntimeException, the
+// super classes of RuntimeException for example are - Exception, Throwable and finally Object
+List<? super RuntimeException> wildExceptions1 = new ArrayList<RuntimeException>();
+
+// this however is not valid, even thought the child of RuntimeException is IllegalStateException, we declared that
+// this list contains types that are super of RuntimeException, and IllegalStateException is not parent or super type
+// it is a child of RuntimeException, therefore the compiler will erorr out
+List<? super RuntimeException> wildExceptions2 = new ArrayList<IllegalStateException>();
+```
+
+Now we can certainly use the add methods, because the compiler will substitute the method arguments or parameters
+with Object directly, always it will use the most upper bound when it tries to resolve the wild card type and the
+upper bound for every class in java is Object by default
+
+```java
+// we can do this now, the compiler will resolve the add method as - add(Object e). We can then add all types of
+// object instances that are part of that hierarchy upper bound by RuntimeException, therefore we can insert anything
+// that is RuntimeException, meaning this is valid, where we add IllegalStateException type instance to the list
+wildExceptions1.add(new IllegalStateException());
+
+// this however is not valid, why ? because the Exception class is not part of the RuntimeException hierarchy, it is
+// a parent of the RuntimeException class/type.
+wildExceptions1.add(new Exception());
+```
+
+In this scenario we can also call get on the list however how the compiler, now knowing which type this container has will resolve the variable to Object, the safest upper boundary.
+
+```java
+// Why is that ? Well the list may contain any type that is RuntimeException or any of its children, assuming object
+// here is the safest, otherwise if we force RuntimeException we might get ClassCastException, why ? Well w can put
+// instances of RuntimeException into that list too, and casting an instance of IllegalStateException to
+// RuntimeException will throw
+Object e = wildExceptions1.get(0);
+```
+
+Wild cards are used as a form of a view / representation of the state of a generic type. We can shift between
+different 'view' representation of the same generic type to accomplish different tasks - use extends to allow
+calling methods that simply return and do not use the generic type in its type arguments, or use super to call
+methods that take generic types as type arguments
+
+```java
+List<Integer> integers = new ArrayList<Integer>();
+List<Integer> floats = new ArrayList<Integer>();
+
+// create a wildcard 'view' of the collections defined above, we tell the compiler here are two variables which we
+// know contain some type that is upper bounded by Number, you can safely cast the return type of methods that return T
+// to that Number, because they all implement it and are children of it
+List<? extends Number> wildIntegers = integers;
+List<? extends Number> wildFloats = floats;
+
+// the compiler sees that our collection type parameter extends number, so we can safely cast to the return types
+// number and use the number interface at the very least.
+public static void print(Collection<? extends Number> nums) {
+    for (Number var : nums) {
+        System.out.println(var.doubleValue());
+    }
+}
+
+print(wildIntegers);
+print(wildFloats);
+```
+
+```java
+List<Exception> exceptions = new ArrayList<Exception>();
+
+// create a wildcard 'view' of the collection defined above, we tell the compiler that whatever type is in that
+// collection is anything that is RuntimeException or a super class of it, which is true it is declared as
+// List<Exception>, but that wild card type is now bound by RuntimeException, therefore we can only put things that are
+// at least RuntimeException or some of its children
+List<? super RuntimeException> wildExceptions = exceptions;
+
+// the compiler sees that this collection type is
+public static void adder(Collection<? super RuntimeException> ex) {
+    ex.add(new IllegalStateException());
+}
+adder(wildExceptions);
+```
+
 ### Limitations
 
 There are many limitations of generic types due to type erasure. A few important
 ones are as follows:
 
--   You cannot instantiate a generic type using a new operator. - this is because the compiler does not know what the
-    default constructor for the type T is at the moment of the generic's definition, that is only known when an actual usage
-    of the generic type is in play i.e when a generic type is instantiated. Remember the type replacement happens at
-    compile time, not at run-time, meaning that after compilation, the resulting byte code will have the type erased, and
-    there is no way to call a constructor of a type erased type. If that were allowed at run-time the expression would be
-    literally - `new Object()`, which is not valid
+- You cannot instantiate a generic type using a new operator. - this is because the compiler does not know what the
+  default constructor for the type T is at the moment of the generic's definition, that is only known when an actual usage
+  of the generic type is in play i.e when a generic type is instantiated. Remember the type replacement happens at
+  compile time, not at run-time, meaning that after compilation, the resulting byte code will have the type erased, and
+  there is no way to call a constructor of a type erased type. If that were allowed at run-time the expression would be
+  literally - `new Object()`, which is not valid
 
     ```java
     T mem = new T(); // compiler error
     ```
 
--   You cannot instantiate an array of a generic type. - Remember the type replacement happens at
-    compile time, not at run-time, meaning that after compilation, the resulting byte code will have the type erased, and
-    there is no way to call the array constructor for erased type, of unknown type, what will end up happening if that
-    were allowed is basically this - `new Object[100]`
+- You cannot instantiate an array of a generic type. - Remember the type replacement happens at
+  compile time, not at run-time, meaning that after compilation, the resulting byte code will have the type erased, and
+  there is no way to call the array constructor for erased type, of unknown type, what will end up happening if that
+  were allowed is basically this - `new Object[100]`
 
     ```java
     T[] amem = new T[100]; // compiler error
     ```
 
--   You can declare instance fields of type T, but not of static fields of type T. This is due to the fact that static
-    members are bound to the `ClassType` itself, however generics are bound to a class type instance, there is no notion of
-    an instance for the generic class type definition itself. For example
+- You can declare instance fields of type T, but not of static fields of type T. This is due to the fact that static
+  members are bound to the `ClassType` itself, however generics are bound to a class type instance, there is no notion of
+  an instance for the generic class type definition itself. For example
 
     ```java
     class Clazz<T> {
@@ -282,16 +395,16 @@ ones are as follows:
     }
     ```
 
--   It is not possible to have generic exceptions - the reason is pretty simple, the catch statements are evaluated during
-    run-time, there is no way to specify a catch expression that would be able to capture different types of the generic
-    exception, i.e `GenericException<String>, GenericException<Number>, GenericException<Float>`
+- It is not possible to have generic exceptions - the reason is pretty simple, the catch statements are evaluated during
+  run-time, there is no way to specify a catch expression that would be able to capture different types of the generic
+  exception, i.e `GenericException<String>, GenericException<Number>, GenericException<Float>`
 
     ```java
     class GenericException<T> extends Throwable {}
     ```
 
--   Generics can not be instantiated from primitive types - i.e. `List<int>, List<short> etc`, is not valid, and would
-    produce a compile time error
+- Generics can not be instantiated from primitive types - i.e. `List<int>, List<short> etc`, is not valid, and would
+  produce a compile time error
 
 ### Summary
 
@@ -431,12 +544,12 @@ in the Map interface that you can use to get the objects classes that implement 
 problem. Also the method names in Map are very similar to the method names in Collection, so it is easy to understand
 and use Map. There are two important concrete classes of Map - `HashMap` and `TreeMap`.
 
--   A `HashMap` - uses a hash table data structure internally. In HashMap searching is a fast operation. However HashMap
-    neither remembers the order in which the elements were inserted nor does it keep elements in any sorted order.
+- A `HashMap` - uses a hash table data structure internally. In HashMap searching is a fast operation. However HashMap
+  neither remembers the order in which the elements were inserted nor does it keep elements in any sorted order.
 
--   A `TreeMap` - uses a red black tree data structure internally. Unlike the HashMap, TreeMap keeps the elements in sorted
-    order, not in the order of insertion, but in the order defined based on the values. Searching and inserting is somewhat
-    slower operation that in the HashMap.
+- A `TreeMap` - uses a red black tree data structure internally. Unlike the HashMap, TreeMap keeps the elements in sorted
+  order, not in the order of insertion, but in the order defined based on the values. Searching and inserting is somewhat
+  slower operation that in the HashMap.
 
 The `NavigableMap` interface extends the `SortedMap` interface. The `TreeMap` class is the widely used clss that implements
 `NavigableMap`. As the name suggests with `NavigableMap`, one can navigate the Map easily. It has mnany methods that make
@@ -554,7 +667,7 @@ Arrays.sort(students, new CGPAComparator());
 
 `The general rule of thumb is that most real world cases have a natural order to them, meaning that the Comparable
 interface can be used, in exceptional cases the Compartor interface can be used as a substitute, to make certain
-customized sorting or ordering decisions.`
+customized sorting or ordering decisions, based on specific criteria.`
 
 ## Stream
 

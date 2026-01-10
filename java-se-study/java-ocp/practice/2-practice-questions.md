@@ -84,9 +84,10 @@ G. (Animal z, m) -> a
 
 5. What are some of the properties of using the singleton pattern? (Choose all that apply.)
 
-A singleton type should be providing a private constructor that is only used internally to create the singleton the very
-first time it is required, then that singleton object is stored internally that is it, ensuring there is only one
-instance of that singleton for the entire duration of the program. Marking it as private only is also a good practice, that way the singleton is accessible only through the getInstance method alone
+A singleton type should be providing a private constructor that is only used internally to create the singleton the
+very first time it is required, then that singleton object is stored internally that is it, ensuring there is only
+one instance of that singleton for the entire duration of the program. Marking it as private only is also a good
+practice, that way the singleton is accessible only through the getInstance method alone
 
 A. Singleton object can be replaced with encapsulated setter method.
 B. `Requires constructor of singleton class to be private.`
@@ -406,7 +407,7 @@ F. Object composition is always preferred to inheritance.
 
 19. Which three scenarios would best benefit from using a singleton pattern? (Choose all three.)
 
-Creating read-only objects is the immutable pattern not directly related to singleton, while we can have  a read-only
+Creating read-only objects is the immutable pattern not directly related to singleton, while we can have a read-only
 singleton that is not mandatory. Ensuring that objects are lazy initialized is another pattern that is again not
 directly related to singleton, it might be used with singleton but is not the same thing. Allowing multiple instances to
 be managed, technically the entire idea of singleton is to manage / create a single instance across the entire
