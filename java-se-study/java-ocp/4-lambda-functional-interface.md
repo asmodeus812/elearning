@@ -25,10 +25,10 @@ interface, which takes and returns only one singular result
 The interface method names for these functional interfaces are rather easy to remember since they extend off of the name
 of the interface itself.
 
--   `Predicate` - boolean test(T t) - execute the actual predicate action and return a boolean result, based on the target argument
--   `Consumer` - void accept(T t) - no result is returned, but some action is executed on the target argument
--   `Function` - R apply(T t) - apply action based on the target argument, and return a new result of new type
--   `Supplier` - T get() - simply return a result, without accepting any external argument
+- `Predicate` - boolean test(T t) - execute the actual predicate action and return a boolean result, based on the target argument
+- `Consumer` - void accept(T t) - no result is returned, but some action is executed on the target argument
+- `Function` - R apply(T t) - apply action based on the target argument, and return a new result of new type
+- `Supplier` - T get() - simply return a result, without accepting any external argument
 
 ### Method References
 
@@ -179,47 +179,47 @@ signature of the abstract methods they declare.`
 
 # Summary
 
-Built-in interfaces
+`Built-in interfaces`
 
--   Built-in functional interfaces Predicate, Consumer, Function, and Supplier differ mainly based on the signature of
-    the abstract method they declare.
+- Built-in functional interfaces Predicate, Consumer, Function, and Supplier differ mainly based on the signature of
+  the abstract method they declare.
 
--   A Predicate tests the given condition and returns true or false; hence it has an abstract method named "test" that
-    takes a parameter of generic type T and returns boolean type.
+- A Predicate tests the given condition and returns true or false; hence it has an abstract method named "test" that
+  takes a parameter of generic type T and returns boolean type.
 
--   A Consumer "consumes" an object and returns nothing; hence it has an abstract method named "accept" that takes an
-    argument of generic type T and has return type void.
+- A Consumer "consumes" an object and returns nothing; hence it has an abstract method named "accept" that takes an
+  argument of generic type T and has return type void.
 
--   A Function "operates" on the argument and returns a result; hence it has an abstract method named "apply" that takes
-    an argument of generic type T and has generic return type R.
+- A Function "operates" on the argument and returns a result; hence it has an abstract method named "apply" that takes
+  an argument of generic type T and has generic return type R.
 
--   A Supplier "supplies" takes nothing but returns something; hence it has an abstract method named "get" that takes no
-    arguments and returns a generic type T.
+- A Supplier "supplies" takes nothing but returns something; hence it has an abstract method named "get" that takes no
+  arguments and returns a generic type T.
 
--   The forEach() method defined in `Iterable` (implemented by collection classes) method accepts a Consumer<T>.
+- The forEach() method defined in `Iterable` (implemented by collection classes) method accepts a Consumer<T>.
 
-Primitive versions
+`Primitive versions`
 
--   The built-in interfaces Predicate, Consumer, Function, and Supplier operate on reference type objects. For primitive
-    types, there are specializations available for int, long, and double types for these functional interfaces.
+- The built-in interfaces Predicate, Consumer, Function, and Supplier operate on reference type objects. For primitive
+  types, there are specializations available for int, long, and double types for these functional interfaces.
 
--   When the Stream interface is used with primitive types, it results in unnecessary boxing and unboxing of the
-    primitive types to their wrapper types. This results in slower code as well as wastes memory because the unnecessary
-    wrapper objects get created. Hence, whenever possible, prefer using the primitive type specializations of the functional
-    interfaces Predicate, Consumer, Function, and Supplier.
+- When the Stream interface is used with primitive types, it results in unnecessary boxing and unboxing of the
+  primitive types to their wrapper types. This results in slower code as well as wastes memory because the unnecessary
+  wrapper objects get created. Hence, whenever possible, prefer using the primitive type specializations of the functional
+  interfaces Predicate, Consumer, Function, and Supplier.
 
--   The primitive versions of the functional interfaces Predicate, Consumer, Function, and Supplier are available only
-    for int, long and double types (and boolean type in addition to these three types for Supplier). You have to use
-    implicit conversions to relevant int version when you need to use char, byte, or short types; similarly, you can use the
-    version for double type when you need to use float. Develop code that uses binary versions of functional interfaces
+- The primitive versions of the functional interfaces Predicate, Consumer, Function, and Supplier are available only
+  for int, long and double types (and boolean type in addition to these three types for Supplier). You have to use
+  implicit conversions to relevant int version when you need to use char, byte, or short types; similarly, you can use the
+  version for double type when you need to use float. Develop code that uses binary versions of functional interfaces
 
--   The functional interfaces `BiPredicate`, `BiConsumer`, and `BiFunction` are binary versions of Predicate, Consumer, and
-    Function respectively. There is no binary equivalent for Supplier since it does not take any arguments. The prefix "Bi"
-    indicates the version that takes "two" arguments.
+- The functional interfaces `BiPredicate`, `BiConsumer`, and `BiFunction` are binary versions of Predicate, Consumer, and
+  Function respectively. There is no binary equivalent for Supplier since it does not take any arguments. The prefix "Bi"
+  indicates the version that takes "two" arguments.
 
-Unary versions
+`Unary versions`
 
--   is a functional interface and it extends Function interface.
+- is a functional interface and it extends Function interface.
 
--   primitive type specializations of `UnaryOperator` are `IntUnaryOperator`, `LongUnaryOperator`, and `DoubleUnaryOperator` for
-    int, long, and double types respectively.
+- primitive type specializations of `UnaryOperator` are `IntUnaryOperator`, `LongUnaryOperator`, and `DoubleUnaryOperator` for
+  int, long, and double types respectively.

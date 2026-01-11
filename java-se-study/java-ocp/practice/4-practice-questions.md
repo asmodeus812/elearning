@@ -14,7 +14,7 @@ Now assume that was not the case, lets imagine that the statement was finalized 
 In that case what is the result going to be. First lets tackle what the stream is going to look like from the
 iterate perspective alone
 
-We have Stream.iterate starting with the emtpy string identity "", and on each iteration we concatenate "1" to the
+We have Stream.iterate starting with the empty string identity "", and on each iteration we concatenate "1" to the
 previous result. The VERY FIRST element in the stream will be the empty string "", and the second one will be "1"
 the third one will be "11" the fourth one will be "111" and so on. Now the trick here is to realize that the empty
 string the identity for the iterate method is actually also part of the stream elements, so when the limit is set to
@@ -62,7 +62,7 @@ B. true true
 C. java.util.stream.ReferencePipeline$3@4517d9a3
 D. The code does not compile.
 E. An exception is thrown.
-F. `The code hangs.`
+F. `The code hangs. (infinite loops)`
 
 4. Which are true statements about terminal operations in a stream? (Choose all that apply.)
 
