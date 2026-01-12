@@ -342,12 +342,26 @@ public class CollectionsAndInterfaces {
                         + arrayListBasedStack.stream().collect(Collectors.maxBy(Comparator.comparingInt(String::length))));
         // exactly the same as the example above but we are using a reverse comparator here of the natural order comparator which for string
         // is simply s1.compareTo(s2), the reverseOrder will simply do s2.compareTo(s2) meaning that this minBy becomes maxBy actually
-        LOGGER.logInfo("minBy(String::compareTo::reverseOrder): " + arrayListBasedStack.stream().collect(Collectors.minBy(Collections.reverseOrder())));
+        LOGGER.logInfo("minBy(String::compareTo::reverseOrder): "
+                        + arrayListBasedStack.stream().collect(Collectors.minBy(Collections.reverseOrder())));
 
-        //
-        Comparator.nullsFirst(Comparator.comparingInt(String::length));
+        // comparator that provides a safe null comparison for collections that might have or contain null elements, in the example below we
+        // are building a stream that contains multiple null values along with valid non-null values in this case strings
+        LOGGER.logInfo("nullsFirst(comparingInt(s.length)): " + Stream.<String>builder()
+                        .add("0")
+                        .add(null)
+                        .add(null)
+                        .add("1")
+                        .add("2")
+                        .add(null)
+                        .add(null)
+                        .add("3")
+                        .build()
+                        .sorted(Comparator.nullsFirst(Comparator.comparingInt(String::length)))
+                        .collect(Collectors.toList()));
 
-        Comparator.comparing(String::length, Integer::compare);
-        Comparator.naturalOrder().reversed();
+        // this is effectively the same as comparingInt which by default uses exactly the Integer::compare to compare integer instances and
+        // return results
+        LOGGER.logInfo("comparing(s.length) (1, 11): " + Comparator.comparing(String::length, Integer::compare).compare("1", "11"));
     }
 }

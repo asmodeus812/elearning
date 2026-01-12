@@ -103,6 +103,15 @@ Below are listed some of the most important functional interfaces provided in th
 core four ones, with different capabilities, which are useful for different contexts, mainly trying to create all
 possible cases and combinations between raw class types and raw primitive types
 
+### Core
+
+| Method                              | Description                                              |
+| ----------------------------------- | -------------------------------------------------------- |
+| Predicate<\T> boolean test(T value) | Checks a condition and returns a boolean value as result |
+| Supplier<\T> T get()                | Operation that returns a value to the caller             |
+| Consumer<\T> void accept(T value)   | Operation that takes an argument but returns nothing.    |
+| Function<\T, R> R apply(T value)    | Functions that take an argument and return a result      |
+
 ### Primitive
 
 There are primitive versions of the functional interface classes provided by `java.util`, these are created to be able
@@ -168,9 +177,9 @@ The `unary` functional interfaces is a variation or specialization of the Functi
 all input and output type to be of one and the same type `<T>` the signature of the unary functional interface looks
 like so - `UnaryOperator<T> extends Function<T, T>`
 
-| Method                          | Description                                                                            |
-| ------------------------------- | -------------------------------------------------------------------------------------- |
-| UnaryOperator<\T> T accept(T t) | Function that takes one argument of the same type and produces result of the same type |
+| Method                         | Description                                                                            |
+| ------------------------------ | -------------------------------------------------------------------------------------- |
+| UnaryOperator<\T> T apply(T t) | Function that takes one argument of the same type and produces result of the same type |
 
 `The entirety of the java.util.function packages consists of only functional interfacse. There are only four core
 interfaces in this package - Predicate, Consumer, Function & Supplier. The rest of the interfaces are primitive
