@@ -3,6 +3,9 @@ package com.learning.core;
 import com.learning.utils.InstanceMessageLogger;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -13,6 +16,9 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CollectionsAndInterfaces {
 
@@ -260,7 +266,6 @@ public class CollectionsAndInterfaces {
         LOGGER.logInfo("descendingMap: " + navigableMapBasedTree.descendingMap());
         LOGGER.logInfo("descendingKeySet: " + navigableMapBasedTree.descendingKeySet());
 
-
         LOGGER.logInfo("containsKey(key1): " + navigableMapBasedTree.containsKey("key1"));
         LOGGER.logInfo("get(key1): " + navigableMapBasedTree.get("key1"));
         LOGGER.logInfo("getOrDefault(key1, default): " + navigableMapBasedTree.getOrDefault("key1", "default"));
@@ -272,7 +277,8 @@ public class CollectionsAndInterfaces {
             return oldValue + "-" + newValue;
         }));
         LOGGER.logInfo("comptue(key3000, <computer>): " + navigableMapBasedTree.compute("key3000", (key, value) -> {
-            // the compute method will be called for the new key, even though there is no a mapping for this key, a new one will be created, but value might be null, so extra care needs to be taken here
+            // the compute method will be called for the new key, even though there is no a mapping for this key, a new one will be created,
+            // but value might be null, so extra care needs to be taken here
             return "computedNewKeyValue" + key + value;
         }));
         LOGGER.logInfo("putIfAbsent(key1234, newValue1234): " + navigableMapBasedTree.putIfAbsent("key1234", "newValue1234"));
@@ -283,47 +289,65 @@ public class CollectionsAndInterfaces {
             return "newKeyMapping-" + key + "-newValue";
         }));
         LOGGER.logInfo("computeIfPresent(key888, <resolver>): " + navigableMapBasedTree.computeIfPresent("key2", (key, value) -> {
+            // we can return null from this method and that will cause the value mapping to be removed from the map instead.
             return "newValueForKey-" + key + "-" + value;
         }));
 
-// boolean add(E e) → returns true if set changed.
+        // collectors final utilty static class is the default implementation for the collector interface that provides a ton of reducers
+        // that can convert and reduce streams from one to another type of collection effortlessly
+        LOGGER.logInfo("toCollection(LinkedList::new): " + arrayListBasedStack.stream().collect(Collectors.toCollection(LinkedList::new)));
+        LOGGER.logInfo("toList(): " + arrayListBasedStack.stream().collect(Collectors.toList()));
+        LOGGER.logInfo("toSet(): " + arrayListBasedStack.stream().collect(Collectors.toList()));
 
-// May throw NullPointerException if the impl forbids null.
+        // the example demonstrates how the map can be constructed with a key/value mapper on top of that we can also provide a merge
+        // functoin that tells the collector what the hell it should do with duplicate keys, to avoid exception throwing, and further more
+        // the final argument tells which supplier to use to create the map instance
+        LOGGER.logInfo("toMap(e, e+e): "
+                        + arrayListBasedStack.stream().collect(Collectors.toMap(e -> e, e -> e + e, (a, b) -> b, HashMap::new)));
+        // basic grouping based on the length of the elements, in this case this array list stack contains 9 elements of length 1 (1 to 9),
+        // and 1 element of length 2 that would be the one with value (10)
+        LOGGER.logInfo("groupingBy(e.length): "
+                        + arrayListBasedStack.stream().collect(Collectors.groupingBy(e -> e.length(), HashMap::new, Collectors.toSet())));
+        // to demonstrate how partitioning works, the type of the first argument has to be a predicate, in this case we group the elements
+        // of the stack into two sections elements that are greater than 5 and such that are less than 5
+        LOGGER.logInfo("partitioningBy(e > 5): " + arrayListBasedStack.stream()
+                        .collect(Collectors.partitioningBy(e -> Integer.parseInt(e) > 5, Collectors.toSet())));
+        // this exmaple groups by the length, but on top of that maps the elements into the buckets to their lengths, therefore te final
+        // group by map will contain, the lengths of the elements not their values from the source array.
+        LOGGER.logInfo("groupingBy(length): " + arrayListBasedStack.stream()
+                        .collect(Collectors.groupingBy(e -> e.length(), HashMap::new,
+                                        Collectors.mapping(String::length, Collectors.toList()))));
+        // here is a more complex example, we have a stream of a few collections of different sizes
+        // - first we are grouping by the size of the collections in the stream
+        // - second- we flat map them into their consitituents parts or elements
+        // - third - we map each element by providing the square of each element
+        // - finally - collect all of them into the grouping buckets of lists
+        LOGGER.logInfo("groupingBy(length) + downstream(flatMapping + mapping): " + Stream.of(List.of(1), List.of(2, 3), List.of(4, 5, 6))
+                        .collect(Collectors.groupingBy(Collection::size,
+                                        Collectors.flatMapping(Collection::stream, Collectors.mapping(e -> e * e, Collectors.toList())))));
+        // collector reducer that counts the elements in the source collection, each element amounts to a quantity of 1, therefore this is
+        // equivalent of actually doing collection.size()
+        LOGGER.logInfo("counting(): " + arrayListBasedIntegerList.stream().collect(Collectors.counting()));
+        // compute the integral average of the given elements contained in the the collection by first converting each element to an
+        // integral type
+        LOGGER.logInfo("averagingInt(Integer::parseInt): "
+                        + arrayListBasedStack.stream().collect(Collectors.averagingInt(Integer::parseInt)));
+        // return the max element by converting the String::compareTo method to a comparator interface implementation for String, from the
+        // source collection
+        LOGGER.logInfo("maxBy(String::compareTo): "
+                        + arrayListBasedStack.stream().collect(Collectors.maxBy(Comparator.comparing(Function.identity()))));
+        // return the max element by converting the String::length method to a comparator interface that is going to be used to actually
+        // find the longest / max string in the source element collection
+        LOGGER.logInfo("maxBy(String::length): "
+                        + arrayListBasedStack.stream().collect(Collectors.maxBy(Comparator.comparingInt(String::length))));
+        // exactly the same as the example above but we are using a reverse comparator here of the natural order comparator which for string
+        // is simply s1.compareTo(s2), the reverseOrder will simply do s2.compareTo(s2) meaning that this minBy becomes maxBy actually
+        LOGGER.logInfo("minBy(String::compareTo::reverseOrder): " + arrayListBasedStack.stream().collect(Collectors.minBy(Collections.reverseOrder())));
 
-// May throw ClassCastException if element incompatible with the set’s comparator/order (e.g., TreeSet).
+        //
+        Comparator.nullsFirst(Comparator.comparingInt(String::length));
 
-// boolean addAll(Collection<? extends E> c) → true if any new element added. Same exception notes as add.
-
-// Lookup
-
-// boolean contains(Object o) → false if absent; may throw ClassCastException/NullPointerException in ordered impls with incompatible/null keys.
-
-// int size(), boolean isEmpty()
-
-// Removal
-
-// boolean remove(Object o) → true if present and removed.
-
-// May throw ClassCastException/NullPointerException in ordered impls.
-
-// boolean removeAll(Collection<?> c) / boolean retainAll(Collection<?> c) → true if set changed.
-
-// void clear() → no exception (unless unmodifiable set).
-
-// Views & traversal
-
-// Iterator<E> iterator() → fail-fast on most non-concurrent sets if structurally modified outside the iterator.
-
-// Iterator.next() → throws NoSuchElementException when exhausted.
-
-// Iterator.remove() → throws IllegalStateException if called before next() or twice for same element.
-
-// forEach, spliterator, stream() (Java 8 defaults)
-
-// Unmodifiable / synchronized wrappers
-
-// Collections.unmodifiableSet(s) → mutators throw UnsupportedOperationException.
-
-// Collections.synchronizedSet(s) → synchronized wrapper (still fail-fast iterators).
+        Comparator.comparing(String::length, Integer::compare);
+        Comparator.naturalOrder().reversed();
     }
 }
