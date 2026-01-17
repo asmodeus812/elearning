@@ -5,11 +5,17 @@ logging:
     path: ./tmp/
   level:
     root: DEBUG
-    com.spring.demo.core: INFO
+    com:
+      spring:
+        demo:
+          core: TRACE
 
 spring:
   application:
     name: demo-base
+
+server:
+  port: 8080
 
 ---
 spring:
@@ -18,6 +24,6 @@ spring:
   config:
     activate:
       on-profile:
-      - local
-
+        - local
 ---
+

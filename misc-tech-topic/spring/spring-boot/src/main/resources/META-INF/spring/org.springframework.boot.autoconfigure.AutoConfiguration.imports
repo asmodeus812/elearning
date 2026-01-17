@@ -1,1 +1,1 @@
-com.spring.demo.config.DefaultDemoAutoConfiguration
+com.spring.demo.config.DefaultStaticAutoConfiguration

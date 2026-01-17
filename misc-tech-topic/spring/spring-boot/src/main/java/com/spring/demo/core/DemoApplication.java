@@ -11,7 +11,8 @@ public class DemoApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(DemoApplication.class);
 
     public static void main(String[] args) {
-        LOGGER.info("Starting the spring boot DemoApplication");
+        LOGGER.info("Starting the spring boot application");
         SpringApplication.run(DemoApplication.class, args);
+        LOGGER.info("Returning the spring boot application");
     }
 }
