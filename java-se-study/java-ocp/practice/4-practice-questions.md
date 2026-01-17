@@ -463,6 +463,11 @@ List<Integer> l = IntStream.range(1, 6).mapToObj(i -> i).collect(Collectors.toLi
 l.forEach(System.out::println);
 ```
 
+For this example we simply need to leave the compiler do its thing, the IntStream will indeed produce a list of
+primitive integers and they can be freely passed to the println method of the System.out IO Steam because they will
+be auto-boxed by the compiler, it is not the most efficient way to print them out but its is using the capabilities
+of the language and the compiler to achieve the final result.
+
 A. IntStream.range(1, 6);
 B. `IntStream.range(1, 6).forEach(System.out::println);`
 C. IntStream.range(1, 6).mapToObj(1 -> i).forEach(System.out::println);

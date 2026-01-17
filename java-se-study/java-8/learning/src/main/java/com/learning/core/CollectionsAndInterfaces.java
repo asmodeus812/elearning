@@ -60,7 +60,7 @@ public class CollectionsAndInterfaces {
         arrayListBasedIntegerList.add(3);
 
         // this might trip some people the remove method has two overloads one that takes in object the other one takes in a plain int
-        // primitive, the one that takes in an object is meant to be used to remove by index, and may throw IndexOutOfBoundsExcetpion ,
+        // primitive, the one that takes in a primitive is meant to be used to remove by index, and may throw IndexOutOfBoundsExcetpion ,
         // however the one that takes in an object is meant to remove by equality an object from the array if such exists
         LOGGER.logInfo("arrayListBasedIntegerList: " + arrayListBasedIntegerList);
         arrayListBasedIntegerList.remove(0);
@@ -99,7 +99,8 @@ public class CollectionsAndInterfaces {
         }
 
         try {
-            // calling element will also throw that is because this is the throwing variant of the peek method that does not
+            // calling element will also throw that is because this is the throwing variant of the peek method that does not just return
+            // null, but directly throws exception in case of empty stack/queue
             arrayListBasedStack.element();
         } catch (Exception e) {
             LOGGER.logSevere("element(): " + e);

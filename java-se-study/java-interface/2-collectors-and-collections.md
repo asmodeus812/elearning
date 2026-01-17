@@ -1,7 +1,7 @@
 ## Stream
 
 A sequence of elements supporting sequential and parallel aggregate operations. In addition to having Stream for
-object references Streams also exist for primitives, but only a fe - IntStream, DoubleStream, LongStream. Stream
+object references Streams also exist for primitives, but only a few types, not all primitives that the language defines - IntStream, DoubleStream, LongStream. Stream
 pipelines execute either sequentially or in parallel.
 
 ### Interface
@@ -63,10 +63,10 @@ pipelines execute either sequentially or in parallel.
 - allMatch, noneMatch - on empty stream will return true, and allMatch on empty stream will return false
 - distinct and sorted - distinct uses equals to compare elements, sorted uses either a custom comparator, or if none
   is provided tries to use the natural comparator i.e cast the element to Comparable, so that might produce a
-  ClassCastException based on the type of elements that are inside the stream at the time or calling sorted
+  `ClassCastException` based on the type of elements that are inside the stream at the time or calling sorted
 - streams can not be re-used once a terminal operation is called on a stream, the stream is closed any any other
   intermediate or terminal operation on it ill end up with an exception - `IllegalStateException`
-- streams form I/O are AutoCloseable, meaning that all we need to do is put them into a try-with-resources block,
+- streams form I/O are `AutoCloseable`, meaning that all we need to do is put them into a try-with-resources block,
   they will also close upon terminating operation execution as well.
 - parallel streams are mostly useful when we deal with huge data sets or data sets that are associative in nature
   where we can easily split the work and combine it later without worrying about the order of elements in the stream.
@@ -76,6 +76,17 @@ pipelines execute either sequentially or in parallel.
   generate with limit
 - prefer the stream builder instead when generating new elements that will end up going through a stream pipeline,
   instead of creating an intermediate Collection instance on which you will call .stream() anyway.
+
+## Arrays
+
+Class containing various methods for manipulating arrays such as sorting and searching, this class also contains a
+static factory that allows arrays to be viewed as lists.
+
+### Interface
+
+- static Arrays.stream(...) - this
+
+### Caveats
 
 ## Collector
 
@@ -156,12 +167,14 @@ elements into collection summarizing elements according to various criteria and 
   actually take downstream collection, such as groupingBy, or partitioningBy, can be passed a mapping function, that
   will transform the elements that go into those downstream collections, i.e instead of putting the actual element in,
   it is mapped to a new value that goes into those buckets. It can be also chained like so - mapping(mapper, mapping(mapper, ...))
-- filtering(predicate, downstream) - just like the map downstream but instead of changing the value it actually
-  decides if the value should at all end up in the final downstream collection
-- flatMapping() - just like the mapping one but instead maps the values from a collections to their actual elements,
-  can also be chained flatMapping(flatMapper, mapping(elementMapper, Collections.toSet()))
-- collectingAndThen(downstream, finisher) - post process the result, right before the collection for the downstream
-  collection is created, the finisher lambda operates on the final collection created by the downstream
+- filtering(predicate, collector) - just like the map downstream but instead of changing the value it actually
+  decides if the value should at all end up in the final downstream collection, thus allowing us to chain calls like so filtering(filterPredicate, mapping(mappingFunction, Collectors.toList()))
+- flatMapping(mapper, collector) - just like the mapping one but instead maps the values from a collections to their
+  actual elements, can also be chained flatMapping(flatMapper, mapping(elementMapper, Collectors.toSet()))
+- collectingAndThen(collector, finisher) - post process the result, right before the collection for the downstream
+  collection is created, the finisher lambda operates on the final collection created by the downstream. The finisher
+  acts like a mapper for the downstream collection. Therefore we can collectingAndThen(toList(),
+  Collections::unmodifiableList)
 
 - counting() - collector reducer that counts the elements in the source collection, each element amounts to a
   quantity of 1, therefore this is equivalent to actually doing collection.size()
@@ -174,7 +187,7 @@ elements into collection summarizing elements according to various criteria and 
 
 - minBy(comparator) - based on the applied comparator on each element in the source collection returns an optional
   value that represents the minimum element based on the comparator, empty optional of the collection is empty
-- maxBy(comparator)-based on the applied comparator on each element in the source collection returns an optional
+- maxBy(comparator) - based on the applied comparator on each element in the source collection returns an optional
   value that represents the maximum element based on the comparator, empty optional of the collection is empty
 
 ## Caveats
@@ -225,18 +238,28 @@ sorted set or sorted map, with explicit comparator`
 
 ### Interface
 
+0. Primary interface
+
 - comapre(e1, e2) - compare two elements and return an integer value denoting which one is the smaller, bigger or if
   they are equal. If e1 is smaller then a negative value is returned, if e1 is bigger then a positive value is
-  returned, if e1 equals exactly e2 then zero is returned
+  returned, if e1 equals exactly e2 then a value of zero is returned
+
+1. Instance methods
+
 - thenComparing(otherComparator) - if the result of the comparator is not zero chain return the result of comparing
   the same elements with the other comparator passed to this method as first argument
+- thenComparingXXX(otherComparator) - the same as the general thenComparing method, allows one to chain multiple
+  comparators, after the previous one has returned a non zero value, the difference here is that XXX stands for the
+  primitives long, int, double, allowing the input argument to be converted from T to a primitive of those types.
 - reversed() - returns an instance of this comparator but in reverse order, in other words a new comparator that
   calls the original one with the order of arguments reversed, thus reversing the order itself - (a, b) ->
   oldComparator.compare(b, a)
 
-- static comparing(extractor, \[comparator\]) - the main comparator builder, that constructs a comparator for a
-  given key from an object, or the object itself by using the Function.identity(), the key extractor is a lambda
-  function, the second argument is optional (overloaded) and it can take the comparator lambda for the key, e.g. -
+2. Static methods
+
+- static comparing(extractor, {comparator}) - the main comparator builder, that constructs a comparator for a given
+  key from an object, or the object itself by using the Function.identity(), the key extractor is a lambda function,
+  the second argument is optional (overloaded) and it can take the comparator lambda for the key, e.g. -
   Comparator.comparing(String::length, Integer::compare), use the length of the string as a key for comparison, and
   compare by it but strictly and explicitly using Integer::compare (or can provide a custom one)
 - static comparingXXX(extractor) - the primitive version that where XXX stands for methods like comparingLong,
@@ -245,11 +268,8 @@ sorted set or sorted map, with explicit comparator`
 - static naturalOrder() - natural order comparator is such that the elements that are passed to it are compared
   based on their compareTo method that implies that those elements have to be implementing the Comparable interface,
   otherwise they can not be considered valid for natural ordering, and `ClassCastException` will arise
-- static reverseOrder() - the reversed of the natural order comparator provided by the naturalOrder method, effectively
-  equivalent to doing the following - Comparator.naturalOrder().reversed()
-- static comparing(extractor) - returns a comparator instance that compares a specific key or a property based on
-  its natural order (compareTo from the Comparable interface) from an element, e.g. comparing(String::length) or
-  comparing(User::getName) etc.
+- static reverseOrder() - the reversed of the natural order comparator provided by the naturalOrder method,
+  effectively equivalent to doing the following - Comparator.naturalOrder().reversed()
 - static nullsFirst(comparator) - returns a null friendly comparator that considers null to be less than non-null
   thus providing a natural order for null elements as well, two null elements are considered equal. Order is such that
   null elements come before non-null elements in the natural order. The comparator argument is used for non-null
@@ -273,14 +293,14 @@ sorted set or sorted map, with explicit comparator`
 
 ## Functional
 
-Essential functional interfaces from the package java.util.function, such that are meant to work with single,
-multiple arguments and primitive versions of the same. Provide building blocks for lambda argument types allowing
-functions to be assigned and passed around just as any other variables
+Essential functional interfaces from the package `java.util.function`, such that are meant to work with single, multiple
+arguments and primitive versions of the same. Provide building blocks for lambda argument types allowing functions to be
+assigned and passed around just as any other variables
 
 ### Interface
 
-- a functional interface has exactly one single abstract non final public method, (SAM) lambda references target
-  call these with the appropriate arguments.
+- a functional interface has exactly one single abstract non final public method, (SAM) lambda references target call
+  these with the appropriate arguments.
 - many have default combiners and chaining methods - andThen, compose, and, or, negate etc.
 - prefer primitive specializations where applicable avoid auto-boxing wrapper types.
 
