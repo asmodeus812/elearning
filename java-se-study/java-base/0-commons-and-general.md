@@ -155,8 +155,23 @@ auto-boxed into Long`, it can be only boxed into its wrapper type `Integer`
 - equals(Object o) - compare an object of a given type to another one of the same type, return true if both objects are equal false otherwise
 - finalize() - a method that will be called exactly one when the object is freed by the garbage collector
 
+12. Loops
+
+- four standard loops exist - for-i, while, do-while, for-each. The first 3 all follow standard traditional form of
+  definition, while the for-each is a special form that is a syntactic sugar for iterating upon common iterable
+  structures in the language - standard traditional arrays - `int[]` and `Iterable` implementations
+- the for-i loop has 3 segments - variable initialization, conditional expression and an update operation. They CAN
+  NOT be interchanged, but we can add multiple initialization expressions and update operations separated by comma
+  a common example of that can be `for (int i = 0, j = 0; i < 10 && j < 20; i++, j++) {}`
+- the curly braces surrounding the body of each of the 4 types of a loops can be omitted, if it contains just one
+  statement or expression, including the post-form-condition of the while loop - `do-while`.
+- for-each loop variable substitution and boxing/un-boxing - variables in a for-each can be boxed/un-boxed and
+  covariant - `List<Integer> ints = new ArrayList<>(); for (Object i : ints) {}; for (int i : ints) {}` or using plain
+  primitive arrays - `int[] ints = new int[10]; for (Integer i : ints) {}; for (Object i : ints) {}`
+- for-each loop can be applied only to primitive or standard base array types or objects that implement the Iterable
+  interface only, anything else is considered a compiler error and disallowed by the language
 - Iterator - a generic iterator interface, implementations provide means of iterating across a collection of items,
-  the interface provides means of getting the next element, checking if there are more elements.
+  the interface provides means of getting the next element, checking if there are more elements
 
     ```java
         // the general structure of the iteration, looks like this
@@ -205,6 +220,7 @@ auto-boxed into Long`, it can be only boxed into its wrapper type `Integer`
 
 # Caveats
 
+- for-each loop type allows for direct boxing/un-boxing and implicit parent-child substitution for reference types
 - array initialization and declaration - `String a = {"test"};` `String[] a = new String[] {"test"}`, `String[] a =
 new String[1]`, all of these are valid, and construct an array and initialize it correctly, but should not mix the
   size declaration with initialization list, use either and NOT both
