@@ -1,1 +1,23 @@
 <h1>Greetings Learning Spring Boot 3.0 fans!</h1>
+
+<h2>List of videos</h2>
+<ul>
+    {{#videos}}
+    <li>
+        {{ getId }}: {{ getName }}  
+        <form action="/update-video/{{ getId }}" method="post" style="display: inline">
+            <input type="text" value="{{ getName }}" placeholder="Update video name" name="name" />     
+            <button type="submit">Update</button>
+        </form>
+        <form action="/delete-video/{{ getId }}" method="post" style="display: inline">
+            <button type="submit">Delete</button>
+        </form>
+    </li>
+    {{/videos}}
+</ul>
+
+<h2>Videos actions</h2>
+<form action="/new-video" method="post">
+    <input type="text" value="" placeholder="New video name" name="name" />     
+    <button type="submit">Submit</button>
+</form>

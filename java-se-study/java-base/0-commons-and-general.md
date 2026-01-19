@@ -241,3 +241,172 @@ new String[1]`, all of these are valid, and construct an array and initialize it
 - `wait/notify` - a thread that is in wait state can be awakened sporadically, even if actually notify was never
   called in the first place, that is why it is advised to put wait in a while loop guarded by some sort of instance
   variable
+
+## Modern guidelines
+
+### 1. Use `record` for DTOs
+
+- Auto-generates `equals()`, `hashCode()`, `toString()`, and getters.
+- Immutable by design (no Lombok needed).
+- Request/response DTOs (`@RequestBody`, `@ResponseBody`).
+- Immutable configuration properties (`@ConfigurationProperties`).
+
+```java
+public class UserDto {
+    private final String name;
+    private final int age;
+    // Boilerplate: constructor, getters, equals, hashCode, toString
+}
+```
+
+```java
+public record UserDto(String name, int age) { }
+```
+
+### 2. Prefer `var` for Local Variables (Judiciously)
+
+- Use `var` when the type is obvious (e.g., `new` expressions, builders).
+- Avoid `var` if it reduces readability (e.g., `var result = service.process()`).
+
+```java
+List<String> names = new ArrayList<>();
+```
+
+```java
+var names = new ArrayList<String>();
+```
+
+### 3. Replace Lombok with Java Language Features
+
+- Use `record` for DTOs (replaces `@Data`, `@Value`).
+- Use compact constructors:
+- When to Keep Lombok:
+    - `@Slf4j` (still concise).
+    - `@Builder` (until Java gets a native builder pattern).
+
+```java
+@Data
+@Builder
+public class Product { ... }
+```
+
+```java
+public record Product(String id, String name) {
+    public Product {
+        Objects.requireNonNull(id);
+    }
+}
+```
+
+### 4. Sealed Classes for Domain Models
+
+- Explicitly restricts inheritance (better domain modeling).
+- Works great with Spring Data JPA `@Entity` hierarchies.
+
+```java
+public abstract class Shape { ... }
+public class Circle extends Shape { ... }  // Unlimited extensibility
+```
+
+```java
+public sealed class Shape permits Circle, Rectangle { ... }
+```
+
+### 5. Pattern Matching (`instanceof` and `switch`)
+
+- Cleaner controller logic (e.g., handling polymorphic DTOs).
+
+```java
+if (obj instanceof String) {
+    String s = (String) obj;
+    System.out.println(s.length());
+}
+```
+
+```java
+if (obj instanceof String s) {
+    System.out.println(s.length());
+}
+```
+
+### 6. Text Blocks for JSON/HTML/SQL
+
+- `@Sql` annotations in internal tests.
+- Hardcoded API response examples.
+
+```java
+String json = "{\"name\":\"John\", \"age\":30}";
+```
+
+```java
+String json = """
+    {
+        "name": "John",
+        "age": 30
+    }
+    """;
+```
+
+### 7. Null Checks with `Objects.requireNonNullElse`
+
+```java
+return name != null ? name : "default";
+```
+
+```java
+return Objects.requireNonNullElse(name, "default");
+```
+
+### 8. HTTP Interface Clients (Java 21+)
+
+- No need for `@FeignClient` (standard Java interface).
+
+```java
+@FeignClient(url = "https://api.example.com")
+public interface UserClient {
+    @GetMapping("/users/{id}")
+    User getUser(@PathVariable String id);
+}
+```
+
+```java
+public interface UserClient {
+    @GetExchange("/users/{id}")
+    User getUser(String id);
+}
+```
+
+### 9. Avoid `@Autowired` use Constructor Injection Only
+
+- Immutable dependencies (thread-safe, no Lombok `@RequiredArgsConstructor` needed).
+
+```java
+@Autowired
+private UserService userService;
+```
+
+```java
+private final UserService userService;
+
+public UserController(UserService userService) {
+    this.userService = userService;
+}
+```
+
+### 10. Switch Expressions
+
+```java
+switch (status) {
+    case "OK": return 200;
+    case "BAD": return 400;
+    default: return 500;
+}
+```
+
+```java
+return switch (status) {
+    case "OK" -> 200;
+    case "BAD" -> 400;
+    default -> 500;
+};
+```

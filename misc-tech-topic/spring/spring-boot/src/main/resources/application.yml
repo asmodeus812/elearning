@@ -11,6 +11,8 @@ logging:
           core: TRACE
 
 spring:
+  datasource:
+     url: ""
   application:
     name: demo-base
 
@@ -26,4 +28,3 @@ spring:
       on-profile:
         - local
 ---
-

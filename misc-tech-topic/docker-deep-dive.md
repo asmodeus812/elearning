@@ -72,9 +72,9 @@ that is developing fast.
 
 What is docker really, that could refer to three things:
 
--   Docker, Inc - is the company behind the docker project
--   Docker the container `runtime` and orchestration technology
--   Docker the open source project - also called `Moby`
+- Docker, Inc - is the company behind the docker project
+- Docker the container `runtime` and orchestration technology
+- Docker the open source project - also called `Moby`
 
 ## Docker, Inc
 
@@ -264,9 +264,9 @@ containerization by enabling the creation of lightweight writable layers on top 
 works is that when a container is created, a writable layer is added on top of a resad only base image. Any modification
 made by the container are written to this top layer, while the base image remains unchanged. This enables:
 
--   Efficient sharing of base images between containers.
--   Minimal disk usage since only changes are stored.
--   Fast container creation by simply stacking layers
+- Efficient sharing of base images between containers.
+- Minimal disk usage since only changes are stored.
+- Fast container creation by simply stacking layers
 
 In containers the `OverlayFS` underpins the storage driver mechanism in Docker and other container runtimes, making
 image building sharing and running highly efficient.
@@ -475,16 +475,16 @@ can be pieced together into large tools. This breaking down process is still ong
 the container execution and container runtime code entirely removed from the daemon and refactored into small
 specialized tools such as runc (container runtime) and containerd (container supervisor)
 
--   runc - as already mentioned `runc` is the reference implementation of the OCI container runtime spec, Docker, Inc was
-    heavily involved in defining the spec and developing runc. Runc is small, it is effectively a lightweight CLI that wraps
-    around `libcontainer`, it has a single purpose in life - to create containers.
+- runc - as already mentioned `runc` is the reference implementation of the OCI container runtime spec, Docker, Inc was
+  heavily involved in defining the spec and developing runc. Runc is small, it is effectively a lightweight CLI that wraps
+  around `libcontainer`, it has a single purpose in life - to create containers.
 
--   containerd - in order to use `runc`, the Docker engine needed something to act as a bridge between the `deamon` and
-    `runc`. This is where `containerd` comes into the picture. `Containerd` implements the execution logic that was pulled
-    out of the Docker daemon, this logic was obviously refactored and tuned when it was written as `containerd`.
-    `Containerd` is a container supervisor - it is responsible for container `lifecycle` operations such as starting and
-    stopping containers, pausing and un-pausing them and destroying them. Like `runc` `containerd` is small lightweight and
-    designed for a single task in life - only interested in container `lifecycle` operations.
+- containerd - in order to use `runc`, the Docker engine needed something to act as a bridge between the `deamon` and
+  `runc`. This is where `containerd` comes into the picture. `Containerd` implements the execution logic that was pulled
+  out of the Docker daemon, this logic was obviously refactored and tuned when it was written as `containerd`.
+  `Containerd` is a container supervisor - it is responsible for container `lifecycle` operations such as starting and
+  stopping containers, pausing and un-pausing them and destroying them. Like `runc` `containerd` is small lightweight and
+  designed for a single task in life - only interested in container `lifecycle` operations.
 
 The most common way of starting containers is using the Docker CLI. The following docker container run command will
 start a simple new container based on the alpine:latest image
@@ -512,17 +512,17 @@ process exits. This means we can run hundreds of containers without having to ru
 container's parent `runc` terminated, the associated containers-shim process becomes the container's parent process. Some
 of the responsibility of the shim performs a container's parent include
 
--   keeping any stdin and stdout streams open so that when the `deamon` is restarted the container does not terminate due to
-    pipes being closed.
+- keeping any stdin and stdout streams open so that when the `deamon` is restarted the container does not terminate due to
+  pipes being closed.
 
--   reports the container's exit status back to the daemon.
+- reports the container's exit status back to the daemon.
 
 On a Linux system the components we have discussed are implemented as separate binaries as follows:
 
--   dockerd (`deamon`)
--   docker-containerd (containerd)
--   docker-containerd-shim (shim)
--   docker-runc (runc)
+- dockerd (`deamon`)
+- docker-containerd (containerd)
+- docker-containerd-shim (shim)
+- docker-runc (runc)
 
 All of those can be seen running if one runs the `ps` command in the host. Some of them will be present when the system
 has running containers only, like the shim, or when a container is starting, like runc.
@@ -572,10 +572,10 @@ and applications have their own official repositories. The are easy to spot as t
 hub `namespace`. These lie under the following URL formats - `https://hub.docker.com/_/<image>` While personal images are
 behind URL formats such as `https://hub.docker.com/r/<user>/image`
 
--   `nginx` - <https://hub.docker.com/_/nginx>
--   `busybox`- <https://hub.docker.com/_/busybox>
--   `redis`- <https://hub.docker.com/_/redis>
--   `mongo` - <https://hub.docker.com/_/mongo>
+- `nginx` - <https://hub.docker.com/_/nginx>
+- `busybox`- <https://hub.docker.com/_/busybox>
+- `redis`- <https://hub.docker.com/_/redis>
+- `mongo` - <https://hub.docker.com/_/mongo>
 
 ### Names
 
@@ -1001,10 +1001,10 @@ image.
 
 The image now has four layers
 
--   RUN npm install
--   COPY . /src
--   RUN apk add npm
--   FROM alpine
+- RUN npm install
+- COPY . /src
+- RUN apk add npm
+- FROM alpine
 
 The application exposes a web service on TCP port 8080 so the `Dockerfile` documents this with the EXPOSE 8080
 instruction. This is added as image metadata and not an image layer. Finally the `ENTRYPOINT` instruction is used to set
@@ -1259,14 +1259,14 @@ Swarm initialized: current node (d21lyz...c79qzkx) is now a manager.
 
 This command can be broken down as follows
 
--   `docker swarm init` tells Docker daemon to initialize a new swarm and make this node the first manager. It also
+- `docker swarm init` tells Docker daemon to initialize a new swarm and make this node the first manager. It also
   enables the swarm mode on the node.
 
--   `advertise-addr` is the IP and port that other nodes should use to connect to this manager. The flag is optional but it
+- `advertise-addr` is the IP and port that other nodes should use to connect to this manager. The flag is optional but it
   gives you control over which IP gets used on nodes with multiple IPs. It also gives you the chance to specify an IP
   address that does not exit on the node such as a load balancing IP address.
 
--   `listen-addr` lets you specify which IP and port you want to listen on for swarm traffic. This will usually match the
+- `listen-addr` lets you specify which IP and port you want to listen on for swarm traffic. This will usually match the
   address provided in `advertise-addr`, but is useful in situations where you want to restrict swarm to a particular IP on a
   system
 
@@ -1354,9 +1354,9 @@ Services, at the highest level services are the way to run tasks on a swarm to r
 it in a service and deploy that service. Beneath the hood service are declarative way of setting the desired state on
 the cluster. For example
 
--   set the number tasks/containers in the service
--   set the image the containers in the service will use
--   set the procedure for updating to newer version of the image
+- set the number tasks/containers in the service
+- set the image the containers in the service will use
+- set the procedure for updating to newer version of the image
 
 Services let us declare the desired state for an application service and feed that to Docker. For example assume that
 you have got an app that has a web front end. You have an image for the web service and testing has shown that you will
@@ -1577,41 +1577,41 @@ As we have seen above, this is one of the many deployment strategies which we ca
 however there are a few other. Not all deployment strategies are listed below, however some of the more well known ones
 are, along with their pros and cons depending on the circumstances
 
--   Recreate Target - stops the old version entirely before deploying the new one, all instances of the app are replaced
+- Recreate Target - stops the old version entirely before deploying the new one, all instances of the app are replaced
   simultaneously. This is simple to implement, and guarantees no coexistence of old and new versions, no resource hogging.
   However there is a downtime during deployment process, clients experience a complete service outage. This is suitable
   for non critical apps where downtime is acceptable
 
--   Rolling Update - Gradually replaces old instances with new ones, one or a few at a time, continues until all instances are
+- Rolling Update - Gradually replaces old instances with new ones, one or a few at a time, continues until all instances are
   updated. It has minimal downtime, allows monitoring of new instances as they are deployed and put into action, reduces
   deployment risk compared to an all-at-once strategy. However old and new versions coexist during the deployment which
   may cause inconsistencies, it also requires careful planning for compatibility between versions. Common for stateless or
   backward compatible apps
 
--   Blue-Green - Deploys the new version (green) alongside the current version (blue) in parallel, traffic is switched to
+- Blue-Green - Deploys the new version (green) alongside the current version (blue) in parallel, traffic is switched to
   the new version once it is verified to be working, the old version remains available as a fallback. The cool thing here
   is that there is no downtime, seamless transition for users, easy and fast rollback, since the old version is still
   active and running. However resource intensive since both the versions are working or active at the same time, complex
   traffic routing needs to be setup in order to make this viable and transparent to the end user.
 
--   Canary - deploys the new version to a small subset of users or servers first, gradually increases the percentage of
+- Canary - deploys the new version to a small subset of users or servers first, gradually increases the percentage of
   traffic routed to the new version, full roll-out occurs after successful validation. Allows controlled testing in
   production with minimal risk, issues can be caught early and affect fewer users, rollbacks are easier during initial
   stages. Requires dynamic traffic routing and monitoring systems, and takes longer to fully deploy compared to the other
   strategies
 
--   Feature toggle - deploys the new version with features disabled, features are enabled incrementally via
+- Feature toggle - deploys the new version with features disabled, features are enabled incrementally via
   configuration toggles without redeploying the code. There is a minimal risk, features can be turned off instantly if
   issues occur, allows gradual roll-out of new functionality, supports A/B testing and phased roll-outs. However in
   increases code complexity, as well as there is a risk of stale toggles cluttering the codebase i.e obsolete
   features.
 
--   Shadow - deploys the new version alongside the old version but does not expose it to users, the new version processes
+- Shadow - deploys the new version alongside the old version but does not expose it to users, the new version processes
   mirrored traffic for testing purposes. No impact on live users, allows the real-world testing of the new version, High
   resource usage, in effect you have two production environments, and does not test user interactions with the new
   versions, rather testers or QA do that, which is not really the same
 
--   A/B Testing - deploys multiple versions at the same time - the old and the new. Routes a subset of users to the new
+- A/B Testing - deploys multiple versions at the same time - the old and the new. Routes a subset of users to the new
   version while the rest continue using the old version. Collects metrics to compare performance and user experience.
   Provides direct insights into user preferences, and performance of different versions, allows for controlled exposure to
   the new version. However it requires robust traffic routing and user segmentation, risk of user confusion if versions
@@ -1643,16 +1643,16 @@ out of the box experience. However it also allows you to customize each one to y
 The Docker platform itself offers some excellent native security technologies, and one the best things about these is
 that they are amazingly simple to use.
 
--   Docker Swarm mode is secure by default, you get all the following with zero configuration required - cryptographic
+- Docker Swarm mode is secure by default, you get all the following with zero configuration required - cryptographic
   node ID, mutual authentication, automatic CA configuration, automatic certificate rotation, encrypted cluster store,
   encrypted networks.
 
--   Docker content trust lets yo sign your images and verify the integrity and publisher of images you pull
+- Docker content trust lets yo sign your images and verify the integrity and publisher of images you pull
 
--   Docker Security Scanning analyses Docker images, detects known vulnerabilities and provides you with a detailed
+- Docker Security Scanning analyses Docker images, detects known vulnerabilities and provides you with a detailed
   report.
 
--   Docker secrets - makes secrets first class citizens in the Docker ecosystem, they get stored in the encrypted
+- Docker secrets - makes secrets first class citizens in the Docker ecosystem, they get stored in the encrypted
   cluster store, encrypted in flight when delivered to containers, and stored in in-memory filesystems when in use
 
 ## Definition
@@ -1668,46 +1668,46 @@ feels like multiple isolate operating systems, this lets us do really cool thing
 same OS without having port conflicts, it also lets us run multiple apps on the same OS without them fighting over shared
 configuration files and shared libraries.
 
--   You can run multiple web servers, each requiring port 443 on a single OS. To do this you jut run each web server app
+- You can run multiple web servers, each requiring port 443 on a single OS. To do this you jut run each web server app
   inside its own network `namespace`.This works because each network `namespace` gets its own IP address and full range of
   ports.
 
--   You can run multiple apps each requiring their own particular version of a shared library or configuration file. To do
+- You can run multiple apps each requiring their own particular version of a shared library or configuration file. To do
   this you run each app inside of its own mount namespace. This works because each mount `namespace` can have its own
   isolated copy of any directory on the system (/etc, /var, /dev etc.)
 
 Docker on Linux currently utilizes the following kernel types of `namespaces`:
 
--   Process id (pid)
--   Network (net)
--   Filesystem mount (mnt)
--   Inter-process communication (ipc)
--   User (user)
--   UTS
+- Process id (pid)
+- Network (net)
+- Filesystem mount (mnt)
+- Inter-process communication (ipc)
+- User (user)
+- UTS
 
 `A docker container is an organized collection of namespaces.` For example every container is made up of its own `pid,
 net, mnt, ipc, uts and potentially user namespaces`. The organized collection of these is what we call a container.
 
--   PID - `namespace` - docker uses the pid `namespace` to provide isolated process trees for each container, every
+- PID - `namespace` - docker uses the pid `namespace` to provide isolated process trees for each container, every
   container gets it own process tree meaning that every container can have its own PID 1, PID `namespaces` also mean that a
   container can not have see or access to the process tree of other containers or host processes it's running on
 
--   Network - docker uses the net `namespace` to provide each container its own isolated network stack, this stack
+- Network - docker uses the net `namespace` to provide each container its own isolated network stack, this stack
   includes interfaces, IP addresses, port ranges, and routing tables, for example every container gets its own `eth0`
   interface with its own unique IP and range of ports
 
--   Mount - every container gets its own unique isolate `root/filetsystem`. This means that every container can have its
+- Mount - every container gets its own unique isolate `root/filetsystem`. This means that every container can have its
   own `/etc, /var, /dev etc`. Processes inside of a container cannot access the mount `namesapce` of the Linux host, or other
   containers, they can only see and access their own isolate mount `namespace`.
 
--   Inter process communication - docker uses the IPC `namespace` for shared memory access within a container. It also
+- Inter process communication - docker uses the IPC `namespace` for shared memory access within a container. It also
   isolates the container from shared memory outside of the container.
 
--   User - docker lets you use the user `namespace` to map users inside of a container to a different user on the Linux
+- User - docker lets you use the user `namespace` to map users inside of a container to a different user on the Linux
   host, a common example would be mapping the root user of a container to a non-root user on the Linux host, user
   `namespaces` are quite new to Docker and are currently optional
 
--   UTS - docker uses the UTS `namespace` to provide each container with its own `hostname`.
+- UTS - docker uses the UTS `namespace` to provide each container with its own `hostname`.
 
 ### Control groups
 
@@ -1727,10 +1727,10 @@ backside running containers as non-root, non root is so powerless it is practica
 technology that lets us pick and choose which root powers our containers need in in order to run. Under the hood the
 Linux root account is made up of a long list of capabilities, some these include
 
--   `CAP_SHOWN` - lets you change file ownership
--   `CAP_NET_BIND_SERVICE` - lets you bind a socket to low numbered network ports
--   `CAP_SETUPID` - lets you elevate the privilege level of a process
--   `CAP_SYS_BOOT` - lets you reboot the system.
+- `CAP_SHOWN` - lets you change file ownership
+- `CAP_NET_BIND_SERVICE` - lets you bind a socket to low numbered network ports
+- `CAP_SETUPID` - lets you elevate the privilege level of a process
+- `CAP_SYS_BOOT` - lets you reboot the system.
 
 Docker works with capabilities so that you can run containers as root, but strip out the root capabilities that you do
 not need. For example if the only root privilege your container needs is the ability to bind to low numbered network
@@ -1767,12 +1767,12 @@ control plane of the cluster and are responsible for configuring the cluster and
 nodes that run your application code as containers. As expected, swarm mode includes many security features that are
 enabled out of the box with a sensible defaults. These include
 
--   Cryptographic node IDs
--   mutual authentication via TLS
--   secure join tokens
--   CA configuration with automatic certificate rotation
--   Encrypted cluster store (config DB)
--   Encrypted networks
+- Cryptographic node IDs
+- mutual authentication via TLS
+- secure join tokens
+- CA configuration with automatic certificate rotation
+- Encrypted cluster store (config DB)
+- Encrypted networks
 
 The moment the `docker swarm init` command is executed, the default security configurations take place out of the box,
 with sensible defaults as already mentioned, The swarm has been given a cryptographic ID, and `mgr1` has issues itself
@@ -1789,10 +1789,10 @@ distinct join tokens - one for joining new managers and one for joining new work
 format of the Swarm join token, every join token is comprised of 4 distinct fields separated by dashes, the format looks
 like that - `PREFIX - VERSION - SWARM ID - TOKEN`.
 
--   The prefix is always - `SWMTKN`.
--   The version fields indicates the version of the Swarm
--   The Swarm ID field is a hash of the swarm's certificate.
--   The token portion is the part that determines if the token can be used to join node as manager or worker.
+- The prefix is always - `SWMTKN`.
+- The version fields indicates the version of the Swarm
+- The Swarm ID field is a hash of the swarm's certificate.
+- The token portion is the part that determines if the token can be used to join node as manager or worker.
 
 If you suspect that either of your join tokens has been compromised you can revoke them and issue new ones with a single
 command, the following example revokes the existing manager join token and issues a new one, `docker swarm join-token
@@ -1827,9 +1827,9 @@ Subject Public Key Info:
 The Subject data in the output above uses the standard `O, OU, and CN` fields to specify the Swarm ID, the node's role and
 the node ID.
 
--   The organization `O` field stores the Swarm ID
--   The organizational unit `OU` field stores the nodes role in the Swarm
--   The canonical name `CN` field stores the nodes crypto ID
+- The organization `O` field stores the Swarm ID
+- The organizational unit `OU` field stores the nodes role in the Swarm
+- The canonical name `CN` field stores the nodes crypto ID
 
 Some of the certificate properties can be configured, like for example the rotation period with the following command
 `docker warm update --cert-expiry 720h`, this will set the expiration of the certificate to 30 days instead of the
@@ -1870,10 +1870,6 @@ running one instance of the red and one instance of the blue (due to the fact th
 total, one of the workers is bound to have 2 tasks/containers running on it, in this case one of each kind - red and
 blue). Now the challenge here is how to distribute the secret to the workers, without leaking the information to
 tasks/containers that must not see it.
-
-```txt
-
-```
 
 1.  The secret is created and posted to the Swarm
 2.  It gets stored in the encrypted cluster store

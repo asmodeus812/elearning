@@ -6,10 +6,11 @@ application that you can just run.
 
 ## Document Prerequisites
 
-This introduction is written to developers and readers who already have experience with Java, Spring, Maven and
-Gradle, you can easily understand the concepts of Spring Boot, if you have the aforementioned knowledge already. If
-you are a beginner we suggest you to go through some resources which serve as introduction to the topics and
-technologies mentioned above before you start reading this resource.
+This introduction is written to developers and readers who already have experience with Java, Spring, Maven and Gradle,
+you can easily understand the concepts of Spring Boot, if you have the aforementioned knowledge already. If you are a
+beginner we suggest you to go through some resources which serve as introduction to the topics and technologies
+mentioned above before you start reading this resource. This document mainly focuses on working with Spring Boot 3.0.0,
+and Spring 6.0.0.
 
 ## Spring and Spring boot
 
@@ -61,180 +62,11 @@ public class DemoApplication {
 }
 ```
 
-# Modern guidelines
-
-### 1. Use `record` for DTOs
-
-- Auto-generates `equals()`, `hashCode()`, `toString()`, and getters.
-- Immutable by design (no Lombok needed).
-- Request/response DTOs (`@RequestBody`, `@ResponseBody`).
-- Immutable configuration properties (`@ConfigurationProperties`).
-
-```java
-public class UserDto {
-    private final String name;
-    private final int age;
-    // Boilerplate: constructor, getters, equals, hashCode, toString
-}
-```
-
-```java
-public record UserDto(String name, int age) { }
-```
-
-### 2. Prefer `var` for Local Variables (Judiciously)
-
-- Use `var` when the type is obvious (e.g., `new` expressions, builders).
-- Avoid `var` if it reduces readability (e.g., `var result = service.process()`).
-
-```java
-List<String> names = new ArrayList<>();
-```
-
-```java
-var names = new ArrayList<String>();
-```
-
-### 3. Replace Lombok with Java Language Features
-
-- Use `record` for DTOs (replaces `@Data`, `@Value`).
-- Use compact constructors:
-- When to Keep Lombok:
-    - `@Slf4j` (still concise).
-    - `@Builder` (until Java gets a native builder pattern).
-
-```java
-@Data
-@Builder
-public class Product { ... }
-```
-
-```java
-public record Product(String id, String name) {
-    public Product {
-        Objects.requireNonNull(id);
-    }
-}
-```
-
-### 4. Sealed Classes for Domain Models
-
-- Explicitly restricts inheritance (better domain modeling).
-- Works great with Spring Data JPA `@Entity` hierarchies.
-
-```java
-public abstract class Shape { ... }
-public class Circle extends Shape { ... }  // Unlimited extensibility
-```
-
-```java
-public sealed class Shape permits Circle, Rectangle { ... }
-```
-
-### 5. Pattern Matching (`instanceof` and `switch`)
-
-- Cleaner controller logic (e.g., handling polymorphic DTOs).
-
-```java
-if (obj instanceof String) {
-    String s = (String) obj;
-    System.out.println(s.length());
-}
-```
-
-```java
-if (obj instanceof String s) {
-    System.out.println(s.length());
-}
-```
-
-### 6. Text Blocks for JSON/HTML/SQL
-
-- `@Sql` annotations in internal tests.
-- Hardcoded API response examples.
-
-```java
-String json = "{\"name\":\"John\", \"age\":30}";
-```
-
-```java
-String json = """
-    {
-        "name": "John",
-        "age": 30
-    }
-    """;
-```
-
-### 7. Null Checks with `Objects.requireNonNullElse`
-
-```java
-return name != null ? name : "default";
-```
-
-```java
-return Objects.requireNonNullElse(name, "default");
-```
-
-### 8. HTTP Interface Clients (Java 21+)
-
-- No need for `@FeignClient` (standard Java interface).
-
-```java
-@FeignClient(url = "https://api.example.com")
-public interface UserClient {
-    @GetMapping("/users/{id}")
-    User getUser(@PathVariable String id);
-}
-```
-
-```java
-public interface UserClient {
-    @GetExchange("/users/{id}")
-    User getUser(String id);
-}
-```
-
-### 9. Avoid `@Autowired` use Constructor Injection Only
-
-- Immutable dependencies (thread-safe, no Lombok `@RequiredArgsConstructor` needed).
-
-```java
-@Autowired
-private UserService userService;
-```
-
-```java
-private final UserService userService;
-
-public UserController(UserService userService) {
-    this.userService = userService;
-}
-```
-
-### 10. Switch Expressions
-
-```java
-switch (status) {
-    case "OK": return 200;
-    case "BAD": return 400;
-    default: return 500;
-}
-```
-
-```java
-return switch (status) {
-    case "OK" -> 200;
-    case "BAD" -> 400;
-    default -> 500;
-};
-```
-
-# Getting started
+## Getting started
 
 This section will teach you how to create a Spring Boot application using Maven and Gradle.
 
-## Command line interface
+### Command line interface
 
 The Spring Boot CLI is a command line tool and it allows us to run the Groovy scripts. This is the easiest way to create
 a Spring Boot application by using the Spring Boot Command Line Interface. You can create, run and test the application
@@ -254,7 +86,9 @@ $ spring init spring-boot --java-version=17 --build=maven
 # here is the list, heavily abridged for demonstration purposes, that lists what are the supported dependencies, project
 # types and, different project parameters one can pass to the spring cli to construct a project skeleton
 $ spring init --list
+```
 
+```
 Supported dependencies
 +--------------------------------------------+--------------------------------------------------------------+-----------------------+
 | Id                                         | Description                                                  | Required version      |
@@ -301,8 +135,7 @@ Supported dependencies
 | zipkin                                     | Enable and expose span and trace IDs to Zipkin.              |                       |
 +--------------------------------------------+--------------------------------------------------------------+-----------------------+
 
-
-Project types (* denotes the default)
+Project types
 +-----------------------+--------------------------------------------------------------+--------------------------------------------+
 | Id                    | Description                                                  | Tags                                       |
 +-----------------------+--------------------------------------------------------------+--------------------------------------------+
@@ -337,7 +170,7 @@ Parameters
 +-------------+------------------------------------------+------------------------------+
 ```
 
-## Getting started
+### Getting started
 
 Spring boot provides a number of starters to add the jars in our class paths, for example for writing a rest endpoint we
 end to add the spring-boot-starter-web dependency in our class path. Observe the codes shown below for a better
@@ -371,7 +204,7 @@ public class HelloWorldController {
 }
 ```
 
-## Packaging application
+### Packaging application
 
 Creating an executable JAR. Let us create and executable JAR file to run the Spring Boot Application, by using Maven or
 Gradle. The Spring executable JAR is somewhat different than regular JAR files which one can execute, the Spring `JARs`
@@ -390,27 +223,30 @@ file, we are not going to be using the regular maven package plugin - `maven-jar
 </parent>
 ```
 
+This is what we might expect to see in our jar if we were to extract its contents out
+
 ```
-BOOT-INF/
-    ├── classes/      # Your compiled application classes
-    ├── lib/          # All dependency JARs
-META-INF/
-    ├── MANIFEST.MF   # Defines the launcher class
-org/springframework/boot/loader/
-    ├── JarLauncher.class  # Spring Boot's custom launcher
+my-app.jar
+├── BOOT-INF/
+│       ├── classes/      # Your compiled application classes
+│       ├── lib/          # All dependency JARs
+├── META-INF/
+│       ├── MANIFEST.MF   # Defines the launcher class
+└── org/springframework/boot/loader/
+        ├── JarLauncher.class  # Spring Boot's custom launcher
 ```
 
 - Spring Boot uses `JarLauncher` (from `spring-boot-loader`) to **bootstrap** the application.
 - This launcher knows how to load classes from `BOOT-INF/classes` and `BOOT-INF/lib`, unlike the standard Java classloader.
 - All dependencies are **embedded** in the JAR (no need for an external `lib` folder).
-- Avoids `classpath` issues when deploying.
+- Avoids `classpath` issues when deploying, everything is packaged together.
 
 How does it work ? If we compare the standard jar packaging plugin provided by maven to the spring one. The Standard
 maven plugin would package the JAR without including the dependencies or libraries that our project depends on, just the
 compiled classes for our project, the structure of a standard jar might look something like that
 
 ```
-your-app.jar
+my-app.jar
 ├── META-INF/
 │   └── MANIFEST.MF       # Basic metadata (Main-Class points directly to your app)
 ├── com/
@@ -518,13 +354,13 @@ execute this process:
 So if we want to really compare both here is what we have established so far, the main differences between the
 maven-jar-plugin and the spring-boot-maven-plugin.
 
-| Feature           | `maven-jar-plugin`              | `spring-boot-maven-plugin`          |
-| ----------------- | ------------------------------- | ----------------------------------- |
-| **Dependencies**  | Not included (external `lib/`)  | Embedded in `BOOT-INF/lib/`         |
-| **Main-Class**    | Directly points to your class   | Delegates to `JarLauncher`          |
-| **Class Loading** | Standard JVM classloader        | Custom `LaunchedURLClassLoader`     |
-| **Runnable**      | Requires manual classpath setup | Works with `java -jar`              |
-| **Web Server**    | Needs external Tomcat/Jetty     | Embedded server (Tomcat/Netty/etc.) |
+| Feature           | `maven-jar-plugin`              | `spring-boot-maven-plugin`            |
+| ----------------- | ------------------------------- | ------------------------------------- |
+| **Dependencies**  | Not included (external `lib/`)  | Embedded in `BOOT-INF/lib/`           |
+| **Main-Class**    | Directly points to your class   | Delegates to `JarLauncher`            |
+| **Class Loading** | Standard JVM classloader        | Custom `LaunchedURLClassLoader`       |
+| **Runnable**      | Requires manual classpath setup | Works with simple call to `java -jar` |
+| **Web Server**    | Needs external Tomcat/Jetty     | Embedded server (Tomcat/Netty/etc.)   |
 
 There is another type of JAR archive, called a WAR application, this is another type of JAR that is deployed on a web
 server, unlike the JAR file, the WAR has a different format and specification this is because the web server where this
@@ -534,7 +370,7 @@ A **WAR** is a specialized JAR used for **web applications** (e.g., Servlet-base
 strict structure defined by the `Java EE/Jakarta EE` spec and is deployed to **external servers** (e.g., Tomcat, Jetty,
 WildFly).
 
-```plaintext
+```
 my-app.war
 ├── WEB-INF/
 │   ├── classes/       # Your compiled classes (e.g., `com.yourpackage`)
@@ -560,7 +396,7 @@ To setup and deploy the application you can simply do
 ```sh
 $ mvn clean package  # Generates `target/my-app.war`
 $ cp target/my-app.war /opt/tomcat/webapps/
-# Tomcat unpacks the WAR and starts the app.
+## Tomcat unpacks the WAR and starts the app.
 ```
 
 To be able to share common libraries, we can use the special directory that tomcat checks, where we can Place common
@@ -644,7 +480,7 @@ shared implementation libraries that are going to be provided by the web server 
     - Never packaged.
     - **Example**: `junit` (test-only dependency).
 
-## Build system
+### Build system
 
 In Spring Boot, choosing a build system is an important task. We recommend Maven or Gradle as they provide a good
 support for dependency management. Spring does not support well other build systems.
@@ -656,18 +492,18 @@ will upgrade automatically. This is achieved by the parent BOM spring dependency
 stands for bill of materials, is a set of pre-defined list of dependencies. The spring BOM has a version, which carries
 with it the correct combination of all spring dependency versions.
 
-## Best practices
+### Best practices
 
 Spring Boot does not have any code layout to work with. However, there are some best practices that will help us. This
 chapter talks about them in detail.
 
-### Default packages
+#### Default packages
 
 A class that does not have any package declaration is considered as a **default package**. Note that generally a default
 package declaration is not recommended. Spring Boot will cause issues such as malfunctioning of Auto Configuration or
 Component Scan, when you use default package.
 
-### Typical layout
+#### Typical layout
 
 It is generally accepted that at the root name of the artifact id for the project - `com.myapp.project`, we should have
 the Application.java file, which contains the Main class, this is due to the fact that any class annotated with the
@@ -675,7 +511,7 @@ the Application.java file, which contains the Main class, this is due to the fac
 if we put the main class at `com.myapp.project`, then everything under this root package name will be considered for
 injection by the spring components.
 
-### Application context
+#### Application context
 
 First it is prudent to understand what is the app context in spring, that is what gets initialized the moment the spring
 container starts, that is not a docker container, but a container that starts to load and create various different java
@@ -763,7 +599,7 @@ autoconfiguration policies baked into Spring Boot extend across these areas:
 • Spring WebSocket - Support for the WebSocket messaging web protocol
 ```
 
-### Auto-configuration
+#### Auto-configuration
 
 As mentioned in spring we have a concept called an Auto configuration, this is a process by which spring picks specific
 pre-defined beans on the class path. The way it works is by defining a special type of file that contains the full path
@@ -810,7 +646,7 @@ framework/layout the moment it starts, this is very early on, unlike the @Config
 later and created later, also the auto-configuration classes specified in the imports file do not require any type use
 of the scanBasePackages to be used`
 
-### @Configuration
+#### @Configuration
 
 On another hand we have the `@Configuration` annotation, that is a bit different since it is discovered through component
 scanning, which is a different process in spring, it also occurs in a different stage of the application startup
@@ -838,7 +674,7 @@ The general rule of thumb, is that if you are creating a library or re-usable co
 provide your own imports file, this would avoid having your package's users or clients to have to include the base
 package of your library or component every time into the `ComponentScan.scanBasePackages annotation`.
 
-### Spring Boot Starters
+#### Spring Boot Starters
 
 As we have already stated spring provides a multitude of starter projects that can be used to bootstrap your project,
 these usually contain mostly auto-configurations and glue logic between different primary dependencies and libraries.
@@ -872,7 +708,7 @@ the Eclipse Foundation. So, the Java community chose Jakarta as the new brand go
 Jakarta EE 9+ is the official version that Spring Boot 3.0 supports. For more details, checkout
 my video What is Jakarta EE? at https://springbootlearning.com/jakarta-ee`
 
-## Application properties
+### Application properties
 
 Application Properties support us to work in different environments. In this section, you are going to see how to
 configure and specify the properties to a Spring Boot application.
@@ -912,7 +748,7 @@ defined in order of most precedence to the least precedence.
 
 5. **Default `application.yml`/`application.properties`**.
 
-### Command line
+#### Command line
 
 Spring Boot application converts the command line properties into Spring Boot Environment properties. Command line
 properties take precedence over the other property sources. By default, Spring Boot uses the 8080 port number to start
@@ -920,22 +756,22 @@ the Tomcat. Let us learn how change the port number by using command line proper
 certain properties on the command line, such that they will take precedence over the ones with which the app was packaged
 
 ```sh
-# Values will override any `server.port` or `spring.datasource.url` defined in `application.yml`.
+## Values will override any `server.port` or `spring.datasource.url` defined in `application.yml`.
 $ java -jar your-app.jar --server.port=8081 --spring.datasource.url=jdbc:mysql://localhost:3306/mydb
 
-# Properties in the `custom-config.yml` will **override** those in `application.yml`.
-# Add `classpath:` for files in the classpath (e.g., `classpath:override.properties`).
+## Properties in the `custom-config.yml` will **override** those in `application.yml`.
+## Add `classpath:` for files in the classpath (e.g., `classpath:override.properties`).
 $ java -jar your-app.jar --spring.config.location=file:/path/to/custom-config.yml
 
-# Merge with additional files without actually replacing the packaged `application.yml`:
+## Merge with additional files without actually replacing the packaged `application.yml`:
 $ java -jar your-app.jar --spring.config.additional-location=file:/path/to/extra.properties
 ```
 
-### Environment
+#### Environment
 
 There are several ways to override the properties through the environment,
 
-#### Core Spring Boot Variables
+##### Core Spring Boot Variables
 
 | Env Variable                        | Effect                                                          |
 | ----------------------------------- | --------------------------------------------------------------- |
@@ -945,7 +781,7 @@ There are several ways to override the properties through the environment,
 | `SPRING_PROFILES_ACTIVE`            | Sets active profiles (e.g., `prod,debug`).                      |
 | `SPRING_CLOUD_CONFIG_ENABLED`       | Disables/configures Spring Cloud Config (e.g., `false`).        |
 
-#### Logging and Debugging
+##### Logging and Debugging
 
 | Env Variable                            | Effect                                         |
 | --------------------------------------- | ---------------------------------------------- |
@@ -954,7 +790,7 @@ There are several ways to override the properties through the environment,
 | `LOGGING_LEVEL_org.springframework.web` | Sets package-specific logging (e.g., `DEBUG`). |
 | `SPRING_OUTPUT_ANSI_ENABLED`            | Force ANSI color output (e.g., `ALWAYS`).      |
 
-#### Server and Database Overrides
+##### Server and Database Overrides
 
 | Env Variable                  | Effect                                               |
 | ----------------------------- | ---------------------------------------------------- |
@@ -967,7 +803,7 @@ There are several ways to override the properties through the environment,
 Replace `.` with `_` and uppercase (e.g., `server.port` → `SERVER_PORT`). Nested keys: `spring.datasource.url` →
 `SPRING_DATASOURCE_URL`.
 
-#### Overriding with `JAVA_TOOL_OPTIONS`
+##### Overriding with `JAVA_TOOL_OPTIONS`
 
 If you can’t use Spring-specific vars, pass the Java system properties, which will be picked up by spring, since it does
 a lookup in order of environment variables, system variables, and then proceeds with startup arguments
@@ -976,7 +812,7 @@ a lookup in order of environment variables, system variables, and then proceeds 
 export JAVA_TOOL_OPTIONS="-Dserver.port=8081 -Ddebug=true"
 ```
 
-### Properties file
+#### Properties file
 
 Properties files are used to keep 'N' number of properties in a single file to run the application in a different
 environment. In Spring Boot, properties are kept in the **application.[properties/yml]** files under the classpath. The
@@ -996,7 +832,7 @@ server:
     port: 8080
 ```
 
-### @Value
+#### @Value
 
 The @Value annotation is used to read the environment or application property value in Java code. The syntax to read the
 property value is shown below:
@@ -1006,7 +842,7 @@ property value is shown below:
 private String applicationName;
 ```
 
-### @ConfigurationProperties
+#### @ConfigurationProperties
 
 The `ConfigurationProperties` annotation is used to group and combine a set of configuration properties that have
 common root, what we usually do is to define a common root path and then define and declare the structure of these
@@ -1052,7 +888,7 @@ Now in order to make spring create instances we have to use either one of these
 The `@EnableConfigurationProperties` or the `@ConfigurationPropertiesScan` is usually put onto a `@Configuration`
 annotated class, say a class named - `ConfigurationPropertiesEnabler` that is part of our
 
-### @ConditionalOnProperty
+#### @ConditionalOnProperty
 
 Besides the usual usage of properties in the spring context, we can also decide if a bean has to be created based on
 the presence or absence of a property or even if the property matches some condition such as a value etc.
@@ -1089,7 +925,7 @@ A more advanced example which not only uses the value's presence but also create
 specific value this property has, and note that no bean will be created by default if the value for example was
 present but did not match any of these
 
-## Spring Profiles
+### Spring Profiles
 
 Spring boot supports different properties based on the Spring active profile. For example we can keep two separate files
 for development and production to run the Spring Boot application, or we can also use multi-document setup in the same
@@ -1139,7 +975,7 @@ $ java -jar <demo-application>.jar --spring.profiles.active=dev
 com.tutorialspoint.demo.DemoApplication : The following profiles are active: dev
 ```
 
-## Spring Logging
+### Spring Logging
 
 Spring Boot uses `Apache Commons logging` for all internal logging. Spring Boot's default configurations provides a
 support for the use of Java Util Logging, Log4j2, and Logback. Using these, we can configure the console logging as well
@@ -1164,20 +1000,20 @@ This is what the starter maven dependency for the spring logging pulls into your
 [INFO] |  \- org.slf4j:jul-to-slf4j:jar:2.0.17:compile
 ```
 
-### SLF4J (Simple Logging Facade for Java)
+#### SLF4J (Simple Logging Facade for Java)
 
 - **Role**: Abstraction layer (facade) over concrete logging implementations.
 - **Purpose**: Decouples your code from specific logging frameworks.
     - Provides a unified API (e.g., `LoggerFactory.getLogger()`).
     - Allows switching implementations (Logback, Log4j2, etc.) without code changes.
 
-### Logback
+#### Logback
 
 - **Default in Spring Boot**.
     - Native SLF4J implementation (no adapter needed).
     - Fast, flexible configuration via `logback.xml`.
 
-### Log4j2
+#### Log4j2
 
 - **Successor to Log4j 1.x**.
 - **Strengths**:
@@ -1236,7 +1072,7 @@ logging:
         org.springframework.web: DEBUG
 ```
 
-## Dependency versioning
+### Dependency versioning
 
 How does spring version its dependencies ? Most of the magic happens in the Spring Parent BOM (bill of materials)
 along side the spring boot stater projects which package all of the dependencies for a given starter to work out of
@@ -1302,7 +1138,7 @@ release. This BOM is released alongside Spring Boot’s actual code. All we have
 Boot parent (spring-boot-starter-parent) in our build file then the latest starter will be used, and everything will
 update and follow pulling the necessary updates from the versions defined int the BOM.`
 
-# Templates
+## Templates
 
 One of the primary use-cases of web applications is to provide some sort of content to the end-user, we will first start
 our journey with templates, or in other words, generate some html content. These templates are a domain specific driven
@@ -1319,15 +1155,17 @@ mixed in with html,css and javascript to generate a dynamic content that the ser
 </dependency>
 ```
 
-We need to define a bean annotated with Controller, note that is a regular MVC controller, and not a RestController, we
+We need to define a bean annotated with Controller, note that is a regular MVC controller, and not a `RestController`, we
 will investigate the difference down later below. By default the Controller annotated beans in Spring are expected to
 return the name of a view - in this case that would be "index". That name will be used to discover the static or dynamic
 view that needs to be delivered to the client. That is different to what the RestController annotated beans return by
 default, which is plain data/content that is delivered as is to the user.
 
+### Content Controller
+
 ```java
 @Controller
-public class IndexController {
+public class TemplateControllerController {
 
     @GetMapping("/")
     public String index() {
@@ -1340,27 +1178,212 @@ Finally create the index file under `src/main/resources/index.moustache`, that i
 view is picked and that this file is going to be considered by the moustache templating engine and evaluated before
 it is delivered to the client. The file can contain any valid html
 
-```moustache
+```html
 <h1>Greetings Learning Spring Boot 3.0 fans!</h1>
 ```
 
 You can experiment by renaming the file to simply index.html which will deliver the file but no dynamic templating
 will be done
 
-# Restful services
+We can expand the controller by defining a model for our MVC structure, that would help us generate a dynamic
+template,
+
+```java
+import org.springframework.ui.Model;
+
+@Controller
+public class TemplateController {
+
+    record Video(String name) {
+    }
+
+    private List<Video> videos = new ArrayList<>();
+
+    {
+        videos.add(new Video("one"));
+        videos.add(new Video("two"));
+        videos.add(new Video("three"));
+        videos.add(new Video("four"));
+    }
+
+    @GetMapping("/")
+    public String index(Model model) {
+        // add the videos as an attribute to the model, note that we are adding the entire collection, Mustache
+        // has a way of determining if a certain structure is Iterable and allows us to iterate over the elements
+        // it contains instead of trying to parse or display it as a normal non-iterable element
+        model.addAttribute("videos", videos);
+        return "index";
+    }
+
+    @PostMapping("/new-video")
+    public String add(@ModelAttribute Video video) {
+        // add the video back to the list of videos, that is persistent until our application is still running,
+        // we are going to change this soon.
+        videos.add(video);
+        // redirect here tells the browser to soft re-direct 302, that is not the same as redirect 301, which is
+        // permanent redirect, it is not bad to know the difference.
+        return "redirect:/";
+    }
+}
+```
+
+Modify the index file to contain the following, this template expands the videos attribute that was added in our
+controller, that attribute can then be directly referenced and expanded in the template
+
+```html
+<h1>Greetings Learning Spring Boot 3.0 fans!</h1>
+<ul>
+    <b>{{#videos}}</b>
+    <li>{{name}}</li>
+    <b>{{/videos}}</b>
+</ul>
+<form action="/new-video" method="post">
+        <input type="text" name="name" />     <button type="submit">Submit</button>
+</form>
+```
+
+One thing to note here is the way we have defined the `form html` tag for this change, you can see here that the
+post action is directly linked to the `new-video` action which will be intercepted by the spring dispatcher servlet,
+and that will be then resolved and called.
+
+What is important is the way it is going to be resolved, the add method will be called with a model attribute, similarly
+to how RESTful controllers work, we can intercept the body of the form by using either `@ModelAttribute` or the
+`@RequestParam`, either one will attempt to read the from the request's parameters - query parameters, form attributes
+and fields, do not confuse this with `@RequestBody`, that annotation is meant to be used to intercept the body of the
+request but the form body is encoded part of the body of an HTTP payload, however it is treated differently by the
+Servlet and the web server.
+
+We have an expanded and a more complete example below that demonstrates how we can leverage the different actions
+like update an delete for a video for our video store. The controller is also using a new video service that
+provides the actual business logic to manipulate the video store, the implementation we will take a look later but
+for now what is important to note are the few nuanced methods here.
+
+`First note that since we use simple forms to send data back to the server, we can only use two methods - POST and
+GET, HTML forms do not support any other verbs besides these two basic ones as of 2025`
+
+```java
+@Controller
+public class TemplateController {
+
+    private final VideosService videosService;
+
+    public TemplateController(VideosService videosService) {
+        this.videosService = videosService;
+    }
+
+    @GetMapping("/")
+    public String index(Model model) {
+        model.addAttribute("videos", videosService.getVideos());
+        return "index";
+    }
+
+    // to create a new video we simply need a new name for the video that is the primary data that the user sees
+    // when the video is displayed along side a unique id which is automatically generated and incremented on each
+    // new video that is being created
+    @PostMapping("/new-video")
+    public String add(@RequestParam("name") String newVideoName) {
+        videosService.addVideo(newVideoName);
+        return "redirect:/";
+    }
+
+    // just as the delete-method we leverage the path variable to pull the id of the video, which we have bound
+    // in the template, for each video from the list we have created an inner-inlined form each of which has a
+    // unique delete-video/video-id URL that has been called. Further more note that we also pull the argument
+    // from the FORM data, in this case the name which comes from the input box, that is where the new name for the
+    // video will be located,
+    @PostMapping("/update-video/{id}")
+    public String update(@PathVariable("id") Integer target, @RequestParam("name") String newVideoName) {
+        videosService.updateVideo(target, newVideoName);
+        return "redirect:/";
+    }
+
+    // we are leveraging the spring framework's capabilities to be able to pull the actual argument from the URL,
+    // here we create a template of the URL and in the method we are able to inject that name argument from the URL
+    // as a path variable, more on these in the next chapter for RESTful
+    @PostMapping("/delete-video/{id}")
+    public String delete(@PathVariable("id") Integer target) {
+        videosService.deleteVideo(target);
+        return "redirect:/";
+    }
+}
+```
+
+The changes to the template introduce two new actions that are added to the video list, next to each video we have
+two new actions to either delete it or update it, both call the template controller methods for their respective
+actions.
+
+```html
+<h2>List of videos</h2>
+<ul>
+        <b>{{#videos}}</b>
+    <li>
+        <b>{{ getId }}: {{ getName }}</b>
+        <form action="/update-video/{{ getId }}" method="post" style="display: inline">
+            <input type="text" value="{{ getName }}" placeholder="Update video name" name="name" />     
+            <button type="submit">Update</button>
+        </form>
+        <form action="/delete-video/{{ getId }}" method="post" style="display: inline">
+            <button type="submit">Delete</button>
+        </form>
+    </li>
+    <b>{{/videos}}</b>
+</ul>
+
+<h2>Videos actions</h2>
+<form action="/new-video" method="post">
+        <input type="text" value="" placeholder="New video name" name="name" />     
+    <button type="submit">Submit</button>
+</form>
+```
+
+With these changes, the example concludes - represents the full expanded implementation that takes care of the
+most basic CRUD operations and demonstrates how we can communicate between the server rendered content in plain html
+here, and the server itself.
+
+## RESTful
+
+By now the world has converged on a handful of formats one of those formats is JSON, by default when we introduced the
+web starter spring portfolio project into our dependencies it has already pulled something called Jackson, that is the
+de-facto standard de-serializer for the web these days, and more specifically for JSON structures it allows one to
+serialize and de-serialize JSON data from and into java objects and java beans
 
 Before you proceed to build a RESTful web service, it is suggested that you have knowledge of the following annotations:
 The `@RestController` annotation is used to define the RESTful web services. It serves JSON, XML and custom response. Its
 syntax is shown below:
 
+The `@RestController` annotation has one key difference when compared to the `@Controller` annotation unlike the
+@Controller annotation which expects that all methods return a name for a view, the `@RestController` treats the return
+data as a JSON payload, converting everything we return into json. There are other caveats, but both annotations are
+eligible for bean injection, and bean creation, they are both discovered by the spring container and spring creates and
+manages instances of these controllers internally, handling the template and RESTful based controllers itself. It is
+advised that these two annotation are not mixed on the same java bean controller because the Spring container
+environment might become confused.
+
 ```java
 @RestController
 public class ProductServiceController {
-    // controller class implementation goes here
+    // controller class implementation goes here, along with methods that accept and return JSON based content
 }
 ```
 
-## Request Mapping
+### Request Verbs
+
+Before we proceed with investigating the actual constructs that allow us to create restful requests and payloads, we
+need to understand what are the common practices of using that data. First let us take a look at some of the HTTP verbs
+
+- `GET` - this type of action is not meant to be mutating data but simply as the name implies retrieve data based on some criteria
+- `POST` - this type of action is usually meant to only create new piece of data and/or is expected to accept such data from the client
+- `PUT` - is used to update existing data and it is not usual to accept partial data to update existing records in the system
+- `DELETE` - is used to only delete existing data from the system, and nothing else
+
+There are other verbs that might be used in specific scenarios but for now we will keep our focus on these particular
+ones, you might have noticed that in the `TemplateController`, above we actually used POST mapping to accept the new
+form-data which is what is expected, when the form action button is clicked a POST method is actually send to the server
+with the data the client/user has entered into the form. Similarly in our `RestController` examples we will use POST to
+create data, the only meaningful difference is that the body of the request will no longer be form data but rather JSON
+data, the contents and meaning however do not change - just the communication language.
+
+### Request Mapping
 
 The `@RequestMapping` annotation is used to define the Request URI to access the REST Endpoints. We can define Request
 method to consume and produce object. The default request method is GET. However the annotation itself has a field that
@@ -1373,7 +1396,7 @@ plain direct usage of the `RequestMapping` annotation
 public ResponseEntity<Object> getProducts() { }
 ```
 
-## Request Body
+### Request Body
 
 The `@RequestBody` annotation is used to define the request body content type. This is relevant when the request method
 in question is of type that is different than GET, in those cases it is possible to send payload to the Servlet. The
@@ -1397,28 +1420,11 @@ public ResponseEntity<Object> createProductMap(@RequestBody Map<String, Object> 
 }
 ```
 
-## Path Variable
-
-The `@PathVariable` annotation is used to define the custom or dynamic request URI. The Path variable in request URI is
-defined as curly braces {} as shown below. This would inject the value of the templated entry in the path string in this
-case called {id} into the method argument, when the request is received, which would allow you to dynamically read a
-request value from the path. Take a good note of the name of the argument in the annotation - `id`, this has to match
-the value in the brackets. It is also possible to skip the value in the `@PathVariable` annotation, and the name would
-be inferred from the name of the argument of the function, this however is only possible if the jar is compiled with the
--parameter option passed to the compiler, that would tell the compiler to retain the name of the arguments at runtime,
-making them accessible to the annotation processor that injects the value into the arguments of the function, by reading
-their names
-
-```java
-@RequestMapping(method=RequestMethod.GET, value="/products/{id}")
-public ResponseEntity<Object> updateProduct(@PathVariable("id") String id) {
-}
-```
-
-## Request Parameter
+### Request Parameter
 
 The `@RequestParam` annotation is used to read the request parameters from the Request URL. By default, it is a required
-parameter. We can also set default value for request parameters as shown here:
+parameter. We can also set default value for request parameters as shown here. The Request parameter can either come
+as data from a form, or from the URL itself (also called query parameter).
 
 ```java
 // one would be able to call this GET endpoint such as follows schema://hostname/products?name=product-name, the query
@@ -1429,7 +1435,7 @@ public ResponseEntity<Object> getProduct(@RequestParam(value="name", required=fa
 }
 ```
 
-## Request Header
+### Request Header
 
 While a request is being built by the client it is possible to construct a custom header that can be passed in the
 header section of the HTTP payload, this header has a name and a value, in our case the name is `x-product-name` note
@@ -1442,7 +1448,7 @@ public ResponseEntity<Object> getProduct(@RequestHeader("X-Product-Name") String
 }
 ```
 
-## Request Attribute
+### Request Attribute
 
 The request attribute, is an internal construct that is attached to the request by the Servlet processor, as early as
 the request being captured by the web server, usually in the real world a special filter or interceptor might add some
@@ -1459,38 +1465,38 @@ public ResponseEntity<AuditLog> getProducts(@RequestAttribute("discount") Double
 }
 ```
 
-## Controller example
+### Path Variable
+
+The `@PathVariable` annotation is used to define the custom or dynamic request URI. The Path variable in request URI is
+defined as curly braces {} as shown below. This would inject the value of the templated entry in the path string in this
+case called {id} into the method argument, when the request is received, which would allow you to dynamically read a
+request value from the path. Take a good note of the name of the argument in the annotation - `id`, this has to match
+the value in the brackets. It is also possible to skip the value in the `@PathVariable` annotation, and the name would
+be inferred from the name of the argument of the function, this however is only possible if the jar is compiled with the
+-parameter option passed to the compiler, that would tell the compiler to retain the name of the arguments at runtime,
+making them accessible to the annotation processor that injects the value into the arguments of the function, by reading
+their names
 
 ```java
-@RestController
-public class ProductsController {
-
-    @PostMapping("/products-body")
-    public ResponseEntity<Object> getProductsQuery(@RequestBody ProductResourceRecord product) {
-        return ResponseEntity.of(Optional.ofNullable(product));
-    }
-
-    @GetMapping("/products-header")
-    public ResponseEntity<Object> getProductsHeader(@RequestHeader("name") String name) {
-        return ResponseEntity.of(Optional.ofNullable(name));
-    }
-
-    @GetMapping("/products-query")
-    public ResponseEntity<Object> getProductsQuery(@RequestParam("name") String name) {
-        return ResponseEntity.of(Optional.ofNullable(name));
-    }
-
-    @GetMapping("/products-path/{id}")
-    public ResponseEntity<Object> getProductsPath(@PathVariable("id") String id) {
-        return ResponseEntity.of(Optional.ofNullable(id));
-    }
-
-    @GetMapping("/products-discount")
-    public ResponseEntity<Object> getProductsDiscount(@RequestAttribute("discount") Double discount) {
-        return ResponseEntity.of(Optional.ofNullable(discount));
-    }
+// so we can call this endpoint with different paths and id arguments such as /products/1, /products/2 and so on, that
+// simplifies development as we are not required to have different endpoints for every possible variation of the id
+// that a product can have, and we are not forced to use query parameters to have an id provided by the user which
+// would be the natural alternative to this problem
+@RequestMapping(method=RequestMethod.GET, value="/products/{id}")
+public ResponseEntity<Object> updateProduct(@PathVariable("id") String id) {
 }
 ```
+
+It is important to note that unlike the other HTTP request 'parameters' that we can pull from a request, The path
+variable is something that the spring framework offers the actual underlying Servlet or the web server have no
+knowledge of this argument as it is not really part of the HTTP spec, like query parameters or the body of a request
+is
+
+### Frontend client
+
+So having introduced the different annotations and methods of extracting data from a request above we can actually
+also complete the description by introducing the actual front end, the client that will invoke those end points and
+how they are going to be invoked, how is the data actually going to be passed to them.
 
 ```http
 ### 1. POST with @RequestBody
@@ -1516,7 +1522,109 @@ GET http://localhost:8080/products-path/12345
 GET http://localhost:8080/products-discount
 ```
 
-# The Servlet
+### Rest controller
+
+Below we have adapted the original TemplateController to to a new implementation that matches what a RESTful based
+controller standard implementation might look like.
+
+```java
+@RestController("/api")
+public class RestfulController {
+
+    private final VideosService videosService;
+
+    public RestfulController(VideosService videosService) {
+        this.videosService = videosService;
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<Object> getMethodName() {
+        // the get is the simplest one it just returns all videos without any input arguments and parameters
+        return ResponseEntity.of(Optional.of(videosService.getVideos()));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Object> getProductsQuery(@PathVariable Integer id) {
+        // the delete mapping requires the path to be specific we have to call like such - /delete/1, otherwise if
+        // we call just /delete the DispatcherServlet will never find a matching path and throw 404
+        return ResponseEntity.of(Optional.of(videosService.deleteVideo(id)));
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Object> getProductsHeader(@PathVariable Integer id, @RequestBody Video video) {
+        // a more complex example that involves multiple arguments in this case an id provided in the path just
+        // as the delete above, we have to call specific /update/1, on top of that the request body has to contain
+        // a name, and must be of json
+        return ResponseEntity.of(Optional.ofNullable(videosService.updateVideo(id, video.getName())));
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<Object> getProductsQuery(@RequestBody Video video) {
+        // the create is rather simple it is again a method that requires a body of json payload to be provided
+        // and it has to contain a name in there.
+        return ResponseEntity.of(Optional.ofNullable(videosService.addVideo(video.getName())));
+    }
+}
+```
+
+So here is what the front end client might do with this controller, below we have a few examples of calling these
+methods for the controller expressed above, note that this is by no means an exhaustive list of the different
+combinations and method/verbs that can be used with a RESTful based controller, it is just the most basic core
+functionality that one might need for a quick start to get a grasp of what can be achieved.
+
+It is safe to say that the entirety of the HTTP request and response are available for access to the developer from
+Spring and there is no need to go to a lower level and operate with raw `Servlets` to achieve some complex flow
+
+```hurl
+@base_url = http://localhost:8080
+@json = application/json
+
+# -----------------------------------------------------------------------------
+# GET /  (list all videos)
+# -----------------------------------------------------------------------------
+GET {{base_url}}/
+HTTP 200
+
+# -----------------------------------------------------------------------------
+# POST /create  (create a new video)
+# -----------------------------------------------------------------------------
+POST {{base_url}}/create
+Content-Type: {{json}}
+
+{
+  "name": "Created from Hurl"
+}
+
+HTTP 200
+
+# -----------------------------------------------------------------------------
+# PUT /update/{id}  (update existing video)
+# Replace 1 with a real id that exists in your system.
+# -----------------------------------------------------------------------------
+PUT {{base_url}}/update/1
+Content-Type: {{json}}
+
+{
+  "name": "Updated from Hurl"
+}
+
+HTTP 200
+
+# -----------------------------------------------------------------------------
+# DELETE /delete/{id}  (delete existing video)
+# Replace 1 with a real id that exists in your system.
+# -----------------------------------------------------------------------------
+DELETE {{base_url}}/delete/1
+HTTP 200
+
+# -----------------------------------------------------------------------------
+# GET /  (verify list after changes)
+# -----------------------------------------------------------------------------
+GET {{base_url}}/
+HTTP 200
+```
+
+## Servlet
 
 Now let us deep dive into what is going on here, how does this work, how does all of this relate to the MVC Spring
 framework and the underlying web server, how do they tie up together. And how do our controllers - be it a restful one
@@ -1643,34 +1751,65 @@ involved here. There are other components which can be registered to a web serve
 not as important to understand how the general flow is implemented
 
 ```plaintext
-[Browser] (User / Client request origin)
-  |
-  v
-[Tomcat/Jetty/Undertow] (The Web Server)
-  +--> parse HTTP
-  |
-  +--> pick thread
-  |
-  + run Filters
-  |
-  v
-[DispatcherServlet]  (Spring MVC entry point)
-  |
-  +--> HandlerMapping finds controller method
-  |
-  +--> HandlerAdapter calls it
-  |      - argument resolvers
-  |      - message converters (JSON <-> objects)
-  |
-  +--> return value handling:
-         - @ResponseBody -> write JSON/text
-         - view name -> ViewResolver -> template render -> write HTML
-  |
-  v
-[HTTP Response] (Server response origin)
-  |
-  v
-  +-> bytes back to browser
+┌──────────────────────────────────────────────┐
+│ 🌐  Browser                                  │
+│     (User / Client request origin)           │
+└──────────────────────────────────────────────┘
+                    │
+                    │  HTTP request
+                    ▼
+┌──────────────────────────────────────────────┐
+│ 🧰  Tomcat / Jetty / Undertow                │
+│     (Web server + servlet container)         │
+│                                              │
+│   ┌──────────────┐  ┌──────────────┐         │
+│   │ parse HTTP   │→ │ pick thread  │         │
+│   └──────────────┘  └──────────────┘         │
+│                 │                            │
+│                 ▼                            │
+│            ┌───────────┐                     │
+│            │ Filters   │  (chain)            │
+│            └───────────┘                     │
+└──────────────────────────────────────────────┘
+                    │
+                    ▼
+┌──────────────────────────────────────────────┐
+│ 🚦  DispatcherServlet                        │
+│     (Spring MVC entry point)                 │
+│                                              │
+│   ┌───────────────────────────────────────┐  │
+│   │ HandlerMapping                        │  │
+│   │  └─ finds matching controller method  │  │
+│   └───────────────────────────────────────┘  │
+│                    │                         │
+│                    ▼                         │
+│   ┌───────────────────────────────────────┐  │
+│   │ HandlerAdapter                        │  │
+│   │  ├─ argument resolvers                │  │
+│   │  └─ message converters JSON ⇄ objects │  │
+│   └───────────────────────────────────────┘  │
+│                    │                         │
+│                    ▼                         │
+│   ┌───────────────────────────────────────┐  │
+│   │ Return value handling                 │  │
+│   │  ├─ @ResponseBody → JSON/text bytes   │  │
+│   │  └─ view name → ViewResolver → render │  │
+│   │                 template → HTML bytes │  │
+│   └───────────────────────────────────────┘  │
+└──────────────────────────────────────────────┘
+                    │
+                    │  HTTP response
+                    ▼
+┌──────────────────────────────────────────────┐
+│ 📦  HTTP Response                            │
+│     (Server response origin)                 │
+└──────────────────────────────────────────────┘
+                    │
+                    ▼
+             ┌────────────────┐
+             │ bytes → 🌐     │
+             │ back to browser│
+             └────────────────┘
 ```
 
 So in summary the web server really needs `two main things to make our application work,` a listener that is invoked
@@ -1680,13 +1819,247 @@ big mediator Servlet implementation that routes to our paths, instead of having 
 xml file for the web server to discover and initialize, it also allows us to take advantage of Spring Boot Framework
 that would manage dependencies for us and allow us to create robust applications
 
-# Handling exceptions
+### Request
+
+When a servlet receives a request it has already been processed by the web server, and the web server does some
+specific processing of the data which is converted internally into a `ServletRequest`, some of the most important
+methods in the `ServletRequest` interface are the following two methods, which allow the user to directly fetch the
+request parameters from the request
+
+```java
+// obtain values from the request query parameters (part of the URL) or body payload (in case it is valid and
+// contains valid form data), these two methods allow one to obtain one value or all values for a given parameter
+// name, note that collisions between parameter names in form data and URL query are not handled specially by the
+// server and are all dumped into the same Map of parameters
+String[] getParameterValues(String name);
+String getParameter(String name);
+```
+
+There are a few examples below that demonstrate what is going on with different types of requests, that contain
+different types of body data and additional data into the URL query section. How the web server treats them is important
+to understand as some values `are opaque` to the server - e.g. HTTP body types such as JSON, XML, byte streams etc. Some
+however are not opaque and `the data is read from the body` and populated into the request structure like form data
+located in the body of the request
+
+1. GET with query arguments
+
+```plaintext
+GET /videos?name=five&tag=spring&tag=boot&page=2 HTTP/1.1
+Host: localhost:8080
+User-Agent: Mozilla/5.0 ...
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.9
+Connection: keep-alive
+Cookie: JSESSIONID=ABC123...
+```
+
+The servlet will process this request and put the query parameters (the only ones in this case) in the parameters map of
+the request object, those can be obtained with the `getParameter("name")` method. therefore the parameters map will
+contain two parameters with keys/names five and tag matching the values in the query
+
+2. POST with form data
+
+```plaintext
+POST /new-video HTTP/1.1
+Host: localhost:8080
+User-Agent: Mozilla/5.0 ...
+Accept: text/html,application/xhtml+xml
+Content-Type: application/x-www-form-urlencoded
+Origin: http://localhost:8080
+Referer: http://localhost:8080/
+Connection: keep-alive
+Cookie: JSESSIONID=ABC123...
+
+name=john
+age=5
+```
+
+This example contain just a form data, similarly as the one above the web server will create the servlet request object
+and put the form data into the request parameters map, in this case the `name` field of the form, and it can be obtained
+the same way using the `getParameter("name")`, method. The parameters map will contain two parameters with key/names
+name, and age matching the values in the form body
+
+3. POST with form and query parameters
+
+```plaintext
+POST /new-video?param=homepage HTTP/1.1
+Host: localhost:8080
+Accept: text/html
+Content-Type: application/x-www-form-urlencoded
+Connection: keep-alive
+
+param=five
+```
+
+This example contains both the query argument and a form data, what happens here, well, the web server will do exactly
+the same and put both of these into the parameters map, under the keys source and name. That implies that in the end
+data from the form and from the query arguments both go into the same single level map of parameters, that also implies
+that we can have name collisions between the name of the form arguments and the query arguments, this is where the
+method `getParameterValues` comes in handy that allows us to obtain all values for a given argument, returning String[],
+not just the first one (which is what `getParameter` does). In this specific scenario we have only one parameter that is
+mapped to 2 values, the name of the parameter is param, however, it has two values one from the form data, one from the
+query, that can cause hidden issues bugs and conflicts.
+
+`All in all avoid using form data arguments with the same name as the ones that are used in the query, otherwise it
+might cause issues and collisions with the data fields from the form data, The form data is NOT opaque in the body
+of the request for the web server, the web server attempts to read form data fields and put them into the inernal
+servlet request structure`
+
+4. POST with JSON payload
+
+```plaintext
+POST /new-video HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/8.x
+Accept: application/json
+Content-Type: application/json
+Connection: keep-alive
+
+{
+  "name": "five",
+  "meta": {
+    "quality": "hd",
+    "tags": ["spring", "mvc"]
+  }
+}
+```
+
+The example above shows one of the most common examples of what an HTTP request looks like in modern times, that is
+an opaque value in the body, could be JSON or XML, anything that is not a form body
+
+So to obtain the data contained in the form parameters we can either use the `@ModelAttribute`, or the `@RequestParam`
+annotations, the `@ModelAttribute` can be used to map complex structures nested data models, while the `@RequestParam` is
+exactly used to pull singular request parameter values from the request, when we would like to read only a few of them
+and are not interested in the rest.
+
+```java
+// using the ModelAttribute the container will attempt to construct an object of type Video using the named
+// arguments of the request parameters matching them against the named arguments of the Video data model, in this case
+// that is possible, if not a runtime exception will occur
+@PostMapping("/new-video")
+public String addFromObject(@ModelAttribute Video video) {
+    videos.add(video);
+}
+
+// using RequestParam, the container will simply pull from the request object's parameter map a parameter value
+// matching the name of the method argument/parameter and call/populate the method
+@PostMapping("/new-video")
+public String addFromParam(@RequestParam String name) {
+    videos.add(new Video(name));
+}
+```
+
+`One might think that duplicating the names of the query parameters and the body of the request containing the form
+data, might present a security risk because an evil actor can possibly override a form data parameter by adding a
+key=value pair with the same name into the URL, however that is not an issue when using proper TLS encrypted
+communication, because all of the data including the URL query string, body and headers are encrypted. Therefore it
+is not possible to tamper with the data in the form or 'replace' it by 'overriding' it from the query parameters`
+
+### Response
+
+TODO: add caveats and issues here related to a request
+
+## Static
+
+Besides allowing us to use dynamic content, like templates or JSON, and XML the web servers usually have means of
+delivering static content that is just as simple as serving static files to the user's browser directly. These
+usually go into `src/main/resources/static`, everything in there is served to the end user as is, no mutation no
+modification the files are just pulled from the server onto the client's browser as is, it is very much like
+downloading a plain file to the client - that file can be anything really, but most commonly those resources are
+some of these - javascript, css, html.
+
+## Services
+
+The service component and its accompanying annotation called @Service defines a spring component that is meant to be
+used to define our business rules and logic, just like the @Controller annotation is meant to be used for annotating
+certain components in spring as Controllers, the Service annotation marks them as services, both of these will cause
+spring to create a bean of the given type, and both will go into the `ApplicationContext`, however they have different
+semantic meaning, and it is generally not a good idea to mix them up.
+
+```java
+public class Video {
+
+    private final Integer id;
+
+    private String name;
+
+    public Video(Integer id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    // getter and setter methods follow, equals, toString and hashCode, the rest of the class is abridge for
+    // simplification
+}
+```
+
+```java
+// we have defined an intermediate service bean that will be in charge of actually providing the data to our
+// controllers, that is usually how in Spring we delegate different roles to different beans, that way each type of
+// bean is dong its part allowing us to extend the application by simply composing more components providing greater
+// flexibility.
+@Service
+public class VideosService {
+
+    private static int VIDEO_SEQUENTIAL_INDEX = 1;
+
+    private List<Video> videos = new ArrayList<>();
+
+    public VideosService() {
+        videos.add(new Video(VIDEO_SEQUENTIAL_INDEX++, "Youtube"));
+        videos.add(new Video(VIDEO_SEQUENTIAL_INDEX++, "Vimeo"));
+        videos.add(new Video(VIDEO_SEQUENTIAL_INDEX++, "Vbox"));
+        videos.add(new Video(VIDEO_SEQUENTIAL_INDEX++, "Onion"));
+    }
+
+    public List<Video> getVideos() {
+        return videos.stream().sorted(Comparator.comparing(Video::getId)).toList();
+    }
+
+    public Optional<Video> getVideo(Integer target) {
+        return videos.stream().filter(vid -> vid.getId().equals(target)).findFirst();
+    }
+
+    public Optional<Video> updateVideo(Integer target, String newName) {
+        Optional<Video> video = getVideo(target);
+        video.ifPresent(vid -> vid.setName(newName));
+        return video;
+    }
+
+    public boolean deleteVideos(String name) {
+        int oldSize = videos.size();
+        videos = videos.stream().filter(vid -> vid.getName().equalsIgnoreCase(name)).toList();
+        int currentSize = videos.size();
+        return oldSize > currentSize;
+    }
+
+    public boolean deleteVideo(Integer target) {
+        Iterator<Video> iterator = videos.iterator();
+        while (iterator.hasNext()) {
+            Video video = iterator.next();
+            if (video.getId().equals(target)) {
+                iterator.remove();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Video addVideo(String name) {
+        var video = new Video(VIDEO_SEQUENTIAL_INDEX++, name);
+        videos.add(video);
+        return video;
+    }
+}
+```
+
+## Exceptions
 
 Handling exceptions and errors in API, and sending the proper responses to the client is good for enterprise
 application, in this chapter we will learn how to handle the exceptions in spring boot, before proceeding with exception
 handling let us gain an understanding on the following annotations:
 
-## @ControllerAdvice
+### @ControllerAdvice
 
 This annotation is used to handle the exceptions globally. What it does it create an advice - an advice is a type of
 functionality that is wrapped around a certain functionality, when you a controller method is triggered, a certain code
@@ -1703,7 +2076,7 @@ after the method execution.
 In the most general use case that can be used to catch exceptions in a single location no mater which controller method
 was called. This is useful when used in conjunction with the `@ExceptionHandler` annotation.
 
-## @ExceptionHandler
+### @ExceptionHandler
 
 This annotation is used to handle the specific exceptions, what it does is annotate a method inside a class annotated
 with `@ControllerAdvice`, that method will be called when a specific exception of a specific type is emitted from a
@@ -1738,4 +2111,103 @@ public class ProductExceptionController {
         // generic you could create another method, annotated with - @ExceptionHandler(value = RuntimeException.class)
     }
 }
+```
+
+## Spring Data
+
+As mentioned above while we created the service that was responsible for managing the entries of videos, we also
+mentioned that that is usually not how it is done. These are non-persistent entries that live only for the duration of
+the runtime, if we want to persist this over time, we have to use a persistent storage. That storage can be anything
+really from a file, to a database, to a remote service that stores our data in an opaque way we do not care about.This
+is where spring data comes into play it is like a huge adapter or a mediator that allows us to store and work with data
+without much hassle.
+
+The most common database used today is a relational one (Oracle, MySQL, PostgreSQL, and so on). Relational databases
+comprise 80% of all projects created. Choosing a NoSQL (not only SQL) data store requires careful consideration, but
+here are three options we can explore:
+
+• Redis is principally built as a key/value data store. It’s very fast and very effective at storing huge amounts of
+key/value data. On top of that, it has sophisticated statistical analysis, time- to-live, and functions.
+
+• MongoDB is a document store. It can store multiple levels of nested documents. It also has the ability to create
+pipelines that process documents and generate aggregated data.
+
+• Apache Cassandra provides a table-like structure but has the ability to control consistency as a trade-off with
+performance. SQL data stores have historically had hard requirements on predefining the structure of the data, enforcing
+keys, and other aspects that tend to give no quarter.
+
+NoSQL data stores tend to relax some of these requirements. Many don’t require an upfront schema
+design. They can have optional attributes, such that one record may have different fields from those
+of other records (in the same keyspace or document).
+
+Some NoSQL data stores give you more flexibility when it comes to scalability, eventual consistency,
+and fault tolerance. For example, Apache Cassandra lets you run as many nodes as you like and lets
+you choose how many nodes have to agree on the answer to your query before giving it. A faster
+answer is less reliable, but 75% agreement may be faster than waiting for all nodes (as is typically the
+case with relational data stores).
+
+### Interface
+
+Before we start we have to first have a good grasp on how spring data operates, unlike other data based interfaces
+spring data is not one big giant API that is implemented by different data store solutions, that is because each of them
+offer a great deal of varying features, and having one common interface is never going to be efficient. Instead what
+spring data does is offer completely different incompatible modules that build from the ground up for each different
+solution, like Infinispan, Cassandra, MongoDB, Redis, JDBC, JPA, etc.
+
+That is why the spring data starters look like this, each of them offers a very distinct type of api and a very distinct
+type of architecture to handle the specifics of the data store it is implementing. One of the most important data
+starters is probably the JPA one. JPA is a specification that describes an ORM (object relational model) database model
+based and usually built on top of relational data bases. JPA specification is implemented by many providers some of the
+most important and famous ones are `Hibernate` and `EclipseLink`. Unlike other spring data providers or portfolios, the
+`JPA` starter is a bit different, as it does not directly work with the database, rather it uses underlying
+implementation (usually hibernate by default) to talk to the database. While the other starters are taking advantage of
+direct communication with the data base storage directly - MongoDB, Redis, JDBC etc.
+
+For That reason the JPA starter is a bit different and does not follow the more standardized architecture that most
+spring data starters follow, it is a more specialized spring-data module. We will take a deep look at its architecture
+and contrast and compare between the other standard spring data starters.
+
+```xml
+<!-- this is just an example of the different starters that exist for the different offerings that spring has to -->
+<!-- communicate with different data stores, each of these has specific requirements and needs when it comes to
+operating with it that is why they are in separate starters to begin with -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-mongodb</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+
+### Templates
+
+Spring data offers something called templates, those are the work horses of spring data they executes the low level
+operations that actually execute the actual underlying data base ops. The templates internally use other beans which
+actually establish the connection, hold a connection pool to the database, do the actual communication and ops.
+
+### Relational Database
+
+Starting off with possibly the most prolific database type that is used in the vast majority of projects, a relational
+database is a structured table based data store that defines a very strict form and shape for the data that is being
+stored.
+
+Adding the spring data starter JPA and `H2` in memory database to the project is as simple as adding these two
+dependencies to our project build file
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <scope>runtime</scope>
+</dependency>
 ```
