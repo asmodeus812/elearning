@@ -11,19 +11,19 @@ handling constructs in the language such as throw statements, throws clause, and
 
 The general hierarchy of the java exception model is such that: `Object -> Throwable -> Excetpion -> RuntimeException`
 
--   `Exceptions` of type Exception in Java are known as check exceptions. If code can throw an Exception you must handle it
-    using a catch block or declare that the method throws that exception forcing the caller of that method to handle that
-    exception
+- `Exceptions` of type Exception in Java are known as check exceptions. If code can throw an Exception you must handle it
+  using a catch block or declare that the method throws that exception forcing the caller of that method to handle that
+  exception
 
--   `RuntimeException` is a derived class of the Exception class. The exceptions deriving from `RuntimeException` are known as
-    unchecked exceptions. It is optional to handle unchecked exceptions. If a code segment in a method can throw an
-    unchecked exception, it is not mandatory to catch that exception or declare that exception in the throws clause of that
-    method.
+- `RuntimeException` is a derived class of the Exception class. The exceptions deriving from `RuntimeException` are known as
+  unchecked exceptions. It is optional to handle unchecked exceptions. If a code segment in a method can throw an
+  unchecked exception, it is not mandatory to catch that exception or declare that exception in the throws clause of that
+  method.
 
--   `Error` - when the `JVM` detects a serious abnormal condition in the program, it raises an exception of type Error.
-    Exception of type Error indicate an abnormal condition, in the program. There is no point in catching these exceptions
-    and pretend nothing has happened. At this point if an Error exception occurs it is a really bad practice to do so! These
-    errors signal that some irrecoverable state has been reached.
+- `Error` - when the `JVM` detects a serious abnormal condition in the program, it raises an exception of type Error.
+  Exception of type Error indicate an abnormal condition, in the program. There is no point in catching these exceptions
+  and pretend nothing has happened. At this point if an Error exception occurs it is a really bad practice to do so! These
+  errors signal that some irrecoverable state has been reached.
 
 ## Throwing
 
@@ -176,6 +176,26 @@ makes more sense, depends on the situation. If the exceptions are thrown for the
 multi-catch makes more sense, makes code more readable and maintainable. However if the different exceptions are handled
 very differently in their catch blocks, then a multiple catch statements approach is required
 
+There is one more technical detail or caveat that needs to be taken a look at for a multi-catch block what is the
+type of the variable that when a pipe is used. The general rule of thumb is that the variable will be the first
+common class type in the hierarchy between those two classes, as we have said `the actual class types used in the
+multi-catch must be siblings but not have parent-child relationship`, however being siblings they certainly share a
+common parent, therefore the type of the variable will be the closest shared parent between the two types
+
+```java
+// for example we can have the following multi catch block that intercepts both a runtime exception and a checked
+// exception they both share a parent and that is the Exception class
+IllegalStateException | IOException -> Exception
+RuntimeException | IOException -> Exception
+
+// however say we have this example where we catch Error and RuntimeException in this case the common parent is
+// Throwable class actually
+Error | RuntimeException -> Throwable
+```
+
+`The variable in a multi-catch pipe block is effectively final, it can NOT be re-assigned, we can only read/call
+methods on it`
+
 ### General catching
 
 As already discussed all exceptions extend from the `Throwable` class, and further more from the Exception class as
@@ -271,6 +291,26 @@ occur using the usual finally syntax, the try-with-resources used to close all r
 `auto-closeable`, and the resource is declared within the try-with-resources statement block the close method of that
 resource will be automatically closed.
 
+To go on a bit of a tangent, with the introduction of the try-with-resources construct in the language, the language
+specification needed a less restrictive interface to represent an object or resource that can be closed safely, and
+then the language specification introduced the `AutoCloseable` interface that is  a parent of the `Closeable` interface
+
+One might wonder, if the logical structure should have been that `Closeable` remains the super class and `AutoCloseable`
+becomes the child specialization. That certainly makes sense however the `Closeable` interface declares its method
+close to throw `IOException`, and the try-with-resource structure needed a broader exception type to throw, they could
+not modify the existing `Closeable` interface due to backwards compatibility and they could not declare the new close
+method to be throwing Exception if it were child of `Closeable` interface because that breaks the rules for the throws
+declaration when overriding a method.
+
+Therefore the only valid solution was for the new `AutoCloseable` interface to become the parent of the old `Closeable`
+interface, and retroactively allow try-with-resources to work with both `AutoCloseable` and `Closeable` interfaces.
+
+`Close method of Closeable is also required to be idempotent - meaning that the close method can be called more
+than one time without introducing additional state transitions in the program, compared to the first call, while the
+close method in AutoCloseable does not have this restriction. In plain English, if a close method is called N number
+of times the program should not perform any differently compared to the method being called N + 1 times, where N is
+at least 1`
+
 The syntax of the try-with-resources is quite simple, the resources are declared and initialized in the try block,
 multiple ones can be declared by using a semi colon to split them up.
 
@@ -278,12 +318,17 @@ multiple ones can be declared by using a semi colon to split them up.
 try(Scanner consoleScanner = new Scanner(System.in)) {
     System.out.println("You typed the integer value: " + consoleScanner.nextInt());
 } catch(Exception e) {
-    // catch all other exceptions here ...
+    // catch all other exceptions here ... some that might occur from calling close too
     System.out.println("Error: Encountered an exception and could not read an
         integer from the console... ");
     System.out.println("Exiting the program - restart and try the program again!");
 }
 ```
+
+The syntax rules for the resources inside the try-with-resources block are quite clear resources are split with a
+semi-colon and an optional semi-colon can be present for the last resource but that is not mandatory or required by
+the compiler or the language. When only one resource entry is present no semi-colon delimiter is required in the
+try-with-resources block
 
 Note the way the resource is being declared, in the example above there is no finally block, however internally the
 compiler will translate this into an actual try-catch-finally block when during the code generation phase, the
@@ -322,7 +367,7 @@ Scanner consoleScanner = new Scanner(System.in);
 try (Scanner scan = consoleScanner) {
     // use the scan instance
 } catch (Exception e) {
-    // do some catching
+    // do some exception handling
 }
 ```
 
@@ -339,10 +384,142 @@ try(Scanner consoleScanner = new Scanner(System.in)) {
 }
 ```
 
+The scanner.close method does not throw any exceptions (it does not declare them in the close method signature)
+therefore we are NOT required to have a catch block, BUT that does not mean that this is the case for all resources
+that are declared in the try-with-resources. More details on these rules below
+
 `If a finally and try-with-resources are used together, the resources inside the try-with-resource statement will be
 closed BEFORE the finally block is called, meaning that closing them again in the finally block is most definitely wrong
 and undefined behavior, they will likely throw since the close method is already closed, in that case the finally block
 can be used to log or notify the outside world that all resources are cleaned up correctly and finalized.`
+
+To add a bit more technical context to the try-with-resources structure, first as we already stated the
+`AutoCloseable` interface can be implemented so the close method is automatically called by the compiler, but how is
+that done, well first the resources that are declared in the try-with-resources structure are wrapped by the
+compiler in a nested try-catch-finally blocks, each statement in the try-with-resource block becomes a nested
+try-catch-finally, where
+
+- in the try part the expression that creates the resource is called
+- in the catch block any exceptions are attempted to be caught, not related to the close method
+- in the finally the close method is called, wrapped around a try-catch block or added as suppressed
+
+It is important to note here is that due to the rules of method overriding it is possible for a class to
+implement the `AutoCloseable` interface and declare the close method as such that it does throw or does NOT throw,
+therefore there are cases where the try-with-resources has to have a catch block or does not require one, that
+depends on what the close method that is getting overridden specified in its declaration
+
+What does the compiled structure that creates the try-with-resources block look like, after the following example which contains 3 resources that all implement the AutoCloseable interface
+
+```java
+void loadUsers(DataSource ds) throws SQLException {
+    String sql = "select id, name from users";
+    try (Connection con = ds.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        while (rs.next()) {
+        }
+    }
+    // If body throws: you see that exception.
+    // If close() throws and body didn't: you see that close exception.
+    // If both throw: close exception is SUPPRESSED on the body exception.
+}
+```
+
+What the compiler converts the calls from above, approximately, you can see that the calls are actually nested, in
+reverse order, so are the close method calls. If a close method throws in an inner finally it will bubble upwards to
+the outer catch, which will trigger the outer finally and so on and so forth, until we reach our own catch block
+which wraps the entire thing from the outside.
+
+```java
+void loadUsers(DataSource ds) throws SQLException {
+    Connection con = ds.getConnection();
+    Throwable primary1 = null;
+    try {
+        PreparedStatement ps = con.prepareStatement("select id, name from users");
+        Throwable primary2 = null;
+        try {
+            ResultSet rs = ps.executeQuery();
+            Throwable primary3 = null;
+            try {
+                while (rs.next()) {
+                    // work is being done
+                }
+            } catch (Throwable t3) {
+                primary3 = t3;
+                throw t3;                      // (may throw -> by next())
+            } finally {
+                if (rs != null) {
+                    if (primary3 != null) {
+                        try { rs.close(); }
+                        catch (Throwable close3) { primary3.addSuppressed(close3); }
+                    } else {
+                        rs.close();            // may throw → bubbles outward
+                    }
+                }
+            }
+        } catch (Throwable t2) {
+            primary2 = t2;
+            throw t2;
+        } finally {
+            if (ps != null) {
+                if (primary2 != null) {
+                    try { ps.close(); }
+                    catch (Throwable close2) { primary2.addSuppressed(close2); }
+                } else {
+                    ps.close();                // may throw → bubbles outward
+                }
+            }
+        }
+    } catch (Throwable t1) {
+        primary1 = t1;
+        throw t1;
+    } finally {
+        if (con != null) {
+            if (primary1 != null) {
+                try { con.close(); }
+                catch (Throwable close1) { primary1.addSuppressed(close1); }
+            } else {
+                con.close();                    // may throw → bubbles to caller
+            }
+        }
+    }
+}
+```
+
+So to make long story short, the try-with-resources wraps the resource calls vertically, in reverse order of their
+declaration in the try block. That way we can close the resources in reverse of their declaration, and finally all
+of the exceptions that have occurred will bubble up to our outer most catch block
+
+`Remember that when a method is overridden and it declares that Exception of certain type is thrown, we are allowed
+to either - declare the same exception types, narrower exception types, or no exception types at all, but we are NOT
+allowed to declare a broader exception types being thrown from that method`
+
+The reason that works, is due to the Liskov substitution principle all of the classes compiled against the parent
+super type will still be correct because the sub-type will either declare the same, narrower or no exceptions being
+thrown from that method at all.
+
+```java
+// all of these are allowed for a class that implements AutoCloseable, as you can see we never declare that the
+// methods throw a broader type of exception, always the types that are being thrown are compatible with what is
+// declared in the signature of the method close in the AutoCloseable interface.
+public void close() {}
+public void close() throws IOException {}
+public void close() throws Exception, IOException {}
+public void close() throws Exception, IOException, FileNotFoundException {}
+public void close() throws FileNotFoundException, InvalidClassException {}
+```
+
+One caveat that you may notice is that we can also do that - `Exception, IOException, FileNotFoundException` - while
+that is valid it offers little value, since `FileNotFoundException` is a child of `IOException` which itself is a
+child of Exception, that is not a compiler error, rather maybe a logical one, it would be more meaningful to provide
+different exceptions that are siblings in the context of the original one in this case Exception, such as -
+`FileNotFoundException`, `InvalidClassException`, those are children of Exception but do not share the same
+hierarchy.
+
+Another note is that we can declare as many `RuntimeException` as we want, as those are not mandatory to be caught
+so the compiler will not complain, further more that is a good way to document our code so external callers know
+what exceptions might be expected to be thrown their way.
 
 ## Throws
 
@@ -427,27 +604,27 @@ exception in the documentation. They are not listed by severity or in base - chi
 
 ## Miscellaneous
 
--   If a method does not have a throws clause, ti does not mean it cannot throw any exceptions; it just means it cannot
-    throw any checked exceptions.
+- If a method does not have a throws clause, ti does not mean it cannot throw any exceptions; it just means it cannot
+  throw any checked exceptions.
 
--   Static block initializers cannot throw any check exceptions, this is because static initialization blocks are
-    invoked when the class is loaded, so there is no way to handle the thrown exceptions in the caller. Further more there
-    is no way to declare the checked exceptions in a throws clause using static initializer
+- Static block initializers cannot throw any check exceptions, this is because static initialization blocks are
+  invoked when the class is loaded, so there is no way to handle the thrown exceptions in the caller. Further more there
+  is no way to declare the checked exceptions in a throws clause using static initializer
 
--   Non-static initializer blocks can throw checked exceptions however all the constructors should declare those
-    exceptions, in their throws clause. This is because the compiler merges the code in the non-static initalizer block and
-    the constructors during the code generation phase, hence the throws clause of the constructor can be used for declaring
-    the checked exceptions that a non-static init block can throw.
+- Non-static initializer blocks can throw checked exceptions however all the constructors should declare those
+  exceptions, in their throws clause. This is because the compiler merges the code in the non-static initalizer block and
+  the constructors during the code generation phase, hence the throws clause of the constructor can be used for declaring
+  the checked exceptions that a non-static init block can throw.
 
--   An overriding method cannot declare more checked exceptions in the throws clause than the list of exceptions
-    declared in the throws clause of the base method
+- An overriding method cannot declare more checked exceptions in the throws clause than the list of exceptions
+  declared in the throws clause of the base method
 
--   An overriding method can declare more specific exceptions than the exception listed in the throws clause of the base
-    method; in other words, one can still declare derived exception in the throws clause of the overriding method.
+- An overriding method can declare more specific exceptions than the exception listed in the throws clause of the base
+  method; in other words, one can still declare derived exception in the throws clause of the overriding method.
 
--   If a method is declared in two or more interfaces, and if that method declares to throw different exceptions in the
-    throws clause, the method implementations must declare and list all of these exception in their throws clause, the
-    methods throws clauses are effectively merged together
+- If a method is declared in two or more interfaces, and if that method declares to throw different exceptions in the
+  throws clause, the method implementations must declare and list all of these exception in their throws clause, the
+  methods throws clauses are effectively merged together
 
 ## User-exceptions
 
@@ -503,11 +680,11 @@ After that the assertion has to be examined, for the reason it failed.
 Asserts are quite useful tool for ones program, it allows users to make certain assumptions in the code, and that is
 quite helpful to discover when these assumptions fail.
 
-A very important detail to remember is that assertions are by default disabled in the run-time. To enable them use the
+A very important detail to remember is that assertions are by default disabled in the runtime. To enable them use the
 `-ea` switch (or its longer form of `-enableasserts`). To disable assertions at `runtime` use a `-da` switch. If
 assertions are disabled by default at runtime then what is the use of `-da` switch ? There are many uses. For example,
 if you want to enable assertions for all classes within a given package and want to disable asserts in a specific class
-in that package. Then a -da switch is useful.
+in that package. Then a `-da` switch is useful.
 
 | Command-Line Argument | Short Description                                                                                       |
 | --------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -522,72 +699,83 @@ in that package. Then a -da switch is useful.
 | -da:...               | Disable assertions in the given unnamed package.                                                        |
 | -dsa                  | Short for -disablesystemsassertions; disables assertions in system classes. This option is rarely used. |
 
+The assert keyword in java can be invoked with the short form and the long form, the short form is just the assert
+followed by a condition, that has to be met otherwise `AssertionError` will be thrown at runtime. The format of the
+assert is -> assert {condition} : {message} where the condition has to be something that we assert has to be `TRUE`,
+if it is `FALSE` then the message will be shown/set in the `AssertionError`. The condition can be wrapped in
+brackets just as like if we invoking a function - assert(condition) or assert condition, and has to be a valid
+condition that evaluates to `TRUE` or `FALSE`, in other words has to be boolean condition construct
+
+`Assertions are a runtime construct and are not evaluated at compile time, the only validation that is done at
+compile time by the compiler is that the condition to the assert is of boolean type. Assertions are disabled by
+default and and must be enabled explicitly for the entire application or on a per-package or per-class basis`
+
 # Summary
 
 Try-catch and throw statements
 
--   When an exception is thrown from a try block, the `JVM` looks for a matching catch handler from the list of catch
-handlers in the method call-chain. If no matching handler is found, that unhandled exception will result in crashing the
-application.
+- When an exception is thrown from a try block, the `JVM` looks for a matching catch handler from the list of catch
+  handlers in the method call-chain. If no matching handler is found, that unhandled exception will result in crashing the
+  application.
 
--   While providing multiple exception handlers (stacked catch handlers), specific exception handlers should be provided
-before general exception handlers.
+- While providing multiple exception handlers (stacked catch handlers), specific exception handlers should be provided
+  before general exception handlers.
 
--   You can programatically access the stack trace using the methods such as `printStackTrace()` and `getStackTrace()`,
-which can be called on any exception object.
+- You can programatically access the stack trace using the methods such as `printStackTrace()` and `getStackTrace()`,
+  which can be called on any exception object.
 
 Catch, multi-catch, and finally
 
--   A try block can have multiple catch handlers. If the cause of two or more exceptions is similar, and the handling
-code is also similar, you can consider combining the handlers and make it into a multi-catch block.
+- A try block can have multiple catch handlers. If the cause of two or more exceptions is similar, and the handling
+  code is also similar, you can consider combining the handlers and make it into a multi-catch block.
 
--   A catch block should either handle the exception or `rethrow` it. To hide or swallow an exception by catching an
-exception and doing nothing is really a bad practice.
+- A catch block should either handle the exception or `rethrow` it. To hide or swallow an exception by catching an
+  exception and doing nothing is really a bad practice.
 
--   You can wrap one exception and throw it as another exception. These two exceptions become chained exceptions. From
-the thrown exception, you can get the cause of the exception.
+- You can wrap one exception and throw it as another exception. These two exceptions become chained exceptions. From
+  the thrown exception, you can get the cause of the exception.
 
--   The code inside a finally block will be executed irrespective of whether a try block has successfully executed or
-resulted in an exception.
+- The code inside a finally block will be executed irrespective of whether a try block has successfully executed or
+  resulted in an exception.
 
 Try-with-resources statement
 
--   Forgetting to release resources by explicitly calling the `close()` method is a common mistake. You can use a
-try-with-resources statement to simplify your code and auto-close resources.
+- Forgetting to release resources by explicitly calling the `close()` method is a common mistake. You can use a
+  try-with-resources statement to simplify your code and auto-close resources.
 
--   You can auto-close multiple resources within a try-with-resources statement. These resources need to be separated by
-semicolons in the try-with-resources statement header.
+- You can auto-close multiple resources within a try-with-resources statement. These resources need to be separated by
+  semicolons in the try-with-resources statement header.
 
--   If a try block throws an exception, and a finally block also throws exception(s), then the exceptions thrown in the
-finally block will be added as suppressed exceptions to the exception that gets thrown out of the try block to the
-caller.
+- If a try block throws an exception, and a finally block also throws exception(s), then the exceptions thrown in the
+  finally block will be added as suppressed exceptions to the exception that gets thrown out of the try block to the
+  caller.
 
 Custom exceptions
 
--   It is recommended that you derive custom exceptions from either the Exception or `RuntimeException` class.
+- It is recommended that you derive custom exceptions from either the Exception or `RuntimeException` class.
 
--   A method's throws clause is part of the contract that its overriding methods in derived classes should obey.
+- A method's throws clause is part of the contract that its overriding methods in derived classes should obey.
 
--   An overriding method can provide the same throw clause as the base method's throws clause or a more specific throws
-clause than the base method's throws clause.
+- An overriding method can provide the same throw clause as the base method's throws clause or a more specific throws
+  clause than the base method's throws clause.
 
--   The overriding method cannot provide a more general throws clause or declare to throw additional checked exceptions
-when compared to the base method's throws clause.
+- The overriding method cannot provide a more general throws clause or declare to throw additional checked exceptions
+  when compared to the base method's throws clause.
 
--   For a resource to be usable in a try-with-resources statement, the class of that resource must implement the
-`java.lang.AutoCloseable` interface and define the `close()` method.
+- For a resource to be usable in a try-with-resources statement, the class of that resource must implement the
+  `java.lang.AutoCloseable` interface and define the `close()` method.
 
 Invariant with asserts
 
--   Assertions are condition checks in the program and should be used for explicitly checking the assumptions you make
-while writing programs.
+- Assertions are condition checks in the program and should be used for explicitly checking the assumptions you make
+  while writing programs.
 
--   The assert statement is of two forms: one that takes a Boolean argument and one that takes an additional string
-argument.
+- The assert statement is of two forms: one that takes a Boolean argument and one that takes an additional string
+  argument.
 
--   If the Boolean condition given in the assert argument fails (i.e., evaluates to false), the program will terminate
-after throwing an `AssertionError`. It is not advisable to catch and recover from when an `AssertionError` is thrown by
-the program.
+- If the Boolean condition given in the assert argument fails (i.e., evaluates to false), the program will terminate
+  after throwing an `AssertionError`. It is not advisable to catch and recover from when an `AssertionError` is thrown by
+  the program.
 
--   By default, assertions are disabled at runtime. You can use the command-line arguments of -ea (for enabling asserts)
-and `-da` (for disabling asserts) and their variants when you invoke the `JVM`.
+- By default, assertions are disabled at runtime. You can use the command-line arguments of -ea (for enabling asserts)
+  and `-da` (for disabling asserts) and their variants when you invoke the `JVM`.
