@@ -904,3 +904,202 @@ A. `2`
 B. 4
 C. 8
 D. The code does not compile.
+
+41. Given the following method and the fact that FileNotFoundException is a subclass of IOException, which of the
+    following method signatures is a valid override by a subclass?
+
+```java
+protected void dance() throws FileNotFoundException {}
+```
+
+This one is a bit tricky there are few things that we have to look at here, first the reduction of the visibility
+when overriding we are not allowed to reduce the visibility of a method that we override, therefore we can not
+override this method as default package private or private, further more we are not allowed to specify broader
+exceptions in this case IOException will be considered broader exception than what the signature of the method
+declares, because the FileNotFoundException is a sub-type of IOException according to the question.
+
+There is only one answer below that satisfies the override rules correctly, that is the public final void dance
+which is possible, we can override and declare the method to be final in the child sub-type class, it is public, we
+are not reducing the visibility, and the exception can be omitted that is allowed - remember that only adding
+broader exception types is not.
+
+A. void dance() throws IOException
+B. public void dance() throws IOException
+C. private void dance() throws FileNotFoundException
+D. `public final void dance()`
+
+42. Given the class definitions below, which value, when inserted into the blank line, DOES NOT allow the class to compile?
+
+```java
+public class Canine {}
+public class Dog extends Canine {}
+public class Wolf extends Canine {}
+public final class Husky extends Dog {}
+
+public class Zoologist {
+    Canine animal;
+    public final void setAnimal(Dog animal) {
+        this.animal = animal;
+    }
+    public static void main(String[] furryFriends) {
+        new Zoologist().setAnimal(___________);
+    }
+}
+```
+
+Even though the Zoologist holds reference to the parent of this hierarchy of classes, The set method here actually
+allows us to only set an animal that is of the Dog hierarchy and Wolf is not, therefore we are never going to be
+allowed to call the setAnimal method with an instance of type Wolf.
+
+A. new Husky()
+B. new Dog()
+C. `new Wolf()`
+D. null
+
+43. Which of the following modifiers cannot be applied to an interface method?
+
+The entire idea that we might be able to provide a final modifier to a method in an interface will actually defat
+the purpose of interfaces, that is why the compiler is preemptive and disables this nonsense. The rest of the optons
+is valid, by default they are all abstract, but adding this keyword is not a compiler error, the default and static
+are also valid, we can have static methods in an interface, and default methods allow us to provide a default
+implementation for interface methods.
+
+A. `final`
+B. default
+C. static
+D. abstract
+
+44. Which statement about the following application is true?
+
+```java
+abstract class House {
+    protected abstract Object getSpace();
+}
+abstract class Room extends House {
+    abstract Object getSpace(Object list);
+}
+abstract public class Ballroom extends House {
+    protected abstract Object getSpace();
+    public static void main(String[] squareFootage) {
+        System.out.print("Let's start the party!");
+    }
+}
+Ballroom.main(new String[0])
+```
+
+this one might be tricky, we have two methods with the same name but different signatures, those are actually
+overloaded and not overriding each other, that might trip somebody because the protected modifier, is reduced on
+the Room class but the method is different remember we are overloading it, so that is fine. Then we have the
+method correctly re-declared with the same exact signature in the Ballroom, class which is perfectly acceptable,
+as long as the signature matches. There are no instances created of Ballroom anywhere because it is abstract. So
+there are no actually issues with this code.
+
+A. `It compiles and at runtime prints Let's start the party!`
+B. It does not compile for one reason.
+C. It does not compile for two reasons.
+D. It does not compile for three reasons.
+
+45. Fill in the blanks: \***\*\_\_\_\_\*\***methods must have a different list of parameters, while \***\*\_\_\_\_\*\***methods must have the exact same return type.
+
+The second part of this is incorrect because neither the overloaded nor overridden types are mandated to have the
+exact same return type. Overloaded methods do not care about return types, and overridden methods might make use of
+covariant types, therefore we can say none of the answers actually make sense
+
+A. Overloaded, overridden
+B. Inherited, overridden
+C. Overridden, overloaded
+D. `None of the above`
+
+46. Which of the following statements about no-argument constructors is correct?
+
+This one might prove hard to read, but in essence the answer that captures the idea is B, that answer implies that
+the parent has declared argument constructor and therefore the default one is not inserted by the compiler, that
+would imply that the child has to have a user declared constructor that knows how to call this parent constructor
+otherwise the compiler would not have a clue.
+
+A. If a parent class does not include a no-argument constructor, a child class cannot declare one.
+B. `If a parent class does not include a no-argument constructor (nor a default one inserted by the compiler), a
+child class must contain at least one constructor definition.`
+C. If a parent class contains a no-argument constructor, a child class must contain a no-argument constructor.
+D. If a parent class contains a no-argument constructor, a child class must contain at least one constructor.
+
+47. Fill in the blanks: The \***\*\_\_\_\_\*\***determines which attributes exist in memory, while the \***\*\_\_\_\_\*\***determines which attributes are accessible by the caller.
+
+Another one of these questions that is worded like shit, the class declaration, defines the layout of the object and
+the reference type determines which members we can access. Java has no notion of 'attributes' what is this shit-show
+
+A. reference type, signature
+B. object type, superclass
+C. reference type, object type
+D. `object type, reference type`
+
+48. Given that Integer and Long are subclasses of Number, what type can be used to fill in the blank in the class below to allow it to compile?
+
+```java
+interface MusicCreator {
+    public Number play();
+}
+abstract class StringInstrument {
+    public Long play() {
+        return 3L;
+    }
+}
+public class Violin extends StringInstrument implements MusicCreator {
+    public ___________play() {
+        return 12L;
+    }
+}
+```
+
+Class wins rule applies here, what it says is that in this case the play method from StringInstrument will serve as
+the first base implementation for the play method from the interface MusicCreator, that implies that any further
+overriding is based on the signature of StringInstrument, therefore we can only provide a type that is Long or is a
+co-variant type to Long. From the options below the only one that is co-variant to Long is Long, Number is no longer
+valid option, Integer is not even in the same class hierarchy.
+
+A. `Long`
+B. Integer
+C. Long or Integer
+D. Long or Number
+
+49. Which of the following is the best reason for creating a default interface method?
+
+The primary reason this feature was introduced was to allow interfaces to be extended with new behavior without
+breaking old implementations, but it is also a good replacement for normal static member methods in interfaces which
+could do the same in the past. Default methods are more flexible, and do not violate the nature of the interface.
+They allow us to reference 'this' (where this reference type is strictly the type of the interface).
+
+A. Allow interface methods to be inherited.
+B. `Add backward compatibility to existing interfaces.`
+C. Give an interface the ability to create concrete methods.
+D. Allow an interface to define a method at the class level.
+
+50. Given that EOFException is a subclass of IOException, what is the output of the following application?
+
+```java
+package ai;
+import java.io.\*;
+class Machine {
+    public boolean turnOn() throws EOFException {
+        return true;
+    }
+}
+public class Robot extends Machine {
+    public boolean turnOn() throws IOException {
+        return false;
+    }
+    public static void main(String[] doesNotCompute) throws Exception {
+        Machine m = new Robot();
+        System.out.print(m.turnOn());
+    }
+}
+```
+
+Given the fact that the EOFException is a child or a sub class of IOException then we are re-declaring the method
+turnOn with a broader exception type than what it was declared to throw in the Machine class, which is not valid,
+this snippet will not compile
+
+A. true
+B. false
+C. `The code does not compile.`
+D. The code compiles but produces an exception at runtime.

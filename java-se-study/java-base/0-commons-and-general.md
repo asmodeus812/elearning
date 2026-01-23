@@ -163,9 +163,7 @@ class SoccerBall extends Ball implements Equipment {}
 
 9. Wildcards
 
-10. Overloading
-
-11. Object
+10. Object
 
 - `wait()` - cause the current thread to wait until it is awakened, by a call to notify, remember that threads can
   be awakened sporadically and we have to guard against that.
@@ -275,8 +273,60 @@ class SoccerBall extends Ball implements Equipment {}
   hierarchy themselves, the type of the piped symbol in a multi catch is the closest parent of the two sibling
   types
 
+15. Overriding
+
+```java
+interface Interface {
+    default Number play() {
+    }
+}
+class Parent {
+    public Long play() {
+        return 3L;
+    }
+}
+public class Child extends Parent implements Interface {
+    public play() {
+    }
+}
+```
+
+- `class beats interface` - if we have a method with the same signature declared in both a class and an interface,
+  and a child class that extends the class and implements the interface, the class beats the interface. Meaning that
+  the class method will take precedence, also implying that if we make that method in the class final we will never be
+  able to override the method coming from the interface.
+- `covariant types` - when overriding a method we are allowed to use what are called covariant types, we can
+  substitute the return type of the overridden method with a sub-type of the original return signature .
+- `exception signature` - we are allowed to override a method exception throws signature by providing a narrower
+  exception types, or omitting the exceptions altogether, we are NOT allowed to provide less narrow exception types.
+- `access modifier` - reducing the visibility of the method is NOT allowed, we can increase the visibility of a
+  method but never reduce it, remember the order is private -> default (package private) -> protected -> public
+- `final modifier` - we can override a method from a parent class or interface and add final modifier to it,
+  effectively disabling any other sub-class of the current class that overrides it from being able to override it
+- `arguments list` - the arguments list of the method has to match EXACTLY, otherwise we are not overriding it we
+  are overloading it the typical example of overloading equals instead of overriding it equals(Child) != equals(Object o)
+
+10. Overloading
+
+- `compile time polymorphism` - this is the technical, term that is used to describe what overloading is, it
+  provides the compiler with the ability to choose which method is called based on the type of the arguments with
+  which the method is invoked, during compile time.
+- `overloading is name + arguments` - overloading is only based on method arguments, and the name of the method, a
+  method can not be overridden and overloaded at the same time.
+- `call site rules` - the compiler has a few strict call rules that are applied - first the method with the exact
+  type arguments is chosen, then wrapper types / boxing is considered and finally variable argument based methods.
+- `varargs vs no-args` - it is possible to provide method overload such that we have a version with no arguments and
+  a version with only varargs - method() and method(String... vars) both can exist simultaneously and do not cause
+  compiler error, if we call method without any arguments the overload with no arguments will win, because the
+  compiler makes a choice on the number of arguments first (after matching the types, if any, of course).
+-
+
 # Caveats
 
+- `class wins over interface` - rule that specifies that when both the interface and the class have the same method
+  (signature matching) the class always wins, if that method is not abstract in the class, it will serve as the
+  implementation of the method, if the method is declared as final it will actually prevent overriding and overshadow
+  the method from the interface.
 - `member variable shadowing` - child classes can shadow and re-declare member variables form a parent that they
   extend off of, meaning that a variable in the child can have the same name but completely different access
   modifiers, and even type, default value and what not, and both the child member variable and the parent are still
