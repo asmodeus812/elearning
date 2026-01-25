@@ -58,7 +58,12 @@ public class Song {
 
 In the language it is NOT possible to declare two methods with the same signature and name, regardless of their
 modifiers - static or not. Since it is possible to call a static method from an instance of a given class the
-compiler will not know which method to call if that was possible
+compiler will not know which method to call if that was possible.
+
+Just a side note, that is only relevant for a single class unit, if two methods exist with the same name in two
+different classes, that extends each other, as long as the method from the parent class is not visible to the child,
+(maybe its private, maybe its package private with default access) then the problem expresses above will not
+manifest
 
 A. Play!
 B. Music!

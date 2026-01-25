@@ -107,5 +107,4 @@ public class LambdaAndFunctional {
         LOGGER.logInfo("Calling accept method on our custom consumer that may throw exception");
         consumer.accept(literalStringValue);
     }
-
 }

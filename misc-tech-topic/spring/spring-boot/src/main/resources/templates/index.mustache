@@ -4,12 +4,12 @@
 <ul>
     {{#videos}}
     <li>
-        {{ getId }}: {{ getName }}  
-        <form action="/update-video/{{ getId }}" method="post" style="display: inline">
-            <input type="text" value="{{ getName }}" placeholder="Update video name" name="name" />     
+        {{ id }}: {{ name }} ({{ description }})
+        <form action="/update-video/{{ id }}" method="post" style="display: inline">
+            <input type="text" value="{{ name }}" placeholder="Update video description" name="description" />     
             <button type="submit">Update</button>
         </form>
-        <form action="/delete-video/{{ getId }}" method="post" style="display: inline">
+        <form action="/delete-video/{{ id }}" method="post" style="display: inline">
             <button type="submit">Delete</button>
         </form>
     </li>

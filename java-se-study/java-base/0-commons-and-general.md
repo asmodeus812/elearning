@@ -319,7 +319,6 @@ public class Child extends Parent implements Interface {
   a version with only varargs - method() and method(String... vars) both can exist simultaneously and do not cause
   compiler error, if we call method without any arguments the overload with no arguments will win, because the
   compiler makes a choice on the number of arguments first (after matching the types, if any, of course).
--
 
 # Caveats
 

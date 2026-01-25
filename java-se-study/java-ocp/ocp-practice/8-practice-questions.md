@@ -1,7 +1,8 @@
 1. What is the best reason for using StringBuilder instead of String?
 
 The existence of a string builder is mostly to avoid the nature of native java strings which are immutable. String
-builder allows you to actually mutate and append/insert/remove/delete string content, without each and every operation resulting in a new string.
+builder allows you to actually mutate and append/insert/remove/delete string content, without each and every
+operation resulting in a new string.
 
 A. StringBuilder adds support for multiple threads.
 B. StringBuilder can use == to compare values.
@@ -563,9 +564,9 @@ D. The code compiles but throws an exception at runtime.
 
 35. Which starts counting from one rather than zero?
 
- the only thing here that makes some sort of logical sense is the months of the LocalDateTime, the rest - index
- based counting is mostly always form 0, and LocalTime has no month component, it only has hours/minutes/seconds and
- such.
+the only thing here that makes some sort of logical sense is the months of the LocalDateTime, the rest - index
+based counting is mostly always form 0, and LocalTime has no month component, it only has hours/minutes/seconds and
+such.
 
 A. Array indexes
 B. The index used by charAt in a String
