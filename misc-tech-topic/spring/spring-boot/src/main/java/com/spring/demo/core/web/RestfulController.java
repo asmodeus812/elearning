@@ -3,7 +3,9 @@ package com.spring.demo.core.web;
 import com.spring.demo.core.model.SearchCriteria;
 import com.spring.demo.core.model.VideoModel;
 import com.spring.demo.core.service.VideoService;
+import java.util.Map;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,9 +13,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("/api")
+@RestController
+@RequestMapping("/api")
 public class RestfulController {
 
     private final VideoService videosService;
@@ -22,14 +26,14 @@ public class RestfulController {
         this.videosService = videosService;
     }
 
-    @GetMapping("/")
-    public ResponseEntity<Object> getVidoes() {
-        return ResponseEntity.of(Optional.of(videosService.getVideos()));
+    @GetMapping("/list")
+    public ResponseEntity<Object> getVidoes(Pageable pageable) {
+        return ResponseEntity.of(Optional.of(videosService.getVideos(pageable)));
     }
 
-    @GetMapping("/find/{name}")
-    public ResponseEntity<Object> getVidoes(@PathVariable String name) {
-        return ResponseEntity.of(Optional.of(videosService.getVideos(SearchCriteria.of(VideoModel.VideoCriteria.NAME, name))));
+    @PostMapping("/find")
+    public ResponseEntity<Object> getVidoes(@RequestBody Map<String, Object> criteria) {
+        return ResponseEntity.of(Optional.of(videosService.getVideos(SearchCriteria.of(criteria))));
     }
 
     @DeleteMapping("/delete/{id}")
@@ -39,11 +43,11 @@ public class RestfulController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<Object> updateVideo(@PathVariable Long id, @RequestBody VideoModel video) {
-        return ResponseEntity.of(Optional.ofNullable(videosService.updateVideo(new VideoModel(id, video.name(), ""))));
+        return ResponseEntity.of(Optional.ofNullable(videosService.updateVideo(video)));
     }
 
     @PostMapping("/create")
     public ResponseEntity<Object> createVideo(@RequestBody VideoModel video) {
-        return ResponseEntity.of(Optional.ofNullable(videosService.addVideo(video.name())));
+        return ResponseEntity.of(Optional.ofNullable(videosService.addVideo(video)));
     }
 }

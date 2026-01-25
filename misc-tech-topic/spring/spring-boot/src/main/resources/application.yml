@@ -11,10 +11,22 @@ logging:
           core: TRACE
 
 spring:
+  h2:
+    console:
+      enabled: true
   datasource:
-     url: ""
+    url: jdbc:h2:mem:mydb
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddlAuto: none
   application:
     name: demo-base
+  data:
+    web.pageable.one-indexed-parameters: true
 
 server:
   port: 8080
@@ -28,3 +40,4 @@ spring:
       on-profile:
         - local
 ---
+

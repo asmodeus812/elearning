@@ -1238,7 +1238,8 @@ controller, that attribute can then be directly referenced and expanded in the t
     <b>{{/videos}}</b>
 </ul>
 <form action="/new-video" method="post">
-        <input type="text" name="name" />     <button type="submit">Submit</button>
+    <input type="text" name="name" />     
+    <button type="submit">Submit</button>
 </form>
 ```
 
@@ -1528,7 +1529,8 @@ Below we have adapted the original TemplateController to to a new implementation
 controller standard implementation might look like.
 
 ```java
-@RestController("/api")
+@RestController
+@RequestMapping("/api")
 public class RestfulController {
 
     private final VideosService videosService;
@@ -1579,15 +1581,9 @@ Spring and there is no need to go to a lower level and operate with raw `Servlet
 @base_url = http://localhost:8080
 @json = application/json
 
-# -----------------------------------------------------------------------------
-# GET /  (list all videos)
-# -----------------------------------------------------------------------------
 GET {{base_url}}/
 HTTP 200
 
-# -----------------------------------------------------------------------------
-# POST /create  (create a new video)
-# -----------------------------------------------------------------------------
 POST {{base_url}}/create
 Content-Type: {{json}}
 
@@ -1597,10 +1593,6 @@ Content-Type: {{json}}
 
 HTTP 200
 
-# -----------------------------------------------------------------------------
-# PUT /update/{id}  (update existing video)
-# Replace 1 with a real id that exists in your system.
-# -----------------------------------------------------------------------------
 PUT {{base_url}}/update/1
 Content-Type: {{json}}
 
@@ -1610,16 +1602,9 @@ Content-Type: {{json}}
 
 HTTP 200
 
-# -----------------------------------------------------------------------------
-# DELETE /delete/{id}  (delete existing video)
-# Replace 1 with a real id that exists in your system.
-# -----------------------------------------------------------------------------
 DELETE {{base_url}}/delete/1
 HTTP 200
 
-# -----------------------------------------------------------------------------
-# GET /  (verify list after changes)
-# -----------------------------------------------------------------------------
 GET {{base_url}}/
 HTTP 200
 ```
@@ -1988,8 +1973,7 @@ public class Video {
         this.name = name;
     }
 
-    // getter and setter methods follow, equals, toString and hashCode, the rest of the class is abridge for
-    // simplification
+    // .... Get and Set methods, equals, toString and hashCode, the rest is abridged for simplicity
 }
 ```
 
@@ -2212,8 +2196,72 @@ dependencies to our project build file
 </dependency>
 ```
 
-```yaml
+Then we can add the following to our application configuration, that will ensure that a default data source is
+initialized and auto-configured by spring, later we will investigate how to customize our data sources and how to
+create more than one.
 
+```yaml
+spring:
+    datasource:
+        url: jdbc:h2:mem:mydb
+        username: sa
+        password: password
+        driverClassName: org.h2.Driver
+    jpa:
+        database-platform: org.hibernate.dialect.H2Dialect
+```
+
+To ensure that we can actually see what is going on with the database and the tables we can enable the console, the
+h2 console allows us to inspect the database as if we are connected to a database management tool, but in the
+browser, visit `http://localhost:8080/h2-console`
+
+```yaml
+spring:
+    h2:
+        console:
+            enabled: true
+            path: /h2-console
+```
+
+That is it in the console when you open it connect to the same URL as we have configured above, that would be -
+`jdbc:h2:mem:mydb`, and use the same username and password as in the `datasource` configuration in the main
+application properties file
+
+One can also configure a file to be used to construct and initialize the database and tables as well as pre-populate
+it with data. That can be done in the connection URL string for the database providing the full absolute path to a
+file on your file system.
+
+By default if we are using the JPA spring data starter, which internally uses Hibernate, the moment we start the
+application, Hibernate will add / create schemas that match our entities that we have defined and declared in our
+app, this is something that can be turned off and is usually done so with - `hibernate.hbm2ddl.auto=none`
+
+Set the hibernate from spring directly, this is a shortcut property that one can set and it will actually under the
+hood set the `hibernate.hbm2ddl.auto` that is directly tied to hibernate
+
+```yaml
+spring:
+    jpa:
+        hibernate:
+            ddlAuto: none
+```
+
+Put these files directly in your src/main/resources, one should be called data.sql, and the other schema.sql, and
+the names are pretty much self explanatory these files are read by, `DataSourceInitializationConfiguration`, and are
+applied to the first data source found in the spring container environment.
+
+```sql
+CREATE SEQUENCE IF NOT EXISTS VIDEOS_SEQ START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE IF NOT EXISTS VIDEOS (
+  ID BIGINT DEFAULT NEXT VALUE FOR VIDEOS_SEQ PRIMARY KEY,
+  NAME VARCHAR(128) NOT NULL UNIQUE,
+  DESCRIPTION VARCHAR(1024)
+);
+```
+
+```sql
+INSERT INTO VIDEOS (NAME, DESCRIPTION) VALUES ('Neon Harbor', 'A disillusioned dockworker uncovers a smuggling ring and must choose between quiet survival and loud justice.');
+INSERT INTO VIDEOS (NAME, DESCRIPTION) VALUES ('Clockwork Orchard', 'In a town where timekeeping is law, a botanist finds a tree that blooms one hour into the future.');
 ```
 
 ### Entities
@@ -2225,19 +2273,24 @@ such.
 
 ```java
 @Entity
+@Table(name = "videos")
 public class VideoEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "VIDEO_SEQ")
-    @SequenceGenerator(name = "VIDEO_SEQ", initialValue = 1, allocationSize = 1)
+    @SequenceGenerator(name = "VIDEOS_SEQ", initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "VIDEOS_SEQ")
+    @Column(name = "id", nullable = false, updatable = false, insertable = true, unique = true)
     private Long id;
 
-    @Column(name = "name", unique = true, updatable = false, insertable = true)
+    @Column(name = "name", unique = true, updatable = true, insertable = true, nullable = false, length = 128)
     private String name;
 
-    @Column(name = "description", unique = false, updatable = true, insertable = true)
+    @Column(name = "description", unique = false, updatable = true, insertable = true, nullable = true, length = 1024)
     private String description;
 
+    public VideoEntity() {
+        // require a default safe constructor
+    }
     .....
 }
 ```
@@ -2246,6 +2299,28 @@ There are few things going on there but what we need to care about is the annota
 two define the cornerstone, of a relational data/entity, each entity in a database is most commonly identified with
 an ID, that is a unique identifier that is generated by the database, based on certain rules that we can customize
 and define, but most commonly that is a self incrementing positive integer starting from 1, and always incrementing.
+
+As we mentioned above if you start the application and have already configured the database connection and have it
+up and running the provider (by default Hibernate) will create the entity schema for you).That also includes any
+number of auxiliary structures like sequences, indexes, foreign keys, and so on, set `hibernate.hbm2ddl.auto to
+configure this behavior`.
+
+```
+The primary key of an entity is one of the most important properties for that entity and it is crucial to understand
+these two annotations however, they contan a lot of information on how hibernate will use the unique identifier for
+the entity, and how a enw value will be assigned when a new entity is received, in this case, what happens here is
+that we tell it that the ID is a GENERATED value, and also tell it HOW to generate that value, in our schema we have
+created the sequence that generates new values, and they have to match - name, initialValue and allocationSize.
+
+Hibernate is also capable of creating these sequences on its own but usually it is a much better idea to construct
+these manually when we craete the schema of te entity ourselves. That way we have proper control over what is going
+on. This is usually done with tools lke Flyway or Liquibase
+
+@Id
+@SequenceGenerator(name = "VIDEOS_SEQ", initialValue = 1, allocationSize = 1)
+@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "VIDEOS_SEQ")
+long id;
+```
 
 ### DTO
 
@@ -2264,7 +2339,15 @@ better when we are not confined by the restrictions and structure of the databas
 @Repository
 public interface VideoRepository extends JpaRepository<VideoEntity, Long> {
 
-    List<VideoEntity> findByName(String name);
+    Optional<VideoEntity> findByName(String name);
+
+    Optional<VideoEntity> findByDescription(String name);
+
+    List<VideoEntity> findAllByNameContaining(String name);
+
+    List<VideoEntity> findAllByDescriptionContaining(String name);
+
+    void deleteAllByName(String name);
 }
 ```
 
@@ -2294,10 +2377,36 @@ generate an SQL query such as - `SELECT * FROM videos WHERE videos.name = 'name'
 meaning we can change the undelrying database implementation such as MSSQL or MySQL or Postgres without having to
 care about our queries being incompatible because spring daata will take care of that`
 
+We have done some changes to the Video class, mostly rename and converted it to a more robust immutable record
+model, where it is easier to pass around as a plain object without having to worry about intermediate state
+mutations. We have also introduced a new converter that will easily allow us to convert from one type to another.
+In this example we have only one DTO (VideoModel) and only one Entity (VideoEntity) that we convert from but in a
+real business scenario you could imagine that we might have more.
+
+```java
+public record VideoModel(Long id, String name, String description) {
+}
+
+public class VideoConverter {
+
+    private VideoConverter() {
+    }
+
+    public static final VideoModel convertFrom(VideoEntity entity) {
+        return new VideoModel(entity.getId(), entity.getName(), entity.getDescription());
+    }
+
+    public static final VideoEntity convertFrom(VideoModel model) {
+        return new VideoEntity(model.name(), model.description());
+    }
+}
+```
+
 We can then update over service to use the videos repository and actually take advantage of the methods that it
 exposes to do the same operations that we have already done to the service
 
 ```java
+
 @Service
 public class VideosService {
 
@@ -2308,18 +2417,26 @@ public class VideosService {
     }
 
     public List<VideoModel> getVideos() {
+        // extract all videos from the repository, this can be a costly operation too
         return videoRepository.findAll().stream().map(VideoConverter::convertFrom).toList();
     }
 
     public Optional<VideoModel> getVideo(VideoModel target) {
+        // we can add more conditions based on which to filter the existing videos
         return videoRepository.findById(target.id()).map(VideoConverter::convertFrom);
     }
 
     @Transactional
     public Optional<VideoModel> updateVideo(VideoModel target) {
+        // update an existing video, we can update both the name and description for a video
         Optional<VideoEntity> targetFoundVideoEntity = videoRepository.findById(target.id());
         if (targetFoundVideoEntity.isPresent()) {
-            targetFoundVideoEntity.get().setDescription(target.description());
+            if (StringUtils.hasText(target.name())) {
+                targetFoundVideoEntity.get().setName(target.name());
+            }
+            if (StringUtils.hasText(target.description())) {
+                targetFoundVideoEntity.get().setDescription(target.description());
+            }
             VideoEntity targetSavedVideoEntity = videoRepository.save(targetFoundVideoEntity.get());
             return Optional.of(VideoConverter.convertFrom(targetSavedVideoEntity));
         }
@@ -2328,27 +2445,31 @@ public class VideosService {
 
     @Transactional
     public boolean deleteVideos() {
+        // delete all entries from storage
         videoRepository.deleteAllInBatch();
         return videoRepository.count() == 0;
     }
 
     @Transactional
     public boolean deleteVideo(Long target) {
+        // delete a video by a non null id
         videoRepository.deleteById(target);
         return videoRepository.findById(target).isPresent();
     }
 
     @Transactional
-    public VideoModel addVideo(String name) {
-        VideoEntity newSavedVideo = new VideoEntity(name, "");
+    public VideoModel addVideo(VideoModel video) {
+        // a video entity created based on a full or partial video model, depending on what is required in
+        // the data base model like the video name for sure is required, while the description not really
+        VideoEntity newSavedVideo = new VideoEntity(video.name(), video.description());
         newSavedVideo = videoRepository.save(newSavedVideo);
         return VideoConverter.convertFrom(newSavedVideo);
     }
 }
 ```
 
-The usage of the transactional annotation above is really mandatory when the function encompasses more than one
-calls to the database, even if some of them are non mutating the state like the ones that are responsible for
+The usage of the `@Transactional` annotation above is really mandatory when the function encompasses more than one
+calls or operations to the database, even if some of them are not mutating the state like the ones that are responsible for
 finding entities, it is advised that these are compactly wrapped in a transaction.
 
 `Transactions provide an atomic all or nothing execution, the idea is that certain actions against the database have
@@ -2375,11 +2496,19 @@ class Service {
     @Transactional
     public void doWork() {}
 
-    // this method is not annotated with the Transactional annotation and will not actually trigger the
+    // this method is not annotated with the @Transactional annotation and will not actually trigger the
     // annotation or transaction when calling doWork, this occurs only when calling the method internally from
     // the same bean, might want to look into AspectJ
     public void doWork2() {
         this.doWork()
+    }
+
+    // this one will bypass the proxy issue with spring, and run the method in a transaction, but the method
+    // that is going to be in transaction is obviously doWork3 not doWork, however since it is internally calling
+    // doWrok every action perormed by doWork will properly be executed within a transactional context
+    @Transactional
+    public void doWork3() {
+        this.doWork();
     }
 }
 ```
@@ -2398,3 +2527,13 @@ transaction infrastructure, all transaction managers extend or implement this in
 - `JtaTransactionManager` — JTA / distributed transactions across multiple resources.
 - `R2dbcTransactionManager` - Reactive transaction api for R2DBC
 
+It is important to remember that by default each spring starter will have a default tx manager, for each data store,
+typically, that Mongo, Jpa, some data starters do not have a concept of a transaction manager,
+
+`However you have to remember, your spring application will use the default/primary one when the code is annotated
+with @Transactional, whichever transaction manager is by default setup will be the one that is used. This is crucial
+because, assuming you have more than one transaction manager available from AutoConfiguration, you might be thinking
+that you are using transactions for your MongoDB operations, but in all actuality it is using the one for JPA
+because that is the default one.`
+
+###

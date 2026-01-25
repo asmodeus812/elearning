@@ -1,6 +1,7 @@
 package com.spring.demo.core.model;
 
 import com.spring.demo.core.api.CriteriaCollection;
+import com.spring.demo.core.api.CriteriaDefinition;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -10,9 +11,15 @@ public class SearchCriteria implements CriteriaCollection {
     private static final String THE_CRITERIA_NAME_MESSAGE = "The criteria name can not be null";
     private static final String THE_CRITERIA_VALUE_MESSAGE = "The criteria value can not be null";
 
-    private final Map<String, Object> criteria = new HashMap<>();
+    private Map<String, Object> criteria = new HashMap<>();
 
     private SearchCriteria() {}
+
+    private SearchCriteria(Map<String, Object> criteria) {
+        for (Map.Entry<String, Object> values : criteria.entrySet()) {
+            addCriteria(values.getKey(), values.getValue());
+        }
+    }
 
     public static final CriteriaCollection empty() {
         return new SearchCriteria();
@@ -20,20 +27,21 @@ public class SearchCriteria implements CriteriaCollection {
 
     public static final CriteriaCollection of(Map<String, Object> criteria) {
         Objects.requireNonNull(criteria, "The criteria values can not be empty");
-        CriteriaCollection newCriteria = new SearchCriteria();
-        for (Map.Entry<String, Object> values : criteria.entrySet()) {
-            newCriteria.addCriteria(values.getKey(), values.getValue());
-        }
-        return newCriteria;
+        return new SearchCriteria(criteria);
     }
 
     public static final SearchCriteria of(Object... keyValuePairs) {
         Objects.requireNonNull(keyValuePairs, "The key value pairs can not be empty");
         assert keyValuePairs.length % 2 == 0 : "Key value pairs inssuficient number";
         SearchCriteria newCriteria = new SearchCriteria();
-        for (int i = 0; i < keyValuePairs.length / 2; i++) {
-            assert keyValuePairs[i] instanceof String : "Value not instance of String";
-            newCriteria.addCriteria((String) keyValuePairs[i], keyValuePairs[i + 1]);
+        for (int i = 0; i < keyValuePairs.length / 2; i += 2) {
+            if (keyValuePairs[i] instanceof String) {
+                newCriteria.addCriteria((String) keyValuePairs[i], keyValuePairs[i + 1]);
+            } else if (keyValuePairs[i] instanceof CriteriaDefinition) {
+                newCriteria.addCriteria((CriteriaDefinition) keyValuePairs[i], keyValuePairs[i + 1]);
+            } else {
+                newCriteria.addCriteria(keyValuePairs[i].toString(), keyValuePairs[i + 1]);
+            }
         }
         return newCriteria;
     }
@@ -42,16 +50,13 @@ public class SearchCriteria implements CriteriaCollection {
     @Override
     public <T> T getRaw(String name) throws ClassCastException {
         Objects.requireNonNull(name, THE_CRITERIA_NAME_MESSAGE);
-        if (!criteria.containsKey(name)) {
-            return null;
-        }
-        return (T) criteria.get(name);
+        return (T) criteria.get(name.toLowerCase());
     }
 
     @Override
     public boolean hasCriteria(String name) throws ClassCastException {
         Objects.requireNonNull(name, THE_CRITERIA_NAME_MESSAGE);
-        return criteria.containsKey(name);
+        return criteria.containsKey(name.toLowerCase());
     }
 
     @Override

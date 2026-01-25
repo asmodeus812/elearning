@@ -13,7 +13,7 @@ public interface CriteriaCollection {
     CriteriaCollection removeCriteria(String name) throws NullPointerException;
 
     default <T> Optional<T> get(String name) throws ClassCastException {
-        return Optional.ofNullable(getRaw(name));
+        return hasCriteria(name) ? Optional.ofNullable(this.<T>getRaw(name)) : Optional.empty();
     }
 
     default <T> Optional<T> get(String name, CriteriaCondition<T> condition) throws ClassCastException {
@@ -21,51 +21,51 @@ public interface CriteriaCollection {
     }
 
     default <T> T getRaw(String name, CriteriaCondition<T> condition) throws ClassCastException {
-        return get(name, condition).orElse(null);
+        return this.<T>get(name, condition).orElse(null);
     }
 
     default <T> T getRawOrDefault(String name, T def) throws ClassCastException {
-        return this.<T>get(name).orElse(def);
+        return hasCriteria(name) ? this.<T>getRaw(name) : def;
     }
 
     default <T> T getRawOrDefault(String name, CriteriaCondition<T> condition, T def) throws ClassCastException {
-        return get(name, condition).orElse(def);
+        return hasCriteria(name) ? this.<T>get(name, condition).orElse(def) : def;
     }
 
     default <T> boolean hasCriteria(String name, CriteriaCondition<T> condition) throws ClassCastException {
-        return get(name, condition).isPresent();
-    }
-
-    default <T> Optional<T> get(CriteriaDefinition key) throws ClassCastException {
-        return get(key.name());
-    }
-
-    default <T> Optional<T> get(CriteriaDefinition key, CriteriaCondition<T> condition) throws ClassCastException {
-        return get(key.name(), condition);
-    }
-
-    default <T> T getRaw(CriteriaDefinition key) throws ClassCastException {
-        return this.<T>get(key.name()).orElse(null);
-    }
-
-    default <T> T getRaw(CriteriaDefinition key, CriteriaCondition<T> condition) throws ClassCastException {
-        return get(key.name(), condition).orElse(null);
-    }
-
-    default <T> T getRawOrDefault(CriteriaDefinition key, T def) throws ClassCastException {
-        return this.<T>get(key.name()).orElse(def);
-    }
-
-    default <T> T getRawOrDefault(CriteriaDefinition key, CriteriaCondition<T> condition, T def) throws ClassCastException {
-        return get(key.name(), condition).orElse(def);
+        return hasCriteria(name) && this.<T>get(name, condition).isPresent();
     }
 
     default boolean hasCriteria(CriteriaDefinition def) throws ClassCastException {
-        return get(def.name()).isPresent();
+        return hasCriteria(def.name());
     }
 
     default <T> boolean hasCriteria(CriteriaDefinition def, CriteriaCondition<T> condition) throws ClassCastException {
-        return get(def.name(), condition).isPresent();
+        return hasCriteria(def.name(), condition);
+    }
+
+    default <T> Optional<T> get(CriteriaDefinition key) throws ClassCastException {
+        return this.<T>get(key.name());
+    }
+
+    default <T> Optional<T> get(CriteriaDefinition key, CriteriaCondition<T> condition) throws ClassCastException {
+        return this.<T>get(key.name(), condition);
+    }
+
+    default <T> T getRaw(CriteriaDefinition key) throws ClassCastException {
+        return this.<T>getRaw(key.name());
+    }
+
+    default <T> T getRaw(CriteriaDefinition key, CriteriaCondition<T> condition) throws ClassCastException {
+        return this.<T>getRaw(key.name(), condition);
+    }
+
+    default <T> T getRawOrDefault(CriteriaDefinition key, T def) throws ClassCastException {
+        return this.<T>getRawOrDefault(key.name(), def);
+    }
+
+    default <T> T getRawOrDefault(CriteriaDefinition key, CriteriaCondition<T> condition, T def) throws ClassCastException {
+        return this.<T>getRawOrDefault(key.name(), condition, def);
     }
 
     default CriteriaCollection addCriteria(CriteriaDefinition def, Object value) throws NullPointerException {

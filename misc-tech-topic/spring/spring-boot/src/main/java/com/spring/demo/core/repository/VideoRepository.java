@@ -3,19 +3,29 @@ package com.spring.demo.core.repository;
 import com.spring.demo.core.entity.VideoEntity;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface VideoRepository extends JpaRepository<VideoEntity, Long> {
 
-    Optional<VideoEntity> findByName(String name);
+    @NonNull
+    Page<VideoEntity> findAll(@NonNull Pageable pageable);
 
-    Optional<VideoEntity> findByDescription(String name);
+    @NonNull
+    Optional<VideoEntity> findByName(@NonNull String name);
 
-    List<VideoEntity> findAllLikeName(String name);
+    @NonNull
+    Optional<VideoEntity> findByDescription(@NonNull String name);
 
-    List<VideoEntity> findAllLikeDescription(String name);
+    @NonNull
+    List<VideoEntity> findAllByNameContaining(@NonNull String name);
 
-    void deleteAllByName(String name);
+    @NonNull
+    List<VideoEntity> findAllByDescriptionContaining(@NonNull String name);
+
+    void deleteAllByName(@NonNull String name);
 }

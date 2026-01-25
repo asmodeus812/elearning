@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
     "id": "laptop",
-    "name": "Laptop",
+    "name": "Laptop"
 }
 
 ### 2. GET with @RequestHeader
@@ -20,44 +20,37 @@ GET http://localhost:8080/products-path/12345
 ### 5. GET with @RequestAttribute (requires server-side setup)
 GET http://localhost:8080/products-discount
 
-# -----------------------------------------------------------------------------
-# Variables
-# -----------------------------------------------------------------------------
-@base_url = http://localhost:8080
-@content_type = application/json
-
-# -----------------------------------------------------------------------------
-# GET / (get all videos)
-# -----------------------------------------------------------------------------
-GET {{base_url}}/
+GET http://localhost:8080/api/list?page=0&size=10
 HTTP 200
 
-# -----------------------------------------------------------------------------
-# POST /create  (create a new video)
-# -----------------------------------------------------------------------------
-POST {{base_url}}/create
-Content-Type: {{content_type}}
+POST http://localhost:8080/api/find
+Content-Type: application/json
 
 {
-  "name": "Created from Hurl"
+  "name": "the"
 }
 
 HTTP 200
 
-# -----------------------------------------------------------------------------
-# PUT /update/{id}  (update video name)
-# -----------------------------------------------------------------------------
-PUT {{base_url}}/update/1
-Content-Type: {{content_type}}
+POST http://localhost:8080/api/create
+Content-Type: application/json
 
 {
-  "name": "Updated from Hurl"
+  "name": "Hurl video",
+  "description": "Created from Hurl"
 }
 
 HTTP 200
 
-# -----------------------------------------------------------------------------
-# DELETE /delete/{id}  (delete video)
-# -----------------------------------------------------------------------------
-DELETE {{base_url}}/delete/1
+PUT http://localhost:8080/api/update
+Content-Type: application/json
+
+{
+    "id": 1,
+    "description": "Updated from Hurl"
+}
+
+HTTP 200
+
+DELETE http://localhost:8080/api/delete/1
 HTTP 200
