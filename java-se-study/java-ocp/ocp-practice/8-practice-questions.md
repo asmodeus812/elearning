@@ -1,4 +1,4 @@
-1. What is the best reason for using StringBuilder instead of String?
+1. What is the best reason for using `StringBuilder` instead of String?
 
 The existence of a string builder is mostly to avoid the nature of native java strings which are immutable. String
 builder allows you to actually mutate and append/insert/remove/delete string content, without each and every
@@ -20,7 +20,7 @@ B. It can be reused via the string pool.
 C. It is final.
 D. `It is mutable.`
 
-3. Which of the following creates a StringBuilder with a different value than the other options?
+3. Which of the following creates a `StringBuilder` with a different value than the other options?
 
 The insert here will actually append at the end of the builder the reason for that is because the insert method
 allows us to insert at the string builder length position, which is the way of saying add to the very end of the
@@ -50,14 +50,14 @@ B. `333 806 1601`
 C. The code compiles but outputs something else.
 D. The code does not compile.
 
-5. How many of the types ArrayList, List, and Object can fill in the blank to produce code that compiles?
+5. How many of the types `ArrayList`, List, and Object can fill in the blank to produce code that compiles?
 
 ```java
 List frisbees = new ____________();
 ```
 
 We can only create array list, the rest like List which is an interface we can not create an instance of and we can
-also not assign new Object to List, even though the Object class as we know has a no-args constructor that is public
+also not assign new Object to List, even though the Object class as we know has a `no-args constructor` that is public
 and accessible
 
 A. None
@@ -515,10 +515,13 @@ xmas.plusDays(-1);
 System.out.println(xmas.getDayOfMonth());
 ```
 
-TODO:
+Local date as we know expresses unit times of year, month and days, therefore there a way to subtract a day from
+that temporal Object in this case we will land on the previous day of the month, in this case the 24th, however
+these are non-mutating fields that means that they produce a new object instance of the local date that will be
+actually returned based on the source object, therefore print statement still remains, 25th
 
 A. 24
-B. 25
+B. `25`
 C. 26
 D. None of the above
 
@@ -586,22 +589,25 @@ D. The method it declares is named test.
 37. Which of these periods represents a larger amount of time?
 
 ```java
-    Period period1 = Period.ofWeeks(1).ofDays(3);
-    Period period2 = Period.ofDays(10);
+Period period1 = Period.ofWeeks(1).ofDays(3);
+Period period2 = Period.ofDays(10);
 ```
 
-TODO:
+Okay here is the deal these are static methods, but they are written in such a way to confuse the user, what does it
+mean, ofWeeks will truly return 1 week period instance, then ofDays will create a completely new instance of period
+spanning 3 days, not in any way related to the previous period. Both methods are static both produce an independent
+of the source instance object. A period of 10 days will be greater than a period of 3 days.
 
 A. period1
-B. period2
+B. `period2`
 C. They represent the same length of time.
 D. None of the above. This code does not compile.
 
 38. What is the result of the following?
 
 ```java
-import java.time._;
-import java.time.format._;
+import java.time.*;
+import java.time.format.*;
 public class HowLong {
     public static void main(String[] args) {
         LocalDate newYears = LocalDate.of(2017, 1, 1);
@@ -612,10 +618,12 @@ public class HowLong {
 }
 ```
 
-TODO:
+The local date being a representative of year, month and day, correctly adjusts when a situation like that arises,
+in this case the date will loop back to 2016, the last day of that year. The interface that is used to create the
+local date and the period are all correct, and valid. The interface to print out the formatted local date as well.
 
 A. 01-01-2017
-B. 12-31-2016
+B. `12-31-2016`
 C. The code does not compile.
 D. The code compiles but throws an exception at runtime.
 
@@ -640,9 +648,11 @@ D. happy.substring(1, happy.length())
 
 40. Which is not a true statement about the Period class?
 
-TODO:
+Period is is year,month or day based, just as `LocalDate` it is meant to serve as a representative of relative time, a
+counter part to the local date, the duration however is the one that represents a relative duration, it is in the
+name it is the counter part of `LocalTime`.
 
 A. A Period is immutable.
 B. A Period is typically used for adding or subtracting time from dates.
-C. You can create a Period representing 2 minutes.
+C. `You can create a Period representing 2 minutes.`
 D. You can create a Period representing 5 years

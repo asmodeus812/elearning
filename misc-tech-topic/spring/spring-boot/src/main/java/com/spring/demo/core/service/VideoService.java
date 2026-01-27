@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,12 +31,25 @@ public class VideoService {
         return videoRepository.findAll(pageable).map(VideoConverter::convertFrom);
     }
 
+    public Page<VideoModel> getVideos(CriteriaCollection search, Pageable pageable) {
+        VideoEntity probe = new VideoEntity();
+
+        Example<VideoEntity> example = CriteriaPipeline.<VideoEntity>of(search)
+                        .<Long>accept(VideoModel.VideoCriteria.ID, CriteriaCondition.<Long>not(Objects::isNull), probe::setId)
+                        .<String>accept(VideoModel.VideoCriteria.NAME, StringUtils::hasText, probe::setName)
+                        .<String>accept(VideoModel.VideoCriteria.DESCRIPTION, StringUtils::hasText, probe::setDescription)
+                        .findFirst()
+                        .map(Example::of)
+                        .orElse(null);
+
+        return videoRepository.findAll(example, pageable).map(VideoConverter::convertFrom);
+    }
+
     public List<VideoModel> getVideos(CriteriaCollection search) {
         return CriteriaPipeline.<List<VideoEntity>>of(search)
-                        .<String>accept(VideoModel.VideoCriteria.NAME, StringUtils::hasText,
-                                        v -> videoRepository.findAllByNameContaining(v))
+                        .<String>accept(VideoModel.VideoCriteria.NAME, StringUtils::hasText, videoRepository::findAllByNameContaining)
                         .<String>accept(VideoModel.VideoCriteria.DESCRIPTION, StringUtils::hasText,
-                                        v -> videoRepository.findAllByDescriptionContaining(v))
+                                        videoRepository::findAllByDescriptionContaining)
                         .<Long>accept(VideoModel.VideoCriteria.ID, v -> videoRepository.findAll())
                         .limitFirst()
                         .flatMap(Collection::stream)
@@ -45,11 +59,11 @@ public class VideoService {
 
     public Optional<VideoModel> getVideo(CriteriaCollection search) {
         return CriteriaPipeline.<VideoEntity>of(search)
-                        .<String>acceptOptional(VideoModel.VideoCriteria.NAME, StringUtils::hasText, v -> videoRepository.findByName(v))
+                        .<String>acceptOptional(VideoModel.VideoCriteria.NAME, StringUtils::hasText, videoRepository::findByName)
                         .<String>acceptOptional(VideoModel.VideoCriteria.DESCRIPTION, StringUtils::hasText,
-                                        v -> videoRepository.findByDescription(v))
+                                        videoRepository::findByDescription)
                         .<Long>acceptOptional(VideoModel.VideoCriteria.ID, CriteriaCondition.<Long>not(Objects::isNull),
-                                        v -> videoRepository.findById(v))
+                                        videoRepository::findById)
                         .findFirst()
                         .map(VideoConverter::convertFrom);
     }

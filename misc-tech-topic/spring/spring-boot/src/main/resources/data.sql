@@ -28,3 +28,25 @@ INSERT INTO VIDEOS (NAME, DESCRIPTION) VALUES ('Crescent Under Glass', 'A watchm
 INSERT INTO VIDEOS (NAME, DESCRIPTION) VALUES ('Hollow City Postcards', 'A travel blogger receives postcards from a city with no roads in or out, each signed with her name.');
 INSERT INTO VIDEOS (NAME, DESCRIPTION) VALUES ('The Blue Door Agreement', 'Neighbors agree never to open a mysterious door in their hallway—until it opens from the inside.');
 INSERT INTO VIDEOS (NAME, DESCRIPTION) VALUES ('Starlight Maintenance', 'A satellite repair crew finds an extra module that was never launched and must trace who put it there.');
+
+INSERT INTO ROLES (NAME) VALUES ('admin');
+INSERT INTO ROLES (NAME) VALUES ('default');
+
+-- INSERT INTO AUTHORITIES (NAME, ROLE) VALUES ('view_all', 1);
+-- INSERT INTO AUTHORITIES (NAME, ROLE) VALUES ('delete_all', 1);
+-- INSERT INTO AUTHORITIES (NAME, ROLE) VALUES ('update_all', 1);
+-- INSERT INTO AUTHORITIES (NAME, ROLE) VALUES ('insert_all', 1);
+
+-- INSERT INTO AUTHORITIES (NAME, ROLE) VALUES ('view_user', 1);
+-- INSERT INTO AUTHORITIES (NAME, ROLE) VALUES ('delete_user', 1);
+-- INSERT INTO AUTHORITIES (NAME, ROLE) VALUES ('update_user', 1);
+-- INSERT INTO AUTHORITIES (NAME, ROLE) VALUES ('insert_user', 1);
+
+-- INSERT INTO AUTHORITIES (NAME, ROLE) VALUES ('view_video', 1);
+-- INSERT INTO AUTHORITIES (NAME, ROLE) VALUES ('delete_video', 1);
+-- INSERT INTO AUTHORITIES (NAME, ROLE) VALUES ('update_video', 1);
+-- INSERT INTO AUTHORITIES (NAME, ROLE) VALUES ('insert_video', 1);
+
+-- INSERT INTO USERS (NAME, PASSWORD, ROLE) VALUES ('admin', 'admin', 1);
+-- INSERT INTO USERS (NAME, PASSWORD, ROLE) VALUES ('user', 'user', 2);
+

@@ -38,24 +38,27 @@ public class VideoEntity {
         return id;
     }
 
-    public void setId(Long id) {
+    public VideoEntity setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public VideoEntity setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public VideoEntity setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     @Override

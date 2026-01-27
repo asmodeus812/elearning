@@ -33,7 +33,7 @@ public class TemplateController {
     @GetMapping(path = {"/", "/list"})
     public String list(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size, Model model) {
         final int pageNumber = Math.max(page, 1);
-        final int pageSize = Math.min(Math.max(size, 1), 1024);
+        final int pageSize = Math.min(Math.max(size, 1), 100);
         final Sort sortCriteria = Sort.by(Sort.Direction.ASC, "id");
 
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, sortCriteria);

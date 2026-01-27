@@ -273,7 +273,7 @@ public class FilesAndPath {
         Path resultOfWalker = Files.walkFileTree(homePathDirectory, new FileVisitorImplementation());
         LOGGER.logInfo(String.format("Result of the walking method is %s", resultOfWalker));
 
-        // the simple wlaker produces a temporary streamthat stream is actually internally implemented with anonymous structure that
+        // the simple walker produces a temporary streamthat stream is actually internally implemented with anonymous structure that
         // structure is holding the io resources therefore when the stream is closed with a terminal operation the resources are going to be
         // closed and freed along with the stream, however it is a good practice to ensure the closing is guaranteed with try-with-resources
         // wiht multiple calls to close method are not going to cause exception so we can ensure that the stream is clsoed always outside of
@@ -365,7 +365,7 @@ public class FilesAndPath {
             // simply
             // set the position of the cursor to 0, and the capacity/limit of the buffer to the maximum size in this case 1KB = 1024 bytes
             bufferOne.clear();
-            bufferOne.clear();
+            bufferTwo.clear();
             // put some random data into the buffers, so they are not empty, the data is not important, what is important here is that we
             // fill up the buffers, with something that is later going to be used to actually transfer the data into a single shot
             // writev(write vectorized) using our two buffers directly into the file
@@ -383,8 +383,6 @@ public class FilesAndPath {
             fileChannelInOut.write(new ByteBuffer[] {bufferOne, bufferTwo});
             LOGGER.logInfo(String.format("Multiplexing buffer content into %s", temporaryNewFile3));
         }
-
-        BiConsumer<String, String> test = (s,f) -> { return; };
 
         // the files interface provies a quick way to construct a seekable byte channel, which allows us to read a path contents as bytes,
         // this is quicker, more generic, and less involved than a straight FileChannel object and managing that. The inherent benefit of

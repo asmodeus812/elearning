@@ -8,12 +8,12 @@ software to the local language and customs is known as localization.
 words, customizing software for people from different countries or languages. How is that achieved ? Two important
 guidelines should be heeded when you localize a software application
 
--   Do `not hardcode` text (such as messages to the users, textual elements in the GUI etc.). and separate them into
-    external files or dedicated classes. With this accomplished there is usually minimal effort to add support for a new
-    local in the software.
+- Do `not hardcode` text (such as messages to the users, textual elements in the GUI etc.). and separate them into
+  external files or dedicated classes. With this accomplished there is usually minimal effort to add support for a new
+  local in the software.
 
--   Handle `cultural specific aspects` such as date, time and currency, formatting with localization in mind. Instead of
-    assuming a default locale, design in such a way that the current locale is fetched and customized.
+- Handle `cultural specific aspects` such as date, time and currency, formatting with localization in mind. Instead of
+  assuming a default locale, design in such a way that the current locale is fetched and customized.
 
 ## Locale
 
@@ -28,7 +28,7 @@ code).
 | static Locale[] getAvailableLocales()    | Returns a list of available locales (i.e., installed locales) supported by the JVM.      |
 | static Locale getDefault()               | Returns the default locale of the JVM.                                                   |
 | static void setDefault(Locale newLocale) | Sets the default locale of the JVM.                                                      |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------- |
+| ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ |
 | String getCountry()                      | Returns the country code for the locale object.                                          |
 | String getDisplayCountry()               | Returns the country name for the locale object.                                          |
 | String getLanguage()                     | Returns the language code for the locale object.                                         |
@@ -49,7 +49,7 @@ Arrays.stream(locales).forEach(locale -> System.out.printf("Locale code: %s and 
 And the output of the snippet above, might look something like that. Note that the output is abridged to only show the
 general format in which the locales are printed and their respective display names
 
-```txt
+```plaintext
 The default locale is: en_US
 No. of other available locales is: 160, and they are:
 Locale code: ms_MY and it stands for Malay (Malaysia)
@@ -68,12 +68,12 @@ Locale code: hu and it stands for Hungarian
 [... rest of the output is elided ... ]
 ```
 
-There are multiple types of of localization formats
+There are multiple types of of localization formats, some of them include:
 
--   "hu" - stands for Hungarian, just one code where the code is the language code, doubles as country code and variant too
--   "ms_MY" - stands for Malay (Malaysia) - language and country code
--   "no_NO_NY" - stands for Norwegian (Norway, Nynorsk) - language, country and region codes
--   "th*TH_TH*#u-nu-thai" - two or three initial codes separated with, language, country code, variant and the extension is `u-nu-thai`
+- "hu" - stands for Hungarian, just one code where the code is the language code, doubles as country code and variant too
+- "ms_MY" - stands for Malay (Malaysia) - language and country code
+- "no_NO_NY" - stands for Norwegian (Norway, Nynorsk) - language, country and region codes
+- "th*TH_TH*#u-nu-thai" - two or three initial codes separated with, language, country code, variant and the extension is `u-nu-thai`
 
 Here is the general format of the locale or localization string. The locale coding scheme allows combining different
 variations to create a locale.
@@ -83,7 +83,7 @@ that country code and variant are always written out in capital letters, the lan
 
 Consider English which is spoken in many countries. There are variations in English based on the country in which the
 language is spoken. We all know that American English is different from British English, but there are many such
-versions. Below is a quick snippet that prints out all english language based localization formats.
+versions. Below is a quick snippet that prints out all English language based localization formats.
 
 ```java
 Arrays.stream(Locale.getAvailableLocales())
@@ -95,12 +95,12 @@ The output might look something like that, note that there are quite a few types
 english. The output refers to different locales in English and makes use of only language code and the country code.
 
 ```txt
+Locale code: en and it stands for English (Default)
 Locale code: en_MT and it stands for English (Malta)
 Locale code: en_GB and it stands for English (United Kingdom)
 Locale code: en_CA and it stands for English (Canada)
 Locale code: en_US and it stands for English (United States)
 Locale code: en_ZA and it stands for English (South Africa)
-Locale code: en and it stands for English
 Locale code: en_SG and it stands for English (Singapore)
 Locale code: en_IE and it stands for English (Ireland)
 Locale code: en_IN and it stands for English (India)
@@ -180,16 +180,16 @@ map those keys to locale specific values. The abstract class `ResourceBundle`, p
 in Java. It has two derived classes `PropertyResourceBundle` and `ListResourceBundle`. The two derived classes provide
 support for resource bundles using two different mechanisms:
 
--   `PropertyResourceBundle` this concrete class provides support for multiple locales in the form of property files, For
-    each locale, one needs to specify the keys and values in a property file, for that locale. For a given locale, if you
-    use the `ResourceBundle.getBundle()` method the relevant property file will be automatically loaded. Of course there is no
-    magic i it; there are certain naming conventions that need to be followed for creating the property files, which will be
-    discussed below.
+- `PropertyResourceBundle` this concrete class provides support for multiple locales in the form of property files, For
+  each locale, one needs to specify the keys and values in a property file, for that locale. For a given locale, if you
+  use the `ResourceBundle.getBundle()` method the relevant property file will be automatically loaded. Of course there is no
+  magic i it; there are certain naming conventions that need to be followed for creating the property files, which will be
+  discussed below.
 
--   `ListResourceBundle` - for adding support to a locale, extend this class. In the derived class the method
-    `getContents` has to be overridden. Which returns and `Object[][]`. This array must have the list of keys and values,
-    The keys must be Strings. Typically the values are also Strings, but values can be anything: sound clips, video
-    clips, URLs or pictures.
+- `ListResourceBundle` - for adding support to a locale, extend this class. In the derived class the method
+  `getContents` has to be overridden. Which returns and `Object[][]`. This array must have the list of keys and values,
+  The keys must be Strings. Typically the values are also Strings, but values can be anything: sound clips, video
+  clips, URLs or pictures.
 
 ### Usage
 
@@ -388,53 +388,53 @@ name, based on the locale, gradually broadening the scope, by looking for a more
 
 Read and set the locale
 
--   A locale represents a language culture or country; the Locale class in Java provides an abstraction for this
-    concept.
+- A locale represents a language culture or country; the Locale class in Java provides an abstraction for this
+  concept.
 
--   Each locale can have three entries: the language and country to form locale tags. There are no standard tags for
-    variants;
+- Each locale can have three entries: the language and country to form locale tags. There are no standard tags for
+  variants;
 
--   The `getter` methods in the Locale class - such as `getLanguage` or `getCountry`, `getVariant` return codes; whereas the
-    similar methods of `getDisplayName`, `getDisplayLanguage` and so on, return human readable text representation for those
-    codes
+- The `getter` methods in the Locale class - such as `getLanguage` or `getCountry`, `getVariant` return codes; whereas the
+  similar methods of `getDisplayName`, `getDisplayLanguage` and so on, return human readable text representation for those
+  codes
 
--   The `getDefault` method in Locale returns the default locale set in the `JVM`. This default locale can be changed to
-    another locale by using the `setDefault` method.
+- The `getDefault` method in Locale returns the default locale set in the `JVM`. This default locale can be changed to
+  another locale by using the `setDefault` method.
 
--   There are many ways to create or get a Locale object - using a `constructor`, `forLanguageTag`, `Locale.Builder` or
-    from the predefined constants
+- There are many ways to create or get a Locale object - using a `constructor`, `forLanguageTag`, `Locale.Builder` or
+  from the predefined constants
 
 Create and use properties file
 
--   A resource bundle is a set of classes or property files that help define a set of keys and map those keys to
-    locale-specific values.
+- A resource bundle is a set of classes or property files that help define a set of keys and map those keys to
+  locale-specific values.
 
--   The class `ResourceBundle` has two derived classes `PropertyResourceBundle` and `ListResourceBundle`.
+- The class `ResourceBundle` has two derived classes `PropertyResourceBundle` and `ListResourceBundle`.
 
--   To obtain the resource bundle use the `ResourceBundle.getBundle` method to get the bundle for a given locale, or the default one
+- To obtain the resource bundle use the `ResourceBundle.getBundle` method to get the bundle for a given locale, or the default one
 
--   The `PropertyResourceBundle` class provides support for multiple locales in the form of property files, for each locale
-    one needs to specify the keys and values in a property file located on the class path. Both the keys and values in the
-    file are of type String
+- The `PropertyResourceBundle` class provides support for multiple locales in the form of property files, for each locale
+  one needs to specify the keys and values in a property file located on the class path. Both the keys and values in the
+  file are of type String
 
--   To add support for a new locale extend the `ListResourceBundle`, class in the derived class override the abstract method
-    `Object[][] getContents` The returned array must have the list of keys and values. The keys must be string and
-    values can be of any type
+- To add support for a new locale extend the `ListResourceBundle`, class in the derived class override the abstract method
+  `Object[][] getContents` The returned array must have the list of keys and values. The keys must be string and
+  values can be of any type
 
--   When passing the key string to the `getObject()` method to fetch the matching value in the resource bundle make sure
-    that h passed keys and the key in the resource bundle exactly match (the key name is case sensitive). I the y do not
-    match a `MissingResourceException` will be thrown
+- When passing the key string to the `getObject()` method to fetch the matching value in the resource bundle make sure
+  that h passed keys and the key in the resource bundle exactly match (the key name is case sensitive). I the y do not
+  match a `MissingResourceException` will be thrown
 
--   The naming convention for a fully qualified resource bundle name is the `packagequalifier + the local format string`
+- The naming convention for a fully qualified resource bundle name is the `packagequalifier + the local format string`
 
 Build resource bundle
 
--   The process of finding a matching resource bundle is same for classes extended from `ListResourceBundle` as for
-    property files defined for `PropertyResourceBundle`.
+- The process of finding a matching resource bundle is same for classes extended from `ListResourceBundle` as for
+  property files defined for `PropertyResourceBundle`.
 
--   The special search sequence to look for a matching resource bundle. Search starts from the most narrow - using the
-    current locale, to the most broad - default `ResourceBundle`
+- The special search sequence to look for a matching resource bundle. Search starts from the most narrow - using the
+  current locale, to the most broad - default `ResourceBundle`
 
--   The `getBundle()` method takes a `ResourceBundle.Control` object as an additional parameter. By extending this
-    `ResourceBundle.Control` class and passing that object one can control or customize the resource bundle searching and
-    loading process
+- The `getBundle()` method takes a `ResourceBundle.Control` object as an additional parameter. By extending this
+  `ResourceBundle.Control` class and passing that object one can control or customize the resource bundle searching and
+  loading process

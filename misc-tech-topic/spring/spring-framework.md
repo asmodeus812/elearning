@@ -2175,7 +2175,7 @@ Spring data offers something called templates, those are the work horses of spri
 operations that actually execute the actual underlying data base ops. The templates internally use other beans which
 actually establish the connection, hold a connection pool to the database, do the actual communication and ops.
 
-### Relational Database
+### Database
 
 Starting off with possibly the most prolific database type that is used in the vast majority of projects, a relational
 database is a structured table based data store that defines a very strict form and shape for the data that is being
@@ -2377,16 +2377,74 @@ generate an SQL query such as - `SELECT * FROM videos WHERE videos.name = 'name'
 meaning we can change the undelrying database implementation such as MSSQL or MySQL or Postgres without having to
 care about our queries being incompatible because spring daata will take care of that`
 
+#### Pageable & Sort
+
+Spring data supports what are known as pages these pageable objects can be passed down to the repository itself, and
+based on it it will page the result, with a size per page and page index, `remember that page number starts at 0`
+
+```java
+// in the repository we might have declared a method like that, spring data will automatically take care of
+// generating an underlying implementation that does handle the paging of the results.
+Page<VideoEntity> findAll(@NonNull Pageable pageable);
+
+public String list(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size, Model model) {
+// clamp the number of the page to never be less than 0, and the size to be at least between 1 and 100, by default
+// the page number and size have limits that can be configured when using the spring request to construct these
+    page = Math.max(page, 0);
+    size = Math.min(Math.max(size, 1), 100);
+
+    // construct the actual page manually, based on the input arguments.
+    Pageable pageable = PageRequest.of(page, size, sortCriteria);
+    videoRepository.findAll(pageable);
+}
+```
+
+These properties are only in effect when we leave spring to initialize our pageable objects, not if we manually call
+Pageable.of, these take effect mostly if we have a controller that takes in an argument of type Pageable and we let
+Spring construct these for us, that way Spring create the pageable object from the specified properties and do the
+clamping and size restrictions on its own, the final Pageable object that we receive will still start from 0, but we are
+allowed to pass in a page number of 1, and spring will take care of clamping it down to 0, we can also change the name
+of the parameter that is used to read the page number the name of the parameter that is used to read the page size and
+so on and so forth.
+
+```yaml
+spring:
+    data:
+        web.pageable.default-page-size: 20 # Default page size.
+        web.pageable.max-page-size: 2000 # Maximum page size to be accepted.
+        web.pageable.one-indexed-parameters: true # Whether to expose and assume 1-based page number indexes.
+        web.pageable.page-parameter: page # Page index parameter name.
+        web.pageable.prefix: # General prefix to be prepended to the page number and page size parameters.
+        web.pageable.qualifier-delimiter: _ # Delimiter to be used between the qualifier and the actual page number and size properties.
+        web.pageable.size-parameter: size # Page size parameter name.
+        web.sort.sort-parameter: sort # Sort parameter name.
+```
+
+```java
+@GetMapping("/list")
+public ResponseEntity<Object> getVidoes(Pageable pageable) {
+    // the pageable object above will be created based on the web.pageable configuration we have set, it is as
+    // if we are leaving spring to automatically construct the page object, something that we might have to have
+    // done manually instead.
+    return ResponseEntity.of(Optional.of(videosService.getVideos(pageable)));
+}
+```
+
 We have done some changes to the Video class, mostly rename and converted it to a more robust immutable record
 model, where it is easier to pass around as a plain object without having to worry about intermediate state
-mutations. We have also introduced a new converter that will easily allow us to convert from one type to another.
-In this example we have only one DTO (VideoModel) and only one Entity (VideoEntity) that we convert from but in a
+mutations. We have also introduced a new converter that will easily allow us to convert from one type to another. In
+this example we have only one `DTO (VideoModel)` and only one `Entity (VideoEntity)` that we convert from but in a
 real business scenario you could imagine that we might have more.
 
 ```java
+// Modify the video model to use record, effectively the same implementation as the original data transfer object
+// but a record allows us to create a truly immutable object that we can pass around and not worry about state changes.
 public record VideoModel(Long id, String name, String description) {
 }
 
+// a simple converter utility class that is meant to speed up the usage and ergonomics of the conversion between one
+// type to another - or in this case from the business data transfer type to the underlying type being represented and
+// stored into the database
 public class VideoConverter {
 
     private VideoConverter() {
@@ -2402,11 +2460,47 @@ public class VideoConverter {
 }
 ```
 
-We can then update over service to use the videos repository and actually take advantage of the methods that it
-exposes to do the same operations that we have already done to the service
+#### Example & Matchers
+
+Searching in a repository can also be done by what is called query by example this is a spring declarative
+alternative of writing dynamic queries instead of having to create a custom method for each possible type of query
+combination or having to do post filtering.
 
 ```java
+// construct a probe or also called example object, the idea is that this, is the prime 'example' by which the
+// repository will look for other matching results, if we provide no custom matcher, it will simply find this probe
+// object. If we however create a matcher that also sets the condition matching on certain fields from the object
+// then we can/will do a broader match, effectively allowing us to match more than one entity based on certain
+// properties it posses
+VideoEntity probe = new VideoEntity();
+probe.setId(id);
+probe.setName(name);
+probe.setDescription(descrition);
 
+// create a matcher that will instead of attempt to exact match values for the fields from the probe that are set,
+// will match using starts or contains conditions, that way the results that are gong to be found are more than just
+// one - the probe
+ExampleMatcher matcher = ExampleMatcher.matchingAll()
+    .withIgnoreNullValues()
+    .withIgnorePaths("id")
+    .withMatcher("name", m -> m.startsWith().ignoreCase())
+    .withMatcher("description", m -> m.contains().ignoreCase());
+
+// by default the spring data repository extends off of an interface that has a findAll overload that takes in as
+// its first argument this special example object, the idea behind the example is that it asks the repository to find
+// all entities that match this 'example' probe
+Example<VideoEntity> ex = Example.of(probe, matcher);
+videoRepository.findAll(example, pageable).map(VideoConverter::convertFrom);
+```
+
+### Service
+
+We can then update over service to use the videos repository and actually take advantage of the methods that it
+exposes to do the same operations that we have already done to the service. This is not an exhaustive representation
+of the service but merely a simple example that aims to show how we can use the concepts we have thus far looked
+into
+
+```java
 @Service
 public class VideosService {
 
@@ -2417,53 +2511,84 @@ public class VideosService {
     }
 
     public List<VideoModel> getVideos() {
-        // extract all videos from the repository, this can be a costly operation too
-        return videoRepository.findAll().stream().map(VideoConverter::convertFrom).toList();
+        // extract all videos from the repository - can be costly with lots of rows
+        return videoRepository.findAll()
+        .stream()
+        .map(VideoConverter::convertFrom)
+        .toList();
     }
 
-    public Optional<VideoModel> getVideo(VideoModel target) {
-        // we can add more conditions based on which to filter the existing videos
-        return videoRepository.findById(target.id()).map(VideoConverter::convertFrom);
+    public Page<VideoModel> getVideos(Pageable pageable) {
+        // fetch only one "page" at a time, map entities -> models
+        return videoRepository.findAll(pageable)
+        .map(VideoConverter::convertFrom);
+    }
+
+    public Page<VideoModel> searchVideos(VideoSearchCriteria criteria, Pageable pageable) {
+        // query-by-example (QBE) works by:
+        VideoEntity probe = new VideoEntity();
+        probe.setName(blankToNull(criteria.name()));                 // String
+        probe.setDescription(blankToNull(criteria.description()));   // String
+
+        ExampleMatcher matcher = ExampleMatcher.matchingAll()
+            .withIgnoreNullValues()
+            // avoid matching by id unless you explicitly want it
+            .withIgnorePaths("id")
+            // global string rule (optional)
+            .withStringMatcher(StringMatcher.CONTAINING)
+            .withIgnoreCase()
+            // per-field overrides (recommended)
+            .withMatcher("name", m -> m.startsWith().ignoreCase())
+            .withMatcher("description", m -> m.contains().ignoreCase());
+
+        Example<VideoEntity> example = Example.of(probe, matcher);
+
+        return videoRepository.findAll(example, pageable)
+        .map(VideoConverter::convertFrom);
     }
 
     @Transactional
     public Optional<VideoModel> updateVideo(VideoModel target) {
-        // update an existing video, we can update both the name and description for a video
-        Optional<VideoEntity> targetFoundVideoEntity = videoRepository.findById(target.id());
-        if (targetFoundVideoEntity.isPresent()) {
-            if (StringUtils.hasText(target.name())) {
-                targetFoundVideoEntity.get().setName(target.name());
-            }
-            if (StringUtils.hasText(target.description())) {
-                targetFoundVideoEntity.get().setDescription(target.description());
-            }
-            VideoEntity targetSavedVideoEntity = videoRepository.save(targetFoundVideoEntity.get());
-            return Optional.of(VideoConverter.convertFrom(targetSavedVideoEntity));
-        }
-        return Optional.empty();
+        // update an existing video, apply non-blank fields
+        return videoRepository.findById(target.id()).map(entity -> {
+                if (StringUtils.hasText(target.name())) {
+                    entity.setName(target.name().trim());
+                }
+                if (StringUtils.hasText(target.description())) {
+                    entity.setDescription(target.description().trim());
+                }
+                VideoEntity saved = videoRepository.save(entity);
+                return VideoConverter.convertFrom(saved);
+            });
     }
 
     @Transactional
     public boolean deleteVideos() {
-        // delete all entries from storage
+        // delete all videos in a batch
         videoRepository.deleteAllInBatch();
         return videoRepository.count() == 0;
     }
 
     @Transactional
     public boolean deleteVideo(Long target) {
-        // delete a video by a non null id
+        // delete a single video by a target
         videoRepository.deleteById(target);
-        return videoRepository.findById(target).isPresent();
+        return videoRepository.findById(target).isEmpty();
     }
 
     @Transactional
     public VideoModel addVideo(VideoModel video) {
-        // a video entity created based on a full or partial video model, depending on what is required in
-        // the data base model like the video name for sure is required, while the description not really
-        VideoEntity newSavedVideo = new VideoEntity(video.name(), video.description());
-        newSavedVideo = videoRepository.save(newSavedVideo);
-        return VideoConverter.convertFrom(newSavedVideo);
+        // new entity from model; name required, description optional
+        VideoEntity newEntity = new VideoEntity(video.name(), video.description());
+        VideoEntity saved = videoRepository.save(newEntity);
+        return VideoConverter.convertFrom(saved);
+    }
+
+    public record VideoSearchCriteria(String name, String description, Long ownerId) {
+    }
+
+    private static String blankToNull(String s) {
+        return (s == null || s.isBlank()) ? null : s.trim();
     }
 }
 ```
@@ -2476,7 +2601,7 @@ finding entities, it is advised that these are compactly wrapped in a transactio
 to be performed in an atomic and safe way, if exceptions arise the all of the actions are rolled back - these the
 transaction wraps around.`
 
-### Transactions
+#### Transactions & Transactional
 
 Transactions are a core structure that is not only relevant for the persistence layer, everything can really be
 wrapped in a transactional context, allowing execution to be be performed in a structured atomic way, what does it
@@ -2536,4 +2661,27 @@ because, assuming you have more than one transaction manager available from Auto
 that you are using transactions for your MongoDB operations, but in all actuality it is using the one for JPA
 because that is the default one.`
 
-###
+### Security
+
+By default spring exposes a default configuration that can be used to secure an application directly we have a great
+control over how the security is implemented and configured, but it can be quickly enabled out of the box to give you
+some basic user authorization and authentication to get you going fast. Include the security dependency in your build
+files first
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+```
+
+The security will be enabled immediately, remember that for each starter spring declares auto-configuration classes in
+its resource file, that tells spring which auto-configuration class beans to create early, these beans construct the
+security context, by default most of these beans are conditional so they are not enforced onto the user, they can be
+disabled and a custom configuration can be setup by the user -
+
+We are referring to the following file as we have already seen it can be used to control which beans spring auto creates
+with the start of the spring container. In the new Spring 4 version, this file is split to achieve a more modularized
+structure for the entire spring framework.
+
+`src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`

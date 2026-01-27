@@ -27,25 +27,25 @@ other date and time related implementations and classes.
 
 ## TemporalAccessor
 
-A read only interface for accessing temporal information such as fields or units from a temporal object. Focuses solely
-on querying with no modification capabilities, acts as a base interface for Temporal.
+A read only interface for accessing temporal information such as fields or units from a temporal object. Focuses
+solely on querying with no modification capabilities, acts as a base interface for Temporal.
 
 ## Temporal
 
-This interface is meant to represent a point in time or an object in the date-time API that can be queries and adjusted,
+This interface is meant to represent a point in time or an object in the date-time API that can be queried and adjusted,
 it does provide API methods such as plus,minus,with and get. The implementations of this class include `Instant,
 LocalDate, LocalTime, ZonedDateTime`
 
 ## TemporalAmount
 
-Represents a relative amount of time such as a duration or a period, which ca nbe added to or subtracted from a
+Represents a relative amount of time such as a duration or a period, which can be added to or subtracted from a
 Temporal, some implementation classes include `Duration and Period`.
 
 ## TemporalAdjuster
 
 Represents a strategy for adjusting a Temporal object, allows performing custom or pre defined adjustments such as
 setting the date to the next Monday or the first day of the month. Built-in examples the `TemporalAdjusters` utility class
-provides common implementations like next(), firstDayOfMonth() etc
+provides common implementations like `next(), firstDayOfMonth() etc`
 
 ## TemporalUnit
 
@@ -217,32 +217,6 @@ Similar to both the `LocalDate` and `LocalTime` classes the `LocalDateTime` also
 temporal elements to a given `LocalDateTime` instance, it does support the same types of methods such as - like
 `plusHours` and `plusMinutes`, the `LocalTime` supports, `plusSeconds`, and `plusNanos`. The equivalent for subtracting
 also exist, such as `minusHours`, `minusMinutes`, `minusSeconds` and `minusNanos`
-
-## Miscellaneous
-
-There are several more methods which are shared, semantically between the different types of dates, methods such as
-
-### Conversions
-
-```java
-LocalDateTime dateTime = LocalDateTime.now();
-System.out.println("Today's date and current time: " + dateTime);
-System.out.println("The date component is " + dateTime.toLocalDate());
-System.out.println("The date component is " + dateTime.toLocalTime());
-```
-
-The code above demonstrates how a `LocalDateTime` can be split into its constituent elements, such that the `LocalDate` and
-`LocalTime` can be extracted separately, from it.
-
-The whole package including the `LocalDate` and `LocalTime` and `LocalDateTime` classes, along with Instant, Period, Duration
-and so on, provide means of converting from one type to another, where reasonable.
-
-### isAfter & isBefore
-
-These methods compare if a given instance of the class of the `Local*` type is after/before another one. What is
-important to note here is that those methods are non-inclusive, meaning that calling `isAfter` on two equal dates, or
-times, or date-time instances will yield false, for both `isAfter` or `isBefore`, they are not taking into account when the
-two instances are equal. To compare for equality one has to use the equals method instead
 
 ## Instant
 
@@ -417,8 +391,8 @@ The call to `getDaylightSavings` will make sure to print correctly if the given 
 so given the snippet above one can expect to see that since the First time zone is in the northern hemisphere where
 during November it is winter, and the other zone is in the southern hemisphere November is in the summer.
 
--   if the duration is zero - DST it not in effect in that zone;
--   if the duration is non-zero - DST is in effect in that zone;
+- if the duration is zero - DST it not in effect in that zone;
+- if the duration is non-zero - DST is in effect in that zone;
 
 ```txt
 Here is the result (when executed on November 5):
@@ -456,24 +430,24 @@ formatting a class type with date and time components such as LocalDateTime, and
 
 Here is a list of important letters and their meanings for creating patterns for dates
 
--   G (era: BC, AD)
--   y (year of era: 2015, 15)
--   Y (week-based year: 2015, 15)
--   M (month: 11, Nov, November)
--   w (week in year: 13)
--   W (week in month: 2)
--   E (day name in week: Sun, Sunday)
--   D (day of year: 256)
--   d (day of month: 13)
--   a (marker for the text a.m./p.m. marker)
--   H (hour: value range 0-23)
--   k (hour: value range 1-24)
--   K (hour in a.m./p.m.: value range 0-11)
--   h (hour in a.m./p.m.: value range 1-12)
--   m (minute
--   s (second)
--   S (fraction of a second)
--   z (time zone: general time-zone format)
+- G (era: BC, AD)
+- y (year of era: 2015, 15)
+- Y (week-based year: 2015, 15)
+- M (month: 11, Nov, November)
+- w (week in year: 13)
+- W (week in month: 2)
+- E (day name in week: Sun, Sunday)
+- D (day of year: 256)
+- d (day of month: 13)
+- a (marker for the text a.m./p.m. marker)
+- H (hour: value range 0-23)
+- k (hour: value range 1-24)
+- K (hour in a.m./p.m.: value range 0-11)
+- h (hour in a.m./p.m.: value range 1-12)
+- m (minute
+- s (second)
+- S (fraction of a second)
+- z (time zone: general time-zone format)
 
 ```java
 // the example simply shows how to create a new formatter for a given format string, note that the methods convention
@@ -493,37 +467,37 @@ the end the final formatted string will look like that - 01.01.2000 (Wed)`
 
 Create and manage dates
 
--   The Java 8 date and time API uses ISO 8601 as the default calendar format, deprecating the old Calendar API
+- The Java 8 date and time API uses ISO 8601 as the default calendar format, deprecating the old Calendar API
 
--   The `LocalDate` class represents a date without time or time zones; the `LocalTime` class represents time without dates
-    and time zones; the `LocalDateTime` class represents both date and time without time zones.
+- The `LocalDate` class represents a date without time or time zones; the `LocalTime` class represents time without dates
+  and time zones; the `LocalDateTime` class represents both date and time without time zones.
 
--   The Instant class represents a Unix timestamp.
+- The Instant class represents a Unix timestamp.
 
--   The Period is used to measure the amount of time in terms of years, months, and days.
+- The Period is used to measure the amount of time in terms of years, months, and days.
 
--   The Duration class represents time in terms of hours, minutes, seconds, and fraction of seconds.
+- The Duration class represents time in terms of hours, minutes, seconds, and fraction of seconds.
 
--   The enumeration temporal.`ChronoUnit` implements the `TemporalUnit` interface.
+- The enumeration temporal.`ChronoUnit` implements the `TemporalUnit` interface.
 
--   Both `TemporalUnit` and `ChronoUnit` deal with time unit values such as seconds, minutes, and hours and date values such
-    as days, months, and years.
+- Both `TemporalUnit` and `ChronoUnit` deal with time unit values such as seconds, minutes, and hours and date values such
+  as days, months, and years.
 
 Create and manage dates with zones
 
--   `ZoneId` identifies a time zone; `ZoneOffset` represents time zone offset from UTC/Greenwich.
+- `ZoneId` identifies a time zone; `ZoneOffset` represents time zone offset from UTC/Greenwich.
 
--   `ZonedDateTime` provides support for all three aspects: date, time, and time zone.
+- `ZonedDateTime` provides support for all three aspects: date, time, and time zone.
 
--   You have to account for daylight savings time (DST) when working with different time zones.
+- You have to account for daylight savings time (DST) when working with different time zones.
 
 Format date and time components
 
--   The `DateTimeFormatter` class provides support for reading or printing date and time values in different
-    formats.
+- The `DateTimeFormatter` class provides support for reading or printing date and time values in different
+  formats.
 
--   The `DateTimeFormatter` class provides predefined constants (such as ISO_DATE and ISO_TIME) for formatting date and
-    time values.
+- The `DateTimeFormatter` class provides predefined constants (such as ISO_DATE and ISO_TIME) for formatting date and
+  time values.
 
--   You encode the format of the date or time using case-sensitive letters to form a date or time pattern string with
-    the `DateTimeFormatter` class.
+- You encode the format of the date or time using case-sensitive letters to form a date or time pattern string with
+  the `DateTimeFormatter` class.
