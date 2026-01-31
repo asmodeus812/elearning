@@ -39,9 +39,15 @@ ResourceBundle b = ResourceBundle.getBundle("Dolphins");
 b.getString("name");
 ```
 
-A. Dolphins.properties
-B. Dolphins_en.java
-C. Dolphins_en.properties
+By default, if we have resource bundles that are named Dolphins and are correctly created files, and classes then
+they will all be picked up, the classes are taking precedence usually over the properties files but as long as they
+are put at the root of the project and are not declared in a sub-package we can pick up the Dolphins bundle as
+properties and as java class that extends ListResourceBundle the question is not clear enough to tell us what it
+does.
+
+A. `Dolphins.properties`
+B. `Dolphins_en.java`
+C. `Dolphins_en.properties`
 D. Whales.properties
 E. Whales_en_US.properties
 F. The code does not compile.
@@ -52,9 +58,11 @@ F. The code does not compile.
 Dolphins.properties
 name=The Dolphin
 age=0
+
 Dolphins_en.properties
 name=Dolly
 age=4
+
 Dolphins_fr.properties
 name=Dolly
 ```
@@ -67,10 +75,16 @@ b.getString("name");
 b.getString("age");
 ```
 
+The bundles that are going to be used here are the french one and the default one, we get a bundle that is for the
+french locale which exists, it does not declare an age therefore java will fallback to the root bundle in this case
+it declares age = 0, the name is going to be picked up from the french resource bundle properties file. The default
+locale that is set here to en_US is a diversion as we are explicitly passing a parameter to the getBundle, had we
+not done this, then the bundle for the default locale would have been picked up.
+
 A. Dolphins.properties and Dolphins.properties
 B. Dolphins.properties and Dolphins_en.properties
 C. Dolphins_en.properties and Dolphins_en.properties
-D. Dolphins_fr.properties and Dolphins.properties
+D. `Dolphins_fr.properties and Dolphins.properties`
 E. Dolphins_fr.properties and Dolphins_en.properties
 F. The code does not compile.
 
@@ -80,7 +94,7 @@ F. The code does not compile.
 import java.time.*;
 public class StartOfSummer {
     public static void main(String[] args) {
-        LocalDate date = -----------------
+        LocalDate date = ________________
     }
 }
 ```
@@ -163,6 +177,11 @@ DateTimeFormatter f = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
 System.out.println(d.format(f));
 ```
 
+The format here that is used is fine, we use short format combined with localized time, this will print the short
+hand form of the time only. Meaning that even if we subtract the period in this case 1 year, 2 months and 3 days, is
+inconsequential because we only want to print the time here, and not the full date since we are using
+ofLocalizedTime
+
 A. 3/7/14 11:22 AM
 B. 5/10/15 11:22 AM
 C. 3/7/14
@@ -181,10 +200,12 @@ DateTimeFormatter f = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
 System.out.println(f.format(d));
 ```
 
-The date is the one that has the format
+The caveat here is that we create a period of 2 years, not of 2 years and 1 day, since each call to ofXXX returns a
+new copy of Period and these methods are static, therefore non stateful. What we expect to get printed here is same
+day same month, same time just 2 years prior
 
 A. 5/9/13 11:22 AM
-B. 5/10/13 11:22 AM
+B. `5/10/13 11:22 AM`
 C. 5/9/14
 D. 5/10/14
 E. The code does not compile.
@@ -193,8 +214,8 @@ G. A runtime exception is thrown.
 12. Which of the answer choices is true given the following code? (Choose all that apply.)
 
 ```plaintext
-    2016–08–28T05:00 GMT-04:00
-    2016–08–28T09:00 GMT-06:00
+2016–08–28T05:00 GMT-04:00
+2016–08–28T09:00 GMT-06:00
 ```
 
 A. The first date/time is earlier.
@@ -233,8 +254,8 @@ F. A runtime exception is thrown.
 
 ```java
 ZoneId zone = ZoneId.of("US/Eastern");
-LocalDate date = ___________________
-    LocalTime time1 = LocalTime.of(2, 15);
+LocalDate date = ___________________;
+LocalTime time1 = LocalTime.of(2, 15);
 ZonedDateTime a = ZonedDateTime.of(date4, time1, zone);
 ```
 
@@ -244,20 +265,23 @@ C. LocalDate.of(2016, 11, 6)
 D. LocalDate.of(2016, 11, 7)
 E. LocalDate.of(2017, 2, 29)
 
-15. Given the following code, which of the answer choices can fill in the blank to print true?
-    (Choose all that apply.)
-    String m1 = Duration.of(1, ChronoUnit.MINUTES).toString();
-    String m2 = Duration.ofMinutes(1).toString();
-    String s = Duration.of(60, ChronoUnit.SECONDS).toString();
-    String d = Duration.ofDays(1).toString();
-    String p = Period.ofDays(1).toString();
-    System.out.println(
-    );
-    A. m1 == m2
-    B.m1.equals(m2)
-    C.m1.equals(s)
-    D.d == p
-    E.d.equals(p)
+15. Given the following code, which of the answer choices can fill in the blank to print true? (Choose all that apply.)
+
+```java
+String m1 = Duration.of(1, ChronoUnit.MINUTES).toString();
+String m2 = Duration.ofMinutes(1).toString();
+String s = Duration.of(60, ChronoUnit.SECONDS).toString();
+String d = Duration.ofDays(1).toString();
+String p = Period.ofDays(1).toString();
+System.out.println(_________________);
+```
+
+A. m1 == m2
+B. `m1.equals(m2)`
+C. m1.equals(s)
+D. d == p
+E. d.equals(p)
+
 16. Given the following, which answers can correctly fill in the blank? (Choose all that apply.)
     LocalDate date = LocalDate.now();
     LocalTime time = LocalTime.now();

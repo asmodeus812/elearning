@@ -463,6 +463,104 @@ example having the following text inside the pattern '('E')', will print the day
 by plain brackets, which are not going to be interpreted as part of the pattern symbols internally by the formatter, in
 the end the final formatted string will look like that - 01.01.2000 (Wed)`
 
+## Stringification
+
+These types use ISO-8601 style output. The details below are the predictable rules that matter on the exam.
+
+### `LocalDate.toString()`
+
+**Format:** `yyyy-MM-dd` (ISO_LOCAL_DATE)
+
+Rules:
+
+- Prints `yyyy-MM-dd` for years **0000–9999** (4-digit year, zero-padded).
+- For years outside that range, uses an **expanded year** with a sign:
+    - `+10000-01-01`, `-0001-01-01`, etc.
+- Month/day are always 2 digits.
+
+Examples:
+
+- `LocalDate.of(2026, 1, 7)` → `2026-01-07`
+- `LocalDate.of(1, 1, 1)` → `0001-01-01`
+- `LocalDate.of(10000, 1, 1)` → `+10000-01-01`
+
+### `LocalTime.toString()`
+
+**Format:** ISO_LOCAL_TIME, with **trimming** behavior.
+
+Rules:
+
+- Always prints **hour and minute**: `HH:mm`
+- Prints `:ss` **only if** seconds ≠ 0 **or** nanos ≠ 0
+- Prints fractional seconds **only if nanos ≠ 0**
+    - Fraction is `.` + up to **9 digits**
+    - Trailing zeros in the fraction are removed
+
+Examples:
+
+- `LocalTime.of(9, 5)` → `09:05`
+- `LocalTime.of(9, 5, 0)` → `09:05`
+- `LocalTime.of(9, 5, 7)` → `09:05:07`
+- `LocalTime.of(9, 5, 7, 120_000_000)` → `09:05:07.12`
+- `LocalTime.of(9, 5, 7, 123_400_000)` → `09:05:07.1234`
+- `LocalTime.of(9, 5, 0, 1)` → `09:05:00.000000001` (seconds appear because nanos exist)
+
+### `LocalDateTime.toString()`
+
+**Format:** ISO_LOCAL_DATE_TIME
+
+Rule:
+
+- `LocalDate.toString()` + `'T'` + `LocalTime.toString()`
+
+Examples:
+
+- `LocalDateTime.of(2026, 1, 27, 14, 30)` → `2026-01-27T14:30`
+- `LocalDateTime.of(2026, 1, 27, 14, 30, 0, 0)` → `2026-01-27T14:30`
+- `LocalDateTime.of(2026, 1, 27, 14, 30, 5)` → `2026-01-27T14:30:05`
+- `LocalDateTime.of(2026, 1, 27, 14, 30, 0, 12_000_000)` → `2026-01-27T14:30:00.012`
+
+### `Period.toString()`
+
+**Format:** `P[nY][nM][nD]` (ISO-8601 date-based amount)
+
+Rules:
+
+- Always starts with `P`
+- Appends years/months/days **only if non-zero**
+- If all components are zero → `P0D`
+- Does **not** normalize signs across units
+
+Examples:
+
+- `Period.of(1, 2, 3)` → `P1Y2M3D`
+- `Period.of(0, 0, 5)` → `P5D`
+- `Period.of(0, 0, 0)` → `P0D`
+- `Period.of(-1, 2, -3)` → `P-1Y2M-3D`
+
+### `Duration.toString()`
+
+**Format:** `PT[nH][nM][n[.fraction]S]` (ISO-8601 time-based amount)
+
+Rules:
+
+- Always starts with `PT`
+- Expresses duration using **hours, minutes, seconds** (Java typically doesn’t use `D` here)
+    - e.g., `Duration.ofDays(1)` → `PT24H`
+- Zero duration → `PT0S`
+- Fractional seconds appear only if nanos ≠ 0 (up to 9 digits, trims trailing zeros)
+- Negative durations can show negatives in the components
+
+Examples:
+
+- `Duration.ofSeconds(45)` → `PT45S`
+- `Duration.ofMinutes(5)` → `PT5M`
+- `Duration.ofHours(27)` → `PT27H`
+- `Duration.ofDays(1)` → `PT24H`
+- `Duration.ofMillis(1)` → `PT0.001S`
+- `Duration.ofMinutes(-5)` → `PT-5M`
+- `Duration.ofSeconds(-3661)` → `PT-1H-1M-1S`
+
 # Summary
 
 Create and manage dates

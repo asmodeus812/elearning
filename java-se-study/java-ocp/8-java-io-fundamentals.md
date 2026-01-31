@@ -45,13 +45,17 @@ output, which in a tty environment is usually the display. That is useful for lo
 
 ## Console
 
-That class helps reading the data from the standard in, instead of relying on reading byte sized chunks from System.in,
-the console class takes care of providing a more user friendly interface to do more advanced reading from `stdin` without
-the general overhead. The console class also provides printing capabilities, meaning it also has reference to `stdout`
+That class helps reading the data from the standard in, instead of relying on reading byte sized chunks from
+System.in, the console class takes care of providing a more user friendly interface to do more advanced reading from
+`stdin` without the general overhead. The console class also provides printing capabilities, meaning it also has
+reference to `stdout`. The console object provided by System, is singleton, it is created and attached to the stdout
+and stdin and every subsequent call to the console method will return the same exact instance.
 
 ### Creating
 
 ```java
+// the console can return null if the application was not started in such a way that it can obtain handles to stdin
+// or/and stdout descriptors of the terminal
 Console console = System.console();
 if(console == null) {
     System.err.println("Cannot retrieve console object");
@@ -61,7 +65,55 @@ if(console == null) {
 console.printf(console.readLine());
 ```
 
-The console object provided by the call to System.console(). The console object that is produced is not a direct wrapper
+Here we can see that the actual implementation checks if the current session is attached to a `tty`, that is a
+native `JVM` implementation that checks if the app is started in a terminal or a terminal emulator, if not then the
+implementation returns NULL, this is what we mean by that fact that the console object might be null. `The
+constructor of the console is actually private, we can see tat below, there is a static console instance stored
+inside the console class that is re-used once created the first time`
+
+```java
+public Console console() {
+    if (istty()) {
+        if (cons == null)
+            cons = new Console();
+        return cons;
+    }
+    return null;
+}
+```
+
+If you ever wondered what the console object actually gets created, you can see here that it actually consists of
+two primary objects - one reader and one writer, The writer is attached directly to file output stream created from
+the file descriptor of stdout, and the reader is attached to a line reader from stdin, that is to allow for line
+buffering of the user input to avoid reading char by char.
+
+```java
+private Console() {
+    readLock = new Object();
+    writeLock = new Object();
+    String csname = encoding();
+    if (csname != null) {
+        try {
+            cs = Charset.forName(csname);
+        } catch (Exception x) {}
+    }
+    if (cs == null)
+    cs = Charset.defaultCharset();
+    out = StreamEncoder.forOutputStreamWriter(
+        new FileOutputStream(FileDescriptor.out),
+        writeLock,
+        cs);
+    pw = new PrintWriter(out, true) { public void close() {} };
+    formatter = new Formatter(out);
+    reader = new LineReader(StreamDecoder.forInputStreamReader(
+        new FileInputStream(FileDescriptor.in),
+        readLock,
+        cs));
+    rcb = new char[1024];
+}
+```
+
+The console object provided by the call to `System.console()`. The console object that is produced is not a direct wrapper
 around the objects from System.in or System.out, it directly interacts with the underlying operating system, to obtain
 the file descriptors to `stdin` and `stdout`, and also provides as mentioned a better API to help usability.
 
@@ -93,26 +145,26 @@ the passed format is not correct.
 %[argument_index][flags][width][.precision]datatype_specifier
 ```
 
--   Each format specifier starts with % sign followed by argument index. flags width and precision information, and ends
-    with a data type specifier
--   Argument index refers to the position of the argument in the argument list it is an integer followed by $, as in 1$
-    and 2$ for first and second argument respectively
--   Flags are single character symbols that specify the characteristics such as alignment and filling characters, for
-    padding. For instance flag "-" specified left alignment and "0" pads the number types with leading zeroes
--   The width specifier indicates the minimum number of characters that will span in the final formatted string, then it
-    is padded with spaces by default, in case the data is bigger than the specified width the full data appears in the
-    output without trimming.
--   The precision fields specifies the number precision digits in the output, relevant only for floating point number
-    arguments
--   Finally is the data type indicates the type of expected input data. The field is a placeholder for the specified
-    input data.
+- Each format specifier starts with % sign followed by argument index. flags width and precision information, and ends
+  with a data type specifier
+- Argument index refers to the position of the argument in the argument list it is an integer followed by $, as in 1$
+  and 2$ for first and second argument respectively
+- Flags are single character symbols that specify the characteristics such as alignment and filling characters, for
+  padding. For instance flag "-" specified left alignment and "0" pads the number types with leading zeroes
+- The width specifier indicates the minimum number of characters that will span in the final formatted string, then it
+  is padded with spaces by default, in case the data is bigger than the specified width the full data appears in the
+  output without trimming.
+- The precision fields specifies the number precision digits in the output, relevant only for floating point number
+  arguments
+- Finally is the data type indicates the type of expected input data. The field is a placeholder for the specified
+  input data.
 
 Let's analyze the following format string - `"%-15s \t %5d \t\t %d \t\t %.1f \n"`
 
--   `%-15s` - a string padded to at least 15 chars
--   `%5d` - decimal or integer with at most 5 digits (padded with spaces if less)
--   `%.1f` - floating point number that can be displayed with at most 1 digit after the floating point
--   `\t` - all formatted arguments are padded or separated with a tabstop, to make some equal space between them
+- `%-15s` - a string padded to at least 15 chars
+- `%5d` - decimal or integer with at most 5 digits (padded with spaces if less)
+- `%.1f` - floating point number that can be displayed with at most 1 digit after the floating point
+- `\t` - all formatted arguments are padded or separated with a tabstop, to make some equal space between them
 
 | Symbol | Description                                                                                      |
 | ------ | ------------------------------------------------------------------------------------------------ |
@@ -132,16 +184,16 @@ Let's analyze the following format string - `"%-15s \t %5d \t\t %d \t\t %.1f \n"
 `All of the format symbols are also supported by the format method in the Console class as well, the format strings and
 symbols in general are applicable in general in a wide variety of places in the java standard library`
 
--   If you do not specify any string formatting specifier, the printf() method will not print anything from the given
-    arguments!
+- If you do not specify any string formatting specifier, the printf() method will not print anything from the given
+  arguments!
 
--   Flags such as "-" and "0" make sense only when you specify width with the format specifier string.
+- Flags such as "-" and "0" make sense only when you specify width with the format specifier string.
 
--   You can also print the % character in a format string; however, you need to use an escape sequence for it. In format
-    specifier strings, % is an escape character, which means you need to use %% to print a single %.
+- You can also print the % character in a format string; however, you need to use an escape sequence for it. In format
+  specifier strings, % is an escape character, which means you need to use %% to print a single %.
 
--   You can use the argument index feature (an integer value followed by $ symbol) to explicitly refer to the arguments
-    by their index position. For example, the following prints "world hello" because the order of arguments are reversed:
+- You can use the argument index feature (an integer value followed by $ symbol) to explicitly refer to the arguments
+  by their index position. For example, the following prints "world hello" because the order of arguments are reversed:
 
     ```java
     console.printf("%2$s %1$s %n", "hello", "world");
@@ -149,9 +201,9 @@ symbols in general are applicable in general in a wide variety of places in the 
     // $1 refers to the first argument ("hello")
     ```
 
--   The < symbol in a format string supports relative index with which you can reuse the argument matched by the
-    previous format specifier. For example, assuming console is a valid Console object, the following code segment prints
-    "10 a 12":
+- The < symbol in a format string supports relative index with which you can reuse the argument matched by the
+  previous format specifier. For example, assuming console is a valid Console object, the following code segment prints
+  "10 a 12":
 
     ```java
     console.printf("%d %<x %<o", 10);
@@ -159,9 +211,9 @@ symbols in general are applicable in general in a wide variety of places in the 
     // 12 - the octal value of 10
     ```
 
--   If you do not provide the intended input data type as expected by the format string, then you can get an
-    IllegalFormatConversionException. For instance, if you provide a string instead of an expected integer in your
-    printRow() method implementation, you will get following exception:
+- If you do not provide the intended input data type as expected by the format string, then you can get an
+  IllegalFormatConversionException. For instance, if you provide a string instead of an expected integer in your
+  printRow() method implementation, you will get following exception:
 
     ```txt
     Exception in thread "main" java.util.IllegalFormatConversionException:
@@ -212,18 +264,18 @@ of information is from the run-time to the file)
 
 Character streams
 
--   meant for reading or writing to character or text based IO such as text files text documents, XML, HTML files.
--   the data is usually utf-16 encoded and stored.
--   iput and output characters streams are called readers and writers respectively
--   the abstract classes of Reader and Writer and their derived classes in the java package provide support for character streams.
+- meant for reading or writing to character or text based IO such as text files text documents, XML, HTML files.
+- the data is usually utf-16 encoded and stored.
+- iput and output characters streams are called readers and writers respectively
+- the abstract classes of Reader and Writer and their derived classes in the java package provide support for character streams.
 
 Byte streams
 
--   meant for reading or writing to binary data io such as executable files, image files and files in low level file
-    formats such as .zip .class .obj and .exe.
--   data dealt with is bytes, units of 8-bit data
--   input and output byte streams re simply called input & output streams, respectively
--   the abstract classes of InputStream and OutputStream and their derived classes are what provide support for byte streams
+- meant for reading or writing to binary data io such as executable files, image files and files in low level file
+  formats such as .zip .class .obj and .exe.
+- data dealt with is bytes, units of 8-bit data
+- input and output byte streams re simply called input & output streams, respectively
+- the abstract classes of InputStream and OutputStream and their derived classes are what provide support for byte streams
 
 `Mixing different streams for different purposes is not recommended, for example if one tries to read a .bmp image with
 a Reader (character stream) since the character streams read and parse the read bytes as UTF-16, the final result will
@@ -516,47 +568,47 @@ class CustomUserClass implements Serializable {
 
 Read and write data from the console
 
--   The public static fields in, out, and err in java.lang.System class respectively represent the standard input,
-    output and error streams. System.in is of type java.io.InputStream and System.out and System.err are of type
-    java.io.PrintStream.
+- The public static fields in, out, and err in java.lang.System class respectively represent the standard input,
+  output and error streams. System.in is of type java.io.InputStream and System.out and System.err are of type
+  java.io.PrintStream.
 
--   You can redirect standard streams by calling the methods `System.setIn`, `System.setOut` and `System.setError`.
+- You can redirect standard streams by calling the methods `System.setIn`, `System.setOut` and `System.setError`.
 
--   You can obtain a reference to the console using the System.`console()` method; if the `JVM` is not associated with any
-    console, this method will fail and return null.
+- You can obtain a reference to the console using the System.`console()` method; if the `JVM` is not associated with any
+  console, this method will fail and return null.
 
--   Many methods are provided in Console-support formatted I/O. You can use the `printf()` and `format()` methods available
-    in the Console class to print formatted text; the overloaded `readLine()` and `readPassword()` methods take format strings
-    as arguments.
+- Many methods are provided in Console-support formatted I/O. You can use the `printf()` and `format()` methods available
+  in the Console class to print formatted text; the overloaded `readLine()` and `readPassword()` methods take format strings
+  as arguments.
 
--   The template of format specifiers is: %[flags][width][.precision]datatype_specifier Each format specifier starts
-    with the % sign, followed by flags, width, and precision information, and ending with a data type specifier. In the
-    format string, the flags, width, and precision information are optional but the % sign and data type specifier are
-    mandatory.
+- The template of format specifiers is: %[flags][width][.precision]datatype_specifier Each format specifier starts
+  with the % sign, followed by flags, width, and precision information, and ending with a data type specifier. In the
+  format string, the flags, width, and precision information are optional but the % sign and data type specifier are
+  mandatory.
 
--   Use the `readPassword()` method for reading secure strings such as passwords. It is recommended to use Array's `fill()`
-    method to "empty" the password read into the character array (to avoid malicious access to the typed passwords).
+- Use the `readPassword()` method for reading secure strings such as passwords. It is recommended to use Array's `fill()`
+  method to "empty" the password read into the character array (to avoid malicious access to the typed passwords).
 
 Use the java.io package classes
 
--   The java.io package has classes supporting both character streams and byte streams.
+- The java.io package has classes supporting both character streams and byte streams.
 
--   You can use character streams for text-based I/O. Byte streams are used for databased I/O.
+- You can use character streams for text-based I/O. Byte streams are used for databased I/O.
 
--   Character streams for reading and writing are called readers and writers respectively (represented by the abstract
-    classes of Reader and Writer).
+- Character streams for reading and writing are called readers and writers respectively (represented by the abstract
+  classes of Reader and Writer).
 
--   Byte streams for reading and writing are called input streams and output streams respectively (represented by the
-    abstract classes of `InputStream` and `OutputStream`).
+- Byte streams for reading and writing are called input streams and output streams respectively (represented by the
+  abstract classes of `InputStream` and `OutputStream`).
 
--   You should only use character streams for processing text files (or human-readable files), and byte streams for data
-    files. If you try using one type of stream instead of another, your program won't work as you would expect; even if it
-    works by chance, you'll get nasty bugs. So don't mix up streams, and use the right stream for a given task at hand.
+- You should only use character streams for processing text files (or human-readable files), and byte streams for data
+  files. If you try using one type of stream instead of another, your program won't work as you would expect; even if it
+  works by chance, you'll get nasty bugs. So don't mix up streams, and use the right stream for a given task at hand.
 
--   For both byte and character streams, you can use buffering. The buffer classes are provided as wrapper classes for
-    the underlying streams. Using buffering will speed up the I/O when performing bulk I/O operations.
+- For both byte and character streams, you can use buffering. The buffer classes are provided as wrapper classes for
+  the underlying streams. Using buffering will speed up the I/O when performing bulk I/O operations.
 
--   For processing data with primitive data types and strings, you can use data streams.
+- For processing data with primitive data types and strings, you can use data streams.
 
--   You can use object streams (classes `ObjectInputStream` and `ObjectOutputStream`) for reading and writing objects in
-    memory to files and vice versa.
+- You can use object streams (classes `ObjectInputStream` and `ObjectOutputStream`) for reading and writing objects in
+  memory to files and vice versa.
