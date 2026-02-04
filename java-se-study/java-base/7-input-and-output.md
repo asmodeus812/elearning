@@ -34,7 +34,8 @@ implementations and override the read or write behavior in some sort. These stre
 
 - `FileReader/Writer` - requires a file handle to read from and a file handle to write to.
 - `PipedReader/Writer` - requires a source that is a pipe to read from, and a pipe to write to.
-- `StringReader/Writer` - requires a source string to read from, writes to a generic StringBuffer.
+- `StringReader/Writer` - requires a source string to read from, writes to a generic instance of a `StringBuffer`
+  (note that is indeed a string buffer not a builder)
 
 #### Decorator/Wrapper
 
@@ -218,4 +219,11 @@ actually unblock the read calls the program`
   existing resource to which they are created, and that is not required for `OutputStream` or `Writer`, these will
   silently try to create the resource but they might throw exception if they can not create the resource
 - `flush` - flush only exists on output or outgoing output-stream or writer interface, it does not make sense to
-  have a flush method on a reader or input-stream interface
+  have a flush method on a reader or input-stream interface, see skip method for a counter example of a method that
+  only exists on the incoming input-stream and reader.
+- `skip` - skip only exists on the reading or input-stream or reader interface, it does not make sense to have skip
+  method on a writer or output-stream interface, it is very similar situation to the flush method that only exists on
+  outgoing streams and writers instead
+- `bridge classes` there are a couple of bridge classes that are meant to bridge the gap between input/output streams
+  and the reader/writer interface, these allow us to read from and write to byte streams as if they were initially opened
+  through a corresponding writer/reader

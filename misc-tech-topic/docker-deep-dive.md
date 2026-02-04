@@ -1647,7 +1647,7 @@ that they are amazingly simple to use.
   node ID, mutual authentication, automatic CA configuration, automatic certificate rotation, encrypted cluster store,
   encrypted networks.
 
-- Docker content trust lets yo sign your images and verify the integrity and publisher of images you pull
+- Docker content trust lets you sign your images and verify the integrity and publisher of images you pull
 
 - Docker Security Scanning analyses Docker images, detects known vulnerabilities and provides you with a detailed
   report.
@@ -1734,7 +1734,7 @@ Linux root account is made up of a long list of capabilities, some these include
 
 Docker works with capabilities so that you can run containers as root, but strip out the root capabilities that you do
 not need. For example if the only root privilege your container needs is the ability to bind to low numbered network
-ports yo should start a container and drop all root capabilities then add back the `CAP_NET_BIND_SERVICE` capability.
+ports you should start a container and drop all root capabilities then add back the `CAP_NET_BIND_SERVICE` capability.
 Docker also imposes restrictions so that containers cannot re-add the removed capabilities back.
 
 ### Mandatory access control systems

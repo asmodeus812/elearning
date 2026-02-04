@@ -1,8 +1,10 @@
-# NIO Streams
+# NIO.2 - New input output v2
 
 Java offers a rich set of `APIs` one can use to manipulate files and directories. Java 7 introduced a set of IO `APIs`
 called `NIO.2` which stands for - New I/O. It offered convenient ways to perform operations related to a file system. In
-Java 8 they can also be sued along the Stream API.
+Java 8 they can also be sued along the Stream API. It is important to note that `NIO.1` exists, that was introduced in
+java 1.4, and it was a complementary addition to the old school java IO that has existed in the language since its
+beginnings.
 
 ## Path
 
@@ -176,9 +178,11 @@ range of functionality.
 | FileTime getLastModifiedTime(Path path, LinkOption...) <br> Path setLastModifiedTime(Path path, FileTime time)                                   | Gets/sets the last modified time for the specified file.                                                                                                                                                                                                                                                                                                                                                                              |
 | Object getAttribute(Path path, String attribute, LinkOption...) <br> Path setAttribute(Path path, String attribute, Object value, LinkOption...) | Gets/sets the specified attribute of the specified file                                                                                                                                                                                                                                                                                                                                                                               |
 
-## Metadata
+### Metadata
 
-To quickly check some basic file `metadata` on files. In previous section the example which was trying to figure out if two paths pointed to the same file. There is another way to do this in a more robust way. To do that one can use the `isSameFile` method instead.
+To quickly check some basic file `metadata` on files. In previous section the example which was trying to figure out if
+two paths pointed to the same file. There is another way to do this in a more robust way. To do that one can use the
+`isSameFile` method instead.
 
 ```java
 Path path1 = Paths.get("Test");
@@ -268,9 +272,11 @@ There are `PosixFileAttributes` and `DosFileAttributes`. For `POSIX` and `DOS` c
 obtain the OS specific file attributes as well, however before that a check for the current operating system type must
 be performed, so to use the correct type of attribute types
 
-## Copying
+### Copying
 
-Copying a file is relatively straight forward, one can simply use the `copy` method on the Files class, however note that the 3rd argument to the copy method is the file copy flags or attribues, which specify what to in case the file already exists and so on.
+Copying a file is relatively straight forward, one can simply use the `copy` method on the Files class, however note
+that the 3rd argument to the copy method is the file copy flags or attributes, which specify what to in case the file
+already exists and so on.
 
 ```java
 // imagine one runs the following on a given source - destination paths, to copy file from src to dst
@@ -300,7 +306,7 @@ directory not the files/directories contained within that directory. If you copy
 does not copy the files or directories contained inside the source directory, they have to be copied
 recursively/explictily`
 
-## Moving
+### Moving
 
 Moving a file is similar to copying, however it is somewhat different as well, first it is similar to copy operation
 because it has to take into account that if another file or directory already exists in that location, explicit
@@ -322,7 +328,7 @@ Files.move(pathSource, pathDestination, StandardCopyOption.REPLACE_EXISTING);
   completes successfully or the source continues to be present, and not moved, if move is not performed as atomic
   operation, and it fails while in process of moving, the state of both files or directories is unknown, and undefined
 
-## Deleting
+### Deleting
 
 The Files class provides a delete method as well. To delete a file directory or symbolic link. There are few points to
 remember about deleting, especially a directory, the delete method should be invoked on an empty directory, otherwise it
@@ -337,7 +343,7 @@ if a file is read-only on some platforms may prevent you from deleting the file
 Files.delete(pathSource);
 ```
 
-## Notes
+### Notes
 
 Some general notes, in relation to the classes already reviewed
 

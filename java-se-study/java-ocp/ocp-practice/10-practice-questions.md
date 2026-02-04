@@ -1134,7 +1134,7 @@ public class Unicorn {
 ```
 
 The method buffered input stream can not be constructed by a file reader. Those classes are not compatible with each
-other we can however use a bridge interface to bridge the gap between them by using -
+other.
 
 A. `The code does not compile.`
 B. The program prints every byte in the file without throwing an exception.
@@ -1142,76 +1142,101 @@ C. The program prints every other byte in the file without throwing an exception
 D. The program throws an EOFException when the end of the file is reached.
 
 38. Choose the class that is least likely to be marked Serializable.
-    A. A class that holds data about the amount of rain that has fallen in a given year
-    B. A class that manages the memory of running processes in an application
-    C. A class that stores information about apples in an orchard
-    D. A class that tracks the amount of candy in a gumball machine
+
+The classes that we should avoid thinking about serializing are those that either store some temporary data that is not
+required to be persistent, or such data that is not related to something that can be actually persisted by the system
+
+A. A class that holds data about the amount of rain that has fallen in a given year
+B. `A class that manages the memory of running processes in an application`
+C. A class that stores information about apples in an orchard
+D. A class that tracks the amount of candy in a gumball machine
+
 39. What is the output of the following application?
-    package cell;
-    import java.io.\*;
-    public class TextMessage {
+
+```java
+import java.io.\*;
+public class TextMessage {
     public String receiveText() throws Exception {
-    try (Reader r = new FileReader("messages.txt")) {
-    StringBuilder s = new StringBuilder();
-    int c;
-    while((c = r.read()) != -1) {
-    s.append((char)c);
-    if(r.markSupported()) {
-    r.mark(100);
-    r.skip(10);
-    r.reset();
-    }
-    }
-    return s.toString();
-    }
+        try (Reader r = new FileReader("messages.txt")) {
+            StringBuilder s = new StringBuilder();
+            int c;
+            while((c = r.read()) != -1) {
+                s.append((char)c);
+                if(r.markSupported()) {
+                    r.mark(100);
+                    r.skip(10);
+                    r.reset();
+                }
+            }
+            return s.toString();
+        }
     }
     public void sendText(String message) throws Exception {
-    try (Writer w = new FileWriter("messages.txt")) {
-    for(int i=0; i<message.length(); i++) {
-    w.write(message.charAt(i));
-    w.skip(1);
+        try (Writer w = new FileWriter("messages.txt")) {
+            for(int i = 0; i < message.length(); i++) {
+                w.write(message.charAt(i));
+                w.skip(1);
+            }
+        }
     }
+    public static void main(String[] minutes) throws Exception {
+        final TextMessage m = new TextMessage();
+        m.sendText("You up?");
+        System.out.println(m.receiveText());
     }
-    }public static void main(String[] minutes) throws Exception {
-    final TextMessage m = new TextMessage();
-    m.sendText("You up?");
-    System.out.println(m.receiveText());
-    } }
-    A. You up?
-    B. Y o u u p ?
-    C. The code does not compile because of the receiveText() method.
-    D. The code does not compile because of the sendText() method.
-40. What is the output of the following program? Assume the file paths referenced in the
-    class exist and are able to be written to and read from.
-    package heart;
-    import java.io.\*;
-    public class Valve implements Serializable {
+}
+```
+
+The `sendText` method contains a call to a method skip that does not actually exist, on a Writer interface, it really
+makes no sense if you think about it, because skip makes only sense when reading data not when writing data, we can not
+skip into the buffer when writing data unless we write on top of data but java has different structures to achieve this
+NIO.2
+
+A. You up?
+B. Y o u u p ?
+C. The code does not compile because of the receiveText() method.
+D. `The code does not compile because of the sendText() method.`
+
+40. What is the output of the following program? Assume the file paths referenced in the class exist and are able to be
+    written to and read from.
+
+```java
+import java.io.\*;
+public class Valve implements Serializable {
     private int chambers = -1;
     private transient Double size = null;
     private static String color;
     public Valve() {
-    this.chambers = 3;
-    color = "BLUE";
+        this.chambers = 3;
+        color = "BLUE";
     }
     public static void main(String[] love) throws Throwable {
-    try (ObjectOutputStream o = new ObjectOutputStream(
-    new FileOutputStream("scan.txt"))) {
-    final Valve v = new Valve();
-    v.chambers = 2;
-    v.size = 10.0;
-    v.color = "RED";
-    o.writeObject(v);
-    }
-    new Valve();
-    try (ObjectInputStream o = new ObjectInputStream(
-    new FileInputStream("scan.txt"))) {
-    Valve v = (Valve)o.readObject();
-    System.out.print(v.chambers+","+v.size+","+v.color);
-    }
+        try (ObjectOutputStream o = new ObjectOutputStream(new FileOutputStream("scan.txt"))) {
+            final Valve v = new Valve();
+            v.chambers = 2;
+            v.size = 10.0;
+            v.color = "RED";
+            o.writeObject(v);
+        }
+        new Valve();
+        try (ObjectInputStream o = new ObjectInputStream(new FileInputStream("scan.txt"))) {
+            Valve v = (Valve)o.readObject();
+            System.out.print(v.chambers+","+v.size+","+v.color);
+        }
     }
     { chambers = 4; }
-    }
-    A. 2,null,RED
-    B. 2,null,BLUE
-    C. 3,10.0,RED
-    D. The code does not compile.
+}
+```
+
+The code will indeed compile the idea here is to re-assert the fact that constructors and initializer blocks are not
+called when we deal with de-serialization of data structure objects in java, instead we will read the chambers
+variable that was set in before the object was written to the file.
+
+The only caveat here is the fact that the constructor of Value changes the static value of the variable COLOR, to
+blue, and we call the constructor randomly on in between the two calls for reading and writing the object, that will
+assign the new value to the static variable to "BLUE"
+
+A. 2,null,RED
+B. `2,null,BLUE`
+C. 3,10.0,RED
+D. The code does not compile.
