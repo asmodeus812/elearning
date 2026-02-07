@@ -2661,6 +2661,223 @@ because, assuming you have more than one transaction manager available from Auto
 that you are using transactions for your MongoDB operations, but in all actuality it is using the one for JPA
 because that is the default one.`
 
+#### Design
+
+Before we dig deeper we have to add some context, in the standard java persistence layer, there are a few annotations
+that are directly linked to working with database entities like tables, primary keys, foreign keys and so on. These are
+crucial when designing a database schema for our business case lets examine a few of them.
+
+##### Annotations
+
+- `@OneToOne`
+- `@OneToMany`
+
+- `@ManyToOne`
+- `@ManyToMany`
+
+- `@JoinColumn`
+- `@JoinTable`
+
+##### Usage
+
+`Many-to-one + One-to-many` - this one is among the most common ones. What this relation expresses is that one side of
+many entities has at most one reference to the other. Think of it like that a User of a store or a customer has many
+orders, each of which is unique, and each of which belongs to that one user, and no other, in other words an order can
+not belong to another user, but that user is often having many more than one orders..
+
+How does it work, on the “many” side, that is the Order side, in our example `@ManyToOne` + `@JoinColumn`, On the “one”
+side, that is the User in our example, (use for optional navigation) - `@OneToMany(mappedBy="...")`. What `mappedBy`
+expresses here is the inverse non-owning side, in our case the User entity does not own that relation ship in a data base
+terms that relationship is expressed on the `Order` entity or table, that is because many unique orders are linked to
+exactly one user, since they can only be made by that user. It does sound counter intuitive that the owning side is the
+Order, but what we say is that is the owning side of the relationship, usually the java persistence layer allows us to
+control the relation from both sides so that is not a problem when the model is expressed in ORM fashion
+
+To even further explain and expand how do we think about it, is that the table on the “many” side holds the foreign key
+column, so it’s usually the **owning side** (the side that writes the foreign key), while the `@OneToMany(mappedBy=...)`
+side is typically **inverse** and is mainly for convenience, however as mentioned both sides can control and persist
+data when working with the ORM model.
+
+```java
+@Entity
+@Table(name = "customers")
+public class CustomerEntity {
+    @Id
+    private Long id;
+
+    // This annotation tells the ORM that one customer can be linked to many orders, and that this is the non
+    // owning side of the relationship, note that we have specified the mappedBy, which is the same name as the
+    // field / property / variable in the order entity, that can be omitted it is usually automatically deduced by
+    // the ORM - Hibernate in our case can resolve it on its own
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
+    private List<OrderEntity> orders;
+}
+
+@Entity
+@Table(name = "orders")
+public class OrderEntity {
+    @Id
+    private Long id;
+
+    // This annotation tells the ORM that many orders are linked to one customer, that is because each customer
+    // makes his own unique order entities of course. We can also see that the Join column is used here that
+    // indicates that this is the owning side, or in other words the side that has the FK column.
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private CustomerEntity customer;
+}
+```
+
+```sql
+CREATE SEQUENCE IF NOT EXISTS CUSTOMERS_SEQ START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE IF NOT EXISTS ORDERS_SEQ START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE IF NOT EXISTS CUSTOMERS (
+  ID BIGINT DEFAULT NEXT VALUE FOR CUSTOMERS_SEQ PRIMARY KEY,
+);
+
+CREATE TABLE IF NOT EXISTS ORDERS (
+  ID BIGINT DEFAULT NEXT VALUE FOR ORDERS_SEQ PRIMARY KEY,
+  FOREIGN KEY (customer_id) references CUSTOMERS(ID)
+);
+```
+
+`One-to-one + join-column` - another example is a unique one to one relation ship between two different entities, think
+of it as two entities that are both completely unique linked to each other, in some way this can usually be done to
+expand an existing table or avoid pulling too much data at once with the ORM model, or in fact to avoid having too much
+data in a single table, there might be multitude of reasons, however the important part to remember here is that the one
+to one relation is between two unique entities and the relation has to also be unique, meaning an entity from one table
+can not have relation to more than 1 entity from the other table, otherwise if it does we are in the Many-to-one
+relation use-case. It is truly one-to-one only if the foreign key is **unique**
+
+As an example we can consider a `User` and a `UserProfile` entities, the profile entity belongs to one and only one user and
+that is it, the relation is unique by convention, and understanding. The owning side here is again the one that posses
+the foreign key, and in this scenario we can either pick the user or the profile entities, but usually it will be the
+user, the semantically more important entity.
+
+This relation uses a combination of the `@OneToOne + @JoinColumn` that is because the ORM needs to know on which column
+to join the two tables to extract the details from. The inverse side is again marked as `OneToOne` and just like the
+`ManyToOne` we only need to specify the `mappedBy` that is the name of the field that is on the owning side.
+
+```java
+@Entity
+@Table(name = "users")
+public class UserEntity {
+    @Id
+    private Long id;
+
+    // This annotation tells the ORM that one user can have exactly one unique profile linked to it, what is
+    // important here to repeat, one profile belongs to only one user only, further more it tells the ORM that the
+    // owning side is the user because it holds the FK column called profile_id, that is where the @JoinColumn
+    // comes in play
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_id", nullable = false)
+    private ProfileEntity profile;
+}
+
+@Entity
+@Table(name = "profiles")
+public class ProfileEntity {
+    @Id
+    private Long id;
+
+    // This annotation tells the ORM that one profile belongs only to one user that this is  the non owning side
+    // because we are using the mappedBy property of the annotation, there is no user entity data in this table
+    // it is implicitly linked to the users table by the user table only
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "profile")
+    private UserEntity user;
+}
+```
+
+```sql
+CREATE SEQUENCE IF NOT EXISTS USERS_SEQ START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE IF NOT EXISTS PROFILES_SEQ START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE IF NOT EXISTS USERS (
+  ID BIGINT DEFAULT NEXT VALUE FOR USERS_SEQ PRIMARY KEY,
+  FOREIGN KEY (profile_id) references PROFILES(ID)
+);
+
+CREATE TABLE IF NOT EXISTS PROFILES (
+  ID BIGINT DEFAULT NEXT VALUE FOR PROFILES_SEQ PRIMARY KEY,
+);
+```
+
+`Many-to-many + Join-table` - the many to many relation is a bit more complicated, with this one we are saying that two
+entities are not owning each other explicitly or implicitly, with the example above the `Order` could not really exist
+without the presence of a `Customer` to make that order, and the `UserProfile` could not really exist without the presence
+of a `User`. Here usually the many-to-many expresses a connection between two independent entities that can share some
+sort of a connection. For example Students and Courses.
+
+Each `student` can be taking many `courses`, and each course can be in turn linked to many students, these entities can
+indeed exist independently of each other, and can be linked to other entities as well, other than from each other. To
+express this relation we need a 3rd table, that is called a `JoinTable` that table is meant to contain at least a pair
+of foreign keys that is unique (the pair of keys itself is unique yes). That pair expresses the connection between the
+two entities.
+
+The way it works is by using a `ManyToMany` annotation, and a `JoinTable` on the owning side, in this case the owning
+side might be the Course entity since, but either one does make sense it up to the design. On the inverse side we use
+again `ManyToMany` and `mappedBy`, that is the non owning side.
+
+“Typical” ownership guidance (practical defaults) - If there is a foreign key column in a table, the entity field mapped
+to that column (commonly `@ManyToOne` or owning `@OneToOne`) is usually the **owning side**, while seeing `mappedBy`
+marks the **inverse side**, for many-to-many, the side with `@JoinTable` is the **owning side**.
+
+```java
+@Entity
+@Table(name = "users")
+public class UserEntity {
+    @Id
+    private Long id;
+
+    //  this annotation tells the ORM that each user can have multiple roles, and that each role itself can be
+    // tied to many users, there is no uniqueness requirement, roles can be shared between the users, and users can
+    // be shared between roles, further more it tells the ORM that this is the owning side because we have the
+    // @JoinTable declared here, this means that connections will be persistent when we make changes from the user
+    // entity
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<RoleEntity> roles;
+}
+
+@Entity
+@Table(name = "roles")
+public class RoleEntity {
+    @Id
+    private Long id;
+
+    // This annotation tells the ORM that there are many users related to this role, but that the ownership is
+    // now held by the role entity, it is held by the mapped by property in the user entity, in this case that is
+    // the one named roles
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles")
+    private Set<UserEntity> users;
+}
+```
+
+```sql
+CREATE SEQUENCE IF NOT EXISTS USERS_SEQ START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE IF NOT EXISTS ROLES_SEQ START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE IF NOT EXISTS ROLES (
+  ID BIGINT DEFAULT NEXT VALUE FOR ROLES_SEQ PRIMARY KEY,
+);
+
+CREATE TABLE IF NOT EXISTS USERS (
+  ID BIGINT DEFAULT NEXT VALUE FOR USERS_SEQ PRIMARY KEY,
+);
+
+CREATE TABLE user_role (
+  role_id BIGINT NOT NULL,
+  user_id  BIGINT NOT NULL,
+  PRIMARY KEY (role_id, user_id),
+  FOREIGN KEY (role_id) REFERENCES ROLES(id),
+  FOREIGN KEY (user_id)  REFERENCES USERS(id)
+);
+```
+
+There are many other considerations when it comes to data base design, but for the time being we will only focus on the relation ship
+
 ### Security
 
 By default spring exposes a default configuration that can be used to secure an application directly we have a great
@@ -2675,13 +2892,315 @@ files first
 </dependency>
 ```
 
-The security will be enabled immediately, remember that for each starter spring declares auto-configuration classes in
-its resource file, that tells spring which auto-configuration class beans to create early, these beans construct the
-security context, by default most of these beans are conditional so they are not enforced onto the user, they can be
-disabled and a custom configuration can be setup by the user -
+The security will be enabled immediately, that is because spring tries to eagerly auto configure default security
+when we include the dependency on the class path, we can disable this later provide our own stack, remember that for
+each starter spring declares auto-configuration classes in its resource file, that tells spring which
+auto-configuration class beans to create early, these beans construct the security context, by default most of these
+beans are conditional so they are not enforced onto the user, they can be disabled and a custom configuration can be
+setup by the user -
 
 We are referring to the following file as we have already seen it can be used to control which beans spring auto creates
 with the start of the spring container. In the new Spring 4 version, this file is split to achieve a more modularized
 structure for the entire spring framework.
 
 `src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`
+
+The spring security filter chain is basically a big servlet chain. On each request the entire filter chain is
+examined, usually when we visit a protected route, the filter chain will throw an exception that is going to be
+caught and then the spring container will attempt to establish a user login and authentication
+
+- security context - where spring stores the current authentication for the request and for the session.
+- authentication filters - extract credentials from the request - basic header, login form POST, etc.
+- authorization filter - checks if this request is allowed to be accessed or not, throws if not.
+
+We are going to build a comprehensive structure of entities that is going to represent the users, roles they have,
+the authorities these roles poses and so on. The structure will be as follows, we will have a `UserEntity`, that has
+a `RoleEntity` bound to it, each role will be a set of `AuthorityEntity`, authorities which themselves are also
+entities in the data base. That will allow us to re-use role entities across multiple users and authority entities
+across multiple roles.
+
+Each authority will have a many to many relation with a role entity, and each user entity will also have a many to
+many relation with the user entities. That is because we will have unique entries of roles that can be linked to
+many users, and unique entries of authorities that can be linked to many roles and vice versa.
+
+We have already discussed a way to do this in a chapter above but the general gist of this is to construct a
+hierarchy similar to this. We will have these entities created `UserEntity -> RoleEntity -> AuthorityEntity.` They
+represent the control a user can have over a resource in the system and we can see how we can feed the information
+we have in the database directly to spring, and its internally user representation to secure our application not just
+with a user but by providing a fine grained control over the actions a user can partake based on its granted roles
+and by proxy the granted authorities for these roles.
+
+#### Structure
+
+This is a very brief description of the structure we are going to use there are quite a few things missing here, but
+this is the general gist of it we create the user and role structures that we are going to need to provide a details
+for the security service in spring.
+
+`You have to remember that when the persistence annotations are either required to be put on methods or the fields,
+however we should not mix them up`
+
+```java
+@MappedSuperclass
+public abstract class AbstractEntity {
+}
+```
+
+```java
+@Entity
+@Table(name = "users")
+public class UserEntity {
+
+    @Id
+    @SequenceGenerator(name = "USERS_SEQ", initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "USERS_SEQ")
+    @Column(name = "id", nullable = false, updatable = false, insertable = true, unique = true)
+    private Long id;
+
+    @Column(name = "username", unique = true, updatable = false, insertable = true, nullable = false, length = 64)
+    private String username;
+
+    @Column(name = "password", unique = false, updatable = true, insertable = true, nullable = false, length = 128)
+    private String password;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private RoleEntity role;
+}
+
+@Entity
+@Table(name = "roles")
+public class RoleEntity {
+
+    @Id
+    @SequenceGenerator(name = "ROLES_SEQ", initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ROLES_SEQ")
+    @Column(name = "id", nullable = false, updatable = false, insertable = true, unique = true)
+    private Long id;
+
+    @Column(name = "name", unique = true, insertable = true, updatable = true, nullable = false, length = 32)
+    private String name;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "role")
+    private Set<UserEntity> users;
+
+    @ManyToMany
+    @JoinTable(name = "role_authority", joinColumns = @JoinColumn(name = "role_id"),
+                    inverseJoinColumns = @JoinColumn(name = "authority_id"))
+    private Set<AuthorityEntity> authorities;
+}
+
+@Entity
+@Table(name = "authorities")
+public class AuthorityEntity {
+
+    @Id
+    @SequenceGenerator(name = "AUTH_SEQ", initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "AUTH_SEQ")
+    @Column(name = "id", nullable = false, updatable = false, insertable = true, unique = true)
+    private Long id;
+
+    @Column(name = "name", nullable = false, updatable = false, insertable = true, unique = true, length = 32)
+    private String name;
+
+    @Column(name = "grant", nullable = false, updatable = false, insertable = true, unique = true, length = 128)
+    private String grant;
+
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "authorities")
+    private Set<RoleEntity> roles;
+}
+```
+
+```sql
+CREATE SEQUENCE IF NOT EXISTS USERS_SEQ START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE IF NOT EXISTS ROLES_SEQ START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE IF NOT EXISTS AUTH_SEQ START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE IF NOT EXISTS ROLES (
+  ID BIGINT DEFAULT NEXT VALUE FOR ROLES_SEQ PRIMARY KEY,
+  NAME VARCHAR(32) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS AUTHORITIES (
+  ID BIGINT DEFAULT NEXT VALUE FOR AUTH_SEQ PRIMARY KEY,
+  NAME VARCHAR(32) NOT NULL UNIQUE,
+  GRANT VARCHAR(128) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS USERS (
+  ID BIGINT DEFAULT NEXT VALUE FOR USERS_SEQ PRIMARY KEY,
+  USERNAME VARCHAR(64) NOT NULL UNIQUE,
+  PASSWORD VARCHAR(128),
+  ROLE_ID BIGINT NOT NULL,
+  FOREIGN KEY (ROLE_ID) references ROLES(ID)
+);
+
+CREATE TABLE ROLE_AUTHORITY (
+  role_id BIGINT NOT NULL,
+  authority_id  BIGINT NOT NULL,
+  PRIMARY KEY (role_id, authority_id),
+  FOREIGN KEY (role_id) REFERENCES ROLES(id),
+  FOREIGN KEY (authority_id)  REFERENCES AUTHORITIES(id)
+);
+```
+
+#### Users
+
+We need to provide a service that will tell spring how to pull information about our users, first we need a
+repository that will be able to pull the data for a user from the data base.
+
+```java
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
+}
+```
+
+Then we will provide a security configuration that will create an instance of users details, that will be used by
+spring and used to authorize and authenticate users when we attempt to login as a known user. We can add some dummy
+users in the data base following the scheme we will have to create both the user and the roles along side some dummy
+authorities.
+
+```java
+@Transactional
+public Optional<UserDetails> getPrincipal(String username) {
+    return userRepository.findByUsername(username).map(user -> new UserDetails() {
+        @Override
+        public Collection<? extends GrantedAuthority> getAuthorities() {
+            return user.getRole().getAuthorities().stream().map(AuthorityEntity::getGrant).map(SimpleGrantedAuthority::new).toList();
+        }
+
+        @Override
+        public String getPassword() {
+            return user.getPassword();
+        }
+
+        @Override
+        public String getUsername() {
+            return user.getUsername();
+        }
+    });
+}
+```
+
+Lastly we link the, repository to the bean and create an anonymous instance of the details service that is going to
+be used as the default one to be injected internally by the default spring authenticator
+
+```java
+@Configuration
+public class SecurityConfiguration {
+
+    @Bean
+    UserDetailsService userDetailsService(UsersService userService) {
+        return name -> userService.getPrincipal(name).orElseThrow(() -> new UsernameNotFoundException(name));
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new PasswordEncoder() {
+            @Override
+            public String encode(CharSequence rawPassword) {
+                return rawPassword == null ? null : rawPassword.toString();
+            }
+
+            @Override
+            public boolean matches(CharSequence rawPassword, String storedPassword) {
+                return Objects.equals(rawPassword == null ? null : rawPassword.toString(), storedPassword);
+            }
+        };
+    }
+}
+```
+
+By default spring uses the concrete instance called - `DaoAuthenticationProvider`, that class has a setter injection
+method that is called `setPasswordEncoder`, once we create our password encoder instance bean it will actually be
+injected into the bean through the setter method.
+
+Our example demonstrates how to set a very plain encoder, that just matches the raw password that was entered by the
+user, in reality that will only be a valid case if we were doing this for development locally or in noncritical
+environments
+
+The other bean in this class is our beans details service for the user. That one is in charge of creating the providing
+details from a repository or some sort of a storage.
+
+In reality we will actually take care of encrypting these passwords, or encoding them salting them, so how does this
+process actually work. The default spring encoders 'encode' the password and ensure that it matches with the one stored
+in the database, these include things like `MessageDigestPasswordEncoder` (Md5) and `BCryptPasswordEncoder` and more.
+
+#### Login
+
+First lets examine types of of login and the credentials approaches, By default the spring security context is
+configured to use the login form login, which present the user with an html login form that validates the user.
+
+The types of logins that spring provides are many some of which are related to external providers like saml or oidc,
+some of them can be built in -house ones like a basic login form or a more advanced post based login form.
+
+- Basic login - the basic login is supported by most browsers, it is a native browser interface that shows up like a
+  pop up and allows the user to login by entering his credentials.
+
+- Login form - the login form is a more advanced built in html based form, that spring provides, the user is
+  presented with a form where he again enters username and password, then this information is sent for authorization
+  and authentication
+
+- Providers - a list of many 3rd party authorization and authentication providers that are supported by default.
+  Each of them has a completely different way of doing the user validation and registration so we are not going to dig
+  deep into them at this time.
+
+Lets examine the different types of login, generally we have two types ones are the stateful logins, and the other
+is the stateless, the stateful are these which restore the state of the user based on some information that is sent
+on each request by the user's client, usually the browser and usually a cookie. The stateless ones are the ones
+where the state is sent manually, such as a token that the user himself has, and it exposed to the user like a JWT token.
+
+Stateful login - usually implemented with a cookie, this cookies is stored in your browser usually not accessible to
+scripts running on the browser side, it is securely stored in the browser and the browser (or the user's client) sends
+it on every request, that is just an identity, a unique string, which is then related to some state stored on the
+server. What does it look like, here is the brief description of the filter chain, for our stateful login attempt
+
+1. DisableEncodeUrlFilter
+2. WebAsyncManagerIntegrationFilter
+3. SecurityContextHolderFilter (loads/clears SecurityContext for the request)
+4. HeaderWriterFilter
+5. CorsFilter
+6. CsrfFilter
+7. LogoutFilter
+8. UsernamePasswordAuthenticationFilter - pulls the data from the POST to /login, from the login page
+9. DefaultLoginPageGeneratingFilter - renders the default login page if you did not provide one
+10. DefaultLogoutPageGeneratingFilter - renders the default logout page if needed, i.e. visit the /logout route
+11. RequestCacheAwareFilter - remembers original URL for redirect after login
+12. SecurityContextHolderAwareRequestFilter - wraps request with security-aware methods
+13. ExceptionTranslationFilter - turns “not authenticated” into redirect-to-login or 401
+14. AuthorizationFilter - final authorization decision
+
+- `First pass`: You’re not authenticated → authorization fails. `ExceptionTranslationFilter` triggers the “start
+  authentication” behavior. For form-login, that means 302 redirect to /login, then we hit GET /login Filter chain runs in
+  order: `UsernamePasswordAuthenticationFilter` sees: method is GET, not POST /login → does nothing, passes through
+  `DefaultLoginPageGeneratingFilter` sees: this is GET /login and you did not define a custom login page → renders the
+  HTML login form
+
+- `Second pass`: Browser submits the form (username/password) to /login. The same exact filter chain runs again in the
+  same order again: `UsernamePasswordAuthenticationFilter` sees: this is POST /login → this is my request, It reads
+  credentials from the request (by default request parameters username and password, via
+  `HttpServletRequest.getParameter(...))`. Builds an Authentication token and calls the `AuthenticationManager`. On
+  success, it stores Authentication into the `SecurityContext` (and typically the session). Then it redirects you (often
+  back to the original URL, using the saved request)
+
+Stateless login - usually implemented by receiving a special token that contains the full information of the user or
+some sort of a bare minimum that will be enough to identify the user, but no state is stored on the server, that relates
+to this token, the actual data is stored in the token, or at least a minimal amount of it enough to recover most of the
+required data for the user from the internal database storage.
+
+1. DisableEncodeUrlFilter
+2. WebAsyncManagerIntegrationFilter
+3. SecurityContextHolderFilter
+4. HeaderWriterFilter
+5. LogoutFilter - often still present but less relevant
+6. BearerTokenAuthenticationFilter - extracts/validates Bearer token, builds Authentication
+7. SecurityContextHolderAwareRequestFilter - wraps request with security-aware methods
+8. ExceptionTranslationFilter - turns “not authenticated” into redirect-to-login or 401
+9. AuthorizationFilter - final authorization decision
+
+- `First pass`:
+
+#### Routes
+
+Once we have secured the user login we can also provide a more fine grained control over the routes that users can use
+and access, which routes are accessible to which users and which routes are not. We do this using the default security
+chain, each route can be fine grain controlled, disallowing not only direct access to it but also allowing only users
+with specific authorities to access it

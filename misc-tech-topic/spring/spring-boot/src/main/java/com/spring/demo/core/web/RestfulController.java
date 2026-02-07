@@ -2,6 +2,7 @@ package com.spring.demo.core.web;
 
 import com.spring.demo.core.model.SearchCriteria;
 import com.spring.demo.core.model.VideoModel;
+import com.spring.demo.core.model.VideoModel.VideoCriteria;
 import com.spring.demo.core.service.VideoService;
 import java.util.Map;
 import java.util.Optional;
@@ -28,26 +29,26 @@ public class RestfulController {
 
     @GetMapping("/list")
     public ResponseEntity<Object> getVidoes(Pageable pageable) {
-        return ResponseEntity.of(Optional.of(videosService.getVideos(pageable)));
+        return ResponseEntity.of(Optional.of(videosService.findAll(pageable)));
     }
 
     @PostMapping("/find")
     public ResponseEntity<Object> getVidoes(@RequestBody Map<String, Object> criteria) {
-        return ResponseEntity.of(Optional.of(videosService.getVideos(SearchCriteria.of(criteria))));
+        return ResponseEntity.of(Optional.of(videosService.search(SearchCriteria.of(criteria), VideoCriteria.values())));
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Object> deleteVideo(@PathVariable Long id) {
-        return ResponseEntity.of(Optional.of(videosService.deleteVideo(id)));
+        return ResponseEntity.of(Optional.of(videosService.delete(id)));
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<Object> updateVideo(@PathVariable Long id, @RequestBody VideoModel video) {
-        return ResponseEntity.of(Optional.ofNullable(videosService.updateVideo(video)));
+        return ResponseEntity.of(Optional.of(videosService.update(video.id(), video)));
     }
 
     @PostMapping("/create")
     public ResponseEntity<Object> createVideo(@RequestBody VideoModel video) {
-        return ResponseEntity.of(Optional.ofNullable(videosService.addVideo(video)));
+        return ResponseEntity.of(Optional.of(videosService.create(video)));
     }
 }

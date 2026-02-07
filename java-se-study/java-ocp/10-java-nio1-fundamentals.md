@@ -1355,7 +1355,7 @@ try (FileChannel ch = FileChannel.open(veryBigSparseFile, StandardOpenOption.CRE
         // offset in the file
         LOGGER.logInfo("wrote #" + writeLen + "B for page #" + i + " at offset " + off);
     }
-    memoryMappedBuffer.force(); // best-effort flush of just what we changed, basically we do `fsync`
+    memoryMappedBuffer.force(); // best-effort flush of just what we changed, basically that does a basic `fsync` call
 }
 ```
 
@@ -1363,8 +1363,11 @@ Now after we have written and touched 32 pages, the size on disk of this file wi
 big.dat`. This demonstrates that we can directly write to the file without having a file channel and we also skip on the
 expensive system calls that each write would had we used the .write method of the File channel instance instead.
 
-This is not always the most fastest way, but it is quite useful if the file we are accessing has been already touched
-and memory pages and is pre-fetched and cached by the file system and the kernel.
+This is not always the fastest way, but it is quite useful if the file we are accessing has been already touched and
+memory pages for it are pre-fetched and cached by the file system and the kernel, subsequent access is going to be
+extremely fast, writes and reads included. No amount of channel read/write calls will beat memory mapped file for which
+the pages are already pulled in main memory (RAM), keep in mind that there is certainly a danger of these pages being
+evicted by the kernel, away from Main memory, but that we have no direct control over (see load method for more details).
 
 `Memory mapping is restricted to the size of integer max_value in java, that is important because that value is about 2
 billion, 2^31, meaning we can only map at most about 2 gigs of data at once. Create multiple mapped buffers if you want
@@ -1378,3 +1381,71 @@ blocking, unlike files the data over the network is never reliable it might be w
 flushed and a variety of different other reason that make blocking I/O quite a pain in the butt. What `Selectable`
 means is that we can check which socket channel is ready to be read or written to , without blocking the current
 thread waiting for the I/O operation
+
+There are many socket channels, - `SocketChannel ServerSocketChannl, DatagramChannel` - while each channel has a
+corresponding socket class, not every socket in java.net, has a corresponding channel implementation that is important
+for later.
+
+### Non-blocking
+
+One of the most important features of the sockets is the non blocking ability, to pull data from the socket when its
+available and not wait for data to become available, that is quite important because that gives us the ability to avoid
+blocking the current thread waiting for data wasting cpu cycles blocking an entire thread just for a damn socket.
+
+How is that achieved ? The socket is put into what is called a readiness state, that we can query the readiness selector
+if the socket is ready to be written to or read from. The main super class that we care about is called `AbstractSelectableChannel`.
+
+The readiness selector state provides means of querying the socket to check if it is ready to to receive or transmit
+data, the blocking or non blocking state of a channel can be actually set through the API
+
+### Server socket
+
+The server socket and server socket channel are quite tightly connected, the channel does use an instance of the
+server socket to actually capture client connections and convert them into `SocketChannel` instances that we can query
+for data or write data to. These two go together always and in a way the `ServerSocketChannl` is directly dependent on
+a `ServerSocket`, at least internally.
+
+The way the server socket channel works is a bit different, the server socket channel requires us to call the
+socket() method to initialize the internal member server socket after we crate the server socket channel which might
+seem a bit odd, but internally the server socket channel does indeed hold a reference to a `ServerSocket` instance
+which we create by calling the `socket()` method on the `ServerSocketChannl` instance
+
+```java
+// we wrap a buffer of data to be sent to the client socket, when a connection is established, note that this is just a dummy data.
+// In actual reality you will most likely not want to wrap or create the data buffer like that as it is not efficient.
+ByteBuffer byteBuffer = ByteBuffer.wrap("sending-data-to-socket".getBytes(StandardCharsets.UTF_8));
+// the server socket object is not enough to being to retrieve connections, we need to create and set the socket object internally
+// and set it, that is done by calling the socket method with the bind paramters, otherwise the socket is not bound when we create the
+// channel
+ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+serverSocketChannel.socket().bind(new InetSocketAddress(5000));
+serverSocketChannel.configureBlocking(false);
+
+boolean hasReceivedConnection = false;
+boolean hasReachedConnectionLimit = false;
+while (!hasReceivedConnection || !hasReachedConnectionLimit) {
+    SocketChannel socketChannelConnection = serverSocketChannel.accept();
+
+    if (Objects.isNull(socketChannelConnection)) {
+        // we have not received any connection but the thread is not blocked waiting for one, that means that here we can do some
+        // actual work in our thread without having to worry that we are being blocked
+        for (int i = 0; i < 5; i++) {
+            LOGGER.logInfo("Doing work while awaiting socket connection");
+            Thread.sleep(100);
+        }
+        hasReachedConnectionLimit = true;
+    } else {
+        // we have received some connection here, meaning that we can now proceed to do something with it maybe
+        // there is data to be pulled or sent to or from that socket.
+        byteBuffer.rewind();
+        socketChannelConnection.write(byteBuffer);
+        socketChannelConnection.close();
+        LOGGER.logInfo("Wrote data to the socket and closing the connection");
+    }
+}
+```
+
+`A newly created serverSocketChannel is opened but not connected/bound the connection happens when we invoke the method
+socket() and bind() on that instance, a ServerSocketChannl is created always in tandem with an internal instance of a
+ServerSocket, there is no other way to opearte with it and if we had not called the socket bind method, and attempt to
+obtain a socket channel to which to read and write then we will get connection exception.`

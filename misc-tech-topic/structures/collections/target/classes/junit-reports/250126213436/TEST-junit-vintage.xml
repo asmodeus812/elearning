@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="JUnit Vintage" tests="1" skipped="0" failures="0" errors="1" time="0.008" hostname="asmodeus" timestamp="2026-01-25T21:34:36">
+<properties>
+<property name="file.encoding" value="UTF-8"/>
+<property name="file.separator" value="/"/>
+<property name="java.class.path" value="/home/asmodeus/.local/share/nvim/neotest-java/junit-platform-console-standalone-1.10.1.jar"/>
+<property name="java.class.version" value="61.0"/>
+<property name="java.home" value="/home/linuxbrew/.linuxbrew/Cellar/openjdk@17/17.0.15/libexec"/>
+<property name="java.io.tmpdir" value="/tmp"/>
+<property name="java.library.path" value="/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib"/>
+<property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+<property name="java.runtime.version" value="17.0.15+0"/>
+<property name="java.specification.maintenance.version" value="1"/>
+<property name="java.specification.name" value="Java Platform API Specification"/>
+<property name="java.specification.vendor" value="Oracle Corporation"/>
+<property name="java.specification.version" value="17"/>
+<property name="java.vendor" value="Homebrew"/>
+<property name="java.vendor.url" value="https://github.com/Homebrew/homebrew-core/issues"/>
+<property name="java.vendor.url.bug" value="https://github.com/Homebrew/homebrew-core/issues"/>
+<property name="java.vendor.version" value="Homebrew"/>
+<property name="java.version" value="17.0.15"/>
+<property name="java.version.date" value="2025-04-15"/>
+<property name="java.vm.compressedOopsMode" value="Zero based"/>
+<property name="java.vm.info" value="mixed mode, sharing"/>
+<property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+<property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+<property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+<property name="java.vm.specification.version" value="17"/>
+<property name="java.vm.vendor" value="Homebrew"/>
+<property name="java.vm.version" value="17.0.15+0"/>
+<property name="jdk.debug" value="release"/>
+<property name="line.separator" value="
+"/>
+<property name="native.encoding" value="UTF-8"/>
+<property name="os.arch" value="amd64"/>
+<property name="os.name" value="Linux"/>
+<property name="os.version" value="6.18.0-9-generic"/>
+<property name="path.separator" value=":"/>
+<property name="sun.arch.data.model" value="64"/>
+<property name="sun.boot.library.path" value="/home/linuxbrew/.linuxbrew/Cellar/openjdk@17/17.0.15/libexec/lib"/>
+<property name="sun.cpu.endian" value="little"/>
+<property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+<property name="sun.java.command" value="/home/asmodeus/.local/share/nvim/neotest-java/junit-platform-console-standalone-1.10.1.jar execute @/home/asmodeus/.projects/elearning/misc-tech-topic/structures/collections/target/classes/.cp --reports-dir=/home/asmodeus/.projects/elearning/misc-tech-topic/structures/collections/target/classes/junit-reports/250126213436 --fail-if-no-tests --disable-banner --details=testfeed --config=junit.platform.output.capture.stdout=true -c=com.collection.ArrayListTest"/>
+<property name="sun.java.launcher" value="SUN_STANDARD"/>
+<property name="sun.jnu.encoding" value="UTF-8"/>
+<property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+<property name="sun.stderr.encoding" value="UTF-8"/>
+<property name="sun.stdout.encoding" value="UTF-8"/>
+<property name="user.country" value="US"/>
+<property name="user.dir" value="/home/asmodeus/.projects/elearning/misc-tech-topic/structures/collections"/>
+<property name="user.home" value="/home/asmodeus"/>
+<property name="user.language" value="en"/>
+<property name="user.name" value="asmodeus"/>
+<property name="user.timezone" value="Europe/Sofia"/>
+</properties>
+<testcase name="initializationError" classname="com.collection.ArrayListTest" time="0.002">
+<error message="Invalid test class 'com.collection.ArrayListTest':
+  1. Method setUp() should be public
+  2. Method listIteratorAtIndexStartsCorrectlyAndBoundsChecked() should be public
+  3. Method clearEmptiesList() should be public
+  4. Method iteratorIteratesInOrder() should be public
+  5. Method streamAndParallelStreamWork() should be public
+  6. Method addAllAtIndexInsertsInOrderAndReturnsChangeFlag() should be public
+  7. Method listIteratorMutationsIfSupported() should be public
+  8. Method subListIsBackedViewModificationsReflectBothWays() should be public
+  9. Method toArrayNoArgsReturnsObjectArrayInOrder() should be public
+  10. Method removeByIndexRemovesAndShiftsAndBoundsChecked() should be public
+  11. Method removeByObjectRemovesFirstOccurrenceReturnsFlag() should be public
+  12. Method addAllAppendsInOrderAndReturnsChangeFlag() should be public
+  13. Method equalsAndHashCodeMatchStandardListContract() should be public
+  14. Method sizeTracksAddsAndRemoves() should be public
+  15. Method addAtIndexInsertsAndShifts() should be public
+  16. Method iteratorRemoveRemovesLastReturnedIfSupported() should be public
+  17. Method assertNullElementBehavior() should be public
+  18. Method addAppendsAndReturnsTrue() should be public
+  19. Method forEachVisitsAllInOrder() should be public
+  20. Method removeIfRemovesMatchingReturnsFlag() should be public
+  21. Method spliteratorTraversesAllElements() should be public
+  22. Method toArrayTypedArraySemantics() should be public
+  23. Method indexOfAndLastIndexOfHandleDuplicates() should be public
+  24. Method removeAllRemovesAllOccurrencesReturnsChangeFlag() should be public
+  25. Method containsAndContainsAllWork() should be public
+  26. Method replaceAllAppliesOperator() should be public
+  27. Method listIteratorForwardBackwardIndices() should be public
+  28. Method newListIsEmptySizeZero() should be public
+  29. Method retainAllKeepsOnlySpecifiedReturnsChangeFlag() should be public
+  30. Method getAndSetWorkAndBoundsChecked() should be public
+  31. Method subListBoundsChecked() should be public
+  32. Method sortSortsWithComparator() should be public" type="org.junit.runners.model.InvalidTestClassError"><![CDATA[org.junit.runners.model.InvalidTestClassError: Invalid test class 'com.collection.ArrayListTest':
+  1. Method setUp() should be public
+  2. Method listIteratorAtIndexStartsCorrectlyAndBoundsChecked() should be public
+  3. Method clearEmptiesList() should be public
+  4. Method iteratorIteratesInOrder() should be public
+  5. Method streamAndParallelStreamWork() should be public
+  6. Method addAllAtIndexInsertsInOrderAndReturnsChangeFlag() should be public
+  7. Method listIteratorMutationsIfSupported() should be public
+  8. Method subListIsBackedViewModificationsReflectBothWays() should be public
+  9. Method toArrayNoArgsReturnsObjectArrayInOrder() should be public
+  10. Method removeByIndexRemovesAndShiftsAndBoundsChecked() should be public
+  11. Method removeByObjectRemovesFirstOccurrenceReturnsFlag() should be public
+  12. Method addAllAppendsInOrderAndReturnsChangeFlag() should be public
+  13. Method equalsAndHashCodeMatchStandardListContract() should be public
+  14. Method sizeTracksAddsAndRemoves() should be public
+  15. Method addAtIndexInsertsAndShifts() should be public
+  16. Method iteratorRemoveRemovesLastReturnedIfSupported() should be public
+  17. Method assertNullElementBehavior() should be public
+  18. Method addAppendsAndReturnsTrue() should be public
+  19. Method forEachVisitsAllInOrder() should be public
+  20. Method removeIfRemovesMatchingReturnsFlag() should be public
+  21. Method spliteratorTraversesAllElements() should be public
+  22. Method toArrayTypedArraySemantics() should be public
+  23. Method indexOfAndLastIndexOfHandleDuplicates() should be public
+  24. Method removeAllRemovesAllOccurrencesReturnsChangeFlag() should be public
+  25. Method containsAndContainsAllWork() should be public
+  26. Method replaceAllAppliesOperator() should be public
+  27. Method listIteratorForwardBackwardIndices() should be public
+  28. Method newListIsEmptySizeZero() should be public
+  29. Method retainAllKeepsOnlySpecifiedReturnsChangeFlag() should be public
+  30. Method getAndSetWorkAndBoundsChecked() should be public
+  31. Method subListBoundsChecked() should be public
+  32. Method sortSortsWithComparator() should be public
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.tryAdvance(ArrayList.java:1602)
+	at java.base/java.util.stream.ReferencePipeline.forEachWithCancel(ReferencePipeline.java:129)
+	at java.base/java.util.stream.AbstractPipeline.copyIntoWithCancel(AbstractPipeline.java:527)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:513)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.FindOps$FindOp.evaluateSequential(FindOps.java:150)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.findFirst(ReferencePipeline.java:647)
+]]></error>
+<system-out><![CDATA[
+unique-id: [engine:junit-vintage]/[runner:com.collection.ArrayListTest]/[test:initializationError(com.collection.ArrayListTest)]
+display-name: initializationError
+]]></system-out>
+</testcase>
+<system-out><![CDATA[
+unique-id: [engine:junit-vintage]
+display-name: JUnit Vintage
+]]></system-out>
+</testsuite>

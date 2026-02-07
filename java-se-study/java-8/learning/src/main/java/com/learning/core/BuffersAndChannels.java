@@ -5,6 +5,7 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -13,11 +14,15 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -231,6 +236,42 @@ public class BuffersAndChannels {
             }
             memoryMappedBuffer.force(); // best-effort flush of just what we changed
         }
+
+        // we wrap a buffer of data to be sent to the client socket, when a connection is established, note that this is just a dummy data.
+        // In actual reality you will most likely not want to wrap or create the data buffer like that as it is not efficient.
+        ByteBuffer byteBuffer = ByteBuffer.wrap("sending-data-to-socket".getBytes(StandardCharsets.UTF_8));
+        // the server socket object is not enough to being to retrieve connections, we need to create and set the socket object internally
+        // and set it, that is done by calling the socket method with the bind params, otherwise the socket is not bound when we create the
+        // channel
+        ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+        serverSocketChannel.socket().bind(new InetSocketAddress(5000));
+        serverSocketChannel.configureBlocking(false);
+
+        boolean hasReceivedConnection = false;
+        boolean hasReachedConnectionLimit = false;
+        while (!hasReceivedConnection || !hasReachedConnectionLimit) {
+            SocketChannel socketChannelConnection = serverSocketChannel.accept();
+
+            if (Objects.isNull(socketChannelConnection)) {
+                // we have not received any connection but the thread is not blocked waiting for one, that means that here we can do some
+                // actual work in our thread wihtout having to worry that we are being blocked
+                for (int i = 0; i < 5; i++) {
+                    LOGGER.logInfo("Doing work while awaiting socket connection");
+                    Thread.sleep(100);
+                }
+                hasReachedConnectionLimit = true;
+            } else {
+                // we have received some connection here, meaning that we can now proceed to do something with it maybe
+                // there is data to be pulled or sent to or from that socket.
+                byteBuffer.rewind();
+                socketChannelConnection.write(byteBuffer);
+                socketChannelConnection.close();
+                LOGGER.logInfo("Wrote data to the socket and closing the connection");
+            }
+        }
+        LOGGER.logInfo("hasReceivedConnection: " + hasReceivedConnection);
+        LOGGER.logInfo("hasReachedConnectionLimit: " + hasReachedConnectionLimit);
+
         fos.close();
         out.close();
     }

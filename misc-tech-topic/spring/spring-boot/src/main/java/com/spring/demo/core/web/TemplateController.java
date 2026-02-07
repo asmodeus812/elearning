@@ -37,7 +37,7 @@ public class TemplateController {
         final Sort sortCriteria = Sort.by(Sort.Direction.ASC, "id");
 
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, sortCriteria);
-        Page<VideoModel> videosPage = videoService.getVideos(pageable);
+        Page<VideoModel> videosPage = videoService.getAll(pageable);
 
         model.addAttribute("videos", videosPage.getContent());
         model.addAttribute("pageNumber", pageNumber);
@@ -59,25 +59,25 @@ public class TemplateController {
 
     @GetMapping(path = "/find", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public String find(Model model, @RequestParam Map<String, String> criteria) {
-        model.addAttribute("videos", videoService.getVideos(SearchCriteria.of(criteria)));
+        model.addAttribute("videos", videoService.search(SearchCriteria.of(criteria), VideoModel.VideoCriteria.values()));
         return TEMPLATE_INDEX_BASE;
     }
 
     @PostMapping(path = "/new-video", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public String add(@ModelAttribute VideoModel video) {
-        videoService.addVideo(video);
+        videoService.create(video);
         return REDIRECT_TEMPLATE_INDEX;
     }
 
     @PostMapping(path = "/update-video", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public String update(@ModelAttribute VideoModel video) {
-        videoService.updateVideo(video);
+        videoService.update(video.id(), video);
         return REDIRECT_TEMPLATE_INDEX;
     }
 
     @PostMapping("/delete-video/{id}")
     public String delete(@PathVariable("id") Long target) {
-        videoService.deleteVideo(target);
+        videoService.delete(target);
         return REDIRECT_TEMPLATE_INDEX;
     }
 

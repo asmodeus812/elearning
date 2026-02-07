@@ -1,49 +1,40 @@
 package com.spring.demo.core.entity;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "authorities")
-public class AuthorityEntity {
-
-    @Id
-    @SequenceGenerator(name = "AUTH_SEQ", initialValue = 1, allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "AUTH_SEQ")
-    @Column(name = "id", nullable = false, updatable = false, insertable = true, unique = true)
-    private Long id;
+@SequenceGenerator(name = "AUTH_SEQ", initialValue = 1, allocationSize = 1)
+public class AuthorityEntity extends AbstractAuditedEntity {
 
     @Column(name = "name", nullable = false, updatable = false, insertable = true, unique = true, length = 32)
     private String name;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @Column(name = "role", updatable = true, insertable = true, unique = false)
-    private List<RoleEntity> roles;
+    @Column(name = "grant", nullable = false, updatable = false, insertable = true, unique = true, length = 128)
+    private String grant;
+
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "authorities")
+    private Set<RoleEntity> roles;
 
     public AuthorityEntity() {
         // require a default safe constructor
     }
 
-    public AuthorityEntity(Long id, String name) {
-        this.id = id;
+    public AuthorityEntity(Long id, String name, String grant) {
+        super(id);
         this.name = name;
+        this.grant = grant;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public AuthorityEntity(String name, String grant) {
+        this(null, name, grant);
     }
 
     public String getName() {
@@ -54,23 +45,28 @@ public class AuthorityEntity {
         this.name = name;
     }
 
-    public List<RoleEntity> getRoles() {
+    public Set<RoleEntity> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<RoleEntity> roles) {
+    public void setRoles(Set<RoleEntity> roles) {
         this.roles = roles;
     }
 
-    @Override
-    public String toString() {
-        return "AuthorityEntity{" + (id != null ? "id=" + id + ", " : "") + (name != null ? "name=" + name + ", " : "")
-                        + (roles != null ? "roles=" + roles : "") + "}";
+    public String getGrant() {
+        return grant;
+    }
+
+    public void setGrant(String grant) {
+        this.grant = grant;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, roles);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(name, grant);
+        return result;
     }
 
     @Override
@@ -78,10 +74,13 @@ public class AuthorityEntity {
         if (this == obj) {
             return true;
         }
+        if (!super.equals(obj)) {
+            return false;
+        }
         if (!(obj instanceof AuthorityEntity)) {
             return false;
         }
         AuthorityEntity other = (AuthorityEntity) obj;
-        return Objects.equals(id, other.id) && Objects.equals(name, other.name) && Objects.equals(roles, other.roles);
+        return Objects.equals(name, other.name) && Objects.equals(grant, other.grant);
     }
 }

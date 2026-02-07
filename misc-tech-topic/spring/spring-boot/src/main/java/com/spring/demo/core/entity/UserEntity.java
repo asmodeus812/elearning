@@ -1,27 +1,18 @@
 package com.spring.demo.core.entity;
 
-import java.util.List;
 import java.util.Objects;
-import org.springframework.security.core.GrantedAuthority;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
-public class UserEntity {
-
-    @Id
-    @SequenceGenerator(name = "USERS_SEQ", initialValue = 1, allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "USERS_SEQ")
-    @Column(name = "id", nullable = false, updatable = false, insertable = true, unique = true)
-    private Long id;
+@SequenceGenerator(name = "USERS_SEQ", initialValue = 1, allocationSize = 50)
+public class UserEntity extends AbstractAuditedEntity {
 
     @Column(name = "username", unique = true, updatable = false, insertable = true, nullable = false, length = 64)
     private String username;
@@ -29,8 +20,8 @@ public class UserEntity {
     @Column(name = "password", unique = false, updatable = true, insertable = true, nullable = false, length = 128)
     private String password;
 
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
-    @Column(name = "role", unique = false, updatable = true, insertable = true, nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
     private RoleEntity role;
 
     public UserEntity() {
@@ -38,17 +29,13 @@ public class UserEntity {
     }
 
     public UserEntity(Long id, String name, String password) {
-        this.id = id;
+        super(id);
         this.username = name;
         this.password = password;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public UserEntity(String name, String password) {
+        this(null, name, password);
     }
 
     public String getUsername() {
@@ -76,14 +63,11 @@ public class UserEntity {
     }
 
     @Override
-    public String toString() {
-        return "UserEntity{" + (id != null ? "id=" + id + ", " : "") + (username != null ? "username=" + username + ", " : "")
-                        + (password != null ? "password=" + password + ", " : "") + (role != null ? "role=" + role : "") + "}";
-    }
-
-    @Override
     public int hashCode() {
-        return Objects.hash(id, username, password, role);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(username);
+        return result;
     }
 
     @Override
@@ -91,11 +75,13 @@ public class UserEntity {
         if (this == obj) {
             return true;
         }
+        if (!super.equals(obj)) {
+            return false;
+        }
         if (!(obj instanceof UserEntity)) {
             return false;
         }
         UserEntity other = (UserEntity) obj;
-        return Objects.equals(id, other.id) && Objects.equals(username, other.username) && Objects.equals(password, other.password)
-                        && Objects.equals(role, other.role);
+        return Objects.equals(username, other.username);
     }
 }

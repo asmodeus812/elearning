@@ -5,9 +5,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.ExampleMatcher.StringMatcher;
 
 public class CriteriaPipeline<R> {
 
@@ -52,10 +49,6 @@ public class CriteriaPipeline<R> {
     }
 
     public Stream<R> limitFirst() {
-        return stream().limit(1);
-    }
-
-    public Stream<R> limitAnu() {
         return stream().limit(1);
     }
 
