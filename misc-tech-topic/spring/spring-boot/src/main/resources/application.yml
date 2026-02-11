@@ -2,7 +2,7 @@
 logging:
   file:
     name: spring.log
-    path: ./tmp/
+    path: /tmp/
   level:
     root: DEBUG
     com:
@@ -10,13 +10,11 @@ logging:
         demo:
           core: TRACE
 
-spring.security.user.name: user
-spring.security.user.password: password
-
 spring:
-  h2:
-    console:
-      enabled: true
+  security:
+    user:
+      name: user
+      password: password
   datasource:
     url: jdbc:h2:mem:mydb
     username: sa
@@ -26,10 +24,13 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddlAuto: none
-  application:
-    name: demo-base
+  h2:
+    console:
+      enabled: true
   data:
     web.pageable.one-indexed-parameters: true
+  application:
+    name: demo-base
 
 server:
   port: 8080
@@ -43,4 +44,3 @@ spring:
       on-profile:
         - local
 ---
-

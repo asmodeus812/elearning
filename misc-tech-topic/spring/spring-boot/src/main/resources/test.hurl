@@ -21,9 +21,12 @@ GET http://localhost:8080/products-path/12345
 GET http://localhost:8080/products-discount
 
 GET http://localhost:8080/api/list?page=0&size=10
+Authorization: Basic YWRtaW46YWRtaW4xMjM=
+
 HTTP 200
 
 POST http://localhost:8080/api/find
+Authorization: Basic YWRtaW46YWRtaW4xMjM=
 Content-Type: application/json
 
 {
@@ -33,6 +36,7 @@ Content-Type: application/json
 HTTP 200
 
 POST http://localhost:8080/api/create
+Authorization: Basic YWRtaW46YWRtaW4xMjM=
 Content-Type: application/json
 
 {
@@ -43,6 +47,7 @@ Content-Type: application/json
 HTTP 200
 
 PUT http://localhost:8080/api/update
+Authorization: Basic YWRtaW46YWRtaW4xMjM=
 Content-Type: application/json
 
 {
@@ -53,4 +58,5 @@ Content-Type: application/json
 HTTP 200
 
 DELETE http://localhost:8080/api/delete/1
+Authorization: Basic YWRtaW46YWRtaW4xMjM=
 HTTP 200

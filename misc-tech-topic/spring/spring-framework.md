@@ -3153,20 +3153,20 @@ scripts running on the browser side, it is securely stored in the browser and th
 it on every request, that is just an identity, a unique string, which is then related to some state stored on the
 server. What does it look like, here is the brief description of the filter chain, for our stateful login attempt
 
-1. DisableEncodeUrlFilter
-2. WebAsyncManagerIntegrationFilter
-3. SecurityContextHolderFilter (loads/clears SecurityContext for the request)
-4. HeaderWriterFilter
-5. CorsFilter
-6. CsrfFilter
-7. LogoutFilter
-8. UsernamePasswordAuthenticationFilter - pulls the data from the POST to /login, from the login page
-9. DefaultLoginPageGeneratingFilter - renders the default login page if you did not provide one
-10. DefaultLogoutPageGeneratingFilter - renders the default logout page if needed, i.e. visit the /logout route
-11. RequestCacheAwareFilter - remembers original URL for redirect after login
-12. SecurityContextHolderAwareRequestFilter - wraps request with security-aware methods
-13. ExceptionTranslationFilter - turns “not authenticated” into redirect-to-login or 401
-14. AuthorizationFilter - final authorization decision
+1. `DisableEncodeUrlFilter`
+2. `WebAsyncManagerIntegrationFilter`
+3. `SecurityContextHolderFilter` - loads/clears `SecurityContext` for the request
+4. `HeaderWriterFilter` - add custom headers to the current response towards the client
+5. `CorsFilter` - handles the CORS pre-flight requests and intercept actual request
+6. `CsrfFilter` - handles reading the CSRF token from the incoming user request
+7. `LogoutFilter` - handles /logout sequence and events propagation throughout the filter chain
+8. `UsernamePasswordAuthenticationFilter` - pulls the data from the POST to /login, from the login page
+9. `DefaultLoginPageGeneratingFilter` - renders the default login page if you did not provide one
+10. `DefaultLogoutPageGeneratingFilter` - renders the default logout page if needed, i.e, hit /logout route
+11. `RequestCacheAwareFilter` - remembers original URL for redirect after login
+12. `SecurityContextHolderAwareRequestFilter` - wraps request with security-aware methods
+13. `ExceptionTranslationFilter` - turns “not authenticated” into redirect-to-login or 401
+14. `AuthorizationFilter` - final authorization decision, additional customizations
 
 - `First pass`: You’re not authenticated → authorization fails. `ExceptionTranslationFilter` triggers the “start
   authentication” behavior. For form-login, that means 302 redirect to /login, then we hit GET /login Filter chain runs in
@@ -3186,21 +3186,185 @@ some sort of a bare minimum that will be enough to identify the user, but no sta
 to this token, the actual data is stored in the token, or at least a minimal amount of it enough to recover most of the
 required data for the user from the internal database storage.
 
-1. DisableEncodeUrlFilter
-2. WebAsyncManagerIntegrationFilter
-3. SecurityContextHolderFilter
-4. HeaderWriterFilter
-5. LogoutFilter - often still present but less relevant
-6. BearerTokenAuthenticationFilter - extracts/validates Bearer token, builds Authentication
-7. SecurityContextHolderAwareRequestFilter - wraps request with security-aware methods
-8. ExceptionTranslationFilter - turns “not authenticated” into redirect-to-login or 401
-9. AuthorizationFilter - final authorization decision
+1. `DisableEncodeUrlFilter`
+2. `WebAsyncManagerIntegrationFilter`
+3. `SecurityContextHolderFilter`
+4. `HeaderWriterFilter`
+5. `LogoutFilter` - often still present but less relevant
+6. `BearerTokenAuthenticationFilter` - extracts/validates Bearer token, builds Authentication
+7. `SecurityContextHolderAwareRequestFilter` - wraps request with security-aware methods
+8. `ExceptionTranslationFilter` - turns “not authenticated” into redirect-to-login or 401
+9. `AuthorizationFilter` - final authorization decision
 
-- `First pass`:
+- `First pass`: TODO
 
 #### Routes
 
 Once we have secured the user login we can also provide a more fine grained control over the routes that users can use
 and access, which routes are accessible to which users and which routes are not. We do this using the default security
 chain, each route can be fine grain controlled, disallowing not only direct access to it but also allowing only users
-with specific authorities to access it
+with specific authorities to access it.
+
+What spring does is allow us to attach different security rules on the requests such that we can enable or disable
+access to certain rules or routes dynamically. What is also possible is to create multiple instances or Beans of the
+`SecurityFilter`. However it is important to note that we need to order them correctly, because it might cause conflicts
+of matching request matchers.
+
+Each security filter chain is built from a HttpSecurity, for each we can configure what routes to ignore, accept allow
+or authenticate, we can configure the type of login, either normal stateful or stateless one and so on and so forth.
+
+```java
+// this is the default web security chain that spring configures, out of the box nothing special just marks all
+// resources as authenticated, and ensures that we can login by enabling both the basic form login that each browser
+// supports and the advanced UI based html form login that spring also exposes through the filters we have already looked
+// at above, either way, the default config is quite bare bones
+@Bean
+@Order(SecurityProperties.BASIC_AUTH_ORDER)
+SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    http.authorizeHttpRequests((requests) -> requests.anyRequest().authenticated());
+    http.formLogin(withDefaults());
+    http.httpBasic(withDefaults());
+    return http.build();
+}
+```
+
+We are going to attempt to override this config for us to make a more advanced one, in our configuration so far we have
+enabled the H2 in memory database console, we have enabled a few RESTful api and also we have a template engine running
+a small UI front end rendered on the server. Each of which requires a different set of constrains, mainly connected to
+how we authenticate the user, so below we attempt to customize just this
+
+- The /h2-consle should be accessible from anyone, it does not require an authentication step because it already
+  provides its own internal way to login and authorize and authenticate people.
+- The /ui routes are going to use the default DAO provider that spring uses by default to pull users from our repository
+  and log them in by username and password
+- The /api routes we will authorize and authenticate with basic HTTP based header authorization and authentication
+
+```java
+@Order(1)
+@Bean(name = "h2SecurityFilterChain")
+SecurityFilterChain h2SecurityFilterChain(HttpSecurity http) throws Exception {
+    // first we configure the h2-console route we know that it has a default login mechanics, so there is no need to add
+    // a second one on top, we will not require any user login by default from spring and leave h2's login functionality to
+    // work as expected here
+    return http.securityMatcher("/h2-console", "/h2-console/**")
+        .authorizeHttpRequests(customizer -> customizer.anyRequest().permitAll())
+        .formLogin(FormLoginConfigurer<HttpSecurity>::disable)
+        .httpBasic(AbstractHttpConfigurer::disable)
+        .build();
+}
+
+@Order(2)
+@Bean(name = "apiSecurityFilterChain")
+SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, @Qualifier("apiUserDetailsService") UserDetailsService apiUserDetailsService,
+    @Qualifier("apiUserDetailsPasswordService") UserDetailsPasswordService apiUserDetailsPasswordService,
+    PasswordEncoder passwordEncoder) throws Exception {
+    // we create a custom authentication provider because we would like to customize it with a special service that
+    // provides only specific sub-set of the users that can actually call our API layer, plain password encoder that
+    // does nothing more than just compare the raw passwords, no encoding is done for the moment as this is for educational
+    // purposes
+    DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider(apiUserDetailsService);
+    daoAuthenticationProvider.setUserDetailsPasswordService(apiUserDetailsPasswordService);
+    daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+
+    // our api is authenticated completely with for now basic HTTP authorization that contains the username and password
+    // in the header using the Authorization basic HTTP functionality, we have to provide a header with a base64 encoded
+    // value representing the user and password in the format Basic base64(username:password) when we call the http/s
+    // request such as, the example below which translates to Basic admin:admin123, a user that exists in our database
+
+    // GET http://localhost:8080/api/list?page=0&size=10
+    // Authorization: Basic YWRtaW46YWRtaW4xMjM=
+    return http.securityMatcher("/api/**")
+        .authorizeHttpRequests(customizer -> customizer.anyRequest().authenticated())
+        .authenticationProvider(daoAuthenticationProvider)
+        .formLogin(FormLoginConfigurer<HttpSecurity>::disable)
+        .httpBasic(Customizer.withDefaults())
+        .build();
+}
+
+@Order(3)
+@Bean(name = "uiSecurityFilterChain")
+SecurityFilterChain uiSecurityFilterChain(HttpSecurity http, @Qualifier("uiUserDetailsService") UserDetailsService uiUserDetailsService,
+    @Qualifier("uiUserDetailsPasswordService") UserDetailsPasswordService uiUserDetailsPasswordService,
+    PasswordEncoder passwordEncoder) throws Exception {
+
+    // we create a custom authentication provider because we would like to customize it with a special service that
+    // provides only specific sub-set of the users that can actually login in our ui layer, also we provide in this case a
+    // plain password encoder that does nothing more than just compare the raw passwords, no encoding is done for the
+    // moment as this is for educational purposes
+    DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider(uiUserDetailsService);
+    daoAuthenticationProvider.setUserDetailsPasswordService(uiUserDetailsPasswordService);
+    daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+
+    // we create a custom login filter, this filter basically is in charge of creating the login page, since by default
+    // it is under /login we would like to generate it under /ui/login we need a custom filter to tell it to use the new
+    // URL for login. The important part here is the authenticationUrl and the loginPageUrl, the first tells the form POST
+    // action where to post to, the second tells the actual URL of the login page
+    DefaultLoginPageGeneratingFilter defaultLoginPageGeneratingFilter = new DefaultLoginPageGeneratingFilter();
+    defaultLoginPageGeneratingFilter.setLogoutSuccessUrl("/ui/logout");
+    defaultLoginPageGeneratingFilter.setLoginSuccessUrl("/ui");
+    defaultLoginPageGeneratingFilter.setAuthenticationUrl("/ui/login");
+    defaultLoginPageGeneratingFilter.setFailureUrl("/ui/login?error");
+    defaultLoginPageGeneratingFilter.setLoginPageUrl("/ui/login");
+
+    // these are mandatory and are not set by default we use just these values, because the
+    // UsernamePasswordAuthenticationFilter expected these by default, can be customized but we avoid adding more code
+    defaultLoginPageGeneratingFilter.setUsernameParameter("username");
+    defaultLoginPageGeneratingFilter.setPasswordParameter("password");
+    defaultLoginPageGeneratingFilter.setFormLoginEnabled(true);
+
+    // we configure a new security matcher that is going to be matching on our ui layer, only, that is important only
+    // these requests will trigger this entire security chain that we configured below, and along side that the custom
+    // login functionality as well.
+    return http.securityMatcher("/ui/**")
+    .authorizeHttpRequests(customizer -> customizer.anyRequest().authenticated())
+    .authenticationProvider(daoAuthenticationProvider)
+    .httpBasic(AbstractHttpConfigurer::disable)
+    .cors(CorsConfigurer<HttpSecurity>::disable)
+    .csrf(CsrfConfigurer<HttpSecurity>::disable)
+    .formLogin(customizer -> {
+        // this is where the magic happens we tell the form login filter, the original one, to redirect to /ui/login
+        // that will trigger our custom filter that we have created and attached below, on top of that we also need to tell
+        // it where to redirect to on success that would be /ui, where our base ui layer is. Finally the login processing
+        // url is what the UsernamePasswordAuthenticationFilter is going to filter on and catch, see by default that is
+        // /login, now we tell it to extract the username and password parameters from /ui/login.
+        customizer.loginPage("/ui/login");
+        customizer.defaultSuccessUrl("/ui/");
+        customizer.loginProcessingUrl("/ui/login");
+    })
+    .addFilterBefore(defaultLoginPageGeneratingFilter, UsernamePasswordAuthenticationFilter.class)
+    .build();
+}
+```
+
+Once we provide our custom filters, the default security filter chain that spring builds will be disabled and no longer
+active, our chain will be, we have created 3 separate chains that match on separate routes, `/api, /ui and /h2-console,`
+they are not related but sibling routes, which makes it easy to avoid conflicts, and its generally accepted that this is
+followed, the moment we start messing with different security matcher instances for related child-parent routes that
+might become too hard to manage, therefore the accepted idea is to configure related routes in the same method.
+
+#### CSRF
+
+One attach vector that many users or clients often find themselves captured by are phishing attacks, when a user is
+redirected to a malicious site or web platform that seems to look exactly like the real thing, they can be tricked into
+using it to authenticate against it, one way spring guards against that is with what is known as cross site resource
+forgery tokens, these are pseudo random numbers or text that is also sent with the request by the client and is tied to
+the user's session once bound to the session upon creation this token must be also always sent otherwise the server will
+deny any new connections and kill the existing session for the client. When a malicious site attempts to trick the user
+to send its data
+
+So how does it work in actual practice, a malicious party creates a web-site or platform that visually and possibly
+functionally resembles the target vulnerable site. The actions that the malicious site performs are targeting the actual
+vulnerable server as well, so far so good, you might think there is no way then to do any harm. However that is wrong.
+Because your browser sends the cookie data to the target vulnerable host every time a request is made. What happens is
+that the malicious actor will trick the user into performing actions on his behalf, for example when the user enters
+some input into a form instead of calling a harmless action on the vulnerable server the attacker will change that
+action to do something more dangerous such as making a payment or changing the user's password. Since the browser
+automatically sends the cookies to the vulnerable site the vulnerable site will have no way of knowing that there was a
+man in the middle attack that used the user's actions to perform a dangerous action instead.
+
+How does a cross site forgery token prevent this, the token is usually generated on each response and on each request to the server the server mandates that the client also sends this token back to the server so the server verifies that it was a
+
+TODO:
+
+#### CORS
+

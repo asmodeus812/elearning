@@ -1411,41 +1411,491 @@ seem a bit odd, but internally the server socket channel does indeed hold a refe
 which we create by calling the `socket()` method on the `ServerSocketChannl` instance
 
 ```java
-// we wrap a buffer of data to be sent to the client socket, when a connection is established, note that this is just a dummy data.
-// In actual reality you will most likely not want to wrap or create the data buffer like that as it is not efficient.
-ByteBuffer byteBuffer = ByteBuffer.wrap("sending-data-to-socket".getBytes(StandardCharsets.UTF_8));
+// wrap the stdout into a channel, that we can just send to directly when we receive data on the socket, that is quite a
+// bit faster than just dumping the data through a logger or system.out, which will force the data read from the socket
+// into the direct buffer to be brought in to the JVM managed heap, then back to the OS, doing an unnecessary, round-trip
+FileOutputStream fos = new FileOutputStream(FileDescriptor.out);
+FileChannel out = fos.getChannel();
+
+// we allocate a small buffer here intentionally just to demonstrate that we can actually read - flip - write any amount
+// as long as the client is connected to us. The buffer is direct and we send to stdout channel bypassing JVM heap allocations
+ByteBuffer byteBuffer = ByteBuffer.allocateDirect(8);
+
 // the server socket object is not enough to being to retrieve connections, we need to create and set the socket object internally
-// and set it, that is done by calling the socket method with the bind paramters, otherwise the socket is not bound when we create the
-// channel
-ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
-serverSocketChannel.socket().bind(new InetSocketAddress(5000));
-serverSocketChannel.configureBlocking(false);
+// and set it, that is done by calling the socket method with the bind parameters, otherwise the socket is not bound
+// when we create the channel we wrap a buffer of data to be sent to the client socket, when a connection is established,
+// note that this is just a dummy data. In actual reality you will most likely not want to wrap or create the data buffer
+// like that as it is not efficient.
+try (ServerSocketChannel serverSocketChannel = ServerSocketChannel.open()) {
+    serverSocketChannel.socket().bind(new InetSocketAddress("0.0.0.0", 9999));
+    serverSocketChannel.configureBlocking(false);
 
-boolean hasReceivedConnection = false;
-boolean hasReachedConnectionLimit = false;
-while (!hasReceivedConnection || !hasReachedConnectionLimit) {
-    SocketChannel socketChannelConnection = serverSocketChannel.accept();
+    int attemptedConnectionsMade = 0;
+    boolean hasReceivedConnection = false;
+    boolean hasReachedConnectionLimit = false;
+    while (!hasReceivedConnection && !hasReachedConnectionLimit) {
+        SocketChannel clientSocketChannelConnection = serverSocketChannel.accept();
 
-    if (Objects.isNull(socketChannelConnection)) {
-        // we have not received any connection but the thread is not blocked waiting for one, that means that here we can do some
-        // actual work in our thread without having to worry that we are being blocked
-        for (int i = 0; i < 5; i++) {
+        if (Objects.isNull(clientSocketChannelConnection)) {
+            // we have not received any connection but the thread is not blocked waiting for one, that means that here we can do
+            // some actual work in our thread without having to worry that we are being blocked
             LOGGER.logInfo("Doing work while awaiting socket connection");
-            Thread.sleep(100);
+            if (attemptedConnectionsMade++ == 20) {
+                hasReachedConnectionLimit = true;
+            }
+            Thread.sleep(1000);
+        } else {
+            // we have received some connection here, meaning that we can now proceed to do something with it maybe
+            // we read it in a while loop until the connection is sending data this will later be converted into a
+            // selector that will ensure we don't block and wait here for data but instead continue to do some work while
+            // data is not being sent to the socket
+            LOGGER.logInfo("Reading data from client connection");
+            while (clientSocketChannelConnection.read(byteBuffer) != -1) {
+                // the data is read from the socket into the buffer, we flip buffer read for write, then we clear and
+                // repeat, the buffer is small but we flip-write-clear while there is data on the channel
+                byteBuffer.flip();
+                out.write(byteBuffer);
+                byteBuffer.clear();
+            }
+            clientSocketChannelConnection.close();
+            hasReceivedConnection = true;
         }
-        hasReachedConnectionLimit = true;
-    } else {
-        // we have received some connection here, meaning that we can now proceed to do something with it maybe
-        // there is data to be pulled or sent to or from that socket.
-        byteBuffer.rewind();
-        socketChannelConnection.write(byteBuffer);
-        socketChannelConnection.close();
-        LOGGER.logInfo("Wrote data to the socket and closing the connection");
     }
+    LOGGER.logInfo("hasReceivedConnection: " + hasReceivedConnection);
+    LOGGER.logInfo("hasReachedConnectionLimit: " + hasReachedConnectionLimit);
 }
+
+// close the out channel, we have wrapped above, this should be done only if there is nothing else in our program that
+// will use stdout, since the channel close here will also close the stdout file handle as well.
+fos.close();
+out.close();
 ```
 
 `A newly created serverSocketChannel is opened but not connected/bound the connection happens when we invoke the method
 socket() and bind() on that instance, a ServerSocketChannl is created always in tandem with an internal instance of a
 ServerSocket, there is no other way to opearte with it and if we had not called the socket bind method, and attempt to
 obtain a socket channel to which to read and write then we will get connection exception.`
+
+```sh
+# we will use netcat here to send some dummy data to the opened port, in this case this case that is port 9999, we send
+# hello and close the socket, ensure that we start the netcat executable after the java program has been started and
+# executed. Enter some data and finish with <ENTER> to trigger the client (netcat) to send it to our server socket program
+$ nc 127.0.0.1 9999
+enter some text here<cr>
+enter more text here<cr>
+```
+
+Okay so from the example above we saw that we can have the socket non-blocking on accept until we receive connection,
+that is important since we can still do some work on the same thread while we have no connections pending, this is
+great, but we still BLOCK when we connect to a client awaiting for the client to send us some data, we can do better,
+that is done with selectors, selectors allow us to avoid the blocking even after we have received a connection, they
+allow us to know when the client has any data pending for us to read, and if there is none, then we unblock the thread
+and keep doing work.
+
+### Client socket
+
+The normal type of a socket, is the so called client socket, similarly to the server socket, the client socket channel
+as well can not be created without a backing socket under the hood, we still call the socket method on a regular
+`SocketChannel` as well. The process is slightly different but the final result is the same. The newly created socket
+channel is open but not connected, attempting to do any related I/O tasks will result in exception.
+
+```java
+// wrap the stdout into a channel, that we can just send to directly when we receive data on the socket, that is quite a
+// bit faster than just dumping the data through a logger or system.out, which will force the data read from the socket
+// into the direct buffer to be brought in to the JVM managed heap, then back to the OS, doing an unnecessary, round-trip
+FileOutputStream fos = new FileOutputStream(FileDescriptor.out);
+FileChannel out = fos.getChannel();
+
+// create some control variables that will ensure that our client does not attempt to connect more than a given amount
+// of times, and well if it does connect it reads until the server sends data
+int attemptedConnectionsMade = 0;
+boolean hasReceivedConnection = false;
+boolean hasReachedConnectionLimit = false;
+
+// temporary variable to hold each socket object on each failure we create a new socket with open, that is important we
+// can not really safely re-use an existing socket channel, so its better to close the non-connected ones and open one on
+// each attempt
+SocketChannel clientSocketChannel = null;
+InetSocketAddress serverInetAddress = new InetSocketAddress("0.0.0.0", 9999);
+while (!hasReachedConnectionLimit && !hasReceivedConnection) {
+    try {
+        // on each iteration try to open a new socket object, obtain a socket handle, configure it as non blocking to
+        // avoid the connect blocking until the server accepts the connection
+        clientSocketChannel = SocketChannel.open();
+        clientSocketChannel.configureBlocking(false);
+        clientSocketChannel.connect(serverInetAddress);
+
+        // after we call connect, the socket is put into a connection pending state if we are in a blocking state the
+        // connect call will block the current thread, but here  we actually check if the socket is pending on a connection
+        // that means the server has not yet accepted it and a full handshake has not been established yet, in the mean
+        // time we can  do some work until the connection is established completely
+        while (!clientSocketChannel.finishConnect()) {
+            LOGGER.logInfo("Awaiting for connection to be accepted...");
+            LOGGER.logInfo("Doing some work while connecting to server");
+            Thread.sleep(1000);
+        }
+
+        // once we have connected we can only read on the thread, the read call is blocking meaning that we will block
+        // until the server has anything to send us, later on we will see how even this can be changed with selectors, will
+        // allow us to instead of blocking the thread, to do some work while the server is not sending data for us to read
+        LOGGER.logInfo("Reading data from server connection");
+        while (clientSocketChannel.read(byteBuffer) != -1) {
+            // write directly to the stdout file descriptor handle, that we have opened above, this is a direct
+            // channel-channel write meaning that it will likely be optimized by the OS into a direct FD-FD move
+            byteBuffer.flip();
+            out.write(byteBuffer);
+            byteBuffer.clear();
+        }
+        hasReceivedConnection = true;
+    } catch (Exception e) {
+        // while the connection is failing here that implies that either the server is not up yet, or the server is
+        // rejecting the connection for some reason, we can still do some work while waiting for the server to become
+        // responsive
+        LOGGER.logInfo("Attempting to establish connection....");
+        LOGGER.logInfo("Doing some work while waiting for server");
+        if (attemptedConnectionsMade++ == 20) {
+            hasReachedConnectionLimit = true;
+        }
+        Thread.sleep(1000);
+    } finally {
+        // on each failure close the old socket, this is safer as it clears the old state that failed to connect to the
+        // server and we create a new one on each try iteration, there is really no easy way to re-use an opened socket
+        // that has already failed on the connect call, that is why we create a new one
+        if (!Objects.isNull(clientSocketChannel)) {
+            clientSocketChannel.close();
+        }
+    }
+}
+
+// print out the control variables to signal to the user which state terminated the client really
+LOGGER.logInfo("hasReceivedConnection: " + hasReceivedConnection);
+LOGGER.logInfo("hasReachedConnectionLimit: " + hasReachedConnectionLimit);
+
+// close the out channel, we have wrapped above, this should be done only if there is nothing else in our program that
+// will use stdout, since the channel close here will also close the stdout file handle as well.
+fos.close();
+out.close();
+```
+
+```sh
+# we will use netcat here to send some dummy data to the opened port, in this case we use netcat as a server, instead of
+# a as a client, we tell it to listen to port 9999 instead of just send data on that port as it did in the previous
+# example where we were using it as a dummy client to our server program, enter data and send it by pressing <ENTER> to
+# trigger netcat to send it to our client socket program
+$ nc -l -p 9999
+enter some text here<cr>
+enter more text here<cr>
+```
+
+### Pipes
+
+The java NIO package also includes an interface to work with pipes, these are very simple constructs that allow data to
+be passed between two places, usually uni-directional , but some pipes can be used in both directions, different
+operating systems implement pipes differently, in Unix they are often implemented as anonymous file descriptor, adhering
+to the UNIX philosophy that everything is a file
+
+In java the Pipe class exposes what are called sinks and sources, these can be obtained from the pipe instance when we
+open it, there are two main classes here the `SinkChannel` and the `SourceChannel` all nested classes inside the Pipe
+class, these pipe channels are selectable and basically expose channel semantics in the form of pipes, there are as we
+know standard input output stream pipes - `PipeInputStream` and the `PipeOutputStream` classes which are the traditional way
+of interacting with pipes.
+
+`Pipes can be used to pass data within the same JVM, and processes that run on it, think about it that way, if we have
+multiple java applications running on the same JVM which is not unheard of, we can easily pass data between them, there
+are other ways of course`
+
+For extra-process communication it is usually better to use socket channels, via a loop back interface or in other words
+the `0.0.0.0`, that allows us to use standard TCP protocol to implement local extraneous process communication between
+processes on the operating system level, that is the rule of thumb when pipes are not enough
+
+### Selectors
+
+In a few words what selectors are doing is allow us to manage multiple I/O operations on the same thread without
+blocking that thread. Instead of waiting for data to be written to or read from a channel the selectors allow us to know
+when the read or write operations are ready or pending, we query the selectors in our working threads asking them if
+there is something for us, if there is not, we continue with our work, until there is, when data is available we can
+stop our work, handle it and continue with our work, that work can be handling different selectors completely
+independent of the ones we just worked with.
+
+#### Components
+
+So what are the components that come into play to implement the selectable channels in java, there are 3 main ones:
+
+- `The Selector` - this class is the one responsible for registering channels, each selectable channel is registered with
+  the Selector instance, and it is the selector instance that has the ability to update the readiness of the channel, the
+  readiness meaning readiness of the channel to receive or transmit data.
+
+- `The Selectable Channel` - this is the interface that contains all a actions that a selectable channel can perform, all
+  channels that are selectable implement this interface and, then can be registered with a selector instance. `FileChannel`
+  is NOT a selectable channel by the way. We will see why later.
+
+- `The Selector Key` - this is the key or identification used between a selector and a selectable channel, when a selectable
+  channel is registered it is given or assigned a key that the selector knows about, it is in a way an identifier for the
+  relationship between the selector and the channel
+
+#### Creation
+
+Lets setup a selector that will monitor 3 channels, remember that this is the core premise of the selectors -
+multiplexing. What does it mean in lay terms, is that we multiplex different read/write operations for multiple channels
+together, allowing us to perform all of them in a way 'at once' for all registered channels
+
+```java
+// create a new selector instance upon which we will register a few channels, we have 3 channels we register against
+// this selector in particular below, this is for now just an interface demonstration
+Selector selector = Selector.open();
+channel1.register(selector, SelectionKey.OP_READ);
+channel2.register(selector, SelectionKey.OP_WRITE);
+channel3.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+
+// Wait up to 10 seconds for a channel to become ready, we can see here the overarching premise of our initial
+// implementation where we used thread.sleep to re-try and wait for  read/write, when we implemented the client and sever
+// socket channels in the examples above.
+readyCount = selector.select(10000);
+```
+
+Selectors are close-able, just like any other resource, it is better we manage them in a try-with resource block or
+otherwise ensure that they are properly closed after use.
+
+Each registration of a channel is encapsulated in a special selector key class that represents the registration of that
+channel against a selector, it is also important to note that the same channel instance can be registered with multiple
+selectors at once.
+
+So what is the general rule of thumb when working with selectors and channels what is the primary sequence of actions of
+the flow that a program must follow, below we have implemented a small snippet of two clients connecting to a service on
+a given port, these clients are using selectors and they attempt to connect to the server when it comes online, each
+channel is registered against a selector class and their selector registration keys are obtained
+
+```java
+// hold references to the channels, these are re-assigned when the connection to the server fails, and a new connection
+// is established, along side with new socket objects spawned by open and references
+SocketChannel client1Channel = null;
+SocketChannel client2Channel = null;
+
+// create a new managed selector that will manage our socket channels, we register the sockets each time we re-create
+// them, this is coupled with selection key cancel, socket close.
+try (Selector selector = Selector.open()) {
+    client1Channel = SocketChannel.open();
+    client2Channel = SocketChannel.open();
+
+    Console systemConsole = System.console();
+
+    InetSocketAddress serverInetAddress = new InetSocketAddress("0.0.0.0", 9999);
+    ByteBuffer byteBuffer = ByteBuffer.allocateDirect(32);
+
+    // ensure that the sockets are not blocking, that is required if we are going to be using channels with selectors, otherwise we
+    // will be getting an exception if they are not configured to be non-blocking state
+    client1Channel.configureBlocking(false);
+    client2Channel.configureBlocking(false);
+
+    // connect to the server, we will not handle the possibility of having the server down or unavailable before this connection
+    // established, assume that the server is up and running for the time being
+    boolean connected1 = client2Channel.connect(serverInetAddress);
+    boolean connected2 = client1Channel.connect(serverInetAddress);
+    int workDoneIterations = 0; // track how much work we are doing
+
+    // register the two socket channels with the selector, this is important to also provide the set of valid operations each
+    // selectable channel exposes - for the socket channel these are connect, write and read, by default.
+    SelectionKey channel1Key =
+    client1Channel.register(selector, SelectionKey.OP_CONNECT | SelectionKey.OP_READ, "channel-client-1");
+    SelectionKey channel2Key =
+    client2Channel.register(selector, SelectionKey.OP_CONNECT | SelectionKey.OP_READ, "channel-client-2");
+
+    // iterate while we break out of this loop which will happen when all the socket clients that we have connected get
+    // disconnected, probably with the server going down or disconnecting them forcibly
+    while (true) {
+        // there are a few ways to select the channels from the selector, either we can use a blocking method, or one that
+        // immediately returns the number of available channels - int numberOfKeys = selector.select(250) - waith 250ms,
+        // the `selectNow` version is just retuning immediately without blocking the thread
+        int numberOfKeys = selector.selectNow();
+
+        // we have at least one channel that is ready and available for connection
+        if (numberOfKeys > 0) {
+            Iterator<SelectionKey> selectedKeysIterator = selector.selectedKeys().iterator();
+
+            // loop over the selected keys and channels and for each check what state they are ready to accept, connect, write or
+            // read, based on this state we can execute the given action
+            while (selectedKeysIterator.hasNext()) {
+                // get the current selected key but also remove it from the list of selected keys that is important otherwise we
+                // might re-play the same action on the same channel multiple times.
+                SelectionKey selectionKey = selectedKeysIterator.next();
+                selectedKeysIterator.remove();
+
+                if (!selectionKey.isValid()) {
+                    continue;
+                }
+
+                // for our use-case all channels registered in the selector are of type socket channel, so we can safely cast here
+                // without any concerns
+                SelectableChannel selectableChannel = selectionKey.channel();
+                SocketChannel currentClientChannel = (SocketChannel) selectableChannel;
+
+                if (!selectableChannel.isOpen()) {
+                    continue;
+                }
+
+                // first we ensure that the socket is connectable if it is we finish the connection to the server, first, then we
+                // can proceed to read/write, there is also not any possiblity that the channel will become read/write available
+                // before we establish the connection
+                if (currentClientChannel.isConnectionPending() && selectionKey.isConnectable()) {
+                    // this clal should exit immediatel with true, but it is safer to be in a while loop to ensure that the
+                    // connection is finalized, until this method returns it is not safe so write/read from the channel yet
+                    try {
+                        while (!currentClientChannel.finishConnect()) {
+                            LOGGER.logInfo("Finalizing connection for channel");
+                        }
+                        // at this point we can read/write from the channel the connection is established between the client channel
+                        // and the server
+                        LOGGER.logInfo("Connected the client channel to server");
+                    } catch (IOException e) {
+                        selectionKey.cancel();
+                        selectableChannel.close();
+                    }
+                }
+
+                // the channel will become readable when data is sent from the server to which we have connected, that is the only
+                // way we will ever enter this conedtion, and also if the selection key is also configured to accept read operations
+                if (currentClientChannel.isConnected() && selectionKey.isReadable()) {
+                    // read what ever was ready from the server into the buffer, flip the buffer write the result directly into the
+                    // stdout channel, that should pose minimal overhead to the performance as it implies almost direct transfer
+                    // between the two channels through a direct buffer.
+                    LOGGER.logInfo("Reading the data from channel: " + selectionKey.attachment());
+                    try {
+                        if (currentClientChannel.read(byteBuffer) >= 0) {
+                            byteBuffer.flip();
+                            out.write(byteBuffer);
+                            byteBuffer.clear();
+                        } else {
+                            selectableChannel.close();
+                            selectionKey.cancel();
+                        }
+                    } catch (IOException e) {
+                        selectionKey.cancel();
+                        selectableChannel.close();
+                        LOGGER.logInfo("Closing socket channel: " + selectionKey.attachment());
+                    }
+                }
+
+                // similarly to the read, however write operation is controled by US the user of the socket, we know when we need to
+                // write to it and that will be set externally when data is ready to be written, after we write data we remove that
+                // operation from the interested operations
+                if (currentClientChannel.isConnected() && selectionKey.isWritable()) {
+                    try {
+                        LOGGER.logInfo("Writing the data from channel: " + selectionKey.attachment());
+                        String userInputData = systemConsole.readLine("Enter data to send to server: ");
+                        // once we have consumed the write operation, we can safely remove it, next time we want to enable the
+                        // socket for write, we will add the write action back to the interested operations, usually done from the
+                        // outside
+                        selectionKey.interestOpsOr(SelectionKey.OP_READ);
+
+                        // write some user specified data, remember that we have to re-set the write action in interested
+                        // operations, the next time we want to write to the channel, we remove write since the socket is always
+                        // WRITE ready, and we will always enter here in case we do not remove it once we write whatever we have to
+                        // write.
+                        currentClientChannel.write(ByteBuffer.wrap(userInputData.getBytes()));
+                    } catch (IOException e) {
+                        selectionKey.cancel();
+                        currentClientChannel.close();
+                        LOGGER.logInfo("Closing socket channel: " + selectionKey.attachment());
+                    }
+                }
+            }
+        } else {
+            try {
+                // if we ever enter here that means that the socket channels might have gotten disconnected in this case try to
+                // re-connect to the server, that will also work in case the server comes online later than the program starts
+                if (!client1Channel.isConnected()) {
+                    channel1Key.cancel();
+                    client1Channel.close();
+                    client1Channel = SocketChannel.open();
+                    client1Channel.configureBlocking(false);
+                    connected1 = client1Channel.connect(serverInetAddress);
+                    if (client1Channel.isConnectionPending()) {
+                        channel1Key = client1Channel.register(selector, SelectionKey.OP_CONNECT | SelectionKey.OP_READ,
+                            "channel-client-1");
+                    }
+                }
+                if (!client2Channel.isConnected()) {
+                    channel2Key.cancel();
+                    client2Channel.close();
+                    client2Channel = SocketChannel.open();
+                    client2Channel.configureBlocking(false);
+                    connected2 = client2Channel.connect(serverInetAddress);
+                    if (client1Channel.isConnectionPending()) {
+                        channel2Key = client2Channel.register(selector, SelectionKey.OP_CONNECT | SelectionKey.OP_READ,
+                            "channel-client-2");
+                    }
+                }
+            } catch (IOException e) {
+            }
+            // just terminate the while - true loop here to ensure that we do not loop too much while we are going work and there is
+            // no data from the server or in other words there are no selection keys that signal if client channels are ready to
+            // receive/emit data
+            if (workDoneIterations++ > 20) {
+                LOGGER.logInfo("Terminating the selector and client channels");
+                break;
+            }
+            // in the mean time while there are no ready selection keys, we can certainly do some other work in the same thread,
+            // this actually will be the most common block since data is usually received sparingly, and we are free to do important
+            // work on the thread.
+            LOGGER.logInfo("Doing work on the thread awaiting ready channels");
+            Thread.sleep(1000);
+        }
+    }
+} finally {
+    client1Channel.close();
+    client2Channel.close();
+}
+```
+
+And in simple pseudo code we can represent the code above or in general the sequence of actions that need to be taken
+when working with selector, selection-key and channel
+
+```plaintext
+selector = selector.open()
+socket.open()
+socket.connect()
+socket.configure()
+socket.register(selector)
+
+while selector.selectNow() > 0 do
+    key = selector.selectedKeys()
+    selector.selectedKeys().remove()
+
+    if not key.valid()
+        continue
+    end
+
+    socket = key.channel();
+
+    if key.connectable()
+        socket.finishConnect()
+    end
+
+    if key.readable()
+        socket.read(buffer)
+    end
+
+    if key.writable()
+        socket.write(buffer)
+    end
+end
+```
+
+There are few things we need to focus on here, a few details regarding the usage of sockets selectors and selection keys
+that we need to take a closer look at, these are the general sequence of steps we need to take to work with a
+non-blocking selection based channels:
+
+1. Open the socket from the `SocketChannel` class, opening a socket simply creates the operating system object but is not
+   bound to any connection, until we call bind (for server socket) or connect (for client socket)
+2. Configure the socket channel to be in a non non-blocking state, that is important because selectors require the
+   channels to be non-blocking, otherwise an exception is thrown
+3. Register the socket against the selector, we can obtain the `SelectionKey` after the register is called, the selection
+   key can be used to cancel the channel (un-register it) or inspect the registration state of the channel
+4. Try to connect to the server based on the `InetSocketAddress`, the connect might fail if it does fail we have to
+   re-create the socket object anew with Socket.open and re-try the connect call
+5. Loop over the number of keys through `selectedKeys` of the selector, calling `selectNow`, can give us the number of
+   selection keys and in turn implying the number of channels that are ready to accept operations
+6. Obtain available key, remove the current key from the keys list through the use of an iterator, consuming a key
+   should always be followed by a removal of that key as it is no longer valid after wards
+7. For the current `SelectionKey` try to check if the channel is ready for connection, read or write, in a loop, if the
+   channel is ready to do a certain operation, we do that operation and finish the loop iteration.
