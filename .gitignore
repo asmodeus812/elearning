@@ -1,8 +1,216 @@
-!*.pdf
-!*.txt
 *.mp3
 
 node_modules
 .resources
 .venv
 .vim
+
+###############################################################################
+# Java / JVM
+###############################################################################
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.jmod
+
+# JVM crash logs
+hs_err_pid*
+replay_pid*
+core.*
+
+###############################################################################
+# Build outputs
+###############################################################################
+# Maven
+target/
+.pom.xml
+.pom.xml-log
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+# (Some repos keep wrapper jar in /gradle/wrapper; above keeps it if present.)
+
+# Ant
+/build/
+/dist/
+/out/
+
+# Generic
+bin/
+out/
+tmp/
+temp/
+*.tmp
+
+###############################################################################
+# Logs / dumps
+###############################################################################
+*.log
+logs/
+log/
+*.trace
+*.stackdump
+*.hprof
+*.jfr
+
+###############################################################################
+# IDEs and editors
+###############################################################################
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+*.ids
+*.orig
+# IntelliJ build artifacts
+out/
+# IntelliJ plugin files
+.idea_modules/
+# Kotlin/Java annotation processing cache
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+
+# Eclipse
+.project
+.classpath
+.settings/
+.metadata/
+.recommenders/
+*.launch
+.factorypath
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+###############################################################################
+# OS / file manager junk
+###############################################################################
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+###############################################################################
+# Environment / secrets / local config
+###############################################################################
+# dotenv and local overrides
+.env
+.env.*
+!.env.example
+!.env.template
+*.local
+*.secret
+secrets/
+secret/
+credentials/
+*.keystore
+*.jks
+*.p12
+*.pem
+*.key
+*.crt
+*.cer
+
+# Local application configs (uncomment if you use these locally only)
+# application-local.properties
+# application-local.yml
+# application-dev.properties
+# application-dev.yml
+
+###############################################################################
+# Test / coverage / reports
+###############################################################################
+# JUnit/TestNG reports
+surefire-reports/
+failsafe-reports/
+test-output/
+reports/
+
+# JaCoCo / coverage
+jacoco.exec
+jacoco*.exec
+jacoco/
+coverage/
+*.lcov
+
+###############################################################################
+# Dependency / tooling caches
+###############################################################################
+# Local maven cache (usually global, but ignore if it appears in repo)
+.m2/
+# Node (if you have frontend bits)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+###############################################################################
+# Packaging / archives
+###############################################################################
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+###############################################################################
+# Docker / containers (local state)
+###############################################################################
+# Docker runtime data (rare in repo, but safe)
+docker-data/
+**/docker-data/
+*.pid
+
+###############################################################################
+# Misc
+###############################################################################
+# Swap/backup files
+*~
+*.swp
+*.swo
+*.bak
+*.old
+
+# Generated sources (optional; comment out if you commit generated code)
+# **/generated/
+# **/gen/
+
+###############################################################################
+# Java-specific frameworks (optional extras)
+###############################################################################
+# Spring Boot
+# (Keep the wrapper scripts, ignore build outputs already covered)
+# *.pid
+
+# Lombok
+lombok.config.bak

@@ -1,6 +1,9 @@
 #!/bin/bash
-
 # sudo apt install pandoc texlive-xetex ffmpeg jq
+
+echo "Processing documentation & total lines"
+find . -type f -name '*.md' -print0 | xargs -0 cat | wc -l
+
 echo "Generating cracking-coding-interview/"
 find cracking-coding-interview/ -type f -name '*.md' | sed -e 's/\.md$//' | xargs -P 8 -I {} sh -c './generator.sh {}'
 
