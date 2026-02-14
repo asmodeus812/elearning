@@ -1,6 +1,7 @@
 package com.spring.demo.core.entity;
 
 import java.util.Objects;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,8 +21,8 @@ public class UserEntity extends AbstractAuditedEntity {
     @Column(name = "password", unique = false, updatable = true, insertable = true, nullable = false, length = 128)
     private String password;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "role_id", nullable = false, insertable = true, updatable = true)
     private RoleEntity role;
 
     public UserEntity() {

@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Videos</title>
+        <style>
+            :root {
+                --bg: #0b1020;
+                --panel: rgba(255, 255, 255, 0.06);
+                --panel2: rgba(255, 255, 255, 0.08);
+                --border: rgba(255, 255, 255, 0.12);
+                --text: rgba(255, 255, 255, 0.92);
+                --muted: rgba(255, 255, 255, 0.66);
+                --muted2: rgba(255, 255, 255, 0.48);
+                --shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+                --radius: 18px;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                font-family:
+                    ui-sans-serif,
+                    system-ui,
+                    -apple-system,
+                    Segoe UI,
+                    Roboto,
+                    Helvetica,
+                    Arial,
+                    "Apple Color Emoji",
+                    "Segoe UI Emoji";
+                color: var(--text);
+                background:
+                    radial-gradient(1200px 700px at 20% -10%, rgba(99, 102, 241, 0.35), transparent 60%),
+                    radial-gradient(900px 600px at 90% 10%, rgba(34, 197, 94, 0.22), transparent 55%),
+                    radial-gradient(800px 500px at 50% 120%, rgba(245, 158, 11, 0.18), transparent 60%), var(--bg);
+                min-height: 100vh;
+                padding: 36px 16px 64px;
+            }
+
+            .container {
+                max-width: 1100px;
+                margin: 0 auto;
+            }
+
+            header {
+                display: flex;
+                align-items: flex-end;
+                justify-content: space-between;
+                gap: 16px;
+                margin-bottom: 18px;
+            }
+
+            h1 {
+                margin: 0;
+                font-size: clamp(24px, 3vw, 34px);
+                letter-spacing: -0.02em;
+                line-height: 1.1;
+            }
+
+            .subtitle {
+                margin: 8px 0 0;
+                color: var(--muted);
+                font-size: 14px;
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: 1.2fr 0.8fr;
+                gap: 18px;
+                align-items: start;
+            }
+            @media (max-width: 980px) {
+                .grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .card {
+                background: linear-gradient(180deg, var(--panel), rgba(255, 255, 255, 0.03));
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                overflow: hidden;
+                backdrop-filter: blur(10px);
+            }
+
+            .card-header {
+                padding: 16px 18px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid var(--border);
+                background: rgba(255, 255, 255, 0.03);
+            }
+
+            .card-header h2 {
+                margin: 0;
+                font-size: 16px;
+                letter-spacing: 0.02em;
+                color: var(--text);
+            }
+
+            .badge {
+                font-size: 12px;
+                color: var(--muted);
+                padding: 6px 10px;
+                border: 1px solid var(--border);
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.04);
+            }
+
+            /* List */
+            ul.videos {
+                list-style: none;
+                margin: 0;
+                padding: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .video-item {
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 12px;
+                background: rgba(255, 255, 255, 0.04);
+                transition:
+                    transform 0.12s ease,
+                    background 0.12s ease,
+                    border-color 0.12s ease;
+            }
+            .video-item:hover {
+                transform: translateY(-1px);
+                background: rgba(255, 255, 255, 0.06);
+                border-color: rgba(255, 255, 255, 0.18);
+            }
+
+            .video-top {
+                display: flex;
+                gap: 12px;
+                align-items: flex-start;
+                justify-content: space-between;
+                margin-bottom: 10px;
+            }
+
+            .meta {
+                display: flex;
+                gap: 10px;
+                align-items: flex-start;
+                min-width: 0;
+            }
+
+            .id-pill {
+                flex: 0 0 auto;
+                font-size: 12px;
+                color: var(--muted);
+                padding: 6px 10px;
+                border-radius: 999px;
+                border: 1px solid var(--border);
+                background: rgba(0, 0, 0, 0.15);
+            }
+
+            .title-wrap {
+                min-width: 0;
+            }
+            .title {
+                margin: 0;
+                font-size: 15px;
+                font-weight: 700;
+                letter-spacing: -0.01em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .desc {
+                margin: 4px 0 0;
+                font-size: 13px;
+                color: var(--muted);
+                line-height: 1.35;
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+
+            /* Forms & controls */
+            .row {
+                display: grid;
+                grid-template-columns: 1fr 1.2fr auto auto;
+                gap: 10px;
+                align-items: center;
+            }
+            @media (max-width: 820px) {
+                .row {
+                    grid-template-columns: 1fr;
+                    gap: 10px;
+                }
+                .actions {
+                    display: flex;
+                    gap: 10px;
+                }
+            }
+
+            .field {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .label {
+                font-size: 11px;
+                color: var(--muted2);
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+
+            input[type="text"] {
+                width: 100%;
+                padding: 10px 12px;
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                background: rgba(0, 0, 0, 0.18);
+                color: var(--text);
+                outline: none;
+                transition:
+                    border-color 0.12s ease,
+                    transform 0.12s ease,
+                    background 0.12s ease;
+            }
+            input[type="text"]::placeholder {
+                color: rgba(255, 255, 255, 0.35);
+            }
+            input[type="text"]:focus {
+                border-color: rgba(99, 102, 241, 0.65);
+                background: rgba(0, 0, 0, 0.26);
+            }
+
+            button {
+                border: 1px solid rgba(255, 255, 255, 0.16);
+                background: rgba(255, 255, 255, 0.06);
+                color: var(--text);
+                padding: 10px 12px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition:
+                    transform 0.1s ease,
+                    background 0.12s ease,
+                    border-color 0.12s ease;
+                font-weight: 600;
+                letter-spacing: 0.01em;
+                white-space: nowrap;
+            }
+            button:hover {
+                transform: translateY(-1px);
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.22);
+            }
+            button:active {
+                transform: translateY(0px);
+            }
+
+            .btn-primary {
+                background: linear-gradient(180deg, rgba(99, 102, 241, 0.75), rgba(99, 102, 241, 0.35));
+                border-color: rgba(99, 102, 241, 0.65);
+            }
+            .btn-primary:hover {
+                background: linear-gradient(180deg, rgba(99, 102, 241, 0.86), rgba(99, 102, 241, 0.42));
+                border-color: rgba(99, 102, 241, 0.85);
+            }
+
+            .btn-danger {
+                background: linear-gradient(180deg, rgba(239, 68, 68, 0.7), rgba(239, 68, 68, 0.28));
+                border-color: rgba(239, 68, 68, 0.65);
+            }
+            .btn-danger:hover {
+                background: linear-gradient(180deg, rgba(239, 68, 68, 0.82), rgba(239, 68, 68, 0.36));
+                border-color: rgba(239, 68, 68, 0.85);
+            }
+
+            .actions {
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+                align-items: center;
+            }
+
+            .inline {
+                display: inline;
+                margin: 0;
+            }
+
+            /* Right side: new video */
+            .pad {
+                padding: 16px;
+            }
+
+            .hint {
+                margin: 10px 0 0;
+                color: var(--muted);
+                font-size: 13px;
+                line-height: 1.45;
+            }
+
+            .footer-note {
+                margin-top: 12px;
+                color: var(--muted2);
+                font-size: 12px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <header>
+                <div>
+                    <h1>Greetings Learning Spring Boot 3.0 fans!</h1>
+                    <p class="subtitle">Manage your videos: update titles/descriptions or add new entries.</p>
+                </div>
+            </header>
+
+            <div class="grid">
+                <!-- LEFT: LIST -->
+                <section class="card">
+                    <div class="card-header">
+                        <h2>List of videos</h2>
+                        <span class="badge">{{#videos}}{{/videos}}</span>
+                    </div>
+
+                    <div style="padding: 10px 10px 10px 10px">
+                        <div style="display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap">
+                            <div style="color: rgba(255, 255, 255, 0.66); font-size: 13px">
+                                Page {{ pageNumber }} of {{ totalPages }} • Total {{ totalElements }}
+                            </div>
+
+                            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
+                                {{#hasPrev}}
+                                <a class="pager-link" href="/ui/videos?page={{ prevPage }}&size={{ pageSize }}">← Prev</a>
+                                {{/hasPrev}}
+                                {{^hasPrev}}
+                                <span class="pager-disabled">← Prev</span>
+                                {{/hasPrev}}
+
+                                {{#pages}}
+                                {{#current}}
+                                <span class="pager-current">{{ number }}</span>
+                                {{/current}}
+                                {{^current}}
+                                <a class="pager-link" href="/ui/videos?page={{ number }}&size={{ pageSize }}">{{ number }}</a>
+                                {{/current}}
+                                {{/pages}}
+
+                                {{#hasNext}}
+                                <a class="pager-link" href="/ui/videos?page={{ nextPage }}&size={{ pageSize }}">Next →</a>
+                                {{/hasNext}}
+                                {{^hasNext}}
+                                <span class="pager-disabled">Next →</span>
+                                {{/hasNext}}
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="videos">
+                        {{#videos}}
+                        <li class="video-item">
+                            <div class="video-top">
+                                <div class="meta">
+                                    <span class="id-pill">ID {{ id }}</span>
+                                    <div class="title-wrap">
+                                        <p class="title">{{ name }}</p>
+                                        <p class="desc">{{ description }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form action="/ui/update-video" method="post" class="row">
+                                <input type="hidden" name="{{ _csrf.parameterName }}" value="{{ _csrf.token }}" />
+                                <input type="hidden" value="{{ id }}" name="id" />
+                                <div class="field">
+                                    <div class="label">Name</div>
+                                    <input type="text" value="{{ name }}" name="name" />
+                                </div>
+                                <div class="field">
+                                    <div class="label">Description</div>
+                                    <input type="text" value="{{ description }}" name="description" />
+                                </div>
+                                <div class="actions">
+                                    <button class="btn-primary" type="submit">Update</button>
+                                </div>
+                            </form>
+
+                            <form action="/ui/delete-video/{{ id }}" method="post" class="inline" style="margin-top: 10px">
+                                <input type="hidden" name="{{ _csrf.parameterName }}" value="{{ _csrf.token }}" />
+                                <button class="btn-danger" type="submit">Delete</button>
+                            </form>
+                        </li>
+                        {{/videos}}
+                        {{^videos}}
+                        <li class="video-item">
+                            <p class="desc" style="margin: 0">No videos on this page.</p>
+                        </li>
+                        {{/videos}}
+                    </ul>
+                </section>
+
+                <!-- RIGHT: CREATE -->
+                <aside class="card">
+                    <div class="card-header">
+                        <h2>Video actions</h2>
+                        <span class="badge">Create</span>
+                    </div>
+
+                    <div class="pad">
+                        <form action="/ui/new-video" method="post" class="field" style="gap: 12px">
+                            <div class="field">
+                                <div class="label">New name</div>
+                                <input type="hidden" name="{{ _csrf.parameterName }}" value="{{ _csrf.token }}" />
+                                <input type="text" value="" placeholder="New video name" name="name" />
+                            </div>
+
+                            <div class="field">
+                                <div class="label">New description</div>
+                                <input type="text" value="" placeholder="New video description" name="description" />
+                            </div>
+
+                            <button class="btn-primary" type="submit">Submit</button>
+                        </form>
+
+                        <p class="hint">Tip: keep names unique (your DB enforces it). Descriptions can be empty.</p>
+                        <div class="footer-note">Pure HTML + CSS, no JS.</div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </body>
+</html>

@@ -3342,6 +3342,46 @@ they are not related but sibling routes, which makes it easy to avoid conflicts,
 followed, the moment we start messing with different security matcher instances for related child-parent routes that
 might become too hard to manage, therefore the accepted idea is to configure related routes in the same method.
 
+#### CORS
+
+Cross origin resource, is a way to 'configure' the single origin policy of the web browser, this is a way to tell the
+browser or the client which parts of the request can be sent and which pars of the response can be read from a specific
+ORIGIN/web-site that has made the request on the behalf of the client/browser. So imagine this following scenario where,
+your browser executes code from two domains `www.a.com` and `www.b.com`, the SERVER can configure the CORS policy to
+tell the browser to only allow reading of responses by `www.a.com`.
+
+- Access-Control-Allow-Methods - controls which types of methods actions ORIGIN can make (POST, GET, DELETE)
+- Access-Control-Allow-Headers - these are request headers you want to send by the ORIGIN
+- Access-Control-Allow-Origin - controls whether the response is readable by which ORIGIN
+- Access-Control-Expose-Headers - controls which response headers are readable by the ORIGIN
+
+It is important to note and remember that the browser is like a huge sandbox, each ORIGIN/web-site is executing in is
+own sandbox, isolated form the rest of the ORIGINS they do not know of each other and there is no easy way to leak
+information or state between the origins, that is what makes the browser a powerful mediator, that is what allows CORS
+to be enforced by the browser, it knows which ORIGIN (which web-site's script) can read the response and if it is not
+allowed it will be blocked. You have no doubt seen console errors in your browser regarding CORS violations. That is
+exactly that the ORIGIN making the request is not allowed to read the response, headers, credentials and the browser
+directly errors out directly when the restricted origin attempts to obtain the response from the server.
+
+There is also a policy that might be enforced by the server, and not by the browser that actually restricts the REQUESTS
+made by the web-site/ORIGIN, that is a way by the server to add additional security by checking the `Origin` header of the
+incoming `request that is set by the browser`, there is no way for an ORIGIN to forge that because it is enforced by the
+browser before the request is sent, to the SERVER. The server verifies this header is among the allowed ones, that way
+no bad ORIGIN actor can even make the request in the first place, stopping it in its tracks.
+
+#### Cookies
+
+Cookies are a special type of header that is mostly relevant to browser, these are headers that the browser mostly works
+with, they were the early ways to store state for the user's session on the ORIGIN (web-site) the cookies themselves are
+normal headers, BUT the browser restricts the scripts that are executing from directly accessing them unless the cookies
+are specially enabled to be accessed. That is because first by default SERVER provide cookies contain no readable
+information, that is relevant to the script, second it might posed security issues. There is a way for a sever to set a
+cookie to be readable by the browser and that is how CSRF Tokens are usually transmitted.
+
+There are also local cookies which the web-site executing its script can save to remember certain local state for the
+user, and maybe send it to the server, but these are not tied to any security or authorization / authentication
+mechanisms.
+
 #### CSRF
 
 One attach vector that many users or clients often find themselves captured by are phishing attacks, when a user is
@@ -3362,9 +3402,243 @@ action to do something more dangerous such as making a payment or changing the u
 automatically sends the cookies to the vulnerable site the vulnerable site will have no way of knowing that there was a
 man in the middle attack that used the user's actions to perform a dangerous action instead.
 
-How does a cross site forgery token prevent this, the token is usually generated on each response and on each request to the server the server mandates that the client also sends this token back to the server so the server verifies that it was a
+How does a cross site forgery token prevent this ? There are a few concepts and we need to know first in the modern web
+clients such as browsers, first lets fix in place some terms
 
-TODO:
+- `USER` - that is the acting party, usually a human, but it can be anything, that uses the CLIENT, to perform actions on
+  the ORIGIN, which in turn has code to allow interacting with the SERVER
 
-#### CORS
+- `CLIENT` - that is the browser we are running, it is the execution environment of the code that the origin provides,
+  the browser downloads the ORIGIN's code and executes in on our machine, rendering the HTML, executing the JavaScript
+  etc. Browsers run the code of each ORIGIN in a sandbox effectively isolating them from each other, allowing for safe
+  execution of multiple web-sites, the browser acts like a mediator and a manager for all the ORIGINS we have currently
+  executing or working with.
 
+- `ORIGIN` - that is the source or host of the originating request, that is the web-site which we are running on our
+  client/browser, that code lives on some server, but our browser has to download it locally to execute it on our
+  machine, parsing HTML, executing javascript etc.
+
+- `SERVER` - the server that requests are made towards, sometimes the origin and the server MIGHT share the same domain,
+  sometimes that is not the case, and when that is not the case is what we will explore, having the same domain is pretty
+  much a done deal, it is considered safe.
+
+- `Request/Response` - that is the round trip that your client takes to communicate with the SERVER, every time the client
+  executes code that needs information from the SERVER, we make a request and we get a response, there are simple ways
+  that your client makes requests, such as FORM actions, and there are complex ones where scripts take charge of using the
+  browser's fetch api to do the same, allowing for more complex requests.
+
+- `Cookies` - cookies are special types of headers with unique values that are used to identify the user's session on the
+  server application, it is sent by by the server as a header when the user's session is established or created on the
+  server., and by default the browser remembers that cookies and sends it back every time we make a request to the server
+
+1. `Session credentials` - By default browsers send all the cookies they receive to the same SERVER that has send them,
+   this has been the default behavior for many years now and that is one of the main attack vectors for malicious
+   actors. What does it mean that if we have two ORIGIN called `www.good.com` and `www.bad.com`, which do a /POST action to
+   SERVER `www.myapi.com`, will both cause the browser to send the cookies sent by the `www.myapi.com`, regardless of the fact
+   that the actual origin that first received the cookies was likely the `www.good.com`, that way the bad actor can take
+   advantage of us if we ever visit the `www.bad.com` and use that ORIGIN instead to do certain sensitive actions. This is
+   behavior specific to browser based web clients, that is not the case for other web clients such as CLI for example like
+   curl, wget etc - which have no understanding of cookies.
+
+2. `Simple vs complex requests` - simple requests are such that they are created without any custom control over the API
+   of the browser by a script or a 3rd party, these are for example the form POST actions. Complex requests are these
+   that are made by scripts or 3rd party actors on your behalf on your browser using the browser's fetch api.
+
+3. `Single origin policy` - that policy is something that the browser enforces, when we deal with complex requests, that
+   is because they (like the simple request) can be cross site, the idea of SOP is that the browser (if it detects cross
+   origin/site request will not allow javascript or custom scripts running in the browser to READ the response of this
+   request, while requests can be made freely, reading the response is restricted by the Browser itself. That is if we have
+   a web site running on `www.site.com`, and a backend on `www.myapi.com`, the `www.site.com` by default will never be able to
+   read ANY of the responses that `www.myapi.com` sends unless we have configured CORS on the `www.myapi.com` server to allow
+   this origin - `www.site.com`
+
+4. `CORS` - Cross origin resource, is a way to 'configure' the single origin policy of the web browser, we can configure
+   these policies on the server and remove some of the restrictions that the SOP enforces by default. This is a way for
+   the SERVER to tell the client/browser that it is okay for certain ORIGINS (read web sites, that the CLIENT runs /
+   executes their javascript) to read the response, read certain headers, authorities (like cookies) and so on
+    - Access-Control-Allow-Methods - controls which types of methods actions ORIGIN can make (POST, GET, DELETE)
+    - Access-Control-Allow-Headers - these are request headers you want to send by the ORIGIN
+    - Access-Control-Allow-Origin - controls whether the response is readable by which ORIGIN
+    - Access-Control-Expose-Headers - controls which response headers are readable by the ORIGIN
+
+5. `Preflight request` - every time the browser makes a request towards a SERVER, a preliminary request is made, and it
+   is called `a pre-flight OPTIONS` request, that is OPTIONS request towards the server to obtain information about what
+   the Access-Control-\* policies are, the browser asks and the server responds with - Allow-Credentials,
+   Access-Control-allow-Origin/Method/Headers. That is the way the SERVER can say which headers are allowed to be read by
+   the client, what request methods are supported, and which ORIGINS (in other words which front-end web sites) are allowed
+   to read the response of the requests being sent.
+
+Now that we have fixed a few of the primary terms, how does the CSRF Token prevent all of that, first the token is a way
+for the server to send a unique token to the CLIENT when the user session is first created, usually that happens the
+first time the session is created for the user or every time the session is refreshed/the token expired or invalidated.
+There are certain implementations that might send a new token on each response from the server. That is mostly
+irrelevant, what the key point here is that besides the cookies the SERVER also sends an additional header that contains
+that special unique token
+
+Here is where the magic happens. We already saw that the browser has something called SOP - single origin policy, with
+that alone we will not be able to really take advantage of calling 3rd party API or have our ORIGIN and SERVER have
+different domains. We also saw that there is something called CORS that allows the `server to lax the restrictions` or
+control the SOP that the browser enforces.
+
+So what the server does (www.myapi.com) is configure the safe ORIGINS (www.good.com) that can make the requests, but
+most importantly what matters here is that what this CORS enables is `to tell the browser that this ORIGIN can read the
+response from this SERVEr and also which headers EXACT headers it can read`. You should be able to see that this is the
+KEY here, the server tells the ORIGIN (www.good.com) can read my special X-CSRF-TOKEN header that contains the token,
+then it can be read from the response, that the good origin made, and saved in the browser in a place where only scripts
+executing on that good ORIGIN can access it.
+
+Now what happens is that every time the good ORIGIN (www.good.com), makes a request to the SERVER (www.myapi.com) it
+also sends this special token as a header, the server verifies that this is the correct origin sending it the request
+and reads the token from the header along side the automatically sent cookie, in this case the cookies is just used to
+identify the user, the actual authorization and security is enforced primary by the CSRF token
+
+You should now see that since the CORS policy dictates which ORIGIN can READ which HEADERS, only the good origin web
+site's (www.good.com) scripts can send, the bad origin (www.bad.com) can not, it will fail on the Preflight request, the
+browser will see that this origin does not have permissions or is not known to the server. And therefore even if it
+manages to make a request it will never be able to read a response from the server.
+
+Note that the biggest enemy of the CSRF token approach is what is called a `XSS`, cross site scripting, that basically
+would allow an attacker to tap into the sandbox of the good ORIGIN, and read the token for free, and send the token on
+the behalf of the user. The way to handle these things here is to have ORIGIN validation on the SERVER. That is to block
+requests, (different than CORS) that originate from an unknown party that is not in our white list.
+
+```java
+CorsConfiguration configurationSource = new CorsConfiguration();
+// relates to setting data in the request
+configurationSource.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+configurationSource.setAllowedHeaders(List.of("Content-Type", "X-XSRF-TOKEN", "Authorization"));
+// relates to accessing the data in the response
+configurationSource.setAllowedOrigins(List.of("http://www.localhost:8080"));
+configurationSource.setExposedHeaders(List.of("Content-Type"));
+configurationSource.setAllowCredentials(true);
+
+UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+source.registerCorsConfiguration("/ui/**", configurationSource);
+
+return http.securityMatcher("/ui/**")
+    .authorizeHttpRequests(customizer -> customizer.anyRequest().authenticated())
+    .httpBasic(AbstractHttpConfigurer::disable)
+    // configure the CORS, we can see above the important part that specifies our ORIGIN, in this case we assume localhost,
+    // but that is just because we are doing all of this locally. The rest of the methods are which are allowed, to be
+    // read for, and the headers that we can read from the response - note that we enable the reading of X-XSRF-TOKEN
+    .cors(config -> config.configurationSource(source))
+    // we configure a X-CSRF token repository that will, put the token into a cookie that is readable by the script,
+    // that way the good origin can pull the token and use it and send it on subsequent requests to the server.
+    .csrf(config -> config.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+    .formLogin(customizer -> {
+        customizer.loginPage("/ui/login");
+        customizer.defaultSuccessUrl("/ui/");
+        customizer.loginProcessingUrl("/ui/login");
+    })
+    .addFilterBefore(defaultLoginPageGeneratingFilter, UsernamePasswordAuthenticationFilter.class)
+    .build();
+```
+
+So what is going on above, is that we have configured that only our own domain in this case localhost, (not very useful
+at the moment) can make requests and read responses, remember this is a policy that is enforced by the client/browser
+not the server. The browser checks if the ORIGIN/web site compiles with this CORS policy that the SERVER
+declares/defines but the browser enforces.
+
+Here we say that the good origin (localhost) can do most of the HTTP methods, and can set the following headers, from
+the response, we have set expose headers (these that can be read from the request) to only Content-Type, for the
+purposes of showing this example
+
+Now that the CORS policy is configured, your application can read the cookie and the token, and then send that token as
+a dedicated named header on every request it makes. Since we know that only this good origin can make requests in the
+first place (otherwise the browser would block them) we know that only this good origin has received the cookie and in
+turn it has read the token. Further more on subsequent requests only that good origin is allowed to set that
+`X-XSRF-TOKEN` header, where we put the token value that we have pulled from the cookie.
+To actually use the CSRF we can enable that by leveraging the `_csrf` parameter that one is set by the
+`CookieCsrfTokenRepository`, by default we can pull the value for it from the response and embed it back into the form
+so it can be read from the CSRF filter, the default name parameter or `_csrf` can be changed of course
+
+```html
+<!-- we have embedded the token as a hidden field in the request body, when the request is received the CsrfFilter will
+attempt to read the value of the token from the body (in _csrf) and compare it to the initially generated token. -->
+<form action="/ui/delete-video/{{ id }}" method="post" class="inline" style="margin-top: 10px">
+    <input type="hidden" name="{{ _csrf.parameterName }}" value="{{ _csrf.token }}" />
+    <button class="btn-danger" type="submit">Delete</button>
+</form>
+```
+
+Also expose the values form the request parameters that are set by spring to the template engine, by default they
+are hidden, and are not exposed but are present i.e spring actually sets them.
+
+```yaml
+# by default what spring does is when it generates the server-content from the template, it would process/check for
+# form fields and would dynamically insert the request attributes that are relevant like _csrf
+spring:
+    mustache:
+        servlet:
+            expose-session-attributes: true
+            expose-request-attributes: true
+```
+
+The actual work is being done in the `CsrfFilter`, where the token is generated or created and validated against the one
+contained in the request arguments, in essence what happens is that both the request parameters in the body or the value
+in the header are read for the value we expect.
+
+```java
+// this is heavily abridged version of the original implementation to demonstrate where or how the token is extracted
+// from the request payload, and that both the header and the body of the request are inspected for this special value by a
+// known unique name that can identify it, the _csrf is used to avoid conflicts and collisions with other body elements
+// that might occur, due to the naming
+String getTokenFromRequest(HttpServletRequest request) {
+    // By default that is the header value of the header X-XSRF-TOKEN
+    String actualToken = request.getHeader("X-XSRF-TOKEN");
+    if (actualToken != null) {
+        return actualToken;
+    }
+    // By default that is the request body parameter value of _csrf
+    actualToken = request.getParameter("_csrf");
+    if (actualToken != null) {
+        return actualToken;
+    }
+}
+
+// get the currently generated token and the one from the current request, and compare them, only if they match we can
+// actually proceed with the execution of the request and chain
+CsrfToken csrfToken = deferredCsrfToken.get();
+String actualToken = getTokenFromRequest(request);
+boolean matches = csrfToken.getToken().equals(actualToken);
+```
+
+We have to modify the login page to enable the \_csrf token that is just a hidden input in the login form that is a
+hidden field, that is bound to the value of the \_csrf and we can use it to. Since the login page is also \_csrf enabled
+due to it being under our filter, we need to ensure that the cooki
+
+```java
+private Map<String, String> hiddenInputs(HttpServletRequest request) {
+    CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+    return (token != null) ? Collections.singletonMap(token.getParameterName(), token.getToken())
+    : Collections.emptyMap();
+}
+
+// this is important since we create our own instance of the page generating filter, we ensure that the hidden
+// fields are embedded in that field. This is just like we did with mustache, but here we have to do it manually since
+// that page is generated and delivered on the fly by spring, and is not tied to the templating engine.
+defaultLoginPageGeneratingFilter.setResolveHiddenInputs(this::hiddenInputs);
+```
+
+This is how one of the forms looks like now, after we have inserted the hidden field we have a name for the field
+that is important because that is the parameter name based on which we read the token value , and a value of course
+
+```html
+<form action="/ui/delete-video/1" method="post" class="inline" style="margin-top: 10px">
+    <input type="hidden" name="_csrf" value="D2snrz-_FHLsKwcaY74OviUxGYSKlajr9-NCOp0ik2YW4l" />
+    <button class="btn-danger" type="submit">Delete</button>
+</form>
+```
+
+#### Authorities
+
+Now that we have some of the general security guardrails in place we can move forward to implementing a more fine
+grained control policy. We already have in place authorities that each user is assigned to. We can restrict certain
+actions for certain users, actions like delete for example should be allowed only by specific authorities.
+
+We can do that by assigning authority filters/annotations on controller methods, either Rest or Template based. First
+lets examine how that works.
+
+`@EnableMethodSecurity` - this annotation will ensure that we enable the security annotations that Spring exposes to the
+user, there are a few, some of which are more sophisticated and some are pretty bare bones, each of which is useful for
+different tasks and purposes.

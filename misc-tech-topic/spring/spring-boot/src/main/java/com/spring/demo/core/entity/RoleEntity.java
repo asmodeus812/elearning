@@ -2,6 +2,7 @@ package com.spring.demo.core.entity;
 
 import java.util.Objects;
 import java.util.Set;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -23,7 +24,7 @@ public class RoleEntity extends AbstractAuditedEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "role")
     private Set<UserEntity> users;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "role_authority", joinColumns = @JoinColumn(name = "role_id"),
                     inverseJoinColumns = @JoinColumn(name = "authority_id"))
     private Set<AuthorityEntity> authorities;

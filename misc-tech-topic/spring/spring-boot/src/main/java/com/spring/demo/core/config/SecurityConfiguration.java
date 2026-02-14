@@ -2,14 +2,16 @@ package com.spring.demo.core.config;
 
 import com.spring.demo.core.config.model.DefaultUserDetails;
 import com.spring.demo.core.service.PrincipalService;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
@@ -23,8 +25,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     @Order(1)
@@ -39,11 +47,12 @@ public class SecurityConfiguration {
 
     @Order(2)
     @Bean(name = "apiSecurityFilterChain")
-    SecurityFilterChain apiSecurityFilterChain(HttpSecurity http)
-                    throws Exception {
+    SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
         return http.securityMatcher("/api/**")
                         .authorizeHttpRequests(customizer -> customizer.anyRequest().authenticated())
                         .formLogin(FormLoginConfigurer<HttpSecurity>::disable)
+                        .cors(CorsConfigurer<HttpSecurity>::disable)
+                        .csrf(CsrfConfigurer<HttpSecurity>::disable)
                         .httpBasic(Customizer.withDefaults())
                         .build();
     }
@@ -53,6 +62,7 @@ public class SecurityConfiguration {
     SecurityFilterChain uiSecurityFilterChain(HttpSecurity http) throws Exception {
 
         DefaultLoginPageGeneratingFilter defaultLoginPageGeneratingFilter = new DefaultLoginPageGeneratingFilter();
+        defaultLoginPageGeneratingFilter.setResolveHiddenInputs(this::hiddenInputs);
         defaultLoginPageGeneratingFilter.setLogoutSuccessUrl("/ui/logout");
         defaultLoginPageGeneratingFilter.setAuthenticationUrl("/ui/login");
         defaultLoginPageGeneratingFilter.setFailureUrl("/ui/login?error");
@@ -62,12 +72,20 @@ public class SecurityConfiguration {
         defaultLoginPageGeneratingFilter.setPasswordParameter("password");
         defaultLoginPageGeneratingFilter.setFormLoginEnabled(true);
 
+        CorsConfiguration configurationSource = new CorsConfiguration();
+        configurationSource.setAllowedOrigins(List.of("http://www.localhost:8080"));
+        configurationSource.setAllowedMethods(List.of("GET", "POST", "DELETE", "OPTIONS"));
+        configurationSource.setAllowedHeaders(List.of("Content-Type", "X-XSRF-TOKEN"));
+        configurationSource.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/ui/**", configurationSource);
+
         return http.securityMatcher("/ui/**")
                         .authorizeHttpRequests(customizer -> customizer.anyRequest().authenticated())
-                        // .authenticationProvider(daoAuthenticationProvider)
                         .httpBasic(AbstractHttpConfigurer::disable)
-                        .cors(CorsConfigurer<HttpSecurity>::disable)
-                        .csrf(CsrfConfigurer<HttpSecurity>::disable)
+                        // .cors(config -> config.configurationSource(source))
+                        // .csrf(config -> config.csrfTokenRepository(new CookieCsrfTokenRepository()))
                         .formLogin(customizer -> {
                             customizer.loginPage("/ui/login");
                             customizer.defaultSuccessUrl("/ui/");
@@ -114,5 +132,10 @@ public class SecurityConfiguration {
                 return Objects.equals(rawPassword == null ? null : rawPassword.toString(), storedPassword);
             }
         };
+    }
+
+    private Map<String, String> hiddenInputs(HttpServletRequest request) {
+        CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+        return (token != null) ? Collections.singletonMap(token.getParameterName(), token.getToken()) : Collections.emptyMap();
     }
 }
