@@ -1020,7 +1020,7 @@ This is what the starter maven dependency for the spring logging pulls into your
     - High performance (asynchronous logging).
     - Advanced features (JSON/YAML config, plugins).
 
-### java.util.logging (JUL)
+#### java.util.logging (JUL)
 
 - **Built into the JVM**.
     - Limited features, poor performance.
@@ -1137,6 +1137,142 @@ which component of the Spring portfolio (starter) is impacted, the Spring Boot t
 release. This BOM is released alongside Spring Boot’s actual code. All we have to do is adjust the version of Spring
 Boot parent (spring-boot-starter-parent) in our build file then the latest starter will be used, and everything will
 update and follow pulling the necessary updates from the versions defined int the BOM.`
+
+## Spring expression language
+
+The spring expression language is a way to allow certain annotations to execute code at runtime during interaction with
+the target of the annotation, such as method invocation, for example. There are some rules and grammar that this
+language follows, but it is not a comprehensive scripting language, it is a way to do a quick transformations or
+validations
+
+### Core syntax
+
+- `true` / `false` — boolean literals
+- `and` / `or` / `not` (also `&&` / `||` / `!`) — boolean operators
+- `== != < <= > >=` — comparisons
+- `'text'` / `"text"` — string literals
+- `+ - * / %` — arithmetic (rare in security rules)
+- `(...)` — grouping / precedence
+- `a ? b : c` — ternary
+- `null` — null literal
+- `obj.prop` / `obj.method(...)` — property access / method call
+- `T(com.pkg.Type)` — type reference (static access / constants)
+- `{1,2,3}` — inline list
+- `{'a':'b'}` — inline map
+- `arr[0]` / `map['k']` — indexer (arrays/lists/maps)
+- `x instanceof T(...)` — type check
+- `x matches 'regex'` — regex match (string)
+
+### Method parameters
+
+- `#argName` — method parameter by name (e.g., #id, #user)
+- `returnObject` — only in @PostAuthorize (method return value)
+- `filterObject` — in @PreFilter/@PostFilter (current element)
+
+### Object References
+
+- `#var` — variable reference (method params, locals, etc.)
+- `#root` — the root expression object
+- `@beanName` — reference a Spring bean by name
+- `@beanName.canEdit(#id)` — call bean method for custom logic
+
+### Security variables
+
+- `authentication` — current Authentication object
+- `principal` — shortcut for authentication.principal
+- `#root` — method-security root (exposes helper methods below)
+
+### Helper methods
+
+- `hasRole('ADMIN')` — true if user has ROLE_ADMIN (`prefix rules apply`)
+- `hasAnyRole('A','B')` — any of the matching roles in the list
+- `hasAuthority('perm')` — true if user has exact authority
+- `hasAnyAuthority('p1','p2')` — any matching authority in the list
+- `hasPermission(target, 'perm')` — delegates to PermissionEvaluator
+- `hasPermission(id, 'Type', 'perm')` — PermissionEvaluator w/ type
+- `isAuthenticated()` — authenticated (not anonymous)
+- `isAnonymous()` — anonymous user
+
+### Discriminators
+
+- `permitAll` — always allow
+- `denyAll` — always deny
+
+### Usage
+
+Built in methods expose the ability to do a more broad filtering on roles, authorities or permissions, on a per target
+basis, these methods are usually used on the entry points in services or controllers.
+
+```java
+// role and authority, the user details in spring provide means of obtaining a list of authorities, these are usually
+// prefixed implicitly by ROLE_ but can be customized, just be wary of this
+@PreAuthorize("hasRole('ADMIN')")
+void adminOnly() {}
+@PreAuthorize("hasAnyRole('ADMIN','SUPPORT')")
+void adminOrSupport() {}
+@PreAuthorize("hasAuthority('video:write')")
+void canWriteVideos() {}
+
+@Component
+class MyPermissionEvaluator implements PermissionEvaluator {
+  @Override
+  public boolean hasPermission(Authentication a, Object target, Object perm) { ... }
+
+  @Override
+  public boolean hasPermission(Authentication a, Serializable id, String type, Object perm) { ... }
+}
+
+// special permission evaluators can be created, these are beans that implement an interface like the one above, to do a
+// more detailed check on the permissions a certain principal has over a certain target, the hasPermission is a built in
+// method just like hasAuthority, hasRole, but provides a more fine grained control over how we decide if the
+// resource/method can be acted upon
+@PreAuthorize("hasPermission(#videoId, 'Video', 'write')")
+void permissionEvaluatorStyle(Long videoId) {}
+```
+
+The context checking built-in methods like checking if we are currently in an authenticated or anonymous context, are
+usually a way to separate secured form non-secured resources, when the current resource (api) is not tightly secured by
+any security rules .
+
+```java
+// helper methods that are exposed by the language, does a broad level checks if we are currently in an authenticated
+// context, that is useful to be able to quickly segregate anonymous vs authenticated context
+@PreAuthorize("isAuthenticated()")
+void anyLoggedInUser() {}
+@PreAuthorize("isAnonymous()")
+void onlyAnonymousUsers() {}
+```
+
+```java
+// referencing either the method argument or a bean-by-name from the spring context can also be done using the spring
+// expression language, using # or # can invoke methods on the referenced target, access properties etc.
+@PreAuthorize("#userId == authentication.name or hasRole('ADMIN')")
+void userCanAccessOwnOrAdmin(Long userId) {}
+@PreAuthorize("@beanName.canEditVideo(#videoId, authentication)")
+void delegateToBean(Long videoId) {}
+```
+
+```java
+// based on the returned object we can do further authorization, and validation, in case there is something/some other
+// action to perform before the return value is delivered
+@PostAuthorize("returnObject.username == authentication.name or hasRole('ADMIN')")
+VideoDto getVideo(Long id) { return new UserModel(5, "name"); }
+
+// filter only the videos that have been created by the currently authenticated user, spring will ensure that in the
+// list of entities passed to this method the collection is filtered based on the authentication context's name in this
+// case only the created by this user entities will actually be updated, these are the ones that are going to match the
+// filter
+@PreFilter(value = "filterObject.createdBy == authentication.name or hasRole('ADMIN')", filterTarget = "videos")
+void bulkUpdateCreator(List<VideoEntity> videoEntities, boolean moreArguments) { }
+```
+
+```java
+// we saw that above that there is a special #root variable, that represents the root context for the spring root
+// expression context, we can re-name a variable for the spell expression evaluator by putting a special @P annotation and
+// specifying the new name for the method parameter
+@PreAuthorize("@beanName.methodCall(#customVariable)")
+void update(@P("customVariable") Root root) { ... }
+```
 
 ## Templates
 
@@ -1493,7 +1629,7 @@ variable is something that the spring framework offers the actual underlying Ser
 knowledge of this argument as it is not really part of the HTTP spec, like query parameters or the body of a request
 is
 
-### Frontend client
+### Usage interface
 
 So having introduced the different annotations and methods of extracting data from a request above we can actually
 also complete the description by introducing the actual front end, the client that will invoke those end points and
@@ -1511,7 +1647,7 @@ Content-Type: application/json
 
 ### 2. GET with @RequestHeader
 GET http://localhost:8080/products-header
-name: PremiumCustomer
+X-Product-Name: PremiumCustomer
 
 ### 3. GET with @RequestParam
 GET http://localhost:8080/products-query?name=Smartphone
@@ -2930,6 +3066,49 @@ we have in the database directly to spring, and its internally user representati
 with a user but by providing a fine grained control over the actions a user can partake based on its granted roles
 and by proxy the granted authorities for these roles.
 
+#### Authentication
+
+In spring there is one primary interface called `Authentication` that deals with storing and retrieving data about the
+current authentication credentials, the interface itself provides a few core methods that are used cross the internal
+implementation of spring-security to represent and hold the name, authorities, and credentials of an authenticated
+principal.
+
+The actual current authenticated context can be obtained by using the `SecurityContextHolder`, that is a is a holder for
+the Authentication instance and is usually implemented either on a global or per thread level. Use the
+`SecurityContextHolder.getContext()` method to obtain that context and then `getAuthentication`, to obtain the current
+authentication, that method can return NULL if there is no authentication context, which would imply no authenticated
+principal.
+
+Internally the security context holder holds an instance implementation of `SecurityContextHolderStrategy` that is
+basically interface that has multiple implementations that handle the different strategies of storing the context, as a
+thread-local variable, global-variable:
+
+- `ThreadLocalSecurityContextHolderStrategy` - using thread-local to store the context, each thread has its own context,
+  that is the most common one
+- `GlobalSecurityContextHolderStrategy` - using a single global context variable, that is shared singleton across
+  threads, thread safety not guaranteed
+
+The Authentication interface on the other hand has a few implementations itself, based on the mechanism used to
+authenticate the user, but some of the most notable ones are:
+
+- `UsernamePasswordAuthenticationToken` - used when the spring security is configured to authenticated users with
+  username and password, during a login form for example
+- `AnonymousAuthenticationToken` - when there is no real user authenticated, meaning the resource is not actually
+  protected by any authentication
+- `RememberMeAuthenticationToken` - obtained when a user has been logged in through the use of a remember me token or a
+  cookie, different than direct form login wit username and password credentials
+
+```java
+// generally one can use the context and obtain the authentication like so, form this point we should check if the
+// authentication instance is valid, and if its not NULL, we can obtain information about the principal
+Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+```
+
+`What is important to remember is that the Authentication and its implementations most importantly in spring, do NOT
+necessarily always represent the final state of authentication, rather it usually represents the way the authentication
+was obtained as well, there are, take for example UsernamePasswordAuthenticationToken and RememberMeAuthenticationToken,
+both implement Authentication, but both represent different ways the authentication was obtained from the user.`
+
 #### Structure
 
 This is a very brief description of the structure we are going to use there are quite a few things missing here, but
@@ -3064,17 +3243,22 @@ public Optional<UserDetails> getPrincipal(String username) {
     return userRepository.findByUsername(username).map(user -> new UserDetails() {
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return user.getRole().getAuthorities().stream().map(AuthorityEntity::getGrant).map(SimpleGrantedAuthority::new).toList();
+            return entity.getRole()
+                            .getAuthorities()
+                            .stream()
+                            .map(AuthorityEntity::getGrant)
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toUnmodifiableSet());
         }
 
         @Override
         public String getPassword() {
-            return user.getPassword();
+            return entity.getPassword();
         }
 
         @Override
         public String getUsername() {
-            return user.getUsername();
+            return entity.getUsername();
         }
     });
 }
@@ -3088,9 +3272,19 @@ be used as the default one to be injected internally by the default spring authe
 public class SecurityConfiguration {
 
     @Bean
-    UserDetailsService userDetailsService(UsersService userService) {
-        return name -> userService.getPrincipal(name).orElseThrow(() -> new UsernameNotFoundException(name));
+    UserDetailsService userDetailsService(PrincipalService principalSerivce) {
+        return name -> principalSerivce.getPrincipal(name).orElseThrow(() -> new UsernameNotFoundException(name));
     }
+
+    @Bean
+    UserDetailsPasswordService userDetailsPasswordService(PrincipalService principalService) {
+        return (user, password) -> {
+            String username = user.getUsername();
+            MutableUserDetails userDetails = new MutableUserDetails(user);
+            userDetails.setPassword(password);
+            Optional<UserDetails> result = principalService.updatePrincipal(username, userDetails);
+            return result.orElseThrow(() -> new UsernameNotFoundException(username));
+    };
 
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -3634,11 +3828,153 @@ that is important because that is the parameter name based on which we read the 
 
 Now that we have some of the general security guardrails in place we can move forward to implementing a more fine
 grained control policy. We already have in place authorities that each user is assigned to. We can restrict certain
-actions for certain users, actions like delete for example should be allowed only by specific authorities.
+actions for certain users, actions like delete for example should be allowed only by specific authorities. We can do
+that by assigning authority filters/annotations on controller/service/repository methods
 
-We can do that by assigning authority filters/annotations on controller methods, either Rest or Template based. First
-lets examine how that works.
+`ROLE vs AUTHORITY` - first let us establish the difference, the role usually specifies some sort of a broad use case that
+has big implications over a large set of resources, such as ROLE_USER, ROLE_ADMIN, ROLE_MANAGER, roles usually provide a
+way to specify a wide set of permissions with few specifics as possible. Authority on the other hand in the context of
+most applications implies a finer grained control over resources, they might be resource or action based like
+video:delete, or delete:video, these allow us to have more control over more specific types of resources and actions.
+These are mere conventions that have been established in the space but are good practices to follow.
 
-`@EnableMethodSecurity` - this annotation will ensure that we enable the security annotations that Spring exposes to the
-user, there are a few, some of which are more sophisticated and some are pretty bare bones, each of which is useful for
-different tasks and purposes.
+`This is a mere convention or a guide line, usually systems implement one or the other, sometimes both, but to spring we
+expose just one set of these not both under getAuthorities. For example a system might have roles which are set of
+authorities, when a user has more than one role he inherits the authorities for each of the role that he has been
+assigned, these are what we expos to spring, and not the roles themselves, which serve as containers or holders`
+
+##### `@EnableMethodSecurity`
+
+This annotation will ensure that we enable the security annotations that Spring exposes to the user, there are a few,
+some of which are more sophisticated and some are pretty bare bones, each of which is useful for different tasks and
+purposes. That would enable the use of `@Secured, @Pre|PostAuthorize annotations and more`
+
+##### `@[Pre|Post]Authorize`
+
+This annotation allows us to execute SPELL, spring's special language that is interpreted at runtime when a method that
+is annotated with this annotation is invoked, that happens here is that the method contains a string that is the
+expression itself usually, that expression is evaluated against the method's arguments and also provides a way to access
+spring internal state context such as singleton beans and more.
+
+```java
+// here is an example of how we can secure the invocations of this method to ensure that only the user that is
+// currently logged in can delete his own user
+@PreAuthorize("#username = authentication.name")
+void deleteByUsername(String username);
+
+// using role based permission, allowing only users which posses the admin based roles, to delete users by a target
+// username
+@PreAuthorize("hasRole('ADMIN')")
+void deleteByUsername(String username);
+
+// using an authority resource action based permission where only users which can act on this resource (user) and do
+// this certain action can delete users
+@PreAuthorize("hasAuthority('user:delete')")
+void deleteByUsername(String username);
+```
+
+Using `hasRole` & `hasAuthority`
+
+There is one detour we have to make because spring has introduced over time conflicting annotations which work with
+authorities, and these can be confusing, both of the `hasRole` and `hasAuthority` annotations work with the
+`getAuthorities` method of the `UserDetails` authentication context, however the way they interpret the values is a bit
+different. When using the role annotation spring assumes that this list of authorities contains role based permissions
+that is why by default it expects to find values that contain the ROLE\* prefix in here, and when using `hasAuthority`
+it assumes the value is usually matched as is, no assumptions made, the general format for roles is `ROLE_{NAME}`, and
+for authority `action:resource`or`resource:action`. There are no hard core rules that enforce this but this is just the
+accepted convention used across most applications. These methods have an alternative multi-argument variant which is
+just following the same naming convention - `hasAnyRole` and `hasAnyAuthority`
+
+`hasRole vs hasAuthority are two different annotations that use the same source of information to determine if the
+authentication context matches the condition , both are using the getAuthorities() which returns a list of
+GrantedAuthority, from Authentication and the main difference is that hasRole checks the value by always pre-pending
+special prefix ROLE_ by default while the hasAuthority checks the raw values in the granted authorities and the ones
+specified in the annotation without any modification`
+
+Let us assume that a user has the following granted authorities `["ROLE_ADMIN", "write:video"]`, we can match for these
+using either the `hasAuthority` or the `hasRole` like so:
+
+`hasRole("ADMIN")` → checks for authority in the list matching "ROLE_ADMIN", prefix the annotation value checks for ROLE_ADMIN
+`hasRole("ROLE_ADMIN")` → checks for authority in the list matching "ROLE_ADMIN", does not double prefix the annotation value
+
+`hasAuthority("write:video")` → checks for the value as is in the list of the authorities
+`hasAuthority("ADMIN")` → checks for authority "ADMIN" (argument used as-is) - not present
+`hasAuthority("ROLE_ADMIN")` → checks for authority "ROLE_ADMIN" (argument used as-is) -present
+
+##### `@Secured`
+
+This is the older legacy annotation that mostly supports role level access, basically the list of `getAuthorities` is
+examined for a role that is specified in the secured annotation and if that role is present the method is allowed,
+this is an annotation that does not provide as much flexibility and is not that great for modern use but can be used
+to do a wide discrimination and exclusion on the authentication context and then use the `PreAuthorize` to do w more
+fine grained filter.
+
+`The Secured annotation checks value AS IS, there is no special conversion or assumption for the values that are in the
+getAuthorities like there is for when using the hasRole in a spring expression language enabled annotation`
+
+```java
+// we have provided multiple authorities that would imply that any one will allow this method to execute, that is not AND
+// condition but an OR condition that links these roles together here, deciding which authentication context can call
+// this method
+@Secured({ "ROLE_USER", "ROLE_ADMIN" })
+void deleteByUsername(String username);
+@Secured({ "user:delete", "user:manage" })
+void deleteByUsername(String username);
+```
+
+So below are a few changes that we can make to our template controller, that exposes the UI for interacting with the
+entities that we have in our project, one of which is the User, we have also added few security annotations to ensure
+that only specific types of users can inspect all users or change user passwords. We have also added the ability for the
+user currently authenticated himself to edit or update his password by re-using the `/ui/user` path, we can see that if
+no `PathVariable` for the id of the user is provided, then the currently authenticated context is used to extract the
+user's details and present them back.
+
+```java
+@Controller
+@RequestMapping("/ui")
+public class TemplateController {
+
+    private static final String TEMPLATE_USER_BASE = "user";
+    private static final String TEMPLATE_USERS_BASE = "users";
+
+    private static final String REDIRECT_TEMPLATE_INDEX = "redirect:/ui/";
+
+    private final UserService userService;
+    private final PrincipalService principalService;
+
+    @GetMapping(path = "/users")
+    @PreAuthorize("hasAuthority('user:manage') or hasAuthority('user:list')")
+    public String getUsers(Model model) {
+        model.addAttribute("users", userService.getAll());
+        return TEMPLATE_USERS_BASE;
+    }
+
+    @GetMapping(path = {"/user", "/user/{id}"})
+    @PreAuthorize("#target == null or hasAuthority('user:manage') or hasAuthority('user:list')")
+    public String getUser(@PathVariable(name = "id", required = false) Long target, Model model) {
+        if (!Objects.isNull(target)) {
+            model.addAttribute("user", userService.get(target));
+        } else {
+            UserDetails details = principalService.getPrincipal().orElseThrow();
+            model.addAttribute("user", userService.findByUsername(details.getUsername()).orElseThrow());
+        }
+        return TEMPLATE_USER_BASE;
+    }
+
+    @PreAuthorize("#user.username == authentication.name or hasAuthority('user:manage')")
+    @PostMapping(path = "/update-user", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    public String editUser(@ModelAttribute UserModel user) {
+        userService.update(user.id(), user);
+        return REDIRECT_TEMPLATE_INDEX + TEMPLATE_USERS_BASE;
+    }
+
+    @PreAuthorize("hasAuthority('user:manage')")
+    @PostMapping(path = "/delete-user/{id}", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    public String deleteUser(@PathVariable("id") Long target) {
+        userService.delete(target);
+        return REDIRECT_TEMPLATE_INDEX + TEMPLATE_USERS_BASE;
+    }
+}
+```
+
+#####

@@ -21,7 +21,7 @@ public class UserEntity extends AbstractAuditedEntity {
     @Column(name = "password", unique = false, updatable = true, insertable = true, nullable = false, length = 128)
     private String password;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "role_id", nullable = false, insertable = true, updatable = true)
     private RoleEntity role;
 

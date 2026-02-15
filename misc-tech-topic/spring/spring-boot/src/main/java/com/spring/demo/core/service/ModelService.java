@@ -4,10 +4,12 @@ import com.spring.demo.core.converter.ModelConverter;
 import com.spring.demo.core.entity.AbstractEntity;
 import com.spring.demo.core.repository.EntityRepository;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 public interface ModelService<E extends AbstractEntity, M> {
 
@@ -24,17 +26,17 @@ public interface ModelService<E extends AbstractEntity, M> {
     }
 
     default Optional<M> find(Long id) {
-        requireValidId(id);
+        requirePresentId(id);
         return repository().findById(id).map(converter()::convertFrom);
     }
 
     default M get(Long id) {
-        requireValidId(id);
+        requirePresentId(id);
         return repository().findById(id).map(converter()::convertFrom).orElseThrow(EntityNotFoundException::new);
     }
 
     default boolean exists(Long id) {
-        requireValidId(id);
+        requirePresentId(id);
         return repository().existsById(id);
     }
 
@@ -54,15 +56,16 @@ public interface ModelService<E extends AbstractEntity, M> {
         return findAll(pageable);
     }
 
+    @Transactional
     default M create(M model) {
         requireModel(model);
         beforeCreateModel(model);
 
         E entity = converter().convertFrom(model);
-        requireNoId(entity.getId());
+        requireEmptyId(entity.getId());
 
         beforeCreateEntity(entity);
-        validateForSave(entity);
+        validateCreateEntity(entity);
 
         E saved = repository().save(entity);
         afterCreateEntity(saved);
@@ -73,12 +76,9 @@ public interface ModelService<E extends AbstractEntity, M> {
         return out;
     }
 
-    // default M update(M model) {
-    // return update(model.id(), model);
-    // }
-
+    @Transactional
     default M update(Long id, M model) {
-        requireValidId(id);
+        requirePresentId(id);
         requireModel(model);
 
         beforeUpdateModel(id, model);
@@ -86,7 +86,7 @@ public interface ModelService<E extends AbstractEntity, M> {
 
         beforeUpdateEntity(entity);
         converter().updateEntity(entity, model);
-        validateForSave(entity);
+        validateCreateEntity(entity);
 
         E saved = repository().save(entity);
         afterUpdateEntity(saved);
@@ -97,17 +97,19 @@ public interface ModelService<E extends AbstractEntity, M> {
         return out;
     }
 
+    @Transactional
     default boolean delete(Long id) {
-        requireValidId(id);
+        requirePresentId(id);
         beforeDelete(id);
         if (!repository().existsById(id)) {
-            throw new EntityNotFoundException();
+            return false;
         }
         repository().deleteById(id);
         afterDelete(id);
         return true;
     }
 
+    @Transactional
     default boolean deleteAll() {
         beforeDelete(null);
         repository().deleteAllInBatch();
@@ -115,7 +117,9 @@ public interface ModelService<E extends AbstractEntity, M> {
         return true;
     }
 
-    default void validateForSave(E entity) { /* no-op */ }
+    default void validateCreateEntity(E entity) { /* no-op */ }
+
+    default void validateCreateModel(M model) { /* no-op */ }
 
     default void beforeCreateModel(M model) { /* no-op */ }
 
@@ -137,28 +141,28 @@ public interface ModelService<E extends AbstractEntity, M> {
 
     default void afterDelete(Long id) { /* no-op */ }
 
-    default void requireValidId(Long id) {
-        if (id == null) {
+    default void requirePresentId(Long id) {
+        if (Objects.isNull(id)) {
             throw new IllegalArgumentException("Id must not be null");
         }
     }
 
-    default void requireNoId(Long id) {
-        if (id != null) {
+    default void requireEmptyId(Long id) {
+        if (!Objects.isNull(id)) {
             throw new IllegalArgumentException("Id must be null");
         }
     }
 
 
     default void requireModel(M model) {
-        if (model == null) {
+        if (Objects.isNull(model)) {
             throw new IllegalArgumentException("Model must not be null");
         }
     }
 
     default void requireEntity(E entity) {
-        if (entity == null) {
-            throw new IllegalArgumentException("Model must not be null");
+        if (Objects.isNull(entity)) {
+            throw new IllegalArgumentException("Entity must not be null");
         }
     }
 }

@@ -48,6 +48,7 @@ INSERT INTO AUTHORITIES (NAME, "GRANT") VALUES ('VIDEO_CREATE', 'video:create');
 INSERT INTO AUTHORITIES (NAME, "GRANT") VALUES ('VIDEO_UPDATE', 'video:update');
 INSERT INTO AUTHORITIES (NAME, "GRANT") VALUES ('VIDEO_DELETE', 'video:delete');
 INSERT INTO AUTHORITIES (NAME, "GRANT") VALUES ('USER_MANAGE',  'user:manage');
+INSERT INTO AUTHORITIES (NAME, "GRANT") VALUES ('USER_LIST',    'user:list');
 
 /* ------------------------------------------------------------
    3) Role ↔ Authority (many-to-many) via ROLE_AUTHORITY
@@ -82,6 +83,11 @@ SELECT r.id, a.id
 FROM ROLES r, AUTHORITIES a
 WHERE r.name = 'ADMIN' AND a.name = 'USER_MANAGE';
 
+INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
+SELECT r.id, a.id
+FROM ROLES r, AUTHORITIES a
+WHERE r.name = 'ADMIN' AND a.name = 'USER_LIST';
+
 /* EDITOR */
 INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
 SELECT r.id, a.id
@@ -97,6 +103,11 @@ INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
 SELECT r.id, a.id
 FROM ROLES r, AUTHORITIES a
 WHERE r.name = 'EDITOR' AND a.name = 'VIDEO_UPDATE';
+
+INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
+SELECT r.id, a.id
+FROM ROLES r, AUTHORITIES a
+WHERE r.name = 'EDITOR' AND a.name = 'USER_LIST';
 
 /* USER */
 INSERT INTO ROLE_AUTHORITY (role_id, authority_id)

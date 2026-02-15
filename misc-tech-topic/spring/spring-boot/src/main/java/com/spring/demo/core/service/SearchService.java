@@ -32,7 +32,7 @@ public abstract class SearchService<E extends AbstractEntity, M> {
     abstract Class<M> modelClass();
 
     public Collection<M> search(CriteriaCollection criteria, Enum<? extends CriteriaDefinition>[] enumerators) {
-        Map<String, Method> setters = settersByPropertyName(entityClass());
+        Map<String, Method> setters = getTypeSetters(entityClass());
         CriteriaPipeline<E> pipeline = CriteriaPipeline.of(criteria);
         ConversionService conversionService = DefaultConversionService.getSharedInstance();
 
@@ -44,22 +44,43 @@ public abstract class SearchService<E extends AbstractEntity, M> {
             return Collections.emptyList();
         }
         for (Enum<? extends CriteriaDefinition> key : enumerators) {
-            String prop = normalizeKey(key.name());
-            Method setter = setters.get(prop);
-            if (setter == null)
+            String property = normalizeKey(key.name());
+            Method setter = setters.get(property);
+            if (Objects.isNull(setter)) {
                 continue;
+            }
+
+            if (!(key instanceof CriteriaDefinition)) {
+                throw new IllegalStateException(String.format("Provided criterion key is of invalid type %s, expected %s",
+                                key.getClass().getSimpleName(), CriteriaDefinition.class.getSimpleName()));
+            }
 
             Class<?> paramType = setter.getParameterTypes()[0];
-            CriteriaCondition<Object> condition = defaultCondition(paramType);
+            CriteriaDefinition definition = (CriteriaDefinition) key;
+            if (!definition.type().equals(paramType)) {
+                throw new IllegalStateException(String.format("Type mismatch between definition %s and expected type %s ",
+                                definition.type().getSimpleName(), paramType.getSimpleName()));
+            }
 
-            pipeline.accept((CriteriaDefinition) key, condition, raw -> {
-                Object arg = (raw == null || paramType.isInstance(raw)) ? raw : conversionService.convert(raw, paramType);
-                invokeSetter(setter, probe, arg);
-                return probe;
+            CriteriaCondition<Object> condition = defaultCondition(paramType);
+            pipeline.accept(definition, condition, raw -> {
+                Object arg = convertValue(conversionService, paramType, raw);
+                return invokeSetter(setter, probe, arg);
             });
         }
+
         Example<E> example = pipeline.findFirst().map(Example::of).orElseThrow();
         return repository().findAll(example).stream().map(converter()::convertFrom).toList();
+    }
+
+    private Map<String, Method> getTypeSetters(Class<?> type) {
+        try {
+            return Arrays.stream(Introspector.getBeanInfo(type).getPropertyDescriptors())
+                            .filter(pd -> pd.getWriteMethod() != null)
+                            .collect(Collectors.toMap(pd -> pd.getName(), pd -> pd.getWriteMethod()));
+        } catch (Exception e) {
+            throw new IllegalStateException(String.format("Failed introspecting setters for %s", type.getSimpleName()), e);
+        }
     }
 
     private CriteriaCondition<Object> defaultCondition(Class<?> paramType) {
@@ -69,35 +90,33 @@ public abstract class SearchService<E extends AbstractEntity, M> {
         return Objects::nonNull;
     }
 
-    private void invokeSetter(Method setter, Object target, Object arg) {
+    private Object convertValue(ConversionService conversionService, Class<?> paramType, Object raw) {
+        return (Objects.isNull(raw) || paramType.isInstance(raw)) ? raw : conversionService.convert(raw, paramType);
+    }
+
+    private E invokeSetter(Method setter, E target, Object arg) {
         try {
             setter.invoke(target, arg);
+            return target;
         } catch (Exception e) {
-            throw new IllegalArgumentException("Failed invoking " + setter.getName() + " on " + target.getClass().getSimpleName(), e);
+            throw new IllegalArgumentException(
+                            String.format("Failed invoking %s on %s", setter.getName(), target.getClass().getSimpleName()), e);
         }
     }
 
-    private Map<String, Method> settersByPropertyName(Class<?> type) {
-        try {
-            return Arrays.stream(Introspector.getBeanInfo(type).getPropertyDescriptors())
-                            .filter(pd -> pd.getWriteMethod() != null)
-                            .collect(Collectors.toMap(pd -> pd.getName(), pd -> pd.getWriteMethod()));
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed introspecting setters for " + type.getName(), e);
+    private String normalizeKey(String keyName) {
+        String lowerCase = keyName.trim().toLowerCase();
+        if (!lowerCase.contains("_")) {
+            return lowerCase;
         }
-    }
-
-    private String normalizeKey(String enumName) {
-        String s = enumName.trim().toLowerCase();
-        if (!s.contains("_"))
-            return s;
-        String[] parts = s.split("_+");
-        StringBuilder out = new StringBuilder(parts[0]);
+        String[] parts = lowerCase.split("_+");
+        StringBuilder finalKeyName = new StringBuilder(parts[0]);
         for (int i = 1; i < parts.length; i++) {
-            if (parts[i].isEmpty())
+            if (parts[i].isEmpty()) {
                 continue;
-            out.append(Character.toUpperCase(parts[i].charAt(0))).append(parts[i].substring(1));
+            }
+            finalKeyName.append(Character.toUpperCase(parts[i].charAt(0))).append(parts[i].substring(1));
         }
-        return out.toString();
+        return finalKeyName.toString();
     }
 }

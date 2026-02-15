@@ -27,11 +27,14 @@ public class UserConverter implements ModelConverter<UserEntity, UserModel> {
 
     @Override
     public ModelConverter<UserEntity, UserModel> updateEntity(UserEntity entity, UserModel model) {
-        if (!Objects.isNull(model.role())) {
-            entity.setRole(roleConverter.convertFrom(model.role()));
-        }
         if (StringUtils.hasText(model.password())) {
             entity.setPassword(model.password());
+        }
+        if (StringUtils.hasText(model.username())) {
+            entity.setPassword(model.username());
+        }
+        if (!Objects.isNull(model.role())) {
+            roleConverter.updateEntity(entity.getRole(), model.role());
         }
         return this;
     }

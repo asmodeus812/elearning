@@ -43,6 +43,11 @@ public class UserService extends SearchService<UserEntity, UserModel> implements
     }
 
     @Transactional
+    public UserModel getByUsername(String username) {
+        return findByUsername(username).orElseThrow();
+    }
+
+    @Transactional
     public Optional<UserModel> findByUsername(String username) {
         Optional<UserEntity> entity = userRepository.findByUsername(username);
         return entity.map(converter()::convertFrom);

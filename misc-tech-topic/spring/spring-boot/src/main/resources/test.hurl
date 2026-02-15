@@ -25,7 +25,7 @@ Authorization: Basic YWRtaW46YWRtaW4xMjM=
 
 HTTP 200
 
-POST http://localhost:8080/api/find
+POST http://localhost:8080/api/videos/find
 Authorization: Basic YWRtaW46YWRtaW4xMjM=
 Content-Type: application/json
 

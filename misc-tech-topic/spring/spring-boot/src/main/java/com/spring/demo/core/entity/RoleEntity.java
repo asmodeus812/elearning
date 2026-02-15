@@ -24,7 +24,7 @@ public class RoleEntity extends AbstractAuditedEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "role")
     private Set<UserEntity> users;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(name = "role_authority", joinColumns = @JoinColumn(name = "role_id"),
                     inverseJoinColumns = @JoinColumn(name = "authority_id"))
     private Set<AuthorityEntity> authorities;

@@ -4,13 +4,13 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class DefaultUserDetails implements UserDetails {
+public class MutableUserDetails implements UserDetails {
 
     private String password;
 
     private final UserDetails delegate;
 
-    public DefaultUserDetails(UserDetails user) {
+    public MutableUserDetails(UserDetails user) {
         this.delegate = user;
         this.password = user.getPassword();
     }
@@ -20,9 +20,8 @@ public class DefaultUserDetails implements UserDetails {
         return this.password;
     }
 
-    public DefaultUserDetails setPassword(String password) {
+    public void setPassword(String password) {
         this.password = password;
-        return this;
     }
 
     @Override

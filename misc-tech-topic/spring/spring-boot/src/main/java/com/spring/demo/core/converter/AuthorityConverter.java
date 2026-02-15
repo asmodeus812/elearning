@@ -23,6 +23,9 @@ public class AuthorityConverter implements ModelConverter<AuthorityEntity, Autho
         if (StringUtils.hasText(model.name())) {
             entity.setName(model.name());
         }
+        if (StringUtils.hasText(model.grant())) {
+            entity.setGrant(model.grant());
+        }
         return this;
     }
 

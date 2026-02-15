@@ -1,11 +1,12 @@
 package com.spring.demo.core.config;
 
-import com.spring.demo.core.config.model.DefaultUserDetails;
+import com.spring.demo.core.config.model.MutableUserDetails;
 import com.spring.demo.core.service.PrincipalService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -17,6 +18,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsPasswordService;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -84,8 +86,8 @@ public class SecurityConfiguration {
         return http.securityMatcher("/ui/**")
                         .authorizeHttpRequests(customizer -> customizer.anyRequest().authenticated())
                         .httpBasic(AbstractHttpConfigurer::disable)
-                        // .cors(config -> config.configurationSource(source))
-                        // .csrf(config -> config.csrfTokenRepository(new CookieCsrfTokenRepository()))
+                        .cors(config -> config.configurationSource(source))
+                        .csrf(config -> config.csrfTokenRepository(new CookieCsrfTokenRepository()))
                         .formLogin(customizer -> {
                             customizer.loginPage("/ui/login");
                             customizer.defaultSuccessUrl("/ui/");
@@ -108,8 +110,13 @@ public class SecurityConfiguration {
 
     @Bean(name = "userDetailsPasswordService")
     UserDetailsPasswordService userDetailsPasswordService(PrincipalService principalService) {
-        return (user, password) -> principalService.updatePrincipal(user.getUsername(), new DefaultUserDetails(user).setPassword(password))
-                        .orElseThrow(() -> new UsernameNotFoundException(user.getUsername()));
+        return (user, password) -> {
+            String username = user.getUsername();
+            MutableUserDetails userDetails = new MutableUserDetails(user);
+            userDetails.setPassword(password);
+            Optional<UserDetails> result = principalService.updatePrincipal(username, userDetails);
+            return result.orElseThrow(() -> new UsernameNotFoundException(username));
+        };
     }
 
     @Profile("!local")

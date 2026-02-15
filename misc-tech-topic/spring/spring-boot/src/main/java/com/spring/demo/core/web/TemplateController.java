@@ -9,14 +9,14 @@ import com.spring.demo.core.service.RoleService;
 import com.spring.demo.core.service.UserService;
 import com.spring.demo.core.service.VideoService;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,9 +31,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/ui")
 public class TemplateController {
 
+    private static final String TEMPLATE_USER_BASE = "user";
     private static final String TEMPLATE_USERS_BASE = "users";
+
+    private static final String TEMPLATE_VIDEO_BASE = "video";
     private static final String TEMPLATE_VIDEOS_BASE = "videos";
-    private static final String REDIRECT_TEMPLATE_INDEX = "redirect:/";
+
+    private static final String REDIRECT_TEMPLATE_INDEX = "redirect:/ui/";
 
     private final VideoService videoService;
     private final RoleService roleService;
@@ -106,15 +110,35 @@ public class TemplateController {
     }
 
     @GetMapping(path = "/users")
+    @PreAuthorize("hasAuthority('user:manage') or hasAuthority('user:list')")
     public String getUsers(Model model) {
-        UserDetails details = principalService.getPrincipal().orElseThrow();
-        model.addAttribute("user", userService.findByUsername(details.getUsername()).orElseThrow());
+        model.addAttribute("users", userService.getAll());
         return TEMPLATE_USERS_BASE;
     }
 
+    @GetMapping(path = {"/user", "/user/{id}"})
+    @PreAuthorize("#target == null or hasAuthority('user:manage') or hasAuthority('user:list')")
+    public String getUser(@PathVariable(name = "id", required = false) Long target, Model model) {
+        if (!Objects.isNull(target)) {
+            model.addAttribute("user", userService.get(target));
+        } else {
+            UserDetails details = principalService.getPrincipal().orElseThrow();
+            model.addAttribute("user", userService.findByUsername(details.getUsername()).orElseThrow());
+        }
+        return TEMPLATE_USER_BASE;
+    }
+
+    @PreAuthorize("#user.username == authentication.name or hasAuthority('user:manage')")
     @PostMapping(path = "/update-user", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public String editUser(@ModelAttribute UserModel user) {
         userService.update(user.id(), user);
+        return REDIRECT_TEMPLATE_INDEX + TEMPLATE_USERS_BASE;
+    }
+
+    @PreAuthorize("hasAuthority('user:manage')")
+    @PostMapping(path = "/delete-user/{id}", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    public String deleteUser(@PathVariable("id") Long target) {
+        userService.delete(target);
         return REDIRECT_TEMPLATE_INDEX + TEMPLATE_USERS_BASE;
     }
 
