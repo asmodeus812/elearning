@@ -17,12 +17,12 @@ public class UserConverter implements ModelConverter<UserEntity, UserModel> {
 
     @Override
     public final UserModel convertFrom(UserEntity entity) {
-        return new UserModel(entity.getId(), entity.getUsername(), null, roleConverter.convertFrom(entity.getRole()));
+        return new UserModel(entity.getId(), entity.getUsername(), entity.getPassword(), roleConverter.convertFrom(entity.getRole()));
     }
 
     @Override
     public final UserEntity convertFrom(UserModel model) {
-        return new UserEntity(model.id(), model.username(), null);
+        return new UserEntity(model.id(), model.username(), model.password(), roleConverter.convertFrom(model.role()));
     }
 
     @Override

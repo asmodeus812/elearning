@@ -4,7 +4,6 @@ import com.spring.demo.core.config.model.MutableUserDetails;
 import com.spring.demo.core.entity.AuthorityEntity;
 import com.spring.demo.core.entity.UserEntity;
 import java.util.Collection;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,7 +16,7 @@ public class PrincipalConverter implements ModelConverter<UserEntity, UserDetail
 
     @Override
     public UserEntity convertFrom(UserDetails model) {
-        return new UserEntity(model.getUsername(), model.getPassword());
+        return new UserEntity(model.getUsername(), model.getPassword(), null);
     }
 
     @Override

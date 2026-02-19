@@ -29,14 +29,15 @@ public class UserEntity extends AbstractAuditedEntity {
         // require a default safe constructor
     }
 
-    public UserEntity(Long id, String name, String password) {
+    public UserEntity(String name, String password, RoleEntity role) {
+        this(null, name, password, role);
+    }
+
+    public UserEntity(Long id, String name, String password, RoleEntity role) {
         super(id);
         this.username = name;
         this.password = password;
-    }
-
-    public UserEntity(String name, String password) {
-        this(null, name, password);
+        this.role = role;
     }
 
     public String getUsername() {

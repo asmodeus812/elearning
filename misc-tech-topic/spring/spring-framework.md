@@ -2400,6 +2400,32 @@ INSERT INTO VIDEOS (NAME, DESCRIPTION) VALUES ('Neon Harbor', 'A disillusioned d
 INSERT INTO VIDEOS (NAME, DESCRIPTION) VALUES ('Clockwork Orchard', 'In a town where timekeeping is law, a botanist finds a tree that blooms one hour into the future.');
 ```
 
+Later on we are going to try to integrate an actual data base provider like Postgres, which requires us to carefully
+tailor the configuration properties in our yaml file. There are a few things that we have to change in there to make
+this work, but the general idea is the following
+
+```yaml
+spring:
+    datasource:
+        url: jdbc:postgresql://localhost:5432/test
+        username: postgres
+        password: postgres
+        driverClassName: org.postgresql
+    jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+```
+
+The appropriate driver has to be added to our classpath at runtime as well so that Spring and the underlying JDBC can
+instantiate it that can be done by adding a dependency such as this:
+
+```xml
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
+</dependency>
+```
+
 ### Entities
 
 The entities are the lowest form of data transfer definitions, these are basically what a way to describe our
@@ -3014,7 +3040,7 @@ CREATE TABLE user_role (
 
 There are many other considerations when it comes to data base design, but for the time being we will only focus on the relation ship
 
-### Security
+## Security
 
 By default spring exposes a default configuration that can be used to secure an application directly we have a great
 control over how the security is implemented and configured, but it can be quickly enabled out of the box to give you
@@ -3977,4 +4003,933 @@ public class TemplateController {
 }
 ```
 
-#####
+Conversely we will also sync our `RestfulController` as well with the changes in the `TemplateController`, here is the
+full version of the restful controller that is made/adapted to replicate what the `TemplateController` now does
+
+```java
+@RestController
+@RequestMapping(path = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
+public class RestfulController {
+
+    private final VideoService videoService;
+    private final RoleService roleService;
+    private final UserService userService;
+    private final PrincipalService principalService;
+    private final AuthorityService authorityService;
+
+    public RestfulController(VideoService videoService, RoleService roleService, UserService userService, PrincipalService principalService,
+                    AuthorityService authorityService) {
+        this.videoService = videoService;
+        this.roleService = roleService;
+        this.userService = userService;
+        this.principalService = principalService;
+        this.authorityService = authorityService;
+    }
+
+    @GetMapping(path = "/videos", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Page<VideoModel>> getVideos(@RequestParam(defaultValue = "1") int page,
+                    @RequestParam(defaultValue = "10") int size) {
+        final int pageNumber = Math.max(page, 1);
+        final int pageSize = Math.min(Math.max(size, 1), 100);
+        final Sort sortCriteria = Sort.by(Sort.Direction.ASC, "id");
+
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, sortCriteria);
+        Page<VideoModel> videosPage = videoService.findAll(pageable);
+
+        return ResponseEntity.ok(videosPage);
+    }
+
+    @GetMapping(path = "/find-videos", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Collection<VideoModel>> findVideos(@RequestParam Map<String, String> criteria) {
+        return ResponseEntity.ok(videoService.search(SearchCriteria.of(criteria), VideoModel.VideoCriteria.values()));
+    }
+
+    @PostMapping(path = "/new-video", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<VideoModel> addVideo(@RequestBody VideoModel video) {
+        return ResponseEntity.ok(videoService.create(video));
+    }
+
+    @PostMapping(path = "/update-video", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<VideoModel> updateVideo(@RequestBody VideoModel video) {
+        return ResponseEntity.ok(videoService.update(video.id(), video));
+    }
+
+    @PostMapping(path = "/delete-video/{id}")
+    public ResponseEntity<Object> deleteVideo(@PathVariable("id") Long target) {
+        return ResponseEntity.ok(videoService.delete(target));
+    }
+
+    @GetMapping(path = "/users")
+    @PreAuthorize("hasAuthority('user:manage') or hasAuthority('user:list')")
+    public ResponseEntity<List<UserModel>> getUsers() {
+        return ResponseEntity.ok(userService.getAll());
+    }
+
+    @GetMapping(path = {"/user", "/user/{id}"})
+    @PreAuthorize("#target == null or hasAuthority('user:manage') or hasAuthority('user:list')")
+    public ResponseEntity<UserModel> getUser(@PathVariable(name = "id", required = false) Long target) {
+        if (!Objects.isNull(target)) {
+            return ResponseEntity.ok(userService.get(target));
+        } else {
+            UserDetails details = principalService.getPrincipal().orElseThrow();
+            return ResponseEntity.ok(userService.findByUsername(details.getUsername()).orElseThrow());
+        }
+    }
+
+    @PreAuthorize("#user.username == authentication.name or hasAuthority('user:manage')")
+    @PostMapping(path = "/update-user", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<UserModel> editUser(@RequestBody UserModel user) {
+        return ResponseEntity.ok(userService.update(user.id(), user));
+    }
+
+    @PreAuthorize("hasAuthority('user:manage')")
+    @PostMapping(path = "/delete-user/{id}")
+    public ResponseEntity<Object> deleteUser(@PathVariable("id") Long target) {
+        return ResponseEntity.ok(userService.delete(target));
+    }
+}
+```
+
+These changes we are going to need with the next chapter where we will start performing tests, the chapter will
+ensure to walk us through the different ways we can test these controllers, and all of the dependent components they
+rely on.
+
+#### Oauth2
+
+TODO:
+
+## Testing
+
+Just as any other starter in spring, spring provides one for testing in here we have quite a few dependencies
+provided that would enable us to do fast test iteration.
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+Adding this dependency will pull dependencies in your class path like:
+
+- Spring Test - spring boot oriented test utilities
+- JUnit 5 - library for writing the actual tests
+- JSONPath - query language for json documents
+- AssertJ - fluent api for asserting results
+- Hamcrest - library of matchers
+- Mockito - mocking and building test cases faster
+- JsonAssert - helps with doing JSON assertions
+- XMLunit - assert and verify xml documents
+
+Testing usually means that we have to test the entire public API of the project we are working with, sometimes even
+the private api might be subject to testing, to ensure the correctness of the program. This happens by asserting
+state that is expected, that state can be checking the result of methods, checking if a given method is invoked, or
+even verifying that an exception is thrown, that is right we have to verify as much of the execution of the unit we
+are testing as possible that includes all possible edge cases aside from the plain obvious straight cases.
+
+### Testing patterns
+
+Okay first before we begin with testing different components we have to clear a few things since, spring is quite
+complex beast there are different ways to test components in the spring environment. We know that spring is a huge
+container of dependency injected state, that is created even when we start tests. That is most of the time not only
+an overkill but also can cause great confusion and does not provide the isolation that we need for tests. What we
+need to do is to have a way to control the spring context.
+
+#### Simple context
+
+Use this when you’re testing domain objects, mapping logic, validation rules you wrote yourself, and service logic that
+doesn’t require Spring features like transactions, AOP proxies, or auto-wiring. These tests don’t create an
+`ApplicationContext`, so there is nothing to “fail to load”.
+
+```java
+// most notable here is the fact that we do not annotate this with any annotation, we do not provide the
+// SpringBootTest, or the Extend test annotation, this test is pure junit,
+class VideoEntityPlainJunitTest {
+
+    @Test
+    void shouldCreateVideoEntityWithProperties() {
+        var v = new VideoEntity();
+        v.setName("n");
+        v.setDescription("d");
+        assertEquals("n", v.getName());
+        assertEquals("d", v.getDescription());
+    }
+}
+```
+
+#### Mocking context
+
+The next level is mocking, that is we test more than one componetns, but still in the realm outside all of the spring
+provided context, transactions, proxies, wiring etc.
+
+```java
+// note the annotation here which we will focus on later, but what does that say anyway ? It just says to spring use
+// this extension, in this case Mockito, Spring has its own which we will later on see how to use as well
+@ExtendWith(MockitoExtension.class)
+class UserServiceTestOnlyMockito {
+
+  @Mock UserRepository userRepository;
+  @Mock UserConverter userConverter;
+  @InjectMocks UserService userService;
+
+  @Test
+  void shouldCreateUserService() {
+    assertNotNull(userService);
+  }
+}
+```
+
+#### Spring context
+
+We are entering the spring territory here where, we would like to allow spring to create a few beans for us but not
+everything, we can control this with the following, we provide the `SpringExtension` class to the extends with which
+will now involve the spring context extension,
+
+```java
+// this annotation provides the bare minimum spring context initialization, it combines a couple of annotations to wire
+// spring to Junit and also enable us to write basic tests that interact with the spring context, we also tell spring
+// load the user service as context to the test, as it is the target of this test
+@SpringJUnitConfig
+@ContextConfiguration(UserService.class)
+class UserServiceWiringTest {
+
+  @MockitoBean UserRepository userRepository;
+  @MockitoBean UserConverter userConverter;
+
+  @Autowired UserService userService;
+
+  @Test
+  void wiringWorks() {
+    assertNotNull(userService);
+    assertNotNull(userService.repository());
+  }
+}
+```
+
+This loads a very tiny spring context and does not scan the entire application also uses and loads only in this case
+the `UserService`
+
+```java
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration
+```
+
+Here we can see part of the annotation, it enables or wires the spring context with Junit using the extend annotation,
+and also provides a default context configuration, when no parameters are provided to the context config annotation
+spring just tries its best to load by default context and configurations from known locations,
+
+#### Stateful context
+
+Further down the levels of testing we might wish to involve actual stateful data, that is to say if we wish to replicate
+the state of the application at some future point in time, such as adding data to the store or repositories that we are
+using to test certain flow or a condition in our code.
+
+```java
+// this is basically an annotation that combines many others that auto-boot the entire spring data stack, enabling it so
+// we can actually perform spring-data actions, that will allow us to persist data in our store such as h2, enable
+// transactions and so on and so forth
+@DataJpaTest
+class VideoRepositoryTest {
+
+  @Autowired VideoRepository repo;
+
+  @Test
+  void saveAndLoad() {
+    var saved = repo.save(new VideoEntity(null, "n", "d"));
+    assertThat(repo.findById(saved.getId())).isPresent();
+  }
+}
+```
+
+We can see a little bit more of how this annotation looks like, and that it enables different parts of the data
+stack along side the `SpringExtension`.
+
+```java
+@ExtendWith(SpringExtension.class)
+@OverrideAutoConfiguration(enabled = false)
+@TypeExcludeFilters(DataJpaTypeExcludeFilter.class)
+@BootstrapWith(DataJpaTestContextBootstrapper.class)
+@Transactional
+@AutoConfigureCache
+@AutoConfigureDataJpa
+@AutoConfigureTestDatabase
+@AutoConfigureTestEntityManager
+@ImportAutoConfiguration
+```
+
+We can use this use case to prepare our data base store, and do a test, that does not exclude the fact that we can
+combine this annotation with previous ones to still perform tests at a deeper level, that interact with the data
+layer.
+
+#### Web context
+
+The next level is testing entire controllers where we would like to do a sort of an end to end test without starting the
+whole application. This will actually load a minimal context that includes what we need to test the end-to-end
+controller interaction, without booting the entire application, all contexts and configurations.
+
+```java
+@WebMvcTest(RestfulController.class)
+class RestfulControllerTest {
+
+    @MockBean
+    VideoService videoService;
+
+    @Autowired
+    MockMvc mvc;
+
+    @Test
+    void listVideosReturnsOk() throws Exception {
+        when(videoService.findAll(any())).thenReturn(List.of());
+        mvc.perform(get("/api/videos")).andExpect(status().isOk());
+    }
+}
+```
+
+We can see a little bit more of how this annotation looks like, and that it enables different parts of the web
+stack along side the `SpringExtension`.
+
+```java
+@BootstrapWith(WebMvcTestContextBootstrapper.class)
+@ExtendWith(SpringExtension.class)
+@AutoConfigureCache
+@AutoConfigureWebMvc
+@AutoConfigureMockMvc
+@ImportAutoConfiguration
+```
+
+Note that if we have a more complex setup, that has security enabled or such we would have to additionally @Import these
+configurations to tell spring how to setup the context, so our integration test actually works.
+
+If security is in play, we typically can run the request “as a user” using `@WithMockUser` (or request post-processors).
+The key idea is that authorization decisions still read Authentication and authorities, but you’re not forced to run a
+full login flow in the test.
+
+#### Full context
+
+Now finally to enable the full context of a spring application, which would imply that the entire application is
+actually started, and everything is loaded for each test we can use the `SpringBootTest` annotation.
+
+```java
+@SpringBootTest
+class ServiceIntegrationTest {
+
+    @Test
+    void loadsContext() { }
+}
+```
+
+### Testing knobs
+
+To summarize what we have learned so far we have two major ways to configure sprng tests, the first way is to do it
+manually, we annotate the tests ourselves and we have the full control over which parts of spring are loaded, or which
+are not. These include enabling different auto-configurations and states. The second part is what are known as slice
+annotations these are pre-defined annotations that we have used already above, to directly enable certain 'stages' of
+our applications, to test these stages. Usually that is the way to go since most of the spring units that we are going
+to be testing are already quite deeply integrated into the spring lifecycle, so we will need things like dependency
+injection (at the very least) along side some sort of configuration, such as security and so on.
+
+Annotations that control the context, these are plain annotations that we use to load only specific parts of the spring
+context and application, we have full control over them, we also are in charge of maintaining them such that when our
+requirements change we also change and adapt these annotations as well.
+
+#### Basic
+
+These are the core testing annotations that we can use to tailor the testing context, they can be used to precisely
+control what part of the spring context is initialized and when, there is little to no ambiguity, as they only
+Crate/initialize what we tell them to.
+
+`@ExtendWith(SpringExtension.class)` - That is the entry point for most of our tests, this is the startup annotation
+that basically links JUnit with Spring, allowing spring to be started by Junit, from this point on we can use spring
+annotations such as @ContextConfiguration or @Import to enable different components of our spring context of
+
+`@ContextConfiguration` - The core Spring test config way to configure and load a selected part of the
+ApplicationContext from specific config classes or locations,not necessarily only spring boot. Use it when you want
+precise control over what configuration is loaded, this one is often paired with @SpringJUnitConfig.
+
+`@Import` - Provides a helping hand not strictly only for testing, annotation, but it is often used to include context into
+the application context, that is a way of pulling common beans and use-cases usually from some sort of utility
+package within the test cases, that provide some common context and configuration to bootstrap the state of the
+tests. In other words to compose multiple configuration classes or units to avoid repeating common entry points and
+requirements also to separate these configurations and components into their own modules or classes.
+
+#### Slices
+
+Test slice annotations are a collection of annotations that basically configure a specific `SLICE` of the spring
+applications context for us- data layer, server/bean layer, web-mvc layer. These are usually provided or exposed by
+spring and 3rd party libraries and are a bunch of auto configurations meant to quickly configure a test context for
+a specific context.
+
+`@SpringJUnitConfig / @SpringJUnitWebConfig` - These are the “turn on Spring test context in JUnit 5” knobs.
+@SpringJUnitConfig is basically the convenient composed version, Spring extension and context configuration, and
+@SpringJUnitWebConfig adds web app context semantics.
+
+Annotations that slice the context, load only a part of your app - These are Spring Boot’s biggest productivity win,
+load only the layer you’re testing. They auto-configure infrastructure for that layer and intentionally don’t scan the
+rest (services/repos/etc.), so you mock the boundaries.
+
+`@WebMvcTest` - Loads Spring MVC infrastructure + controller-related beans (and excludes regular `@Component` beans by
+default). Great for controller request/response behavior without booting everything.
+
+`@WebFluxTest` - Same concept as `WebMvcTest` annotation but for Spring `WebFlux` controllers and applications.
+
+`@DataJpaTest` - Loads the JPA persistence slice (entities, repositories, JPA infra). Great for repository
+queries/mappings, typically with a test database unless you opt out.
+
+`@JsonTest, @RestClientTest` - plus other data slices like @DataJdbcTest, @DataMongoTest, @DataRedisTest,
+@DataR2dbcTest, etc. (depending on your stack). The Boot testing chapter calls out these slice patterns explicitly.
+
+`@SpringBootTest` - Bootstraps (almost) your whole application using Spring Boot’s SpringApplication, so you get
+auto-configuration, component scanning, @ConfigurationProperties, etc. This is the “integration test” hammer; you use it
+when you truly want the assembled app. It can also start a server depending on webEnvironment.
+
+Some third-party starters often ship their own `@XXXTest` annotations that behave like slices, they’re usually
+meta-annotations combining Boot test auto-config and exclusions. The concept is the same: “load only the tech under
+test”.
+
+### Testing units
+
+In unit testing the units are usually the smallest things we can interact with, but that varies from project to
+project, in our scenario UNITS can be considered our Database entities, business Models, Services etc. These are to
+say, units are a standalone element or component of our project/program, you can think of it as an ATOM, the
+smallest indivisible element.
+
+```java
+@Test
+void toStringShouldAlsoBeTested() {
+      VideoEntity entity = new VideoEntity("alice", "title", "description");
+      assertThat(entity.toString()).isEqualTo("VideoEntity{id=null, username='alice',
+              name='title', description='description'}");
+}
+```
+
+We can use as many assertions as we wish and usually a test is not required to have one master assert that is
+actually much easier to combine multiple asserts into a single test method, however what is important is to ensure
+that the test methods are testing a unit (what a unit is in your project, you can decide). The example below tests a
+unit in this case the unit is the VideoEntity, and the testing that we perform is over the available setter methods.
+That way the test methods are directly referring to some sort of actual action, that might be performed during the
+usage of the public API of that object / type class - setters mutate the object, we verify that all the setters work
+as expected.
+
+```java
+@Test
+void settersShouldMutateState() {
+      VideoEntity entity = new VideoEntity("alice", "title", "description");
+      entity.setId(99L);
+      entity.setName("new name");
+      entity.setDescription("new desc");
+      entity.setUsername("bob");
+      assertThat(entity.getId()).isEqualTo(99L);
+      assertThat(entity.getUsername()).isEqualTo("bob");
+      assertThat(entity.getName()).isEqualTo("new name");
+      assertThat(entity.getDescription()) //
+            .isEqualTo("new desc");
+}
+```
+
+### Testing repositories
+
+We can also create our test case for the user repository by using another annotation, such as `@DataJpaTest`, that
+would enable the data slice and allow us to take advantage of persisting data to test our service for example.
+
+```java
+@Testable
+@DataJpaTest
+@ActiveProfile("test")
+@Import(UserRepository.class)
+class UserRepositoryTest {
+}
+```
+
+Update your `src/test/resources/application-test.yml`, also one should use `@ActiveProfile("test")`, on top of the
+target test to ensure that the correct profile is used, usually a generic abstract class is created that contains
+all the common annotations and we simply extend off of it when writing tests but, regardless the profile will NOT be
+automatically present.
+
+```yaml
+spring.sql.init.mode: always
+spring.sql.init.schema-locations: classpath:/schema.sql
+spring.sql.init.data-locations: classpath:/data.sql
+```
+
+A couple more things to note here since we are going to be testing the repository integration, we also need to take care
+of ensuring that the H2 container picks the correct data and schema, for our test cases, we can create a new custom data
+sql file and put it in our classpath under `src/test/resources/test-data.sql`. The schema can be re-used from the
+primary schema file which is what we would expect as well, but some tests might require custom schema objects (keep that
+in mind)
+
+### Testing services
+
+Services are a bit more complicated to test because they often rely on multiple beans that need to be instantiated
+first, or mocked. And often times there are no pre-defined slices that we can rely on because these services are
+user created representing the business layer of an application. These are usually a repository or other services.A
+service might also depend on some spring internal beans that are created by spring automatically and we might not
+have full control over them in which case instead of mocking them we can spy on them directly from the context,
+meaning we do not create a mock instance that is injected into the service, but we wrap around an existing instance
+created in the spring context / container to spy on that bean instead
+
+```java
+@Testable
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private UserConverter userConverter;
+
+    @InjectMocks
+    private UserService userService;
+
+    @Test
+    void shouldCreateUserService() {
+        assertNotNull(userService);
+        assertNotNull(userService.entityClass());
+        assertNotNull(userService.modelClass());
+
+        assertNotNull(userService.repository());
+        assertNotNull(userService.converter());
+    }
+}
+```
+
+In this example we have a bare bones mockito context, that is injecting the mocks into the user service, there is no
+spring context involved here, we are not actually using spring at all, we are going to see how this can be upgraded
+to use spring to actually let spring inject the dependencies in our services instead
+
+To ensure this can be tested correctly we have to ensure that we mock the return values of these beans as well,
+there are no actual beans created for these dependencies that this service is getting inject with.
+
+Next step is to let spring create these instances, while we can still have mockito wrap around them and provide a
+mock, in the example here we let spring create the service instance, and we @Autowire it, however the dependencies
+are still strictly not spring context created, just the primary service that is being tested.
+
+```java
+@Testable
+@SpringJUnitConfig
+@Import(classes = UserService.class)
+class UserServiceTest {
+
+    @MockitoBean
+    private UserRepository userRepository;
+
+    @MockitoBean
+    private UserConverter userConverter;
+
+    @Autowired
+    private UserService userService;
+}
+```
+
+We have changed the example above by using different annotations, now we have enabled spring context, so instead of
+mockito we are actually loading a minimal spring context, that is going to be loading and auto-wiring the user
+service bean along side the dependencies which the service needs. `MockitoBean` is a spring based annotation that
+basically allows us to create a mock of a bean in the spring context directly, that will be injected and wired into
+the user service, and also mock it at the same time. But remember, the actual beans instances for these service
+dependencies are not their concrete actual implementations, they are mock implementation instances injected into the
+spring context by Mockito
+
+We can go further, what if we want to provide the actual instances, tell spring to scan the components instead, we
+have to swap our the annotations with `MockitoSpyBean`, that will only wrap around the actual implementations
+created and injected into the spring context, and not interfere with the bean itself. Still allow us to spy onto the
+bean' method calls and so on. Now we have told spring to detect and scan all components under the package base for
+the dependencies - `UserRepository.class and UserConverter.class`. And spring will actually create these beans
+itself with their implementations.
+
+```java
+@Testable
+@SpringJUnitConfig
+@Import(UserServiceTest.ExtraTestConfiguration.class)
+class UserServiceTest {
+
+    @TestConfiguration
+    @ComponentScan(basePackageClasses = {UserService.class, UserRepository.class, UserConverter.class})
+    static class ExtraTestConfiguration {
+    }
+
+    @MockitoSpyBean
+    private UserRepository userRepository;
+
+    @MockitoSpyBean
+    private UserConverter userConverter;
+
+    @Autowired
+    private UserService userService;
+}
+```
+
+The test above is of course not complete since even though an instance of the user repository might be created in
+the spring container context, we have not initialized or ensured that the data layer/slice is, and no proper
+persistence would be possible, this is for demonstration purposes to showcase that we can still create the dependent
+beans into the spring context, and use their actual implementations.
+
+### Testing controllers
+
+Unlike units, controllers, services and other such components of our program are more complex and usually rely on
+interfacing and communicating with other components to perform and action, a controller for example might use
+multiple business services to deliver information to the end client. In this case what do we test , and also how ?
+
+First a few things we would have to prepare, since we have already created some sort of protection through our
+security for certain routes, in the security configuration we have to ensure that we can actually call the servlet
+path under our controller in this case we will attempt to test both the template and restful controllers. Either way
+both of them are secured and protected and do not allow anonymous access at all.
+
+To do that we have to take advantage of the spring security testing dependency spring-security-test, that one
+contains a few helping hand annotations such as `@WithMockUser`, we can use to annotate our test methods or test suite
+to mimic security authentication context.
+
+```xml
+<dependency>
+    <groupId>org.springframework.security</groupId>
+    <artifactId>spring-security-test</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+Here is the general structure of our test suite, we have injected the `VideoService` mock into the controller, which
+in this case is initialized by the `WebMvcTest` annotation slice, that will ensure that spring creates our
+controllers, and mockito will create an instance proxy of the `VideoService`, that we can mock - tell certain methods
+to return certain pre-defined result.
+
+```java
+@Testable
+@WithMockUser(value = "test-user", username = "admin", roles = {"video:list"})
+@WebMvcTest(controllers = RestfulController.class)
+class RestfulControllerTest {
+
+    @MockitoBean
+    UserService userService;
+
+    @MockitoBean
+    VideoService videoService;
+
+    @MockitoBean
+    RoleService roleService;
+
+    @MockitoBean
+    PrincipalService principalService;
+
+    @MockitoBean
+    AuthorityService authorityService;
+
+    @Autowired
+    MockMvc mvc;
+
+    @BeforeEach
+    void prepareMockData() {
+        Page<VideoModel> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 20), 0);
+        when(videoService.findAll(any(Pageable.class))).thenReturn(emptyPage);
+    }
+
+    @Test
+    void shouldReturnPagedVideos() throws Exception {
+        mvc.perform(get("/api/videos").param("page", "0").param("size", "20").accept(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.content", hasSize(0)))
+                        .andExpect(jsonPath("$.totalElements").value(0));
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(videoService).findAll(captor.capture());
+
+        Pageable pageable = captor.getValue();
+        assertThat(pageable.getPageNumber()).isZero();
+        assertThat(pageable.getPageSize()).isEqualTo(20);
+    }
+}
+```
+
+What the test actually does is not that important in this case we just verify that the response is valid 200, and
+also empty, it should contain page data as well since that controller endpoint returns pageable result.
+
+```java
+@Testable
+@WithMockUser(value = "test-user", username = "admin", roles = {"user:list", "user:manage"})
+@WebMvcTest(controllers = TemplateController.class)
+class TemplateControllerTest {
+
+    @MockitoBean
+    UserService userService;
+
+    @MockitoBean
+    VideoService videoService;
+
+    @MockitoBean
+    RoleService roleService;
+
+    @MockitoBean
+    PrincipalService principalService;
+
+    @MockitoBean
+    AuthorityService authorityService;
+
+    @Autowired
+    MockMvc mvc;
+
+    @BeforeEach
+    void prepareMockData() {
+        when(userService.findByUsername("admin"))
+                        .thenReturn(Optional.of(new UserModel(1L, "admin", "admin", new RoleModel(1L, "ADMIN", Collections.emptySet()))));
+        when(userService.get(1L)).thenReturn(new UserModel(1L, "admin", "admin", new RoleModel(1L, "ADMIN", Collections.emptySet())));
+        when(principalService.getPrincipal()).thenReturn(Optional.of(new MutableUserDetails("admin", "admin", Collections.emptySet())));
+    }
+
+    @Test
+    void shouldReturnPrincipalUser() throws Exception {
+        mvc.perform(get("/ui/user").accept(MediaType.TEXT_HTML_VALUE))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML_VALUE));
+
+        verify(userService, times(0)).get(anyLong());
+        verify(principalService, times(1)).getPrincipal();
+        verify(userService, times(1)).findByUsername("admin");
+    }
+
+    @Test
+    void shouldReturnTargetUser() throws Exception {
+        mvc.perform(get("/ui/user/1").accept(MediaType.TEXT_HTML_VALUE))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML_VALUE));
+
+        verify(principalService, times(0)).getPrincipal();
+        verify(userService, times(0)).findByUsername(anyString());
+        verify(userService, times(1)).get(1L);
+    }
+}
+```
+
+Here is a simple test that demonstrates both how to get the current target user principal, this method returns
+either a user by username or the currently authenticated principal based on if we provide an id (relational unique
+identifier) to obtain a user by it. In the first scenario that we test we test for the currently authenticated
+principal which is obtained from the principal service, the second scenario obtains a user only if our user has the
+correct roles/permissions which for our test case it has - user:manage or user:list
+
+Note that both tests verify that the respective methods are called with the proper arguments, and even it asserts
+that certain methods are never called at all since that is what we would expect as well, that is an important
+distinction, because we would like to avoid any side effects that might be produced by unexpected method calls.
+
+```plaintext
+[demo-base] [ main] w.c.HttpSessionSecurityContextRepository : Created HttpSession         as SecurityContext is non-default
+[demo-base] [ main] w.c.HttpSessionSecurityContextRepository : Stored  SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken]
+
+[Principal=org.springframework.security.core.userdetails.User [Username=admin, Password=[PROTECTED], Enabled=true,
+AccountNonExpired=true, CredentialsNonExpired=true, AccountNonLocked=true, Grant ed Authorities=[ROLE_user:list]],
+Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[ROLE_user:list]]]
+```
+
+Just as a side note when the tests run, one might notice this get printed, by the spring context being initialized
+before the tests start executing, this actually shows us how the WithMockUser constructs and sets the user principal
+authentication context.
+
+### Test containers
+
+We saw above already that we can use an in-memory data base like H2 which we already use for our base application to
+simplify its deployment and testing. However in a real world senario our app will not be using an in memory
+database, on the contrary it will be using an actual real instance of a database possibly even running on a
+different machine in a different data center or server than our business app.
+
+For testing in spring we can still use in-memory h2 replacement to test our data slice, but sometimes it is better
+to have the real thing even in tests, so how do we do that. Not longer after the invention of Docker in 2013-2014,
+came `testcontainers`, these are a quick way for us to spin a test container on our environment, without having to
+worry about setting up and booting them and tearing them down after we have finished ourselves.
+
+The idea is simple when or to be exact just right before tests start, the `testcontainers` will spin up an instance
+of an application for us (in this case we will focus on databases, but really it can be anything) and prepare them
+for use, our application will never know it is running against a test-container a replica of the actual application
+that it expects to connect to in the real world (like a database, such as Postgres, Mysql, etc).
+
+The added benefit here is that we reduce the unknowns, if our application was developed to work with a certain
+database - `Postgres` for example, we test with the exact same conditions that it expects, not with a reproduction of
+a database like what `H2` is. This is important because different databases have different SQL dialects, sometimes
+these things might matter for our use case
+
+`A common mistake when testing repositories is using an in-memory database like H2 for testing while using a
+different type of database like PostgreSQL or Oracle Database in production. There is no guarantee that the
+implementation that worked with an in-memory database will work in the same way with other databases. Additionally,
+the in-memory database may not have all the features provided by your production database and vice versa.`
+
+The general set of dependencies we need to add to our pom file, these are just like any other, note that we do not
+specify the version here, we will do that with the `Testcontainers` BOM
+
+```xml
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
+</dependency>
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>junit-jupiter</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+The test containers BOM will ensure that the dependencies that are part of the `org.testcontainers` group all come with
+their proper versions
+
+```xml
+<dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+</dependencyManagement>
+```
+
+A few notes about these dependencies, that we have just added to our pom file, and how they interact with spring during
+testing:
+
+- The very first specifies the java database drivers for `Postgres`, that is important because we care about having a
+  `Postgres` drivers otherwise we would not be able to connect to the database in a `testcontainer` or at actual
+  production server
+
+- The other two are the integration between test containers and Postgres, that dependency is actually providing a
+  common API between the generic test container API, and Postgres, allowing us to quickly interact and start with
+  Postgres containers, and the final dependency is actually the test-container integration with JUnit, these are all
+  the things we really need.
+
+- The final dependency is the BOM, that is very similar to the way the spring-boot-parent BOM works, it contains all
+  the necessary versions of all dependencies that we would need, including the ones we just included, packaged under
+  one major.minor.patch version basically the BOM contains all the dependencies fixed with specific version, that work
+  together, that ensures that we will not randomly update one dependency version and forget another an explode our
+  application, the BOM ensures that the working versions between the different dependencies are packaged together
+
+```xml
+<properties>
+    <testcontainers.version>1.21.4</testcontainers.version>
+</properties>
+```
+
+First ensure that your version of `testcontainers` is compatible with the system's docker daemon and engine version,
+run `docker info` to verify this, a more recent 29+ version would require an up-to date BOM for test-containers
+
+```sh
+$ docker info
+Client: Docker Engine - Community
+ Version:    29.1.5
+ Context:    default
+ Debug Mode: false
+ Plugins:
+  buildx: Docker Buildx (Docker Inc.)
+    Version:  v0.30.1
+    Path:     /usr/libexec/docker/cli-plugins/docker-buildx
+  compose: Docker Compose (Docker Inc.)
+    Version:  v5.0.1
+    Path:     /usr/libexec/docker/cli-plugins/docker-compose
+```
+
+Once we have verified that we have the correct BOM version to work with our local daemon engine, we can take a look
+at the test suite.
+
+```java
+@Testable
+@DataJpaTest
+@Testcontainers
+@ContextConfiguration(initializers = DataSourceInitializer.class)
+@AutoConfigureTestDatabase(replace = Replace.NONE, connection = EmbeddedDatabaseConnection.NONE)
+class VideoRepositoryTest {
+
+    @Container
+    // create an instance of the Postgres database, with this particular image, that instance will be alive for the
+    // duration of this test suite only, and destroyed afterwards
+    static final PostgreSQLContainer<?> POSTGRES_DATABASE = new PostgreSQLContainer<>("postgres:16-alpine");
+
+    @Autowired
+    // tests are focused on this repository, but we can factor-away the common annotations and the initializer into a
+    // parent class, where the common logic for setting up the initializer and the database container will lie.
+    VideoRepository videoRepository;
+
+    @Test
+    void shouldPersistVideos() {
+        VideoEntity entity = new VideoEntity("video1", "descrption1");
+        entity = videoRepository.save(entity);
+
+        assertNotNull(entity);
+        assertNotNull(entity.getId());
+
+        assertEquals(1L, videoRepository.count());
+        assertEquals(entity, videoRepository.getReferenceById(entity.getId()));
+    }
+
+    static class DataSourceInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        @Override
+        public void initialize(@NonNull ConfigurableApplicationContext applicationContext) {
+            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(applicationContext,
+                            "spring.datasource.url=" + POSTGRES_DATABASE.getJdbcUrl(),
+                            "spring.datasource.username=" + POSTGRES_DATABASE.getUsername(),
+                            "spring.datasource.password=" + POSTGRES_DATABASE.getPassword(),
+                            "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
+                            "spring.datasource.driverClassName=org.postgresql.Driver", "spring.jpa.hibernate.ddl-auto=create-drop");
+        }
+    }
+}
+```
+
+A few key points that are incredibly important to understand how this test setup works and why it works, lets start
+form the top
+
+- `DataJpaTest` - initialize the entire JPA context slice in the spring context, that is, all the repository
+  configurations, down to the JPA transaction managers and so on.
+- `Testcontainers` - integrates the test-containers with JUNIT ensures that it will piggy back on Junit, needed to
+  actually know when to start itself and the containers that annotation is basically using the JUnit extends with -
+  and attaching the test-container as extension, for startup - `@ExtendWith(TestcontainersExtension.class)`
+- `ContextConfiguration` - enable our custom `DataSourceInitializer`, that will dynamically modify the spring
+  properties during context initialization to ensure that we actually connect to the database instance started by
+  test-containers and not whatever we have statically configured to work with our actual production grade database.
+- `AutoConfigureTestDatabase` - this one is quite important, it tell the spring context to not create any default
+  test data source `DataSource`, that is initially created by `DataJpaTest`
+
+`DataSourceInitializer` - the data source initializer here ensures that we have correctly setup the properties required
+for the connection to the Postgres relational data base, most importantly we have to setup the URL, username password
+but also ensure that hibernate is using the correct SQL dialect in this case previously we have set this to the
+`H2Dialect`, that is not valid for Postgres databases, we have to use the `PostgreSQLDialect` instead, also we have to
+change the driver we were thus far using the `H2` Driver, we change it to use the Postgres driver (we added as a runtime
+dependency to the pom at the start of this chapter). Take a good note of the way we configure the
+`ddl-auto=create-drop`, that will ensure that the schema is created automatically, we need this because our schema is
+
+`AutoConfigureTestDatabase` - the next important part, this is where the connection magic happens, by default the slice
+that is initialized by `DataJpaTest` creates an embedded data source connection, it tries to locate one of a few
+in-memory databases on the classpath and connect to them, such  as `H2, Derby or HSQL`, which we do not want we want to
+integrate with the real thing, so we have to either remove our H2 integration and delete it from the classpath, or
+completely disable this behavior which is implemented by `TestDatabaseAutoConfiguration`, by setting the Replace to
+NONE, meaning the data source will NOT be replaced with one that is connecting to an in-memory database.
+
+Later on we will actually remove H2 completely from our application and replace this integration with an actual Postgres
+database for both the tests and the actual application
+
+TODO: move to actual PGsql
+We can further enhance the
+
+```yaml
+spring:
+  sql.init.mode: always
+  sql.init.schema-locations: classpath:/schema.sql
+  datasource:
+    url: jdbc:postgresql://localhost:5432/test
+    username: postgres
+    password: postgres
+    driverClassName: org.postgresql
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+---
+```
+
+### Test security
+
+We already did some of that by providing a pre-defined test authentication and authority context, when we used
+`WithMockUser`, which basically setup a testing authentication context out of the box for us allowing us to access an
+otherwise protected endpoint, we are going to deep deeper this time and see how to actually verify that the security
+that we have put in place works
+
+### Summary

@@ -10,6 +10,26 @@ public class MutableUserDetails implements UserDetails {
 
     private final UserDetails delegate;
 
+    public MutableUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities) {
+        this.delegate = new UserDetails() {
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return authorities;
+            }
+
+            @Override
+            public String getPassword() {
+                return getPassword();
+            }
+
+            @Override
+            public String getUsername() {
+                return username;
+            }
+        };
+        this.password = password;
+    }
+
     public MutableUserDetails(UserDetails user) {
         this.delegate = user;
         this.password = user.getPassword();
@@ -20,8 +40,9 @@ public class MutableUserDetails implements UserDetails {
         return this.password;
     }
 
-    public void setPassword(String password) {
+    public MutableUserDetails setPassword(String password) {
         this.password = password;
+        return this;
     }
 
     @Override

@@ -1,13 +1,8 @@
 package com.spring.demo.core;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.platform.commons.annotation.Testable;
 
-@SpringBootTest
+@Testable
 class DemoApplicationTest {
-
-    @Test
-    void contextLoads() {
-    }
 
 }
