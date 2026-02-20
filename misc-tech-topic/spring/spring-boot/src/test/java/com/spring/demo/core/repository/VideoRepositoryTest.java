@@ -6,7 +6,7 @@ import com.spring.demo.core.entity.VideoEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class GenericRepositoryTest extends AbstractRepositoryTest {
+class VideoRepositoryTest extends AbstractRepositoryTest {
 
     @Autowired
     VideoRepository videoRepository;

@@ -17,8 +17,8 @@ spring:
       password: password
   mustache:
     servlet:
-      expose-session-attributes:  true
-      expose-request-attributes:  true
+      expose-session-attributes: true
+      expose-request-attributes: true
   datasource:
     url: jdbc:h2:mem:mydb
     username: sa
@@ -36,6 +36,10 @@ spring:
   application:
     name: demo-base
 
+my-application:
+  name: demo-app
+  authorities: ["user:manage", "user:list"]
+
 server:
   port: 8080
 
@@ -48,3 +52,4 @@ spring:
       on-profile:
         - local
 ---
+

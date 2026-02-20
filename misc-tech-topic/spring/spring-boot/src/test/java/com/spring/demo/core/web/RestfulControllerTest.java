@@ -32,7 +32,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @Testable
-@WithMockUser(value = "test-user", username = "admin", roles = {"video:list"})
+@WithMockUser(value = "test-user", username = "admin", authorities = {"video:list"})
 @WebMvcTest(controllers = RestfulController.class)
 class RestfulControllerTest {
 

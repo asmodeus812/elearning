@@ -847,7 +847,7 @@ private String applicationName;
 The `ConfigurationProperties` annotation is used to group and combine a set of configuration properties that have
 common root, what we usually do is to define a common root path and then define and declare the structure of these
 root properties in code, effectively binding the class annotated with this annotation to a specific set o properties
-that can be found in the application.yml file or had been provided from outside when the app was started like so
+that can be found in the `application.yml` file or had been provided from outside when the app was started like so
 
 ```java
 @ConfigurationProperties(prefix = "spring.application", ignoreInvalidFields = false, ignoreUnknownFields = true)
@@ -866,6 +866,7 @@ public class DefaultConfigurationProperties {
 }
 ```
 
+
 So as you can see the annotation actually has verification and validation properties, that is because by default it
 really enforces the structure of the prefix to match exactly what the class declares. In our case we use the
 `spring.application` prefix, that means that it will inject properties under this property root, and we use just the
@@ -877,16 +878,92 @@ with properties from the environment, and use the fields to do that. There is al
 `ConstructorBinding` which tells spring that it should prefer the constructors declared for this bean to create the
 instance
 
-Now in order to make spring create instances we have to use either one of these
+Now in order to make spring create instances we have to use either one of these, one is meant to specifically enable a
+bean that is the configuration properties, the other is a broad bean scanner, meaning that we can put our properties in
+a common package and add one `ConfigurationPropertiesScan` annotation on top of our class that contains our
+`ComponentScan`, and be done with it.
 
 - `@EnableConfigurationProperties(MyConfig.class)` - this will enable the properties, but still unless we specify
   the values annotation (like above) to tell spring which classes are eligible for for construction that will not work
   them they wont be created in the context.
-- `@ConfigurationPropertiesScan(basePackages = "com.spring.demo")` this will tell spring where it can find classes
+
+- `@ConfigurationPropertiesScan(basePackages = "com.spring.demo")` - this will tell spring where it can find classes
   with the `ConfigurationProperties` annotations.
 
 The `@EnableConfigurationProperties` or the `@ConfigurationPropertiesScan` is usually put onto a `@Configuration`
-annotated class, say a class named - `ConfigurationPropertiesEnabler` that is part of our
+annotated class, say a class named - `ConfigurationPropertiesEnabler` that is part of our config package in our
+application
+
+`Remember just this rule, avoid annotating the Configuration properties class itself with Configuration, that will not
+do anything, it will not make spring initialize the properties even if we have ConfigurationProperties onto that class
+as well, these are two different types of components which spring treats very differently - Normal Beans injected into
+the context, and Configuration properties beans`
+
+#### @ConfigurationPropertiesBinding
+
+Now that we have investigated the basics of the configuration properties, we have to expand on the concept a little bit,
+properties in the yaml or properties files are usually very simple types, `strings, numbers, booleans` and an array of
+those types. But we might want to convert these into actual java objects. How would we do that ? We have property
+converters, that can help us configure this behavior for example create full blown objects like Users from configuration
+properties that are plain strings, or combine multiple properties into creating java objects.
+
+```java
+@Bean
+@ConfigurationPropertiesBinding
+Converter<String, GrantedAuthority> grantedAuthorityConverter() {
+    return new Converter<String, GrantedAuthority>() {
+        @Override
+        @Nullable
+        public GrantedAuthority convert(String source) {
+            return new SimpleGrantedAuthority(source);
+        }
+    };
+}
+```
+
+Create a converter for granted authorities, granted authorities in an interface that is used in spring security all
+over the place and its main purpose is to allow or disallow certain actions to be performed by the currently
+authenticated user. They are not easily or trivially convertible from strings, that is why we need to give spring a
+helping hand.
+
+Let us change the `application.yml` file a little bit and create our own section for properties, where we will add our
+new custom authority type properties.
+
+```yaml
+my-application:
+  name: demo-app
+  authorities: ["user:manage", "user:list"]
+```
+
+Then we change the existing implementation of the `DefaultConfigurationProperties` to take this into account, note
+that we have already changed the prefix to be `my-application`, and added the new `authorities` property along in the constructor and a getter for it.
+
+```java
+@ConfigurationProperties(prefix = "my-application", ignoreInvalidFields = false, ignoreUnknownFields = true)
+public class DefaultConfigurationProperties {
+
+    private final String name;
+
+    private final Collection<GrantedAuthority> authorities;
+
+    @ConstructorBinding
+    public DefaultConfigurationProperties(String name, Collection<GrantedAuthority> authorities) {
+        this.name = name;
+        this.authorities = authorities;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Collection<GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+}
+```
+
+Thanks to the converter spring context will know how to actually construct a collection instance of these `GrantedAuthority`
+based off of our configuration's array of string literals and the provided custom converter.
 
 #### @ConditionalOnProperty
 
@@ -908,14 +985,12 @@ it with a Bean annotation, to achieve the same.
 
 ```java
 @Bean
-@ConditionalOnProperty(prefix="my.app", name="video",
-    havingValue="youtube")
+@ConditionalOnProperty(prefix="my.app", name="video", havingValue="youtube")
 public YouTubeService youTubeService() {
         return new YouTubeService();
 }
 @Bean
-@ConditionalOnProperty(prefix="my.app", name="video",
-    havingValue="vimeo")
+@ConditionalOnProperty(prefix="my.app", name="video", havingValue="vimeo")
 public VimeoService vimeoService() {
         return new VimeoService();
 }
@@ -2890,6 +2965,10 @@ public class OrderEntity {
 }
 ```
 
+Here is the actual structure the schema, as you can see each customer has an order, and the order table itself is the
+one that holds the reference to the customer, from a data-base schema point of view that is the order that owns the
+connection or relationship.
+
 ```sql
 CREATE SEQUENCE IF NOT EXISTS CUSTOMERS_SEQ START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE IF NOT EXISTS ORDERS_SEQ START WITH 1 INCREMENT BY 1;
@@ -2951,6 +3030,11 @@ public class ProfileEntity {
 }
 ```
 
+The structure of the schema, is represented below, you can notice that just like the CUSTOMER and ORDER example, we have
+an owning side, the one that owns the relationship, in this case either one can, but for our purposes we have put that
+ownership and in the user entity, here the thing to remember is that each user is connected to exactly one user profile
+and vice-versa.
+
 ```sql
 CREATE SEQUENCE IF NOT EXISTS USERS_SEQ START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE IF NOT EXISTS PROFILES_SEQ START WITH 1 INCREMENT BY 1;
@@ -2992,7 +3076,7 @@ public class UserEntity {
     @Id
     private Long id;
 
-    //  this annotation tells the ORM that each user can have multiple roles, and that each role itself can be
+    // This annotation tells the ORM that each user can have multiple roles, and that each role itself can be
     // tied to many users, there is no uniqueness requirement, roles can be shared between the users, and users can
     // be shared between roles, further more it tells the ORM that this is the owning side because we have the
     // @JoinTable declared here, this means that connections will be persistent when we make changes from the user
@@ -3017,6 +3101,11 @@ public class RoleEntity {
 }
 ```
 
+The actual schema we need to construct might look something like that, each user will be tied to a role and vice-versa,
+in a separate join table, that will represent that connection pair, remember that both users and roles are independent
+entities, a role can be tied or referenced to more than one users, but a single user can generally have more than one
+role at a given time, each one representing a sub-set of authorities and actions that can be performed by that user
+
 ```sql
 CREATE SEQUENCE IF NOT EXISTS USERS_SEQ START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE IF NOT EXISTS ROLES_SEQ START WITH 1 INCREMENT BY 1;
@@ -3038,7 +3127,8 @@ CREATE TABLE user_role (
 );
 ```
 
-There are many other considerations when it comes to data base design, but for the time being we will only focus on the relation ship
+There are many other considerations when it comes to data base design, but for the time being we will only focus on the
+relationships
 
 ## Security
 
@@ -3214,6 +3304,10 @@ public class AuthorityEntity {
     private Set<RoleEntity> roles;
 }
 ```
+
+The final structure or the schema will be modified to include the authorities now linked to the role, each authority is
+generally going to belong to a single role, because they are mostly unique, authority such as `video:edit` will belong
+to a role named `ROLE_VIDEOS` for example and that authority would not belong to another role
 
 ```sql
 CREATE SEQUENCE IF NOT EXISTS USERS_SEQ START WITH 1 INCREMENT BY 1;
@@ -3430,7 +3524,7 @@ access to certain rules or routes dynamically. What is also possible is to creat
 `SecurityFilter`. However it is important to note that we need to order them correctly, because it might cause conflicts
 of matching request matchers.
 
-Each security filter chain is built from a HttpSecurity, for each we can configure what routes to ignore, accept allow
+Each security filter chain is built from a `HttpSecurity`, for each we can configure what routes to ignore, accept allow
 or authenticate, we can configure the type of login, either normal stateful or stateless one and so on and so forth.
 
 ```java
@@ -3449,15 +3543,15 @@ SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Excepti
 ```
 
 We are going to attempt to override this config for us to make a more advanced one, in our configuration so far we have
-enabled the H2 in memory database console, we have enabled a few RESTful api and also we have a template engine running
+enabled the `H2` in memory database console, we have enabled a few RESTful api and also we have a template engine running
 a small UI front end rendered on the server. Each of which requires a different set of constrains, mainly connected to
 how we authenticate the user, so below we attempt to customize just this
 
-- The /h2-consle should be accessible from anyone, it does not require an authentication step because it already
+- The `/h2-consle` should be accessible from anyone, it does not require an authentication step because it already
   provides its own internal way to login and authorize and authenticate people.
-- The /ui routes are going to use the default DAO provider that spring uses by default to pull users from our repository
+- The `/ui` routes are going to use the default DAO provider that spring uses by default to pull users from our repository
   and log them in by username and password
-- The /api routes we will authorize and authenticate with basic HTTP based header authorization and authentication
+- The `/api` routes we will authorize and authenticate with basic HTTP based header authorization and authentication
 
 ```java
 @Order(1)
@@ -3527,7 +3621,7 @@ SecurityFilterChain uiSecurityFilterChain(HttpSecurity http, @Qualifier("uiUserD
     defaultLoginPageGeneratingFilter.setLoginPageUrl("/ui/login");
 
     // these are mandatory and are not set by default we use just these values, because the
-    // UsernamePasswordAuthenticationFilter expected these by default, can be customized but we avoid adding more code
+    // `UsernamePasswordAuthenticationFilter` expected these by default, can be customized but we avoid adding more code
     defaultLoginPageGeneratingFilter.setUsernameParameter("username");
     defaultLoginPageGeneratingFilter.setPasswordParameter("password");
     defaultLoginPageGeneratingFilter.setFormLoginEnabled(true);
@@ -3545,7 +3639,7 @@ SecurityFilterChain uiSecurityFilterChain(HttpSecurity http, @Qualifier("uiUserD
         // this is where the magic happens we tell the form login filter, the original one, to redirect to /ui/login
         // that will trigger our custom filter that we have created and attached below, on top of that we also need to tell
         // it where to redirect to on success that would be /ui, where our base ui layer is. Finally the login processing
-        // url is what the UsernamePasswordAuthenticationFilter is going to filter on and catch, see by default that is
+        // url is what the `UsernamePasswordAuthenticationFilter` is going to filter on and catch, see by default that is
         // /login, now we tell it to extract the username and password parameters from /ui/login.
         customizer.loginPage("/ui/login");
         customizer.defaultSuccessUrl("/ui/");
@@ -4376,12 +4470,12 @@ default). Great for controller request/response behavior without booting everyth
 `@DataJpaTest` - Loads the JPA persistence slice (entities, repositories, JPA infra). Great for repository
 queries/mappings, typically with a test database unless you opt out.
 
-`@JsonTest, @RestClientTest` - plus other data slices like @DataJdbcTest, @DataMongoTest, @DataRedisTest,
+`@JsonTest, @RestClientTest` - plus other data slices like `@DataJdbcTest`, `@DataMongoTest`, `@DataRedisTest`,
 @DataR2dbcTest, etc. (depending on your stack). The Boot testing chapter calls out these slice patterns explicitly.
 
 `@SpringBootTest` - Bootstraps (almost) your whole application using Spring Boot’s SpringApplication, so you get
-auto-configuration, component scanning, @ConfigurationProperties, etc. This is the “integration test” hammer; you use it
-when you truly want the assembled app. It can also start a server depending on webEnvironment.
+auto-configuration, component scanning, `@ConfigurationProperties`, etc. This is the “integration test” hammer; you use it
+when you truly want the assembled app. It can also start a server depending on `webEnvironment`.
 
 Some third-party starters often ship their own `@XXXTest` annotations that behave like slices, they’re usually
 meta-annotations combining Boot test auto-config and exclusions. The concept is the same: “load only the tech under
@@ -4594,7 +4688,7 @@ to return certain pre-defined result.
 
 ```java
 @Testable
-@WithMockUser(value = "test-user", username = "admin", roles = {"video:list"})
+@WithMockUser(value = "test-user", username = "admin", authorities = {"video:list"})
 @WebMvcTest(controllers = RestfulController.class)
 class RestfulControllerTest {
 
@@ -4645,7 +4739,7 @@ also empty, it should contain page data as well since that controller endpoint r
 
 ```java
 @Testable
-@WithMockUser(value = "test-user", username = "admin", roles = {"user:list", "user:manage"})
+@WithMockUser(value = "test-user", username = "admin", authorities = {"user:list", "user:manage"})
 @WebMvcTest(controllers = TemplateController.class)
 class TemplateControllerTest {
 
@@ -4715,12 +4809,14 @@ distinction, because we would like to avoid any side effects that might be produ
 
 [Principal=org.springframework.security.core.userdetails.User [Username=admin, Password=[PROTECTED], Enabled=true,
 AccountNonExpired=true, CredentialsNonExpired=true, AccountNonLocked=true, Grant ed Authorities=[ROLE_user:list]],
-Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[ROLE_user:list]]]
+Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[user:list]]]
 ```
 
 Just as a side note when the tests run, one might notice this get printed, by the spring context being initialized
-before the tests start executing, this actually shows us how the WithMockUser constructs and sets the user principal
-authentication context.
+before the tests start executing, this actually shows us how the `@WithMockUser` constructs and sets the user
+principal authentication context. `Take a good note of the fact that we use authorities in the WithMockUser
+annotation and not the roles, because that will produce a role of the type ROLE_user:list and not a raw authority
+user:list`
 
 ### Test containers
 
@@ -4865,6 +4961,11 @@ class VideoRepositoryTest {
     static class DataSourceInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
         public void initialize(@NonNull ConfigurableApplicationContext applicationContext) {
+            // the important properties are listed here, what we do is prepare the default data source correctly, each
+            // data source needs to know not just the connection URL, or merely the password, but most importantly which
+            // actual data base driver and dialect is going to be used, otherwise there is no way to establish a correct
+            // connection that is going to work. The ddl-auto here is used because we have no compatible schema generation
+            // mechanism at this point, not until we change our actual app database integration from H2 to PostgreSQL.
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(applicationContext,
                             "spring.datasource.url=" + POSTGRES_DATABASE.getJdbcUrl(),
                             "spring.datasource.username=" + POSTGRES_DATABASE.getUsername(),
@@ -4900,36 +5001,212 @@ dependency to the pom at the start of this chapter). Take a good note of the way
 
 `AutoConfigureTestDatabase` - the next important part, this is where the connection magic happens, by default the slice
 that is initialized by `DataJpaTest` creates an embedded data source connection, it tries to locate one of a few
-in-memory databases on the classpath and connect to them, such  as `H2, Derby or HSQL`, which we do not want we want to
-integrate with the real thing, so we have to either remove our H2 integration and delete it from the classpath, or
+in-memory databases on the classpath and connect to them, such as `H2, Derby or HSQL`, which we do not want we want to
+integrate with the real thing, so we have to either remove our `H2` integration and delete it from the classpath, or
 completely disable this behavior which is implemented by `TestDatabaseAutoConfiguration`, by setting the Replace to
 NONE, meaning the data source will NOT be replaced with one that is connecting to an in-memory database.
 
-Later on we will actually remove H2 completely from our application and replace this integration with an actual Postgres
-database for both the tests and the actual application
+Later on we will actually remove `H2` completely from our application and replace this integration with an actual
+Postgres database for both the tests and the actual application, that would solve the issue of having to exclude test
+data base data sources from being created because the `H2` will be removed from the classpath / our dependencies.
 
 TODO: move to actual PGsql
 We can further enhance the
 
 ```yaml
 spring:
-  sql.init.mode: always
-  sql.init.schema-locations: classpath:/schema.sql
-  datasource:
-    url: jdbc:postgresql://localhost:5432/test
-    username: postgres
-    password: postgres
-    driverClassName: org.postgresql
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    sql.init.mode: always
+    sql.init.schema-locations: classpath:/schema.sql
+    datasource:
+        url: jdbc:postgresql://localhost:5432/test
+        username: postgres
+        password: postgres
+        driverClassName: org.postgresql
+    jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
 ---
 ```
 
 ### Test security
 
 We already did some of that by providing a pre-defined test authentication and authority context, when we used
-`WithMockUser`, which basically setup a testing authentication context out of the box for us allowing us to access an
-otherwise protected endpoint, we are going to deep deeper this time and see how to actually verify that the security
-that we have put in place works
+`@WithMockUser`, which basically setup a testing authentication context out of the box for us allowing us to access an
+otherwise protected endpoint, we are going to dig deeper this time and see how to actually verify that the security that
+we have put in place works. The test case below is mostly abridged, the full form is not shown but rather what is
+actually important for the purposes of demonstrating how to make sure we are actually testing the security layer of our
+application.
 
-### Summary
+```java
+@Testable
+@Import(SecurityConfiguration.class)
+@WebMvcTest(controllers = TemplateController.class)
+class SecurityConfigurationTest {
+
+    @Autowired
+    MockMvc mvc;
+
+    @BeforeEach
+    @WithMockUser(value = "setup-user", username = "basic", authorities = {})
+    void prepareMockData() {
+        when(userService.findByUsername("admin"))
+                        .thenReturn(Optional.of(new UserModel(...)));
+        when(userService.get(1L)).thenReturn(new UserModel(...));
+        when(userService.update(anyLong(), any())).thenReturn( new UserModel(...));
+        when(principalService.getPrincipal()).thenReturn(Optional.of(new MutableUserDetails(...)));
+    }
+
+    @Test
+    void shouldReportUnauthorizedForUserAccess() throws Exception {
+        mvc.perform(get("/ui/user/1")).andExpect(status().is3xxRedirection()).andExpect(redirectedUrlPattern("**/ui/login"));
+        verify(userService, times(0)).get(1L);
+    }
+
+    @Test
+    @WithMockUser(value = "test-user", username = "regular-user", authorities = {"video:list"})
+    void shouldReportForbiddenForUserAccess() throws Exception {
+        mvc.perform(get("/ui/user/1")).andExpect(status().isForbidden());
+        verify(userService, times(0)).get(1L);
+    }
+
+    @Test
+    @WithMockUser(value = "test-user", username = "regular-user", authorities = {"user:manage"})
+    void shouldReportAllowForUserAccess() throws Exception {
+        mvc.perform(get("/ui/user/1")).andExpect(status().isOk());
+        verify(userService, times(1)).get(1L);
+    }
+
+    @Test
+    @WithMockUser(value = "test-user", username = "advanced-user", authorities = {"user:manage"})
+    void shouldReportAllowForUserUpdate() throws Exception {
+        UserModel updatedUser = new UserModel(1L, "regular-user", "new-password", null);
+
+        mvc.perform(post("/ui/update-user").with(csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                        .param("id", "1")
+                        .param("username", "regular-user")
+                        .param("password", "new-password")).andExpect(status().is3xxRedirection());
+        verify(userService, times(1)).update(1L, updatedUser);
+    }
+
+    @Test
+    @WithMockUser(value = "test-user", username = "regular-user", authorities = {})
+    void shouldReportForbiddenForUserUpdate() throws Exception {
+        mvc.perform(post("/ui/update-user").with(csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                        .param("id", "1")
+                        .param("username", "another-user")
+                        .param("password", "new-password")).andExpect(status().isForbidden());
+        verify(userService, times(0)).update(anyLong(), any());
+    }
+
+    @Test
+    @WithMockUser(value = "test-user", username = "myself-user", authorities = {})
+    void shouldReportAllowMyselfForUserUpdate() throws Exception {
+        UserModel updatedUser = new UserModel(1L, "myself-user", "new-password", null);
+
+        mvc.perform(post("/ui/update-user").with(csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                        .param("id", "1")
+                        .param("username", "myself-user")
+                        .param("password", "new-password")).andExpect(status().is3xxRedirection());
+        verify(userService, times(1)).update(1L, updatedUser);
+    }
+}
+```
+
+First take a look at the following setup, we have here specified that, we require to import the security configuration
+for our application, if we do not do this the default MVC slice security that is setup will be used, meaning we are not
+going to be testing our security. Remember that the testing slice annotations do not implicitly initialize our context
+at all, they mostly take care of initializing, the core context that spring needs to start the given slice in this case
+the web slice only, and that is all
+
+```java
+// these two annotations have to be correctly setup to actually properly test what we expect to test, first the
+// controller that we are aiming at testing has to be the one which is initialized in the @WebMvcTest, and secondly we
+// @Import our security context configuration.
+@Import(com.spring.demo.core.config.SecurityConfiguration.class)
+@WebMvcTest(controllers = com.spring.demo.core.web.TemplateController.class)
+```
+
+Second we want to see if our security actually works, we have a few guard rails that protect the controller - the user
+must be authenticated and also authorized, meaning the user has to have the correct authorities to perform the given
+actions, otherwise we get 401 or 403 respectively more on that in a bit. On top of that the endpoints are protected by
+CSRF token - BUT that is only for side effect or mutating endpoints - POST, PUT, DELETE, that means that methods like
+GET and OPTIONS are not protected by CSRF by default in spring because they do not produce side effects (by convention)
+
+```java
+// take a good note of the fact that we use the authorities  of the mock user, we specify that this user has this
+// specific authority list, which we require for mutating the user data in our controller otherwise we will get forbidden
+// even if we are authenticated
+@WithMockUser(value = "test-user", username = "advanced-user", authorities = {"user:manage"})
+void () throws Exception {
+    ...
+    // enhances this update-user request with a csrf token, also take a note of the content type, since this is part of
+    // the TemplateController, we do not have an APPLICATION_JSON but rather we use APPLICATION_FORM_URLENCODED_VALUE, or
+    // in other words form data, the csrf will be included in both the form data and the request headers
+    mvc.perform(post("/ui/update-user").with(csrf())
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        .param("id", "1")
+        .param("username", "regular-user")
+        .param("password", "new-password"))
+    ...
+}
+```
+
+The `csrf` static method located at `SecurityMockMvcRequestPostProcessors`, is a post processor for requests. What it
+does is enhance the test request we construct with MVC and perform, with a cross site resource forgery token, to allow
+us to call the endpoint otherwise we will receive 415
+
+We have come to the final point we can see that we have two types of statuses related to security context, mostly - we
+usually get `401 or 403`, that spring e - `401` means unauthenticated (even though actually that is unauthorized as
+specified in the web spec) and `403` is unauthorized. What does that imply
+
+`401` - unauthenticated - means that our user never authenticated, that might be due to wrong user/password credentials,
+or we can get this error code on endpoints that only require authentication, but no authorization
+
+`403` - forbidden - means that we were not authorized or allowed to perform a certain action, that means that we are
+authenticated, and the application recognizes us but we are not having the correct set of permissions to evaluate the
+action we are trying to evaluate
+
+We can clearly actually see the difference between these two in the test which is expressed above, here is an
+excerpt from that test. We can see that without any mock user the application will directly redirect to the login
+page, that is how we have it setup in our security config. Below we have put the abridged important parts of the security config that actually configures this exact behavior
+
+```java
+...
+
+// here we actually create a new login page filter that is under /ui/login, the default login page remains and it is
+// actually what redirects to this custom login page, this is for convenience and consistency mostly we could have used
+// the default login page just as well which is under /login
+DefaultLoginPageGeneratingFilter defaultLoginPageGeneratingFilter = new DefaultLoginPageGeneratingFilter();
+defaultLoginPageGeneratingFilter.setAuthenticationUrl("/ui/login");
+defaultLoginPageGeneratingFilter.setLoginPageUrl("/ui/login");
+
+...
+
+.formLogin(customizer -> {
+    // this configuration will force the default filter to redirect to the custom login page, instead of the
+    // default login page which is what it does by default, this was done to separate the login into its own
+    // sub-section path under /ui
+    customizer.loginPage("/ui/login");
+    customizer.defaultSuccessUrl("/ui/");
+    customizer.loginProcessingUrl("/ui/login");
+})
+```
+
+Here is the test itself, notice that we expect a redirect, not a 401, because that is what our security does, unlike
+when you are unauthorized, where you will get an error 403 page, here we do not default to a 401 page but rather
+directly proactively redirect to the login page, to force a user / principal to login. That is as we same configured
+in our security config, we can of course change this behavior and redirect to a 401 error page just like we do for
+unauthorized / 403 errors
+
+```java
+@Test
+void shouldReportUnauthorizedForUserAccess() throws Exception {
+    // we specifically test that the access to an endpoint without a user will directly navigate us to the login
+    // page, this is the setup that we have chosen, attempting to present the login to the user
+    mvc.perform(get("/ui/user/1")).andExpect(status().is3xxRedirection()).andExpect(redirectedUrlPattern("**/ui/login"));
+}
+```
+
+## Release
