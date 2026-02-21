@@ -1,8 +1,9 @@
 #!/bin/bash
 # sudo apt install pandoc texlive-xetex ffmpeg jq
 
-echo "Processing documentation & total lines"
-find . -type f -name '*.md' -print0 | xargs -0 cat | wc -l
+echo "Processing following documents"
+find . -type f -name '*.md'
+find . -type f -name '*.md' -print0 | xargs -0 cat | awk 'BEGIN{f=0} /^[[:space:]]*(```|~~~)/{f=!f;next} f{next} /^[ \t]{4}/{next} {print}' | wc -l
 
 echo "Generating cracking-coding-interview/"
 find cracking-coding-interview/ -type f -name '*.md' | sed -e 's/\.md$//' | xargs -P 8 -I {} sh -c './generator.sh {}'

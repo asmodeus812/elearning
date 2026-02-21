@@ -11,6 +11,9 @@ logging:
           core: TRACE
 
 spring:
+  sql.init.mode: always
+  sql.init.data-locations: classpath:/postgres-data.sql
+  sql.init.schema-locations: classpath:/postgres-schema.sql
   security:
     user:
       name: user
@@ -20,14 +23,15 @@ spring:
       expose-session-attributes: true
       expose-request-attributes: true
   datasource:
-    url: jdbc:h2:mem:mydb
-    username: sa
-    password: password
-    driverClassName: org.h2.Driver
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+    driverClassName: org.postgresql.Driver
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddlAuto: none
+      ddl-auto: none
+      show-sql: true
   h2:
     console:
       enabled: true

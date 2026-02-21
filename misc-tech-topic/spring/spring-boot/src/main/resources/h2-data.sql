@@ -29,20 +29,10 @@ INSERT INTO VIDEOS (NAME, DESCRIPTION) VALUES ('Hollow City Postcards', 'A trave
 INSERT INTO VIDEOS (NAME, DESCRIPTION) VALUES ('The Blue Door Agreement', 'Neighbors agree never to open a mysterious door in their hallway—until it opens from the inside.');
 INSERT INTO VIDEOS (NAME, DESCRIPTION) VALUES ('Starlight Maintenance', 'A satellite repair crew finds an extra module that was never launched and must trace who put it there.');
 
-/* ------------------------------------------------------------
-   1) Roles
-   ------------------------------------------------------------ */
 INSERT INTO ROLES (NAME) VALUES ('ADMIN');
 INSERT INTO ROLES (NAME) VALUES ('EDITOR');
 INSERT INTO ROLES (NAME) VALUES ('USER');
 
-/* ------------------------------------------------------------
-   2) Authorities
-   NOTE: GRANT is a reserved keyword in many SQL dialects.
-         In H2, if you get syntax errors, quote it as "GRANT"
-         (as done below). If your DDL used GRANT unquoted and failed,
-         rename the column or quote it in the CREATE TABLE too.
-   ------------------------------------------------------------ */
 INSERT INTO AUTHORITIES (NAME, "GRANT") VALUES ('VIDEO_READ',   'video:read');
 INSERT INTO AUTHORITIES (NAME, "GRANT") VALUES ('VIDEO_CREATE', 'video:create');
 INSERT INTO AUTHORITIES (NAME, "GRANT") VALUES ('VIDEO_UPDATE', 'video:update');
@@ -50,89 +40,74 @@ INSERT INTO AUTHORITIES (NAME, "GRANT") VALUES ('VIDEO_DELETE', 'video:delete');
 INSERT INTO AUTHORITIES (NAME, "GRANT") VALUES ('USER_MANAGE',  'user:manage');
 INSERT INTO AUTHORITIES (NAME, "GRANT") VALUES ('USER_LIST',    'user:list');
 
-/* ------------------------------------------------------------
-   3) Role ↔ Authority (many-to-many) via ROLE_AUTHORITY
-   ADMIN: all authorities
-   EDITOR: read/create/update
-   USER: read only
-   ------------------------------------------------------------ */
-
-/* ADMIN */
 INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
-SELECT r.id, a.id
-FROM ROLES r, AUTHORITIES a
-WHERE r.name = 'ADMIN' AND a.name = 'VIDEO_READ';
+    SELECT r.id, a.id
+    FROM ROLES r, AUTHORITIES a
+    WHERE r.name = 'ADMIN' AND a.name = 'VIDEO_READ';
 
 INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
-SELECT r.id, a.id
-FROM ROLES r, AUTHORITIES a
-WHERE r.name = 'ADMIN' AND a.name = 'VIDEO_CREATE';
+    SELECT r.id, a.id
+    FROM ROLES r, AUTHORITIES a
+    WHERE r.name = 'ADMIN' AND a.name = 'VIDEO_CREATE';
 
 INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
-SELECT r.id, a.id
-FROM ROLES r, AUTHORITIES a
-WHERE r.name = 'ADMIN' AND a.name = 'VIDEO_UPDATE';
+    SELECT r.id, a.id
+    FROM ROLES r, AUTHORITIES a
+    WHERE r.name = 'ADMIN' AND a.name = 'VIDEO_UPDATE';
 
 INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
-SELECT r.id, a.id
-FROM ROLES r, AUTHORITIES a
-WHERE r.name = 'ADMIN' AND a.name = 'VIDEO_DELETE';
+    SELECT r.id, a.id
+    FROM ROLES r, AUTHORITIES a
+    WHERE r.name = 'ADMIN' AND a.name = 'VIDEO_DELETE';
 
 INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
-SELECT r.id, a.id
-FROM ROLES r, AUTHORITIES a
-WHERE r.name = 'ADMIN' AND a.name = 'USER_MANAGE';
+    SELECT r.id, a.id
+    FROM ROLES r, AUTHORITIES a
+    WHERE r.name = 'ADMIN' AND a.name = 'USER_MANAGE';
 
 INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
-SELECT r.id, a.id
-FROM ROLES r, AUTHORITIES a
-WHERE r.name = 'ADMIN' AND a.name = 'USER_LIST';
-
-/* EDITOR */
-INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
-SELECT r.id, a.id
-FROM ROLES r, AUTHORITIES a
-WHERE r.name = 'EDITOR' AND a.name = 'VIDEO_READ';
+    SELECT r.id, a.id
+    FROM ROLES r, AUTHORITIES a
+    WHERE r.name = 'ADMIN' AND a.name = 'USER_LIST';
 
 INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
-SELECT r.id, a.id
-FROM ROLES r, AUTHORITIES a
-WHERE r.name = 'EDITOR' AND a.name = 'VIDEO_CREATE';
+    SELECT r.id, a.id
+    FROM ROLES r, AUTHORITIES a
+    WHERE r.name = 'EDITOR' AND a.name = 'VIDEO_READ';
 
 INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
-SELECT r.id, a.id
-FROM ROLES r, AUTHORITIES a
-WHERE r.name = 'EDITOR' AND a.name = 'VIDEO_UPDATE';
+    SELECT r.id, a.id
+    FROM ROLES r, AUTHORITIES a
+    WHERE r.name = 'EDITOR' AND a.name = 'VIDEO_CREATE';
 
 INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
-SELECT r.id, a.id
-FROM ROLES r, AUTHORITIES a
-WHERE r.name = 'EDITOR' AND a.name = 'USER_LIST';
+    SELECT r.id, a.id
+    FROM ROLES r, AUTHORITIES a
+    WHERE r.name = 'EDITOR' AND a.name = 'VIDEO_UPDATE';
 
-/* USER */
 INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
-SELECT r.id, a.id
-FROM ROLES r, AUTHORITIES a
-WHERE r.name = 'USER' AND a.name = 'VIDEO_READ';
+    SELECT r.id, a.id
+    FROM ROLES r, AUTHORITIES a
+    WHERE r.name = 'EDITOR' AND a.name = 'USER_LIST';
 
-/* ------------------------------------------------------------
-   4) Users (each user has exactly one role via USERS.ROLE_ID)
-   Passwords here are plain strings (replace with encoded hashes
-   if your app expects BCrypt, etc.)
-   ------------------------------------------------------------ */
+INSERT INTO ROLE_AUTHORITY (role_id, authority_id)
+    SELECT r.id, a.id
+    FROM ROLES r, AUTHORITIES a
+    WHERE r.name = 'USER' AND a.name = 'VIDEO_READ';
+
 INSERT INTO USERS (USERNAME, PASSWORD, ROLE_ID)
 VALUES ('admin',  'admin123',
-        (SELECT id FROM ROLES WHERE name = 'ADMIN'));
+    (SELECT id FROM ROLES WHERE name = 'ADMIN'));
 
 INSERT INTO USERS (USERNAME, PASSWORD, ROLE_ID)
 VALUES ('editor', 'editor123',
-        (SELECT id FROM ROLES WHERE name = 'EDITOR'));
+    (SELECT id FROM ROLES WHERE name = 'EDITOR'));
 
 INSERT INTO USERS (USERNAME, PASSWORD, ROLE_ID)
 VALUES ('user1',  'user123',
-        (SELECT id FROM ROLES WHERE name = 'USER'));
+    (SELECT id FROM ROLES WHERE name = 'USER'));
 
 INSERT INTO USERS (USERNAME, PASSWORD, ROLE_ID)
 VALUES ('user2',  'user123',
-        (SELECT id FROM ROLES WHERE name = 'USER'));
+    (SELECT id FROM ROLES WHERE name = 'USER'));
 

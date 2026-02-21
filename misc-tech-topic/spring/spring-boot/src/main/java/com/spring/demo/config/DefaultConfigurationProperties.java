@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.security.core.GrantedAuthority;
 
-@ConfigurationProperties(prefix = "my-application", ignoreInvalidFields = false, ignoreUnknownFields = true)
+@ConfigurationProperties(prefix = "my-application", ignoreInvalidFields = false, ignoreUnknownFields = false)
 public class DefaultConfigurationProperties {
 
     private final String name;

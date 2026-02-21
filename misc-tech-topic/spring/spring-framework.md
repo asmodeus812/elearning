@@ -692,7 +692,7 @@ want to start writing reactive web apps, you don’t have to learn a whole new p
 So if we wanted to build a standard web application, we would need the following, first we need the Spring web starter
 
 • MVC and the associated annotations found in Spring Web. These are the Spring Framework bits that support servlet-based web apps.
-• Jackson Databind for serialization and deserialization (including JSR 310 support) to and from JSON.
+• Jackson Databind for serialization and de-serialization (including JSR 310 support) to and from JSON.
 • An embedded Apache Tomcat servlet container.
 • Core Spring Boot starter.
 • Spring Boot.
@@ -712,6 +712,18 @@ my video What is Jakarta EE? at https://springbootlearning.com/jakarta-ee`
 
 Application Properties support us to work in different environments. In this section, you are going to see how to
 configure and specify the properties to a Spring Boot application.
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-configuration-processor</artifactId>
+</dependency>
+```
+
+The spring-boot-configuration-processor is an annotation processor that generates metadata for your custom Spring Boot
+application properties. It achieves this by processing configuration classes annotated with `@ConfigurationProperties`.
+
+#### Properties ordering
 
 The general order of properties collection that Spring Boot does is by evaluating sources in this order (higher
 overrides lower order):
@@ -866,22 +878,23 @@ public class DefaultConfigurationProperties {
 }
 ```
 
-
 So as you can see the annotation actually has verification and validation properties, that is because by default it
 really enforces the structure of the prefix to match exactly what the class declares. In our case we use the
 `spring.application` prefix, that means that it will inject properties under this property root, and we use just the
 name property under this tree of properties, which we know is of type String
 
-So here is a neat detail about how `ConfigurationProperties` works, this annotation does not create actual
+So here is a neat detail about how `@ConfigurationProperties` works, this annotation does not create actual
 dependency injection managed bean in the spring context, what it does is simply say - hey this class can be injected
 with properties from the environment, and use the fields to do that. There is also the usage of the
-`ConstructorBinding` which tells spring that it should prefer the constructors declared for this bean to create the
+`@ConstructorBinding` which tells spring that it should prefer the constructors declared for this bean to create the
 instance
 
 Now in order to make spring create instances we have to use either one of these, one is meant to specifically enable a
-bean that is the configuration properties, the other is a broad bean scanner, meaning that we can put our properties in
-a common package and add one `ConfigurationPropertiesScan` annotation on top of our class that contains our
-`ComponentScan`, and be done with it.
+target class(or multiple classes) as a beans that are the configuration properties, the other is a broad package based
+bean scanner, meaning that we can put our properties in a common package and add one `@ConfigurationPropertiesScan`
+annotation on top of our class, maybe the same one that contains our `@ComponentScan` for regular beans, and be done with
+it, now our `@ConfigurationProperties` (under this package being scanned) annotated classes will be constructed into the
+spring context.
 
 - `@EnableConfigurationProperties(MyConfig.class)` - this will enable the properties, but still unless we specify
   the values annotation (like above) to tell spring which classes are eligible for for construction that will not work
@@ -921,7 +934,7 @@ Converter<String, GrantedAuthority> grantedAuthorityConverter() {
 }
 ```
 
-Create a converter for granted authorities, granted authorities in an interface that is used in spring security all
+Create a converter for granted authorities, granted authorities is an interface that is used in spring security all
 over the place and its main purpose is to allow or disallow certain actions to be performed by the currently
 authenticated user. They are not easily or trivially convertible from strings, that is why we need to give spring a
 helping hand.
@@ -931,15 +944,20 @@ new custom authority type properties.
 
 ```yaml
 my-application:
-  name: demo-app
-  authorities: ["user:manage", "user:list"]
+    name: demo-app
+    authorities: ["user:manage", "user:list"]
 ```
 
-Then we change the existing implementation of the `DefaultConfigurationProperties` to take this into account, note
-that we have already changed the prefix to be `my-application`, and added the new `authorities` property along in the constructor and a getter for it.
+Then we change the existing implementation of the `DefaultConfigurationProperties` to take this into account, note that
+we have already changed the prefix to be `my-application`, and added the new `authorities` property along in the
+constructor and a getter for it.
 
 ```java
-@ConfigurationProperties(prefix = "my-application", ignoreInvalidFields = false, ignoreUnknownFields = true)
+// note that we have changed the source prefix, we no longer use the default root spring.application, instead we have
+// created our own root, under which we can put whatever custom properties we like, also changed the ignore* attributes
+// or the annotation, that is to ensure that missing or invalid properties get caught as early as possible since we have
+// full control over them we can and should ensure their correctness before they are used in the application
+@ConfigurationProperties(prefix = "my-application", ignoreInvalidFields = false, ignoreUnknownFields = false)
 public class DefaultConfigurationProperties {
 
     private final String name;
@@ -962,8 +980,18 @@ public class DefaultConfigurationProperties {
 }
 ```
 
-Thanks to the converter spring context will know how to actually construct a collection instance of these `GrantedAuthority`
-based off of our configuration's array of string literals and the provided custom converter.
+Thanks to the converter spring context will know how to actually construct a collection instance of these
+`GrantedAuthority` based off of our configuration's array of string literals and the provided custom converter. And
+below is an example of how the list of granted authorities might look like inspected from the injected bean
+`DefaultConfigurationProperties`.
+
+```plaintext
+  authorities ArrayList = ArrayList@43 size=2
+   0 SimpleGrantedAuthority = SimpleGrantedAuthority@66
+     = SimpleGrantedAuthority@66 "user:manage"
+   1 SimpleGrantedAuthority = SimpleGrantedAuthority@67
+     = SimpleGrantedAuthority@67 "user:list"
+```
 
 #### @ConditionalOnProperty
 
@@ -2485,7 +2513,7 @@ spring:
         url: jdbc:postgresql://localhost:5432/test
         username: postgres
         password: postgres
-        driverClassName: org.postgresql
+        driverClassName: org.postgresql.Driver
     jpa:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
 ```
@@ -4542,8 +4570,8 @@ automatically present.
 
 ```yaml
 spring.sql.init.mode: always
-spring.sql.init.schema-locations: classpath:/schema.sql
-spring.sql.init.data-locations: classpath:/data.sql
+spring.sql.init.schema-locations: classpath:/h2-schema.sql
+spring.sql.init.data-locations: classpath:/h2-data.sql
 ```
 
 A couple more things to note here since we are going to be testing the repository integration, we also need to take care
@@ -5010,23 +5038,6 @@ Later on we will actually remove `H2` completely from our application and replac
 Postgres database for both the tests and the actual application, that would solve the issue of having to exclude test
 data base data sources from being created because the `H2` will be removed from the classpath / our dependencies.
 
-TODO: move to actual PGsql
-We can further enhance the
-
-```yaml
-spring:
-    sql.init.mode: always
-    sql.init.schema-locations: classpath:/schema.sql
-    datasource:
-        url: jdbc:postgresql://localhost:5432/test
-        username: postgres
-        password: postgres
-        driverClassName: org.postgresql
-    jpa:
-        database-platform: org.hibernate.dialect.PostgreSQLDialect
----
-```
-
 ### Test security
 
 We already did some of that by providing a pre-defined test authentication and authority context, when we used
@@ -5210,3 +5221,385 @@ void shouldReportUnauthorizedForUserAccess() throws Exception {
 ```
 
 ## Release
+
+The art of actually packing your application is just as important as making it. There are many ways to package spring
+apps. Above in the very first chapters we already talked these many ways but we will re-iterate on them briefly and
+maybe expand a little bit. First we are going to take a better look at the `Uber jar` idea which is a term coined by the
+spring team, and is something that is produced by the spring maven plugin.
+
+The idea is simple we package everything together, including a small embedded web server that will run our app, and that
+enables us to use around this `Uber jar`, everywhere, everywhere, really any environment that has a compatible JVM
+installed on it will run this thing, no extra dependencies no extra hassle, just a jar, usually a couple dozen of
+megabytes big at most.
+
+```xml
+<plugin>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-maven-plugin</artifactId>
+</plugin>
+```
+
+Maybe this is not as impressive as you were led to believe, perhaps because this is incredibly simple. So, let’s revisit
+what exactly has happened:
+
+1. There is no need to download and install an Apache Tomcat servlet container anywhere. We are
+   using embedded Apache Tomcat. This means this tiny JAR file is carrying the means to run itself.
+
+2. There is no need to go through the legacy procedure of installing an application server, fashioning
+   a WAR file, combining it with third-party dependencies using some ugly assembly file to fashion
+   an EAR file, and then uploading the whole thing to some atrocious UI.
+
+3. We can push this whole thing to our favorite cloud provider and command the system to run
+   10,000 copies of it, the same setup for each of these copies.
+
+Another option is to use the docker engine and docker itself to package our application, that is also much easier to
+distribute our app as well. The idea is that once we have the `Uber` jar created, we can easily bake that into a docker
+image, spring itself has a plugin goal that will build and package and create an image all in one go for your
+application.
+
+```sh
+# just run the following in your command line, that will trigger the plugin goal that is built and distributed with
+# spring boot and do the entire process for you from compiling, testing, and packaging the app down to making a docker
+# image and deploying that onto your local docker engine client
+./mvnw spring-boot:build-image
+
+# this is the equivalent of the above, it is just the actual goal that is being run, it is contained inside the spring
+# boot maven plugin and it is the actual thing that knows how to construct and build not only our application, but the
+# entire stack.
+./mvnw org.springframework.boot:spring-boot-maven-plugin:build-image
+```
+
+Okay now we can go a step further, docker images and containers as well are built from something called layers, these
+layers are a construct that allows us to stack a read only file system resources on top of each other like a Lego. The
+layers allow us to be re-used across images. Further more for our use case we might want to do something like this -
+have the application dependencies in another layer than our application and thus when we change our application code
+that would only trigger layer re-build for the layer that our application occupies and not all layers which potentially
+will force dependencies to be re-downloaded that really have not changed (usually those change quite rarely as well)
+
+We have to mention here that we can very well package our application as one big fat jar, but the general idea is to
+split it up, into layers, each layer represents a logical part of the whole, that logical part - dependencies,
+resources, app-code, changes at different cadences, thus we can safely move them to different layers, that can greatly
+increase the efficiency when building applications, not to mention that if we have more than one, that becomes kind of
+crucial. Imagine we have 10 applications all using spring boot 6, that implies that most all dependencies are going to
+be the same - meaning their version, that is because all versions are defined and declared in the spring parent BOM
+file. Thus if we have a layer just for these dependencies that layer can be shared between all of our 10 application,
+and the main differences will be the actual app-code and possibly the resources the app uses. You can see how that can
+become a quite beneficial approach to packing the app image, instead of putting everything into one layer one big fat
+jar.
+
+So what is the general process that is being followed by these packaging and building tools. First we have already seen
+what the fat jar contains in early chapters we knwo that the jar contains all the dependencies that we would need to run
+the app, along side the app code and resources, all into one big jar file. But what we need to realize is that the
+structure needs not be that, actually the structure can be anything as long as we have the dependencies and know how to
+build the class path to run our application, after all.
+
+First lets see what is going on on the surface, lets assume that you are running locally and run this java command
+against your fat jar in the target directory
+
+```sh
+# first lets run the following command and see what is going to be printed out
+java -Djarmode=tools -jar target/app-0.0.1-SNAPSHOT.jar list-layers
+
+# these are the folders that are going to be created, each one of these folders, contains files form the fat jar, some
+# contain only dependencies, another contain the boot loader to start our app, the others contain our source code alone
+dependencies
+spring-boot-loader
+snapshot-dependencies
+application
+```
+
+```sh
+# now we can run the same command just change it a bit and extract the layers instead of listing them, that will create
+# local folders with the content above.
+java -Djarmode=tools -jar target/app-0.0.1-SNAPSHOT.jar extract --layers --destination ./target/extracted
+```
+
+So here is the actual directory structure that we expect to see, under the root folder extracted, we have the
+dependencies, the app itself, these are the most important ones for now.
+
+```plaintext
+ target/
+   extracted/
+     application/
+       app-0.0.1-SNAPSHOT.jar
+     dependencies/
+       lib/
+     snapshot-dependencies/
+     spring-boot-loader/
+```
+
+Now that we have seen what these folders contain, we can move into actually creating a Dockerfile that will replicate
+the same behavior but with docker. So what is going on with the Dockerfile lets examine the docker file that might be
+generated.
+
+```Dockerfile
+# first we create a base builder throwaway image from the OpenJDK Alpine version, and copy our fat jar into that image,
+# we are going to use our fat jar to extract into the different layers
+FROM openjdk:17-jdk-alpine as builder
+ARG JAR_FILE=target/*.jar
+COPY ${JAR_FILE} application.jar
+```
+
+```Dockerfile
+# second we actually do the extraction in the builder image, that image is as we mentioned above a throwaway one, that
+# means we will use it only as a staging area for our resources
+RUN java -Djarmode=layertools -jar application.jar extract --layers --destination ./
+```
+
+```Dockerfile
+# from the builder image now we can copy all the resources back into an image that will contain all of these folders,
+# each of these copy commands will create a new independent layer
+FROM openjdk:17-jdk-alpine
+COPY --from=builder dependencies/ ./
+COPY --from=builder snapshot-dependencies/ ./
+COPY --from=builder spring-boot-loader/ ./
+COPY --from=builder application/ ./
+
+# tell docker how to start this image as a container, that jar launcher is what will construct the classpath and ensure
+# that the application is started as if it were in a regular fat jar, what is crucial to remember here is that we do not
+# need the application to be in a jar, all we need to do is know how to start it meaning - knowing the entry point and how
+# to construct the classpath for the application to work correctly. And all of that information is inside the MANIFEST file
+ENTRYPOINT ["java", "-jar", "application.jar"]
+```
+
+Here is an abridged version of the manifest file for this application, you can see that it constructs and references the
+classpath by using all dependencies in the lib/ folder which is exactly where our dependencies live, so instead of
+having one big fat jar, we have smaller files, the dependencies and our actual application, that way we can easily only
+update our dependencies independently in the lib/ folder or our application.jar again independently without destroying
+all of the layers.
+
+Remember that each COPY creates a new layer, that means that the next time we perform a COPY for example in - `COPY
+--from=builder application/ ./` to update our application jar, we are not going to touch the layers created before that,
+such as the dependencies layers, or snapshots, or the boot-loader, only the application layer will be re-built
+
+Now that we have this knowledge we can see how this is beneficial, these layers are managed by docker engine, docker has
+their `SHA`, and can share the layers (in this case the most crucial one is the dependencies layer) between different
+images, if we had a few dozen applications these benefits can compound quickly
+
+```MF
+Manifest-Version: 1.0
+Created-By: Maven JAR Plugin 3.4.2
+Build-Jdk-Spec: 21
+Implementation-Title: demo
+Implementation-Version: 0.0.1-SNAPSHOT
+Main-Class: com.spring.demo.core.DemoApplication
+Spring-Boot-Version: 3.5.3
+Class-Path: lib/spring-boot-3.5.3.jar lib/spring-boot-autoconfigure-3.5. 3.jar lib/jakarta.annotation-api-2.1.1.jar
+ lib/snakeyaml-2.4.jar lib/ja ckson-databind-2.19.1.jar lib/jackson-annotations-2.19.1.jar lib/jackso n-core-2.19.1.jar
+ lib/jackson-datatype-jdk8-2.19.1.jar lib/jackson-data type-jsr310-2.19.1.jar
+ lib/jackson-module-parameter-names-2.19.1.jar li b/tomcat-embed-core-10.1.42.jar lib/tomcat-embed-el-10.1.42.jar lib/tom
+ cat-embed-websocket-10.1.42.jar lib/spring-web-6.2.8.jar lib/spring-bea ns-6.2.8.jar
+ lib/micrometer-observation-1.15.1.jar lib/micrometer-commo ns-1.15.1.jar lib/spring-webmvc-6.2.8.jar
+ lib/spring-context-6.2.8.jar lib/spring-expression-6.2.8.jar lib/logback-classic-1.5.18.jar lib/logb
+ ack-core-1.5.18.jar...
+```
+
+Once the image is ready you can release your new application to repositories like docker hub, these are public
+repositories that host container images, which can be accessed from pretty much anywhere in the world, that is a useful
+mechanism to share application container images in a wider community. Each image is tagged, the tag represents the
+version of your application, that way you can release a new version while the old one is still available, the versioning
+should generally follow `SemVer`, meaning the version string contains 3 main components, or numbers representing the,
+MAJOR.MINOR.PATCH version of the application.
+
+The MAJOR number is only incremented when there are breaking or significant changes in the application, that notifies
+the clients of your app of that (one such example might be a public API that has changed, and is no longer compatible
+with the old one). The MINOR change is usually reserved for non-breaking but still significant changes, mostly for new
+features or improvements. These are not supposed to break the application for your clients, and the clients do not
+expect that to be the case by default. The final number is the PATCH, that usually represents bug fixes and general
+quality of life improvements
+
+## Upgrades
+
+Once we know how to deploy our application, and we also know how to start a docker image we can take advantage of that
+an for example modify our application to use another database instance instead of the built in-memory one we have been
+using so far, so for example to do this change we only need to modify some of the application properties, such as
+providing a new profile or directly setting these on the command line, some of the approaches are not as portable as
+others.
+
+### Database
+
+What we can do is change our application yaml config to first have the following `DataSource`, username and password
+config. Do not forget to also change the dialect, we have been using an `H2` dialect so far but that is not going to
+work, we have to tell JPA or in this case its implementation Hibernate which dialect to use when building the underlying
+SQL queries. We also need to configure the correct driver as well, that means we need two things first enable the
+correct diver in the data source, in this case that would be - setting the correct value for the `driverClassName`
+- `org.postgresql.Driver`. Then we have to add the Postgres driver into the POM file of our project
+
+```xml
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
+</dependency>
+```
+
+```yaml
+# Schema initialization
+sql.init.mode=always
+sql.init.data-locations=classpath:/postgres-data.sql
+sql.init.schema-locations=classpath:/postgres-schema.sql
+# JDBC DataSource settings
+spring.datasource.url=jdbc:postgresql://localhost:5432/postgres
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+spring.driverClassName: org.postgresql.Driver
+# JPA settings
+spring.jpa.hibernate.ddl-auto=none
+spring.jpa.hibernate.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+```
+
+Take a good note of the `DDL` configuration, that is important, we are going to provide our own schema file instead,
+just as like we did for the H2 database, that is much easier to maintain in the long run, not allow hibernate to update
+it or change it. That also implies that we will have to introduce new tools to do this for us there are some famous ones
+in existence such as `Liquibase` or `Flyway`, both of which ensure proper schema migration and updates.
+
+For our purposes we are just going to use a single schema file for now, and ensure that the schema is created. By
+default the `sql.init.mode` is enabled only for embedded data bases, which `H2` was but we would like to change that to be
+for all data bases that is why we use the always.
+
+```sql
+CREATE SEQUENCE IF NOT EXISTS videos_seq START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS users_seq  START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS roles_seq  START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS auth_seq   START WITH 1 INCREMENT BY 50;
+
+CREATE TABLE IF NOT EXISTS roles (
+    id   BIGINT PRIMARY KEY DEFAULT nextval('roles_seq'::regclass),
+    name VARCHAR(32) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS authorities (
+    id    BIGINT PRIMARY KEY DEFAULT nextval('auth_seq'::regclass),
+    name  VARCHAR(32) NOT NULL UNIQUE,
+    "grant" VARCHAR(128) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    id       BIGINT PRIMARY KEY DEFAULT nextval('users_seq'::regclass),
+    username VARCHAR(64) NOT NULL UNIQUE,
+    password VARCHAR(128),
+    role_id  BIGINT NOT NULL,
+    CONSTRAINT fk_users_role
+    FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+
+CREATE TABLE IF NOT EXISTS videos (
+    id          BIGINT PRIMARY KEY DEFAULT nextval('videos_seq'::regclass),
+    name        VARCHAR(128) NOT NULL UNIQUE,
+    description VARCHAR(1024)
+);
+
+CREATE TABLE IF NOT EXISTS role_authority (
+    role_id      BIGINT NOT NULL,
+    authority_id BIGINT NOT NULL,
+    PRIMARY KEY (role_id, authority_id),
+    CONSTRAINT fk_role_authority_role
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    CONSTRAINT fk_role_authority_authority
+    FOREIGN KEY (authority_id) REFERENCES authorities(id)
+);
+
+ALTER SEQUENCE roles_seq  OWNED BY roles.id;
+ALTER SEQUENCE auth_seq   OWNED BY authorities.id;
+ALTER SEQUENCE users_seq  OWNED BY users.id;
+ALTER SEQUENCE videos_seq OWNED BY videos.id;
+```
+
+The schema ensures that we only create these schema entities once, we can also do the same for the data by using
+similar idea that is to ensure that on subsequent restarts of our application we do not get errors due to conflicts,
+that is something that might occur if we do not take this into account. Take note of the usage of `on conflict
+(<key>) do nothing`, which will ensure that if we had already inserted that record before, (app has been restarted
+we do not get failed sql queries.
+
+```sql
+INSERT INTO roles (name) VALUES
+    ('ADMIN'),
+    ('EDITOR'),
+    ('USER')
+    ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO authorities (name, "grant") VALUES
+    ('VIDEO_READ',   'video:read'),
+    ('VIDEO_CREATE', 'video:create'),
+    ('VIDEO_UPDATE', 'video:update'),
+    ('VIDEO_DELETE', 'video:delete'),
+    ('USER_MANAGE',  'user:manage'),
+    ('USER_LIST',    'user:list')
+    ON CONFLICT (name) DO NOTHING;
+
+WITH r AS (SELECT id FROM roles WHERE name = 'ADMIN'),
+a AS (SELECT id FROM authorities)
+INSERT INTO role_authority (role_id, authority_id)
+    SELECT r.id, a.id
+    FROM r CROSS JOIN a
+    ON CONFLICT DO NOTHING;
+
+WITH r AS (SELECT id FROM roles WHERE name = 'EDITOR'),
+a AS (
+    SELECT id FROM authorities
+    WHERE name IN ('VIDEO_READ', 'VIDEO_CREATE', 'VIDEO_UPDATE', 'USER_LIST')
+)
+INSERT INTO role_authority (role_id, authority_id)
+    SELECT r.id, a.id
+    FROM r CROSS JOIN a
+    ON CONFLICT DO NOTHING;
+
+WITH r AS (SELECT id FROM roles WHERE name = 'USER'),
+a AS (SELECT id FROM authorities WHERE name = 'VIDEO_READ')
+INSERT INTO role_authority (role_id, authority_id)
+    SELECT r.id, a.id
+    FROM r CROSS JOIN a
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO users (username, password, role_id) VALUES
+    ('admin',  'admin123',  (SELECT id FROM roles WHERE name = 'ADMIN')),
+    ('editor', 'editor123', (SELECT id FROM roles WHERE name = 'EDITOR')),
+    ('user1',  'user123',   (SELECT id FROM roles WHERE name = 'USER')),
+    ('user2',  'user123',   (SELECT id FROM roles WHERE name = 'USER'))
+    ON CONFLICT (username) DO NOTHING;
+```
+
+Once we ensure these properties are set, and we have added the new schema file we can create a Postgres container using
+a regular Postgres image that will run in our case on our localhost
+
+```sh
+# we run the Postgres image, and ensure that we set the same username and password that we have configured for our
+# application above, in the properties, this of course is important
+$ docker run -d -p 5432:5432 --name postgres -e POSTGRES_USERNAME=postgres -e POSTGRES_PASSWORD=postgres postgres:16-alpine
+```
+
+To summarize some of these properties that we pass to docker to run our image, with the docker run command, and we
+customize it to set it up to work with our application:
+
+- p - tell the docker engine which port to forward from the container to the host, in this case we forward the same
+default Postgres 5432 port from the container to the host. The format of that port pair is the container:host
+- d - tells the docker engine to start the container as a background non blocking one, that means our shell process will
+not be blocked and we can still run other commands, like for example starting our app
+- e - pass environment variables and their values, in this case this is quite important as we use that flag to set the
+username and password variables which the Postgres image is expecting to see to configure them
+- `postgres:16-alpine` lastly the docker run command requires one unnamed argument to be provided which is the name of the
+image to use to start the container with
+
+Finally we can start the application and that will now be using the actual Postgres database instance deployed in the
+container `postgres`, we are no longer going to be using `H2` for our production application, further more we can even
+remove the embedded database `H2` dependency and its drivers from the POM file altogether as well.
+
+```xml
+<!-- we can remove this dependency tag from our pom file now, we are no longer going to be needing it as we will not be
+using the embedded database, neither in the actual application execution, or in the tests, where remember we implemented
+the usage of test containers -->
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <scope>runtime</scope>
+</dependency>
+```
+
+### Migration
+
+Once we have setup the new database for application, we can move onto adding the support for working with adding support
+for declaring a structured schema migration. That is as already mentioned tools like `Liquibase` or `Flyway`, which are
+used to incrementally mutate and migrate our schema when changes arise.
+
+## Native
