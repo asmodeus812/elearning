@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <!-- Load tables in FK-safe order -->
+    <changeSet id="data-001-roles" author="generated">
+        <loadData file="data/roles.csv" relativeToChangelogFile="false" tableName="roles" separator="," encoding="UTF-8" />
+    </changeSet>
+
+    <changeSet id="data-002-authorities" author="generated">
+        <loadData file="data/authorities.csv" relativeToChangelogFile="false" tableName="authorities" separator="," encoding="UTF-8" />
+    </changeSet>
+
+    <changeSet id="data-003-users" author="generated">
+        <loadData file="data/users.csv" relativeToChangelogFile="false" tableName="users" separator="," encoding="UTF-8" />
+    </changeSet>
+
+    <changeSet id="data-004-videos" author="generated">
+        <loadData file="data/videos.csv" relativeToChangelogFile="false" tableName="videos" separator="," encoding="UTF-8" />
+    </changeSet>
+
+    <changeSet id="data-005-role-authority" author="generated">
+        <loadData file="data/role_authority.csv" relativeToChangelogFile="false" tableName="role_authority" separator="," encoding="UTF-8" />
+    </changeSet>
+</databaseChangeLog>

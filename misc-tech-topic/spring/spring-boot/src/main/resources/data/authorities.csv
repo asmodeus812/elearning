@@ -1,0 +1,7 @@
+"id","name","grant"
+"1","VIDEO_READ","video:read"
+"51","VIDEO_CREATE","video:create"
+"101","VIDEO_UPDATE","video:update"
+"151","VIDEO_DELETE","video:delete"
+"201","USER_MANAGE","user:manage"
+"251","USER_LIST","user:list"

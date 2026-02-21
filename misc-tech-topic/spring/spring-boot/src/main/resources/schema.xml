@@ -1,0 +1,86 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet author="Author Name" id="1771685413670-1">
+        <createTable tableName="videos">
+            <column autoIncrement="true" incrementBy="50" name="id" startWith="3001" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="videos_pkey" />
+            </column>
+            <column name="name" type="VARCHAR(128)">
+                <constraints nullable="false" />
+            </column>
+            <column name="description" type="VARCHAR(1024)" />
+        </createTable>
+    </changeSet>
+    <changeSet author="Author Name" id="1771685413670-2">
+        <createTable tableName="users">
+            <column autoIncrement="true" incrementBy="50" name="id" startWith="401" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="users_pkey" />
+            </column>
+            <column name="username" type="VARCHAR(64)">
+                <constraints nullable="false" />
+            </column>
+            <column name="password" type="VARCHAR(128)" />
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Author Name" id="1771685413670-3">
+        <createTable tableName="roles">
+            <column autoIncrement="true" incrementBy="50" name="id" startWith="301" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="roles_pkey" />
+            </column>
+            <column name="name" type="VARCHAR(32)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Author Name" id="1771685413670-4">
+        <createTable tableName="authorities">
+            <column autoIncrement="true" incrementBy="50" name="id" startWith="601" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="authorities_pkey" />
+            </column>
+            <column name="name" type="VARCHAR(32)">
+                <constraints nullable="false" />
+            </column>
+            <column name="grant" type="VARCHAR(128)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Author Name" id="1771685413670-5">
+        <addUniqueConstraint columnNames="name" constraintName="videos_name_key" tableName="videos" />
+    </changeSet>
+    <changeSet author="Author Name" id="1771685413670-6">
+        <addUniqueConstraint columnNames="username" constraintName="users_username_key" tableName="users" />
+    </changeSet>
+    <changeSet author="Author Name" id="1771685413670-7">
+        <addUniqueConstraint columnNames="name" constraintName="roles_name_key" tableName="roles" />
+    </changeSet>
+    <changeSet author="Author Name" id="1771685413670-8">
+        <addUniqueConstraint columnNames="grant" constraintName="authorities_grant_key" tableName="authorities" />
+    </changeSet>
+    <changeSet author="Author Name" id="1771685413670-9">
+        <addUniqueConstraint columnNames="name" constraintName="authorities_name_key" tableName="authorities" />
+    </changeSet>
+    <changeSet author="Author Name" id="1771685413670-10">
+        <createTable tableName="role_authority">
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="role_authority_pkey" />
+            </column>
+            <column name="authority_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="role_authority_pkey" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Author Name" id="1771685413670-11">
+        <addForeignKeyConstraint baseColumnNames="authority_id" baseTableName="role_authority" constraintName="fk_role_authority_authority" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="authorities" validate="true" />
+    </changeSet>
+    <changeSet author="Author Name" id="1771685413670-12">
+        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="role_authority" constraintName="fk_role_authority_role" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="roles" validate="true" />
+    </changeSet>
+    <changeSet author="Author Name" id="1771685413670-13">
+        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="users" constraintName="fk_users_role" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="roles" validate="true" />
+    </changeSet>
+</databaseChangeLog>

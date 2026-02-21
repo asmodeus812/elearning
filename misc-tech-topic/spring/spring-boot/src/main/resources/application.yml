@@ -11,7 +11,7 @@ logging:
           core: TRACE
 
 spring:
-  sql.init.mode: always
+  sql.init.mode: never
   sql.init.data-locations: classpath:/postgres-data.sql
   sql.init.schema-locations: classpath:/postgres-schema.sql
   security:
@@ -35,6 +35,8 @@ spring:
   h2:
     console:
       enabled: true
+  liquibase:
+    change-log: classpath:changelog.xml
   data:
     web.pageable.one-indexed-parameters: true
   application:

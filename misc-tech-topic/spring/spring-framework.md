@@ -1,7 +1,7 @@
 # Introduction
 
 Spring boot is an open source java based framework used to create micro services, it is developed by Pivotal it is
-easy to create a stand alone and production read spring application, using spring boo. Spring Boot enterprise ready
+easy to create a stand alone and production ready spring application, using spring boo. Spring Boot enterprise ready
 application that you can just run.
 
 ## Document Prerequisites
@@ -5153,7 +5153,7 @@ GET and OPTIONS are not protected by CSRF by default in spring because they do n
 void () throws Exception {
     ...
     // enhances this update-user request with a csrf token, also take a note of the content type, since this is part of
-    // the TemplateController, we do not have an APPLICATION_JSON but rather we use APPLICATION_FORM_URLENCODED_VALUE, or
+    // the `TemplateController`, we do not have an APPLICATION_JSON but rather we use `APPLICATION_FORM_URLENCODED_VALUE`, or
     // in other words form data, the csrf will be included in both the form data and the request headers
     mvc.perform(post("/ui/update-user").with(csrf())
         .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -5179,9 +5179,10 @@ or we can get this error code on endpoints that only require authentication, but
 authenticated, and the application recognizes us but we are not having the correct set of permissions to evaluate the
 action we are trying to evaluate
 
-We can clearly actually see the difference between these two in the test which is expressed above, here is an
-excerpt from that test. We can see that without any mock user the application will directly redirect to the login
-page, that is how we have it setup in our security config. Below we have put the abridged important parts of the security config that actually configures this exact behavior
+We can clearly actually see the difference between these two in the test which is expressed above, here is an excerpt
+from that test. We can see that without any mock user the application will directly redirect to the login page, that is
+how we have it setup in our security config. Below we have put the abridged important parts of the security config that
+actually configures this exact behavior
 
 ```java
 ...
@@ -5203,6 +5204,7 @@ defaultLoginPageGeneratingFilter.setLoginPageUrl("/ui/login");
     customizer.defaultSuccessUrl("/ui/");
     customizer.loginProcessingUrl("/ui/login");
 })
+...
 ```
 
 Here is the test itself, notice that we expect a redirect, not a 401, because that is what our security does, unlike
@@ -5362,12 +5364,6 @@ COPY --from=builder application/ ./
 ENTRYPOINT ["java", "-jar", "application.jar"]
 ```
 
-Here is an abridged version of the manifest file for this application, you can see that it constructs and references the
-classpath by using all dependencies in the lib/ folder which is exactly where our dependencies live, so instead of
-having one big fat jar, we have smaller files, the dependencies and our actual application, that way we can easily only
-update our dependencies independently in the lib/ folder or our application.jar again independently without destroying
-all of the layers.
-
 Remember that each COPY creates a new layer, that means that the next time we perform a COPY for example in - `COPY
 --from=builder application/ ./` to update our application jar, we are not going to touch the layers created before that,
 such as the dependencies layers, or snapshots, or the boot-loader, only the application layer will be re-built
@@ -5375,6 +5371,12 @@ such as the dependencies layers, or snapshots, or the boot-loader, only the appl
 Now that we have this knowledge we can see how this is beneficial, these layers are managed by docker engine, docker has
 their `SHA`, and can share the layers (in this case the most crucial one is the dependencies layer) between different
 images, if we had a few dozen applications these benefits can compound quickly
+
+Here is an abridged version of the manifest file for this application, you can see that it constructs and references the
+classpath by using all dependencies in the lib/ folder which is exactly where our dependencies live, so instead of
+having one big fat jar, we have smaller files, the dependencies and our actual application, that way we can easily only
+update our dependencies independently in the lib/ folder or our application.jar again independently without destroying
+all of the layers.
 
 ```MF
 Manifest-Version: 1.0
@@ -5596,10 +5598,352 @@ the usage of test containers -->
 </dependency>
 ```
 
-### Migration
+### Versioning
 
 Once we have setup the new database for application, we can move onto adding the support for working with adding support
-for declaring a structured schema migration. That is as already mentioned tools like `Liquibase` or `Flyway`, which are
-used to incrementally mutate and migrate our schema when changes arise.
+for declaring a structured schema versioning. That is as already mentioned tools like `Liquibase` or `Flyway`, which are
+used to incrementally mutate and upgrade our schema when changes arise. The idea is simple each time we need to
+implement some change to our application or a new feature, we might need to touch the database schema that means that we
+will have to change the schema.
+
+We have two options to change the schema directly, to reflect our desired new state, or to to do what is called a
+versioned change. What a versioned changed implies means that we have a list of changes to our schema. Every change that
+we have ever done has been recorded, every new change is just like any other old change, in the end it is very easy to
+track, revert and manage schema changes. We still have only one schema which represents the final set of applied changes
+in order, but it is very easy to pick the list of changes to our schema and revert to any valid state from the past
+
+```xml
+<!-- add the following dependency to our POM file, by default liquibase is versioned directly in the spring-parent BOM
+file there fore we need not provide any version -->
+<dependency>
+    <groupId>org.liquibase</groupId>
+    <artifactId>liquibase-core</artifactId>
+</dependency>
+```
+
+The premise is quite similar to how file versioning is done in source control systems such as git, or svn. That gives us
+great flexibility and is invaluable resource in production grade environments, and applications.
+
+First what we need to do is convert our schema to a `liquibase` changelog, remember that we have to track the entire chain
+of changes to our schema including the initial state as well, that also includes the actual schema as it exists at this
+very moment. We can capture that with a CLI application or use as a docker image, easily by attaching to our database.
+
+First ensure that the `postgres` database container is running and you have at least started the application once, to
+generate the schema, the rest will be taken care by `liquibase` it will use that schema to create the initial starting
+changelog file along with all change sets that are required to replicate the same database schema
+
+```sh
+# this is done again to avoid AccessDenied with liquibase image user, that is because the image user by default is 1001,
+# and the one we use by default on the system is with id 1000, that wont allow the image to write to folders created by
+# user with id 1000.
+$ mkdir -p liquibase-out
+$ sudo chown -R 1001:1001 liquibase-out
+$ docker run --rm --network container:postgres \
+  -v "$PWD/liquibase-out:/liquibase/changelog" \
+  --entrypoint sh liquibase/liquibase:5.0.1 \
+  -c '
+    lpm add postgresql --global &&
+    liquibase \
+      --url=jdbc:postgresql://localhost:5432/postgres \
+      --username=postgres \
+      --password=postgres \
+      --changelog-file=/liquibase/changelog/db.changelog.xml \
+      --default-schema-name=public \
+      --exclude-objects=databasechangelog,databasechangeloglock \
+      generate-changelog
+  '
+```
+
+This will produce an xml file which will contain all the necessary steps to re-create our schema as we have it exactly
+in our schema.sql file, then we can start modifying it with new changes, having this first step though is highly
+important, we need to know the base starting state
+
+Note that we have mounted a volume to the working directory and we have also created that directory beforehand with some
+pre-defined permissions that is needed to allow the `liquibase` container to correctly be able to mount this file and
+write to it, we shall not re-use the file just copy the contents to our `src/main/resources/schema.xml`
+
+```xml
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+     https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet author="Author">
+        <createTable tableName="videos">
+            <column autoIncrement="true" incrementBy="50" name="id" startWith="3001" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="videos_pkey" />
+            </column>
+            <column name="name" type="VARCHAR(128)">
+                <constraints nullable="false" />
+            </column>
+            <column name="description" type="VARCHAR(1024)" />
+        </createTable>
+    </changeSet>
+    <changeSet author="Author">
+        <createTable tableName="users">
+            <column autoIncrement="true" incrementBy="50" name="id" startWith="401" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="users_pkey" />
+            </column>
+            <column name="username" type="VARCHAR(64)">
+                <constraints nullable="false" />
+            </column>
+            <column name="password" type="VARCHAR(128)" />
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Author">
+        <createTable tableName="roles">
+            <column autoIncrement="true" incrementBy="50" name="id" startWith="301" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="roles_pkey" />
+            </column>
+            <column name="name" type="VARCHAR(32)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Author">
+        <createTable tableName="authorities">
+            <column autoIncrement="true" incrementBy="50" name="id" startWith="601" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="authorities_pkey" />
+            </column>
+            <column name="name" type="VARCHAR(32)">
+                <constraints nullable="false" />
+            </column>
+            <column name="grant" type="VARCHAR(128)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Author">
+        <addUniqueConstraint columnNames="name" constraintName="videos_name_key" tableName="videos" />
+    </changeSet>
+    <changeSet author="Author">
+        <addUniqueConstraint columnNames="username" constraintName="users_username_key" tableName="users" />
+    </changeSet>
+    <changeSet author="Author">
+        <addUniqueConstraint columnNames="name" constraintName="roles_name_key" tableName="roles" />
+    </changeSet>
+    <changeSet author="Author">
+        <addUniqueConstraint columnNames="grant" constraintName="authorities_grant_key" tableName="authorities" />
+    </changeSet>
+    <changeSet author="Author">
+        <addUniqueConstraint columnNames="name" constraintName="authorities_name_key" tableName="authorities" />
+    </changeSet>
+    <changeSet author="Author">
+        <createTable tableName="role_authority">
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="role_authority_pkey" />
+            </column>
+            <column name="authority_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="role_authority_pkey" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Author">
+        <addForeignKeyConstraint baseColumnNames="authority_id" baseTableName="role_authority"
+            constraintName="fk_role_authority_authority" deferrable="false" initiallyDeferred="false" onDelete="NO
+                                                                                                       ACTION"
+            onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="authorities" validate="true" />
+    </changeSet>
+    <changeSet author="Author">
+        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="role_authority"
+            constraintName="fk_role_authority_role" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+            onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="roles" validate="true" />
+    </changeSet>
+    <changeSet author="Author">
+        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="users" constraintName="fk_users_role"
+            deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+            referencedColumnNames="id" referencedTableName="roles" validate="true" />
+    </changeSet>
+</databaseChangeLog>
+```
+
+```yaml
+# we can put that under the following location, that implies src/main/resources/changelog.xml, the exact directory is
+# not strictly decided as long as the structure makes sense and the file is in resources where it will be copied form into
+# our jar and classpath, any location and logical file name is going to do just fine
+spring:
+  liquibase:
+    change-log: classpath:changelog.xml
+```
+
+Create the `changelog.xml` file, that will include both the schema we just created and the data migration change set later on,
+for now the `changelog.xml` file will only include the `schema.xml` file import
+
+```xml
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog
+     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <include file="schema.xml" relativeToChangelogFile="false" />
+</databaseChangeLog>
+```
+
+The schema is one part of the database but we also have some data in there as well, next section will show us how to
+ensure that we migrate what data we have in this database currently in a more data / declarative oriented way
+
+### Migration
+
+Now what if we also want to retain and migrate the data as well, `liquibase` is not really great for that but based on the
+database type we have a few options, what if we want to migrate in a database independent way, such as we do not need to
+care if we are hosting our data on a `postgres`, or `mysql` or `mssql` database.
+
+The solution is not meant to replace proper data migration, in a production environment there are other more robust
+solutions, but this is more useful to initialize our database with data similarly to how we have done so far with the
+data.sql files. After we have done all of that we can start our application again,
+
+```sh
+# this is done again to avoid AccessDenied with liquibase image user, that is because the image user by default is 1001,
+# and the one we use by default on the system is with id 1000, that wont allow the image to write to folders created by
+# user with id 1000.
+$ mkdir -p liquibase-data
+$ sudo chown -R 1001:1001 liquibase-data
+
+$ docker run --rm --network container:postgres \
+  -v "$PWD/liquibase-data:/liquibase/changelog" \
+  --entrypoint sh liquibase/liquibase:5.0.1 \
+  -c '
+    mkdir -p /liquibase/changelog/data &&
+    lpm add postgresql --global &&
+    liquibase \
+      --url=jdbc:postgresql://localhost:5432/postgres \
+      --username=postgres \
+      --password=postgres \
+      --default-schema-name=public \
+      --exclude-objects=databasechangelog,databasechangeloglock \
+      --changelog-file=/liquibase/changelog/db.data.changelog.xml \
+      --dataOutputDirectory=/liquibase/changelog/data \
+      --diffTypes=data \
+      generate-changelog
+  '
+```
+
+After running this command we will see similar structure in the `liquibase-data` folder we can take this data folder
+that contains these `csv` files and move them to our resources classpath under `src/main/resources`. Then we will make
+sure that `liquibase` picks them up for considerations when we boot our application
+
+```plaintext
+ data/
+   authorities.csv
+   role_authority.csv
+   roles.csv
+   users.csv
+   videos.csv
+```
+
+Create the `data.xml` file now which will contain references to the csv files which are going to be imported by liquibase,
+we are going to reference this `data.xml` file in our changelog file put the include right after the schema file
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+     https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <!-- Load tables in FK-safe order -->
+    <changeSet id="data-001-roles" author="generated">
+        <loadData file="data/roles.csv" relativeToChangelogFile="false" tableName="roles" separator="," encoding="UTF-8" />
+    </changeSet>
+
+    <changeSet id="data-002-authorities" author="generated">
+        <loadData file="data/authorities.csv" relativeToChangelogFile="false" tableName="authorities" separator="," encoding="UTF-8" />
+    </changeSet>
+
+    <changeSet id="data-003-users" author="generated">
+        <loadData file="data/users.csv" relativeToChangelogFile="false" tableName="users" separator="," encoding="UTF-8" />
+    </changeSet>
+
+    <changeSet id="data-004-videos" author="generated">
+        <loadData file="data/videos.csv" relativeToChangelogFile="false" tableName="videos" separator="," encoding="UTF-8" />
+    </changeSet>
+
+    <changeSet id="data-005-role-authority" author="generated">
+        <loadData file="data/role_authority.csv" relativeToChangelogFile="false" tableName="role_authority" separator="," encoding="UTF-8" />
+    </changeSet>
+</databaseChangeLog>
+```
+
+We update the `changelog.xml` file to now include the new data.xml, the final structure of the `src/main/resources` folder
+is shown below, or rather the relevant parts that include the `changelog.xml`, `data.xml`, `schema.xml`, and the data folder
+
+```xml
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog
+     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <include file="schema.xml" relativeToChangelogFile="false" />
+    <include file="data.xml" relativeToChangelogFile="false" />
+</databaseChangeLog>
+```
+
+Here is what the resources folder should look like, we have the data folder filled with the csv files which contain our
+data. The data.xml file is meant to reference these files and make sure to create the change set for each one of them.
+The schema we already saw in the previous chapter is in charge or creating the schema for our data base. And the
+changelog.xml file is the entry point, that includes both the schema and data xml files (the order here is important)
+
+```plaintext
+ data/
+   authorities.csv
+   role_authority.csv
+   roles.csv
+   users.csv
+   videos.csv
+󰗀 changelog.xml
+󰗀 data.xml
+󰗀 schema.xml
+```
+
+After all of that we can finally remove or delete the database `postgres` container, do not worry we are not going to lose
+our precious data, we will make sure that `liquibase` picks the data and schema files.
+
+```sh
+# remove the container and delete it, that will clean up all the data we have in there, including the database, tables,
+# schemas and data
+$ docker container stop postgres
+$ docker container rm -f postgres
+$ docker run -d -p 5432:5432 --name postgres -e POSTGRES_USERNAME=postgres -e POSTGRES_PASSWORD=postgres postgres:16-alpine
+```
+
+```yaml
+# we can delete these from our application yaml file, they are no longer needed we are not going to dump the data and
+# schema files form there but use `liquibase` to load them, or we can change the value of init.mode to never from always
+sql.init.mode: always -> never
+sql.init.data-locations: classpath:/postgres-data.sql
+sql.init.schema-locations: classpath:/postgres-schema.sql
+```
+
+Now build and start the application, we can inspect the contents of the `liqiubase` system/log table that is going to be
+created by `liquibase` in that database - `SELECT * FROM public.databasechangelog LIMIT 500`. We will see all the change
+log entries created along side the data entries.  this is an abridged version of the actual table, there are many
+columns in that table that are not relevant for displaying the essence of the actions that we care about were performed
+by `liquibase`.
+
+```plaintext
+   │ id                      │ author      │ filename   │ dateexecuted     │ description
+1  │ 1771685413670-1         │ Author Name │ schema.xml │ {year}-{mm}-{dd} │ createTable tableName=videos
+2  │ 1771685413670-2         │ Author Name │ schema.xml │ {year}-{mm}-{dd} │ createTable tableName=users
+3  │ 1771685413670-3         │ Author Name │ schema.xml │ {year}-{mm}-{dd} │ createTable tableName=roles
+4  │ 1771685413670-4         │ Author Name │ schema.xml │ {year}-{mm}-{dd} │ createTable tableName=authorities
+5  │ 1771685413670-5         │ Author Name │ schema.xml │ {year}-{mm}-{dd} │ addUniqueConstraint constraintName=videos_name_key, tableName=videos
+6  │ 1771685413670-6         │ Author Name │ schema.xml │ {year}-{mm}-{dd} │ addUniqueConstraint constraintName=users_username_key, tableName=users
+7  │ 1771685413670-7         │ Author Name │ schema.xml │ {year}-{mm}-{dd} │ addUniqueConstraint constraintName=roles_name_key, tableName=roles
+8  │ 1771685413670-8         │ Author Name │ schema.xml │ {year}-{mm}-{dd} │ addUniqueConstraint constraintName=authorities_grant_key, tableName=authorities
+9  │ 1771685413670-9         │ Author Name │ schema.xml │ {year}-{mm}-{dd} │ addUniqueConstraint constraintName=authorities_name_key, tableName=authorities
+10 │ 1771685413670-10        │ Author Name │ schema.xml │ {year}-{mm}-{dd} │ createTable tableName=role_authority
+11 │ 1771685413670-11        │ Author Name │ schema.xml │ {year}-{mm}-{dd} │ addForeignKeyConstraint baseTableName=role_authority, constraintName=fk_role_authority_authority, referencedTableName=authorities
+12 │ 1771685413670-12        │ Author Name │ schema.xml │ {year}-{mm}-{dd} │ addForeignKeyConstraint baseTableName=role_authority, constraintName=fk_role_authority_role, referencedTableName=roles
+13 │ 1771685413670-13        │ Author Name │ schema.xml │ {year}-{mm}-{dd} │ addForeignKeyConstraint baseTableName=users, constraintName=fk_users_role, referencedTableName=roles
+14 │ data-001-roles          │ generated   │ data.xml   │ {year}-{mm}-{dd} │ loadData tableName=roles
+15 │ data-002-authorities    │ generated   │ data.xml   │ {year}-{mm}-{dd} │ loadData tableName=authorities
+16 │ data-003-users          │ generated   │ data.xml   │ {year}-{mm}-{dd} │ loadData tableName=users
+17 │ data-004-videos         │ generated   │ data.xml   │ {year}-{mm}-{dd} │ loadData tableName=videos
+18 │ data-005-role-authority │ generated   │ data.xml   │ {year}-{mm}-{dd} │ loadData tableName=role_authority
+```
 
 ## Native
