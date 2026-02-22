@@ -5425,6 +5425,7 @@ config. Do not forget to also change the dialect, we have been using an `H2` dia
 work, we have to tell JPA or in this case its implementation Hibernate which dialect to use when building the underlying
 SQL queries. We also need to configure the correct driver as well, that means we need two things first enable the
 correct diver in the data source, in this case that would be - setting the correct value for the `driverClassName`
+
 - `org.postgresql.Driver`. Then we have to add the Postgres driver into the POM file of our project
 
 ```xml
@@ -5575,13 +5576,13 @@ To summarize some of these properties that we pass to docker to run our image, w
 customize it to set it up to work with our application:
 
 - p - tell the docker engine which port to forward from the container to the host, in this case we forward the same
-default Postgres 5432 port from the container to the host. The format of that port pair is the container:host
+  default Postgres 5432 port from the container to the host. The format of that port pair is the container:host
 - d - tells the docker engine to start the container as a background non blocking one, that means our shell process will
-not be blocked and we can still run other commands, like for example starting our app
+  not be blocked and we can still run other commands, like for example starting our app
 - e - pass environment variables and their values, in this case this is quite important as we use that flag to set the
-username and password variables which the Postgres image is expecting to see to configure them
+  username and password variables which the Postgres image is expecting to see to configure them
 - `postgres:16-alpine` lastly the docker run command requires one unnamed argument to be provided which is the name of the
-image to use to start the container with
+  image to use to start the container with
 
 Finally we can start the application and that will now be using the actual Postgres database instance deployed in the
 container `postgres`, we are no longer going to be using `H2` for our production application, further more we can even
@@ -5764,8 +5765,8 @@ write to it, we shall not re-use the file just copy the contents to our `src/mai
 # not strictly decided as long as the structure makes sense and the file is in resources where it will be copied form into
 # our jar and classpath, any location and logical file name is going to do just fine
 spring:
-  liquibase:
-    change-log: classpath:changelog.xml
+    liquibase:
+        change-log: classpath:changelog.xml
 ```
 
 Create the `changelog.xml` file, that will include both the schema we just created and the data migration change set later on,
@@ -5920,7 +5921,7 @@ sql.init.schema-locations: classpath:/postgres-schema.sql
 
 Now build and start the application, we can inspect the contents of the `liqiubase` system/log table that is going to be
 created by `liquibase` in that database - `SELECT * FROM public.databasechangelog LIMIT 500`. We will see all the change
-log entries created along side the data entries.  this is an abridged version of the actual table, there are many
+log entries created along side the data entries. this is an abridged version of the actual table, there are many
 columns in that table that are not relevant for displaying the essence of the actions that we care about were performed
 by `liquibase`.
 
@@ -5946,4 +5947,326 @@ by `liquibase`.
 18 │ data-005-role-authority │ generated   │ data.xml   │ {year}-{mm}-{dd} │ loadData tableName=role_authority
 ```
 
-## Native
+### Native
+
+After we have already seen how to convert and bundle our application into an executable that can be run anywhere, and
+also how to scale it horizontally by running multiple copies of it all independent of each other. We are going to focus
+on performance, take a look what are our options. We are going to focus more specifically onto something called `GraalVM`.
+
+What really is `GraalVM` ? Well for years the java eco system was constantly bashed by other communities and even its
+own, that it does not come on par with binary based applications that do not require an interpreted environment like the
+java virtual machine. Binary applications that execute directly machine code for the target platform that they were
+compiled for were far more performant than java applications which run inside a virtual machine and for all intents and
+purposes is an interpreted language with a runtime byte code optimization techniques.
+
+Deploying thousands of applications daily on cloud providers started to add up to people's cloud bills, some java
+applications take quite a while to start up, and some of that is the Java virtual machine booting up the application and
+itself. There has to be a better more performant way to do these things.
+
+A new player that had just popped up into the cloud sphere were the so called lambda functions, these are as the name
+suggests very small `functions` of sorts that can boot up an application on demand, instead of having your application
+run inside a dedicated cluster node as a container, the application is started and destroyed on demand, there is no idle
+time. This is all good but for a java application that is based off of a virtual machine, that was not possible without
+some significant changes in the ecosystem
+
+As it turns out a new player comes into town again, and that was Oracle, they created GraalVM the idea and target is
+simple it will support any language under the sun - C++, Java, Javascript, Ruby, C and so on. Soon after the spring
+native project was born around 2019, to support this, the idea of the spring team was to help with the transition to
+this new GraalVM technology.
+
+`Just to put an emphasis on that java has been since the dawn of time an interpreted language that is, our source code
+gets translated into bytecode, that byte code is interpreted by the java virtual machine at runtime. During the runtime
+of an application the virtual machine is capable of performing optimizations such as hot-spot compilation, that means
+that the virtual machine i s able to optimize hot paths in our code, compiling them into machine code directly (for the
+target platform). But at its heart the Java language is interpreted, by the virtual machine`
+
+So to translate our application into native representation that can be run on the GraalVM we have to do a few trade
+offs, such as limited support for reflection, and limited support for runtime proxies, as well some special handling of
+external resources.
+
+- First GraalVM takes care of reducing the total footprint of the program, it employs a principal called `reachability`,
+  what that means is that any code path that it deems is not reachable is completely cut off the final binary. That
+  implies that for example if we pull an entire library that we use just parts of, only the parts that are going to ever
+  be used are going to be part of the final binary image.
+- Reflection's capabilities are also reduced, that is because some of the information for reflection is completely
+  dropped and it is possible that at runtime the full capabilities of the reflection in Java are not available without
+  some preliminary work
+- Proxies - these are a familiar issue, java has for long supported runtime proxies but those are not possible with
+  GraalVM, instead all proxies have to be known and ready at `compile` time
+
+All of that implies that accessing code that was easily accessible and reachable before through reflection, like
+invoking methods, inspecting properties of objects at runtime and a whole host of useful reflection features are now
+much harder to achieve, that is a huge blow to an ecosystem like Spring because it takes a big advantage of that
+specific Java feature a lot.
+
+That is why in recent years spring itself has taken a great amount of care to reduce its use of dynamic proxies and
+most of these are replaced with actual beans, that serve as the proxy objects, for example instead of wrapping around a
+bean (silently), we are often required to provide implementations that serve the purpose of a proxy object or sometimes
+Spring generates them, but does not strictly rely on the runtime proxies that it once did so heavily.
+
+Running an application with the GraalVM is a bit different than what we are used to and naturally it is using a
+completely different set of tools to do that, for example when we were building the app for use with the Java virtual
+machine, we were using the spring maven plugin to build the `UBER-JAR`, here we are using a completely different plugin
+called the native maven plugin, the name should be enough to imply that this is meant for running the java application
+as a native binary instead.
+
+So for example let us take a few examples of what is going on, when we take two core concepts in spring and try to
+explain how they are handled by spring to prepare your application to be run on the GraalVM. First it is curcial to know
+that unlike with the regular java virtual machine, where most of the spring context and code paths get loaded on demand
+lazily. With native applications that aim to run on the GraalVM that is not possible, everything has to be ready to be
+analyzed and compiled at build time that is what we call static analysis.
+
+That means that GraalVM has to have a complete overview of the full application code-path at build and compile time
+dynamic object creation and runtime dynamic behavior has to be converted into something that is visible & available at
+compile time and analysis time so the GraalVM can perform the proper static code analysis on it - that really means
+quite literally `everything`
+
+So what spring does is provide a helping hand to GraalVM by converting our application to exactly that, it converts our
+application to be ready for static analysis, What does that imply ? Basically everything that was so far done at runtime
+
+For example creating beans, on demand, loading classes, and initializing and binding configuration properties and what
+not is now done upfront - What does that translate into ? Simply put Spring generates code for us that is representative
+of our code but converted into code that is easier for the GraalVM to reason about and analyze. So Spring will generate
+additional java code that is reflective (pun-intended) of our annotated code, see a few examples below
+
+- `@Configuration` - these are configuration beans that usually are in charge of providing some sort of a @Bean or a
+  general configuration that needs to be analyzed and instantiated by spring. This initialization and construction spring
+  usually does at runtime. That does not work with native assembly and compilation however. Instead what spring does
+  internally to prepare these classes ahead of time, it analyzing the annotations and creates a stub source files and
+  classes that are then passed to the GraalVM compiler. That way the runtime initialization is converted into one that is
+  happening at compile time
+
+    ```java
+    @Configuration(proxyBeanMethods = false)
+    class MyConfig {
+        @Bean Greeter greeter() { return new Greeter(); }
+    }
+    ```
+
+    ```java
+    final class MyConfig__BeanDefinitions {
+
+        static BeanDefinition myConfig() {
+            RootBeanDefinition bd = new RootBeanDefinition(MyConfig.class);
+            bd.setInstanceSupplier(MyConfig::new);
+            return bd;
+        }
+
+        static BeanDefinition greeter() {
+            RootBeanDefinition bd = new RootBeanDefinition(Greeter.class);
+            bd.setInstanceSupplier(() -> /* call factory method */);
+            return bd;
+        }
+    }
+    ```
+
+- `Proxies` - spring makes a huge use out of proxies, however by default those are the java runtime proxies which are
+  created on demand and wrap around the actual instances of the objects in our code, that is not possible with GraalVM,
+  what spring does it to replace these proxies, with `CGlib` proxies with generate actual bytecode and inject that byte code
+  in our class files
+
+    ```java
+      public interface Catalog {
+          @Cacheable("prices")
+          BigDecimal price(String sku);
+      }
+
+      @Service
+      class CatalogImpl implements Catalog {
+          public BigDecimal price(String sku) { return lookupInDb(sku); }
+      }
+
+      System.out.println(ctx.getBean(Catalog.class).getClass());
+      // in default JVM that will produce by default a runtime proxy
+      // typically prints something like - class com.sun.proxy.$Proxy
+    ```
+
+    ```markdown
+    <!-- Spring Boot explains that `CGLIB` proxy bytecode is generated at build time for native images, and you can inspect
+         it the target folder where the class files are found, so for example, we might see a file looking like that -->
+
+    CatalogImpl$$SpringCGLIB$$0.class
+    ```
+
+- `Dependency Injection (DI)` - spring would convert that into actually creating our beans manually, generating java
+  code that would invoke the constructor for the bean, usually with native images spring suggests that we use constructor
+  injection, that is much easier to reason about, and must easier for spring to generate the code that would construct the
+  object, avoid using setters and especially having just private properties and no exposed public api that would allow you
+  to construct the object in the first place.
+
+    ```java
+    @Service
+    class OrderService {
+
+    private final PaymentClient paymentClient;
+    private final OrderRepository orderRepository;
+
+    OrderService(PaymentClient paymentClient, OrderRepository orderRepository) {
+        this.paymentClient = paymentClient;
+        this.orderRepository = orderRepository;
+    }
+
+    public void placeOrder(String userId) {
+        paymentClient.charge(userId);
+        orderRepository.save(userId);
+    }
+    }
+    ```
+
+    ```java
+    // conceptual generated code shape
+    OrderService os = new OrderService(
+        beanFactory.getBean(PaymentClient.class),
+        beanFactory.getBean(OrderRepository.class)
+    );
+    ```
+
+After having examined the top level, lets try to convert our Application to add support for the GraalVM generation.
+First lets add the following plugins to our pom file, these are important because we need to ensure that we have both
+the build native plugin and the hibernate configuration that is to disable the runtime lazy proxies that hibernate
+usually uses.
+
+```xml
+<plugins>
+    <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+    </plugin>
+    <plugin>
+        <groupId>org.graalvm.buildtools</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+    </plugin>
+    <plugin>
+        <groupId>org.hibernate.orm.tooling</groupId>
+        <artifactId>hibernate-enhance-maven-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>enhance</id>
+                <goals>
+                    <goal>enhance</goal>
+                </goals>
+                <configuration>
+                    <enableDirtyTracking>true</enableDirtyTracking>
+                    <enableLazyInitialization>true</enableLazyInitialization>
+                    <enableAssociationManagement>true</enableAssociationManagement>
+                </configuration>
+            </execution>
+        </executions>
+    </plugin>
+</plugins>
+```
+
+Finally run the build image command, that will ensure that an image is created for docker, that image will contain the
+native binary that is built for our application, you also will be able to see that under target/classes we have a bunch
+of new classes that are created by the spring ahead of time processor. So under the `org.springframework` we can see the
+different folders that were created these are mostly generated by the Spring AOP that is generating our code prepared
+for GraalVM, to analyze and build.
+
+```xml
+target/classes/org/springframework
+drwxrwxr-x aop
+drwxrwxr-x boot
+drwxrwxr-x context
+drwxrwxr-x data
+drwxrwxr-x orm
+drwxrwxr-x security
+drwxrwxr-x transaction
+drwxrwxr-x web
+```
+
+The command below will ensure that the native image is built and packaged into an image that is going to be deployed to
+your local docker repository, the image will tagged and created under the name of your application. After executing the
+command below just run `docker image ls` and identify which of the images is yours.
+
+Note that without providing the profile flag, an image will still be built, however, that image will be normal JVM based
+one, that is we have already actually done this in previous older chapters where we split the application into its
+building blocks and saw how to have the different application components split into layers, where we had a layer for
+dependencies, one for the resources and the application code itself.
+
+Here is a little bit of a hint that we can provide before building the java application into a native one, we can start
+the JVM with a hint that will generate a hint by leveraging the native image agent, that will help us ensure that as
+much information is recorded for our application while it starts and works, that can be quite beneficial before we
+decide to generate the native image.
+
+```sh
+# this will require JDK with a native image agent, that means a GraalVM enabled virtual machine, meaning that, we need
+# to start our java binary application with that GraalVM virtual machine, instead of the regular one under $JAVA_HOME
+# while the application is running it is important to exercise the different paths in the application, that might not
+# immediately be analyzed by spring AOP, that can greatly improve the compilation of the native image
+$ /Library/Java/JavaVirtualMachines/graalvm-25.jdk/Contents/Home/bin/java \
+    -Dspring.aot.enabled=true \
+    -agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/native-image/ \
+    -jar target/yourapp.jar
+```
+
+`Ensure that you install GraalVM for your machine type of architecture, use uname -m to see what type or arch you have,
+either arm64, or x86_64 or antoher one`
+
+The native profile does exactly the same thing, there is conceptually no difference, the application image is still
+built from layers, where each layer again represents the same building block components of your app.
+
+```sh
+# that is all that we need to run here, this will both create the image that we have seen used, already and also do that
+# for the native profile, without providing the profile what this does is simply build the docker layered image that we
+# had a look at in previous chapters already, adding the native profile with the -P flag, enables the GraalVM native
+# compile, in the end we will still get a docker image with the native package
+./mvnw -Pnative spring-boot:build-image
+```
+
+Here is what the output of the command above might look like, that is the GraalVM analyzing our application, below you
+can actually see the difference between the layers that the native image is producing, instead of having layers, like
+dependencies, snapshot-dependencies, and application, we actually see different types of layers being created and into
+the image, since the final build image contains only the actually reachable code meaning - not only our dependencies but
+also the code dependencies on the java standard library and runtime.
+
+```plaintext
+[INFO] [creator] ================================================================================
+[INFO] [creator] GraalVM Native Image: Generating 'com.spring.demo.core.DemoApplication' (executable)...
+[INFO] [creator] ================================================================================
+[INFO] [creator] --------------------------------------------------------------------------------
+[INFO] [creator] [2/8] Performing analysis...  [******]                          (28.5s @ 3.50GB)
+[INFO] [creator]    39,923 reachable types   (92.3% of   43,257 total)
+[INFO] [creator]    60,456 reachable fields  (64.8% of   93,302 total)
+[INFO] [creator]   196,564 reachable methods (63.5% of  309,656 total)
+[INFO] [creator]    12,132 types, 2,161 fields, and 18,883 methods registered for reflection
+[INFO] [creator]       132 types,   206 fields, and   119 methods registered for JNI access
+[INFO] [creator]         4 native libraries: dl, pthread, rt, z
+[INFO] [creator] --------------------------------------------------------------------------------
+[INFO] [creator] Produced artifacts:
+[INFO] [creator]  /layers/paketo-buildpacks_native-image/native-image/com.spring.demo.core.DemoApplication (executable)
+[INFO] [creator]  /layers/paketo-buildpacks_native-image/native-image/libawt.so (jdk_library)
+[INFO] [creator]  /layers/paketo-buildpacks_native-image/native-image/libawt_headless.so (jdk_library)
+[INFO] [creator]  /layers/paketo-buildpacks_native-image/native-image/libawt_xawt.so (jdk_library)
+[INFO] [creator]  /layers/paketo-buildpacks_native-image/native-image/libfontmanager.so (jdk_library)
+[INFO] [creator]  /layers/paketo-buildpacks_native-image/native-image/libfreetype.so (jdk_library)
+[INFO] [creator]  /layers/paketo-buildpacks_native-image/native-image/libjava.so (jdk_library_shim)
+[INFO] [creator]  /layers/paketo-buildpacks_native-image/native-image/libjavajpeg.so (jdk_library)
+[INFO] [creator]  /layers/paketo-buildpacks_native-image/native-image/libjvm.so (jdk_library_shim)
+[INFO] [creator]  /layers/paketo-buildpacks_native-image/native-image/liblcms.so (jdk_library)
+[INFO] [creator] ================================================================================
+[INFO] [creator] Reusing cache layer 'paketo-buildpacks/bellsoft-liberica:native-image-svm'
+[INFO] [creator] Adding cache layer 'paketo-buildpacks/bellsoft-liberica:native-image-svm'
+[INFO] [creator] Reusing cache layer 'paketo-buildpacks/syft:syft'
+[INFO] [creator] Adding cache layer 'paketo-buildpacks/syft:syft'
+[INFO] [creator] Adding cache layer 'paketo-buildpacks/native-image:native-image'
+[INFO] [creator] Reusing cache layer 'buildpacksio/lifecycle:cache.sbom'
+[INFO] [creator] Adding cache layer 'buildpacksio/lifecycle:cache.sbom'
+[INFO] Successfully built image 'docker.io/library/demo:0.0.1-SNAPSHOT'
+```
+
+We can also build a native image as well, instead of building that into a docker image we build it directly onto the
+local machine, that can be quite a bit more involved because you need to have GraalVM installed locally, that is because
+the actual GraalVM will be responsible for analyzing, compiling and generating the actual native binary of course.
+
+```sh
+# this is another very useful command, what it does is to compile the binary locally, so instead of having a docker
+# image this will create the compiled binary locally using GraalVM, that implies that you have to have set the
+# correct value for the `GRAALVM_HOME` environment variable to actually work.
+./mvnw -Pnative native:compile
+```
+
+`Keep in mind that not all applications might scale up with GraalVM it is relatively new approach to building
+applications, there fore you can not expect that every third party library out side of the core spring framework will
+provide support for it.`
+
+### Scaling

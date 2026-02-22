@@ -95,28 +95,30 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.4.12</version>
             </plugin>
-            <!-- <plugin> -->
-            <!-- <groupId>com.github.eirslett</groupId> -->
-            <!-- <artifactId>frontend-maven-plugin</artifactId> -->
-            <!-- <version>2.0.0</version> -->
-            <!-- <executions> -->
-            <!-- <execution> -->
-            <!-- <goals> -->
-            <!-- <goal>install-node-and-npm</goal> -->
-            <!-- </goals> -->
-            <!-- </execution> -->
-            <!-- <execution> -->
-            <!-- <id>npm install</id> -->
-            <!-- <goals> -->
-            <!-- <goal>npm</goal> -->
-            <!-- </goals> -->
-            <!-- </execution> -->
-            <!-- </executions> -->
-            <!-- <configuration> -->
-            <!-- <nodeVersion>v18.20.8</nodeVersion> -->
-            <!-- </configuration> -->
-            <!-- </plugin> -->
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.hibernate.orm.tooling</groupId>
+                <artifactId>hibernate-enhance-maven-plugin</artifactId>
+                <version>${hibernate.version}</version>
+                <executions>
+                    <execution>
+                        <id>enhance</id>
+                        <goals>
+                            <goal>enhance</goal>
+                        </goals>
+                        <configuration>
+                            <enableDirtyTracking>true</enableDirtyTracking>
+                            <enableLazyInitialization>true</enableLazyInitialization>
+                            <enableAssociationManagement>true</enableAssociationManagement>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
