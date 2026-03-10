@@ -6188,17 +6188,6 @@ the JVM with a hint that will generate a hint by leveraging the native image age
 much information is recorded for our application while it starts and works, that can be quite beneficial before we
 decide to generate the native image.
 
-```sh
-# this will require JDK with a native image agent, that means a GraalVM enabled virtual machine, meaning that, we need
-# to start our java binary application with that GraalVM virtual machine, instead of the regular one under $JAVA_HOME
-# while the application is running it is important to exercise the different paths in the application, that might not
-# immediately be analyzed by spring AOP, that can greatly improve the compilation of the native image
-$ /Library/Java/JavaVirtualMachines/graalvm-25.jdk/Contents/Home/bin/java \
-    -Dspring.aot.enabled=true \
-    -agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/native-image/ \
-    -jar target/yourapp.jar
-```
-
 `Ensure that you install GraalVM for your machine type of architecture, use uname -m to see what type or arch you have,
 either arm64, or x86_64 or antoher one`
 
@@ -6223,8 +6212,6 @@ also the code dependencies on the java standard library and runtime.
 [INFO] [creator] ================================================================================
 [INFO] [creator] GraalVM Native Image: Generating 'com.spring.demo.core.DemoApplication' (executable)...
 [INFO] [creator] ================================================================================
-[INFO] [creator] --------------------------------------------------------------------------------
-[INFO] [creator] [2/8] Performing analysis...  [******]                          (28.5s @ 3.50GB)
 [INFO] [creator]    39,923 reachable types   (92.3% of   43,257 total)
 [INFO] [creator]    60,456 reachable fields  (64.8% of   93,302 total)
 [INFO] [creator]   196,564 reachable methods (63.5% of  309,656 total)
@@ -6259,14 +6246,477 @@ local machine, that can be quite a bit more involved because you need to have Gr
 the actual GraalVM will be responsible for analyzing, compiling and generating the actual native binary of course.
 
 ```sh
+# this will require JDK with a native image agent, that means a GraalVM enabled virtual machine, meaning that, we need
+# to start our java binary application with that GraalVM virtual machine, instead of the regular one under $JAVA_HOME
+# while the application is running it is important to exercise the different paths in the application, that might not
+# immediately be analyzed by spring AOP, this process can greatly improve the compilation of the native image
+$ /Library/Java/JavaVirtualMachines/graalvm-25.jdk/Contents/Home/bin/java \
+    -Dspring.aot.enabled=true \
+    -agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/native-image/ \
+    -jar target/yourapp.jar
+```
+
+As mentioned above before you proceed with compiling the native image, you should try to exercise the different code
+paths in the application, this will ensure that different possibly uncaught code paths are captured by the agent and can
+greatly increase the chance of actually having the final image working. Because even though a lot of work has gone into
+working out how to create native images out of spring framework based applications, there is still a huge risk of ending
+up with a non working native application.
+
+```sh
 # this is another very useful command, what it does is to compile the binary locally, so instead of having a docker
 # image this will create the compiled binary locally using GraalVM, that implies that you have to have set the
 # correct value for the `GRAALVM_HOME` environment variable to actually work.
 ./mvnw -Pnative native:compile
 ```
 
-`Keep in mind that not all applications might scale up with GraalVM it is relatively new approach to building
-applications, there fore you can not expect that every third party library out side of the core spring framework will
-provide support for it.`
+`Keep in mind that not all applications might scale up or even work at all with GraalVM it is relatively new approach to
+building applications, therefore you can not expect that every third party library out side of the core spring framework
+will provide support for it. Exercising the different code paths during runtime can greatly improve the native image
+generation as well`
 
 ### Scaling
+
+In the spring and the modern java world one of the harder problems to solve is the problem of scaling, this is the
+problem that has plagued many people and Engineers over the recent times. The idea is that so far we have worked with
+synchronous http clients and servers, these components were mostly fine in the past but with recent changes in models
+and architecture and requirements for processing and application deployment have become somewhat obsolete or not always
+ideal.
+
+The main problem is that with the current http model we expect to see and have a dedicated thread per client. That means
+that each client that wants to communicate with a web server i.e. issues a web request is allocated a thread, for the
+entire duration of that request. That last statement seems very aggressive, each client can take up a thread for the
+entire duration of the request from start to finish, that seems like a very bad idea in general, meaning that slow
+clients can and sometimes do, clog the entire pipeline.
+
+What happens in reality, servers are usually fast, there are not many operations that take too much time on a server,
+however when it comes to clients, that is where the issues start to manifest, there are wide variety of clients, some
+with slow machines, some with slow internet connection, some that are physically too far away and data makes a lot of
+hops to get to in between the client and the server. All of this induces a pressure on the server, because in most
+cases the thread that was just allocated for this client is forced to wait for the client to accept the data before more
+data can be delivered. That is `suboptimal` because that means that clients can take up and block an entire thread, for
+way too long, than anticipated.
+
+Then there are the servers, for the most part the operations that servers execute per client are not that expensive,
+however there are cases where the operation itself might be. Think writing to a database, or writing to a file, or any
+number of external blocking I/O operations, that might be expensive not because the operation itself is too costly
+(though sometimes might be) but because the scale might be too big - think writing entries in a log file, that scales
+badly with the data that has to be written. We have to have a way to unblock that thread from this singular job,
+periodically to let other processes work on the `same thread`
+
+And here lies the implementation of Reactive streams, the concept of a thread per client is killed, instead we have
+multiple clients per thread, however for that to really work and happen we have to make sure that the thread can serve
+more than one clients, this is done by ensuring the thread does not block and cooperatively executes tasks for multiple
+clients at once. How does it work actually ? First we have to define the different components:
+
+#### Objects
+
+The reactive library declares a few important objects, that we need to know and understand those are the Mono and Flux
+objects, they basically define that a reactive pipeline can return either 0..1 elements for the Mono object, or 0..N for
+the Flux. That will become important later. But to put in words what does that mean exactly, is that the Mono and Flux
+object define how much work a reactive pipeline can do. `Each element produced by Mono or Flux is defined as 1 unit of
+work, and the subscriber uses that unit of work`
+
+#### Publisher
+
+That is the source of the data in reactive streams, that is the in source code words the function that produces the Mono
+or Flux objects, these are like the Future object in java, the express a chunk of work that will be done, and a result
+produced.
+
+```java
+class IntRangePublisher implements Flow.Publisher<Integer> {
+    private final int start, count;
+    IntRangePublisher(int start, int count) {
+        this.start = start;
+        this.count = count;
+    }
+    @Override public void subscribe(Flow.Subscriber<? super Integer> subscriber) {
+        subscriber.onSubscribe(new RangeSubscription(subscriber, start, count));
+    }
+}
+```
+
+#### Subscriber
+
+The consumer of the data produced by the Publisher, in web flux land that is the WebFlux response writer, that is
+responsible for writing data to the client, it decides how fast to consumer data from the publisher and handle
+accordingly. It does that by using signals.
+
+```java
+class PrintSubscriber implements Flow.Subscriber<Integer> {
+    private Flow.Subscription sub;
+    @Override public void onSubscribe(Flow.Subscription subscription) {
+        this.sub = subscription;
+        sub.request(1); // request first item
+    }
+    @Override public void onNext(Integer item) {
+        System.out.println("onNext: " + item);
+        sub.request(1); // request next item
+    }
+    @Override public void onError(Throwable t) {
+        System.out.println("onError: " + t.getMessage());
+    }
+    @Override public void onComplete() {
+        System.out.println("onComplete");
+    }
+}
+```
+
+#### Subscription
+
+The contract between the publisher and subscriber. It carries the request - i can handle N more items, or cancel - i am
+done or client disconnected, it takes care of what we call back pressure, that is a topic that we will take a look
+separately. But in essence, it controls the publisher, in such a way that it does not work more than needed
+
+```java
+class RangeSubscription implements Flow.Subscription {
+    private final Flow.Subscriber<? super Integer> sub;
+    private final AtomicLong demand = new AtomicLong(0);
+    private final AtomicBoolean cancelled = new AtomicBoolean(false);
+    private final int end;
+    private int current;
+
+    RangeSubscription(Flow.Subscriber<? super Integer> sub, int start, int count) {
+        this.sub = sub;
+        this.current = start;
+        this.end = start + count;
+    }
+    @Override public void request(long n) {
+        if (n <= 0 || cancelled.get()) return;
+        demand.addAndGet(n);
+        emit();
+    }
+    @Override public void cancel() {
+        cancelled.set(true);
+    }
+    private void emit() {
+        while (!cancelled.get() && demand.get() > 0 && current < end) {
+            sub.onNext(current++);
+            demand.decrementAndGet();
+        }
+        if (!cancelled.get() && current >= end) {
+            sub.onComplete();
+        }
+    }
+}
+```
+
+#### Processor
+
+A component that is both subscriber and a publisher, used to bridge or transform streams. These are how we join
+transform reactive streams, meaning we wrap one reactive stream with another or more than one, to produce a result, for
+example we might wrap a Flux object that produces many results into a Mono, object. Once all Flux objects have been
+emitted the Mono object then can emit its one unit of work - which is what it represents. These processors are important
+as they are the bridge
+
+```java
+// here are a few examples that we can easily follow, we transform one type of reactive object into another, in this
+// case the processors are the operators we are using here, that would be reduce, collectList, next, and more.
+Mono<Integer> m1 = flux.reduce(Integer::sum);
+Mono<List<String>> m2 = flux.collectList();
+Mono<String> m3 = flux.next();
+```
+
+#### Operation
+
+How does this pipeline work ? First we produce a Flux or Mono object, that is basically like a Stream pipeline. It
+defines the operations that will need to take place to produce a result, just like streams they are not actually
+producing results right away instead what we do is just declare the pipeline. That object is returned in our
+controllers, but in reality it is created by the business layer by interacting with other reactive components - reactive
+database repositories, reactive services, streams, message emitters, and so on. Each on can emit a mono or flux objects.
+These objects just like streams provide means of being transformed meaning that we can convert from one type of Mono or
+Flux object to another, just like with Stream.map
+
+Once the objects are produced the response layer the WebFlux, in Netty or Tomcat the web server subscribes to these
+objects. Once that is done, the subscriber in this case the response layer has two hooks it cares about `onNext`, and
+`onComplete`. These hooks are what drive the process. What goes on here is that the subscriber (response layer) calls
+the first request(n) work units when constructed right away, the publisher being the Flux or Mono objects in turn will
+call the hook methods `onNext`, when a unit is delivered and in that hook the subscriber again calls `request(n)`. What
+we have here basically is a chain of operations the hook triggers the next request until the reactive stream is done
+
+Just to emphasis that That request(n) initial call from the response layer subscription usually in the constructor
+triggers the pipeline, in a way we now told the reactive object to start producing work, and it will do as many units of
+work as we request.
+
+```java
+// Controller: returns ONE result (Mono), internally does 6 units of work in total but split into into 3 separate work
+// batches, idea is to demonstrate how we can convert from a multi unit work to single unit work while still having
+// batched processing that does not block the entire thread when we request the 1 unit of work from the mono.
+Mono<Summary> handleRequest() {
+    return Flux.range(1, 6)          // 6 units of work
+    .window(2)                       // 3 batches (2 items each)
+    .concatMap(batch ->              // one batch at a time
+        batch.map(this::doWork)      // per-unit work
+            .collectList()           // finish batch -> list
+            .map(this::batchSummary) // convert to result
+    )
+    .reduce(this::combineSummaries); // final -> Mono
+}
+
+// WebFlux subscribes and drives the demand (request 1)
+class ResponseWriter implements Subscriber<Summary> {
+    Subscription sub;
+    @Override public void onSubscribe(Subscription s) {
+        this.sub = s;
+        sub.request(1);
+    }
+    @Override public void onNext(Summary s) {
+        writeToSocket(s);
+        sub.request(1);
+    }
+    @Override public void onComplete() { close(); }
+}
+
+// Per request we create writer, subscribe to the result of the controller being a reactive stream object. This is the
+// initiation of the flow, it goes like this: subscribe -> onSubscribe -> request
+void onHttpRequest(Client client) {
+    Publisher<Integer> pub = handleRequest();
+    ResponseWriter writer = new ResponseWriter(client.socket);
+    pub.subscribe(writer);
+}
+```
+
+So let us observe the order of operations here, we have the flux or reactive, object being created the moment the user
+hits the endpoint. That would trigger the internal response layer to create that object by calling the controller (our
+implementation). Then the response layer subscribes to the resulting flux object, this will ensure that the reactive
+stream is started by the response writer, or more precisely the call to request(n) in the `constructor` or
+`onSubscribe`. Starting the reactive stream means that now on each `request` - `workdone` the subscription `onNext` is
+called where we can chain wit the next request work method call. That way we request new work after the previous on has
+finished
+
+Now in our controller we have created a mono object that usually represents one unit of work but that is wrapping an
+upstream reactive Flux object that does 3 units of work batched by 2. What does that mean. Means that the flux object
+does 3 units of work but for each unit of work we have 2 more units of work. `What is crucial here to understand is that
+the Mono object that is wrapped around our Flux object is actually itself a subscription`, and it subscribes to the Flux
+object, that means the moment Flux emits `onComplete` the mono will emit `1 unit of work`. Because the mono is 1 (or 0) unit
+of work. That itself will signal `onComplete` to the main subscription object being the `ResponseWriter`.
+
+#### Setup
+
+Converting an existing application to be reactive is not as straight forward as it might seem that is because the entire
+concept and internal workings are completely different. What does that mean ? Traditional MVC based ones use the tomcat
+embedded web server, this is a normal standard sync web server that has a thread per connection or client model and it
+is NOT capable of interactive reactive requests. We need another web server that can do that. The one we can use is
+`Netty`. That is not a traditional web server, or in other words a servlet web server implementation, that we can easily
+integrate with, instead it is a completely different beast, usually much lower level implementation that is a generic
+async web server not directly tied to the servlet API.
+
+Second most of the dependencies we have thus far examined are built with standard MVC logic in mind they are not
+reactive by default, they have entire new dependencies that are built on top of the reactive interface. That includes
+things like `spring-data, spring-security and more`. These dependencies we have thus far used are unfit for using with
+reactive programming and reactive applications will not work at all with them. Some are still the same but use
+completely different setup or configuration procedure because the reactive modules in them are separate from the MVC
+modules (spring-security)
+
+Here are the basic dependencies we need first to enable reactive application these are at the core of the setup, using
+these along side with other reactive based dependencies we will build a completely new dependency chain for our
+application.
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-webflux</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-webflux-test</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+Here is what the web flux starter bundles with its dependencies, these are a few of the primary dependencies that the
+starter exposes and uses, the most crucial one here is the reactor `Netty` starter, that starter includes the
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-reactor-netty</artifactId>
+    <version>3.5.3</version>
+    <scope>compile</scope>
+</dependency>
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-web</artifactId>
+    <version>6.2.8</version>
+    <scope>compile</scope>
+</dependency>
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-webflux</artifactId>
+    <version>6.2.8</version>
+    <scope>compile</scope>
+</dependency>
+```
+
+The abridged version of the number of dependencies these starters pull are as follows the starter web flux will pull the
+`reactor-netty` starter which actually is what internally integrates with the reactor-core library that provides the
+capabilities we have thus far examined, it provides the necessary interfaces and components to interact with reactive
+streams and also integrates the `Netty` framework.
+
+```plaintext
++- org.springframework.boot:spring-boot-starter-webflux:3.5.3:compile
+|  +- org.springframework.boot:spring-boot-starter-reactor-netty:3.5.3:compile
+|  |  \- io.projectreactor.netty:reactor-netty-http:1.2.7:compile
+|  |     +- io.projectreactor.netty:reactor-netty-core:1.2.7:compile
+|  |     \- io.projectreactor:reactor-core:3.7.7:compile (omitted for duplicate)
+```
+
+Below we have listed all the removed dependencies along side their replacements, some are not replaced and remain in
+place, such as the logging, `liquibase`, mustache, these are blocking and in some capacity they are okay. For example
+`liquibase` is migration tool that is run at the start of an application, therefore that is fine, we don't need a
+reactive interface for it. Others like the entire spring data layer, or the spring starter-web are replaced with a
+reactive alternative, some are not removed but they provide a way to tell them to use and setup a reactive interface
+instead like the spring-security.
+
+```xml
+<dependencies>
+    <!-- Web: remove servlet stack -->
+    <!--
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+
+    <!-- Security (keep, but configure reactive SecurityWebFilterChain) -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+
+    <!-- Data JPA (blocking) -->
+    <!--
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    -->
+    <!-- JDBC driver (blocking) -->
+    <!--
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <scope>runtime</scope>
+    </dependency>
+    -->
+    <!-- Reactive R2DBC -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>r2dbc-postgresql</artifactId>
+    </dependency>
+
+    <!-- Mongo (blocking) -->
+    <!--
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-mongodb</artifactId>
+    </dependency>
+    -->
+    <!-- Reactive Mongo -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
+    </dependency>
+
+    <!-- Liquibase is blocking (OK for startup migrations) -->
+    <dependency>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-core</artifactId>
+    </dependency>
+
+    <!-- Mustache is blocking (OK if you offload or accept blocking) -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-mustache</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-configuration-processor</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-logging</artifactId>
+    </dependency>
+
+    <!-- Tests -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <scope>test</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-test</artifactId>
+        <scope>test</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>postgresql</artifactId>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+```
+
+Usually having two applications one that is MVC based and one that is reactive is the best choice, mixing those two
+stacks is possible but error prone and can lead to issues. At any given time only one stack can be active that means
+that we can certainly have one application that uses both dependencies on the classpath, but we can not activate both
+during runtime, we can only configure one which to used, right before the application is started.
+
+What we can do for our use case it to update the application config to use different configuration classes based on
+which ones are on the class path. Spring has the ability to know which type of app setup we have -
+`spring.main.web-application-type`, we can use that to our advantage to toggle between the two states of our setup
+
+```java
+@Configuration
+@ConditionalOnClass(name = "org.springframework.web.servlet.DispatcherServlet")
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+```
+
+```java
+@Configuration
+@ConditionalOnClass(name = "org.springframework.web.reactive.DispatcherHandler")
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+```
+
+We can combine this into two custom user defined annotations on our side that can then be used to annotate our
+components that conditionally control which beans are created for which configuration stage.
+
+```java
+@Documented
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+public @interface ReactiveApplicationType {
+}
+
+@Documented
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+public @interface ServletApplicationType {
+}
+```
+
+That way we can have both in the same application however only one will be active at a time. Now we can setup and use
+this across our components and ensure that we enable the web based ones or the reactive ones based on the use case.
+However that would imply we will need to refactor a lot of the stack, like the business layer that has all the services
+which are now going to not only have to return new Reactive objects, but also the internal processing will have to also
+take that into account meaning that implementation itself will likely have to change to accommodate for more efficient
+use for the reactive objects.
+
+#### Upgrading
