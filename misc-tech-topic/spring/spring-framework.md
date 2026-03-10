@@ -6719,4 +6719,114 @@ which are now going to not only have to return new Reactive objects, but also th
 take that into account meaning that implementation itself will likely have to change to accommodate for more efficient
 use for the reactive objects.
 
+`However it is not really recommended as we have mentioned already, it is better to have your application split into
+multiple modules or scoped within packages at the very least, otherwise the components will certainly conflict. Further
+more by default there are many auto configurations that are enabled by spring, having both on the classpath is also not
+ideal because many of those auto configurations are only conditional on bean presence, but not on the type of the
+application. Therefore having both on the classpath will trigger both types auto configuration based of off conditional
+beans, having both auto configurations run at the same time is often a recepie for disaster.`
+
+#### Debugging
+
+To help us debug a spring application context we have a few options, but most importantly 3 main points of entry, first
+we enable the logging, for the context, beans and factories, that will give us a lot of useful information when the
+application attempts to start. Then we can also enable the management which is basically actuator. And finally the top
+level debug property that will help us collect the final drops of info of off the debug information, for the app.
+
+```yaml
+debug: true
+
+logging:
+    level:
+        root: DEBUG
+        org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener: DEBUG
+        org.springframework.boot.autoconfigure: DEBUG
+        org.springframework.beans.factory.support: DEBUG
+        org.springframework.context.annotation: DEBUG
+
+management:
+    endpoints:
+    server:
+        port: 8081
+    endpoints:
+        web:
+            base-path: /actuator
+            exposure:
+                include: "conditions,beans,configprops,env"
+    endpoint:
+        conditions:
+            enabled: true
+        beans:
+            enabled: true
+        configprops:
+            enabled: true
+        env:
+            enabled: true
+```
+
+To use actuator you can setup the following dependency in your xml file, that will ensure that the management config
+above actually works, otherwise there wont be any exposed. Above we have also configured a deterministic set of
+endpoints that we can use to examine the different stages of the context initialization
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+
+Once having actuator running you can visit, the following endpoints each of which provide some sort of metrics for our
+application, some of which is for different stages of operation during runtime. Each of which below is grouped into the
+relevant category they provide information for.
+
+`Core status information`
+
+- health: Reports application and component health.
+- info: Exposes app info from info.\* and contributors.
+- startup: Shows startup timing and bean initialization metrics.
+
+`Configuration and context`
+
+- conditions: Auto‑config matches and non‑matches with reasons.
+- configprops: Effective @ConfigurationProperties values.
+- env: Environment properties, sources, and active profiles.
+- beans: All beans and their dependencies.
+
+`Web and routing`
+
+- mappings: Request mappings for controllers and endpoints.
+- httpexchanges: Recent HTTP exchanges when enabled.
+- sessions: HTTP session details (Servlet stack only).
+
+`Logging and diagnostics`
+
+- loggers: View and change log levels at runtime.
+- logfile: Access the configured log file.
+
+`Metrics and performance`
+
+- metrics: Micrometer metrics and measurements.
+- threaddump: JVM thread dump.
+- heapdump: JVM heap dump.
+
+`Data and migration`
+
+- caches: Cache names and stats.
+- flyway: Flyway migration status.
+- liquibase: Liquibase migration status.
+
+`Scheduling and messaging`
+
+- scheduledtasks: Scheduled tasks and triggers.
+- quartz: Quartz jobs and triggers.
+- integrationgraph: Spring Integration wiring.
+
+`Security and audit`
+
+- auditevents: Security audit events when configured.
+
+`Lifecycle`
+
+- shutdown: Graceful shutdown when enabled.
+
 #### Upgrading

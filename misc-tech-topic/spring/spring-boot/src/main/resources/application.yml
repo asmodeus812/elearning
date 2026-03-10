@@ -3,12 +3,12 @@ logging:
   file:
     name: spring.log
     path: /tmp/
-  level:
-    root: DEBUG
-    com:
-      spring:
-        demo:
-          core: TRACE
+    level:
+      root: DEBUG
+      org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener: DEBUG
+      org.springframework.boot.autoconfigure: DEBUG
+      org.springframework.beans.factory.support: DEBUG
+      org.springframework.context.annotation: DEBUG
 
 spring:
   sql.init.mode: never
@@ -41,6 +41,24 @@ spring:
     web.pageable.one-indexed-parameters: true
   application:
     name: demo-base
+
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: "conditions,beans,configprops,env"
+  endpoint:
+    conditions:
+      enabled: true
+    beans:
+      enabled: true
+    configprops:
+      enabled: true
+    env:
+      enabled: true
 
 my-application:
   name: demo-app
